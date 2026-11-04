@@ -3,26 +3,74 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export default function GamePage() {
   const router = useRouter();
   const [player, setPlayer] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const savedPlayer = localStorage.getItem("dailyRiddlePlayer");
+    async function loadPlayer() {
+      try {
+        const { data: sessionData, error: sessionError } =
+          await supabase.auth.getSession();
 
-    if (!savedPlayer) {
-      router.replace("/register");
-      return;
+        if (sessionError) throw sessionError;
+
+        const user = sessionData.session?.user;
+
+        if (!user) {
+          router.replace("/register");
+          return;
+        }
+
+        const { data, error: playerError } = await supabase
+          .from("players")
+          .select("id, nickname, server_number")
+          .eq("auth_user_id", user.id)
+          .single();
+
+        if (playerError) throw playerError;
+
+        setPlayer(data);
+      } catch (err) {
+        console.error(err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     }
 
-    setPlayer(JSON.parse(savedPlayer));
+    loadPlayer();
   }, [router]);
 
-  if (!player) {
+  if (loading) {
     return (
       <main className="min-h-screen bg-[#080711] text-white flex items-center justify-center">
-        Loading...
+        Loading player...
+      </main>
+    );
+  }
+
+  if (error || !player) {
+    return (
+      <main className="min-h-screen bg-[#080711] text-white flex items-center justify-center p-6">
+        <div className="text-center">
+          <h1 className="text-xl font-bold text-red-400">
+            Player Profile Not Found
+          </h1>
+          <p className="text-gray-400 mt-3 text-sm">
+            {error || "Please register again."}
+          </p>
+          <button
+            onClick={() => router.push("/register")}
+            className="mt-6 bg-purple-600 px-6 py-3 rounded-xl"
+          >
+            REGISTER AGAIN
+          </button>
+        </div>
       </main>
     );
   }
@@ -40,7 +88,7 @@ export default function GamePage() {
         </h1>
 
         <p className="text-gray-400 mt-2">
-          Server {player.server}
+          Server {player.server_number}
         </p>
 
         <div className="mt-10 bg-[#151020] border border-purple-500/30 rounded-2xl p-8 text-center">
@@ -53,15 +101,6 @@ export default function GamePage() {
           <p className="text-gray-400 text-sm mt-4">
             Your daily challenge is coming soon.
           </p>
-
-          <div className="mt-7 border border-purple-500/20 rounded-xl p-5">
-            <p className="text-purple-300 font-bold">
-              ONE DAY. ONE RIDDLE.
-            </p>
-            <p className="text-gray-500 text-xs mt-2">
-              Can you become today's champion?
-            </p>
-          </div>
         </div>
 
         <p className="text-center text-gray-600 text-xs mt-8">
