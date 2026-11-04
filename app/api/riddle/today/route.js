@@ -40,6 +40,7 @@ export async function GET(request) {
       );
     }
 
+    // Get today's date using WIB
     const dateParts = new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Jakarta",
       year: "numeric",
@@ -54,6 +55,7 @@ export async function GET(request) {
     const today =
       `${dateMap.year}-${dateMap.month}-${dateMap.day}`;
 
+    // Get today's riddle
     const { data: riddle, error: riddleError } =
       await supabaseAdmin
         .from("riddles")
@@ -71,6 +73,7 @@ export async function GET(request) {
       );
     }
 
+    // Get player's saved progress
     const { data: previousScore, error: scoreError } =
       await supabaseAdmin
         .from("scores")
@@ -81,19 +84,21 @@ export async function GET(request) {
 
     if (scoreError) throw scoreError;
 
-    const alreadyCompleted =
-      Boolean(previousScore?.completed_at);
+    const attempts = previousScore?.attempts || 0;
+    const solved = Boolean(previousScore?.completed_at);
+    const finished = solved || attempts >= 3;
 
     return Response.json({
       player,
       riddle,
       progress: {
-        attempts: previousScore?.attempts || 0,
-        attemptsLeft: alreadyCompleted
+        attempts,
+        attemptsLeft: finished
           ? 0
-          : Math.max(0, 3 - (previousScore?.attempts || 0)),
+          : Math.max(0, 3 - attempts),
         score: previousScore?.score || 0,
-        completed: alreadyCompleted,
+        completed: solved,
+        finished,
       },
     });
 
