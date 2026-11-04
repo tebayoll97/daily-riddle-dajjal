@@ -24,7 +24,7 @@ export default function RegisterPage() {
 
     localStorage.setItem("dailyRiddlePlayer", JSON.stringify(player));
 
-    router.push("/");
+    router.push("/game");
   }
 
   return (
