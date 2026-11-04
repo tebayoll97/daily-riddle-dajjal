@@ -1,8 +1,13 @@
 
+"use client";
+
+import { useRouter } from "next/navigation";
+
 export default function Home() {
+  const router = useRouter();
+
   return (
     <main className="min-h-screen bg-[#080711] text-white flex flex-col items-center justify-center p-6">
-
       <div className="text-center max-w-xl w-full">
 
         <p className="text-purple-400 tracking-[0.4em] text-xs mb-4">
@@ -21,7 +26,6 @@ export default function Home() {
         </p>
 
         <div className="mt-10 border border-purple-500/30 rounded-2xl p-8 bg-[#151020]">
-
           <div className="text-6xl mb-5">🔮</div>
 
           <h2 className="text-xl font-bold">
@@ -32,10 +36,12 @@ export default function Home() {
             A new mystery awaits you every day.
           </p>
 
-          <button className="mt-7 w-full bg-purple-600 hover:bg-purple-500 transition rounded-xl py-4 font-bold tracking-wider">
+          <button
+            onClick={() => router.push("/register")}
+            className="mt-7 w-full bg-purple-600 hover:bg-purple-500 transition rounded-xl py-4 font-bold tracking-wider"
+          >
             PLAY TODAY'S RIDDLE
           </button>
-
         </div>
 
         <p className="text-gray-600 text-xs mt-8">
@@ -43,7 +49,6 @@ export default function Home() {
         </p>
 
       </div>
-
     </main>
   );
 }
