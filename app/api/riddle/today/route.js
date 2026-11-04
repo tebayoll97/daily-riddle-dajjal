@@ -3,7 +3,6 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function GET(request) {
   try {
-    // Verify player identity
     const authorization = request.headers.get("authorization");
 
     if (!authorization?.startsWith("Bearer ")) {
@@ -25,7 +24,6 @@ export async function GET(request) {
       );
     }
 
-    // Find registered player
     const { data: player, error: playerError } =
       await supabaseAdmin
         .from("players")
@@ -42,7 +40,6 @@ export async function GET(request) {
       );
     }
 
-    // Get today's date in Indonesia (WIB)
     const dateParts = new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Jakarta",
       year: "numeric",
@@ -54,9 +51,9 @@ export async function GET(request) {
       dateParts.map((part) => [part.type, part.value])
     );
 
-    const today = `${dateMap.year}-${dateMap.month}-${dateMap.day}`;
+    const today =
+      `${dateMap.year}-${dateMap.month}-${dateMap.day}`;
 
-    // Find today's active riddle
     const { data: riddle, error: riddleError } =
       await supabaseAdmin
         .from("riddles")
@@ -74,9 +71,30 @@ export async function GET(request) {
       );
     }
 
+    const { data: previousScore, error: scoreError } =
+      await supabaseAdmin
+        .from("scores")
+        .select("attempts, score, completed_at")
+        .eq("player_id", player.id)
+        .eq("riddle_id", riddle.id)
+        .maybeSingle();
+
+    if (scoreError) throw scoreError;
+
+    const alreadyCompleted =
+      Boolean(previousScore?.completed_at);
+
     return Response.json({
       player,
       riddle,
+      progress: {
+        attempts: previousScore?.attempts || 0,
+        attemptsLeft: alreadyCompleted
+          ? 0
+          : Math.max(0, 3 - (previousScore?.attempts || 0)),
+        score: previousScore?.score || 0,
+        completed: alreadyCompleted,
+      },
     });
 
   } catch (error) {
