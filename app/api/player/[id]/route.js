@@ -20,7 +20,7 @@ export async function GET(request, { params }) {
     const { data: player, error: playerError } =
       await supabaseAdmin
         .from("players")
-        .select("id, nickname, server_number, created_at")
+        .select("id, nickname, server_number, created_at, avatar_url")
         .eq("id", id)
         .maybeSingle();
 
@@ -48,7 +48,10 @@ export async function GET(request, { params }) {
     }
 
     return Response.json({
-      player,
+      player: {
+        ...player,
+        avatar_url: player.avatar_url || null,
+      },
       stats: stats || {
         total_points: 0,
         riddles_solved: 0,
