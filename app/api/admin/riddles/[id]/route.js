@@ -166,3 +166,69 @@ export async function PATCH(request, { params }) {
     );
   }
 }
+
+export async function DELETE(request, { params }) {
+  const auth = await verifyAdmin(request);
+
+  if (!auth.authorized) {
+    return Response.json(
+      { error: auth.error },
+      { status: auth.status }
+    );
+  }
+
+  try {
+    const { id } = await params;
+
+    if (!id) {
+      return Response.json(
+        { error: "Riddle ID is required." },
+        { status: 400 }
+      );
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from("riddles")
+      .delete()
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
+
+    if (error) {
+      console.error("Delete riddle error:", error);
+
+      if (error.code === "23503") {
+        return Response.json(
+          {
+            error: "This riddle has existing player scores and cannot be deleted.",
+          },
+          { status: 409 }
+        );
+      }
+
+      return Response.json(
+        { error: "Failed to delete riddle." },
+        { status: 500 }
+      );
+    }
+
+    if (!data) {
+      return Response.json(
+        { error: "Riddle not found." },
+        { status: 404 }
+      );
+    }
+
+    return Response.json({
+      success: true,
+      message: "Riddle deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Delete riddle API error:", error);
+
+    return Response.json(
+      { error: "Internal server error." },
+      { status: 500 }
+    );
+  }
+}
