@@ -12,6 +12,7 @@ const translations = {
     ranking: "Ranking",
     profile: "Profile",
     copyright: "All rights reserved.",
+    universe: "A WORLD OF GAMES. ONE UNIVERSE.",
   },
   id: {
     tagline: "Satu hari. Satu teka-teki. Satu juara.",
@@ -20,6 +21,7 @@ const translations = {
     ranking: "Peringkat",
     profile: "Profil",
     copyright: "Hak cipta dilindungi.",
+    universe: "DUNIA PERMAINAN. SATU SEMESTA.",
   },
 };
 
@@ -27,67 +29,82 @@ export default function Footer() {
   const { language } = useLanguage();
   const t = translations[language] || translations.en;
 
+  const navLinks = [
+    { label: t.home, href: "/" },
+    { label: t.play, href: "/game" },
+    { label: t.ranking, href: "/leaderboard" },
+    { label: t.profile, href: "/profile" },
+  ];
+
   return (
-    <footer className="border-t border-purple-500/20 bg-[#080711] mt-auto">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+    <footer className="relative border-t border-purple-500/20 bg-[#080711] mt-auto overflow-hidden">
 
-        <div className="flex flex-col items-center text-center gap-4">
+      {/* Decorative glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-24 bg-purple-600/10 blur-3xl pointer-events-none" />
 
-          {/* Website Logo */}
-          <Link href="/" className="text-lg font-black tracking-wider">
+      <div className="relative max-w-6xl mx-auto px-4 py-10">
+
+        <div className="flex flex-col items-center text-center gap-5">
+
+          {/* Logo */}
+          <Link
+            href="/"
+            className="text-xl font-black tracking-[0.12em] text-white hover:opacity-80 transition"
+          >
             THE <span className="text-purple-400">DAILY RIDDLE</span>
           </Link>
 
           {/* Tagline */}
-          <p className="text-gray-500 text-xs">
+          <p className="text-gray-500 text-xs tracking-wide">
             {t.tagline}
           </p>
 
-          {/* Character Profile Links */}
-          <div className="flex items-center gap-2 text-sm font-semibold">
+          {/* Character Links */}
+          <div className="flex items-center gap-3 px-5 py-2.5 rounded-full border border-purple-500/20 bg-purple-500/5">
             <Link
               href="/characters/dajjal"
-              className="text-purple-300 hover:text-purple-400 transition"
+              className="text-purple-300 hover:text-white transition font-bold text-sm"
             >
               †Ðαjjαし•†
             </Link>
 
-            <span className="text-gray-600">×</span>
+            <span className="text-purple-500/50 text-xs">×</span>
 
             <Link
               href="/characters/veylora"
-              className="text-purple-300 hover:text-purple-400 transition"
+              className="text-purple-300 hover:text-white transition font-bold text-sm"
             >
               †Veyしorα•†
             </Link>
           </div>
 
+          {/* Divider */}
+          <div className="w-20 h-px bg-gradient-to-r from-transparent via-purple-500/60 to-transparent" />
+
           {/* Navigation */}
-          <div className="flex items-center gap-5 text-xs text-gray-400">
-            <Link href="/" className="hover:text-purple-400 transition">
-              {t.home}
-            </Link>
+          <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-xs text-gray-400 hover:text-purple-300 transition-colors duration-200"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
 
-            <Link href="/game" className="hover:text-purple-400 transition">
-              {t.play}
-            </Link>
-
-            <Link href="/leaderboard" className="hover:text-purple-400 transition">
-              {t.ranking}
-            </Link>
-
-            <Link href="/profile" className="hover:text-purple-400 transition">
-              {t.profile}
-            </Link>
-          </div>
+          {/* Universe Label */}
+          <p className="text-[9px] tracking-[0.25em] text-purple-400/50 font-semibold mt-1">
+            {t.universe}
+          </p>
 
           {/* Copyright */}
-          <p className="text-[10px] text-gray-600 mt-2">
+          <p className="text-[10px] text-gray-600 mt-1">
             © 2026 THE DAILY RIDDLE. {t.copyright}
           </p>
 
         </div>
-
       </div>
     </footer>
   );
