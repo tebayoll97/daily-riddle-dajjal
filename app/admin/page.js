@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdminClient } from "@/lib/supabaseAdminClient";
 import { useLanguage } from "@/app/components/LanguageProvider";
 
 const translations = {
@@ -63,7 +63,7 @@ export default function AdminDashboardPage() {
     async function verifyAccess() {
       try {
         const { data, error: sessionError } =
-          await supabase.auth.getSession();
+          await supabaseAdminClient.auth.getSession();
 
         if (sessionError) throw sessionError;
 
@@ -84,7 +84,7 @@ export default function AdminDashboardPage() {
         const result = await response.json();
 
         if (!response.ok) {
-          await supabase.auth.signOut();
+          await supabaseAdminClient.auth.signOut();
 
           if (response.status === 401 || response.status === 403) {
             router.replace("/admin/login");
@@ -123,7 +123,11 @@ export default function AdminDashboardPage() {
     setLoggingOut(true);
 
     try {
-      await supabase.auth.signOut();
+      const { error: logoutError } =
+        await supabaseAdminClient.auth.signOut();
+
+      if (logoutError) throw logoutError;
+
       router.replace("/admin/login");
     } catch (err) {
       console.error("Admin logout error:", err);
@@ -187,7 +191,6 @@ export default function AdminDashboardPage() {
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
-
           <div>
             <p className="text-purple-400 text-xs tracking-[0.3em]">
               THE DAILY RIDDLE
@@ -209,14 +212,11 @@ export default function AdminDashboardPage() {
           >
             {loggingOut ? t.loggingOut : t.logout}
           </button>
-
         </div>
 
         {/* Admin Information */}
         <section className="mt-10 rounded-2xl border border-purple-500/30 bg-[#151020] p-5 sm:p-6">
-
           <div className="flex items-center gap-4">
-
             <div className="w-14 h-14 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-2xl">
               ♛
             </div>
@@ -230,7 +230,6 @@ export default function AdminDashboardPage() {
                 {admin.email}
               </p>
             </div>
-
           </div>
 
           <div className="mt-5 pt-4 border-t border-purple-500/20">
@@ -238,24 +237,20 @@ export default function AdminDashboardPage() {
               ● {t.secure}
             </p>
           </div>
-
         </section>
 
         {/* Management Modules */}
         <section className="mt-10">
-
           <h2 className="text-sm font-black tracking-wider text-purple-300 mb-5">
             {t.management}
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-
             {modules.map((module) => (
               <div
                 key={module.title}
                 className="rounded-2xl border border-purple-500/20 bg-[#151020] p-5"
               >
-
                 <div className="flex items-center justify-between">
                   <span className="text-3xl">
                     {module.icon}
@@ -273,18 +268,14 @@ export default function AdminDashboardPage() {
                 <p className="text-gray-400 text-sm mt-2 leading-relaxed">
                   {module.description}
                 </p>
-
               </div>
             ))}
-
           </div>
-
         </section>
 
         <p className="text-center text-gray-600 text-xs mt-12">
           THE DAILY RIDDLE · ADMIN CONTROL CENTER · 2026
         </p>
-
       </div>
     </main>
   );
