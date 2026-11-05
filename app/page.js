@@ -4,9 +4,36 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useLanguage } from "./components/LanguageProvider";
+
+const translations = {
+  en: {
+    present: "DAJJAL & VEYLORA PRESENT",
+    tagline: "One day. One riddle. One champion.",
+    ready: "Are You Ready?",
+    mystery: "A new mystery awaits you every day.",
+    wait: "PLEASE WAIT...",
+    play: "PLAY TODAY'S RIDDLE",
+    global: "GLOBAL CHALLENGE • ALL SERVERS WELCOME",
+    error: "Something went wrong. Please try again.",
+  },
+  id: {
+    present: "DAJJAL & VEYLORA MEMPERSEMBAHKAN",
+    tagline: "Satu hari. Satu teka-teki. Satu juara.",
+    ready: "Apakah Kamu Siap?",
+    mystery: "Misteri baru menantimu setiap hari.",
+    wait: "MOHON TUNGGU...",
+    play: "MAINKAN TEKA-TEKI HARI INI",
+    global: "TANTANGAN GLOBAL • SEMUA SERVER DIPERSILAKAN",
+    error: "Terjadi kesalahan. Silakan coba lagi.",
+  },
+};
 
 export default function Home() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const t = translations[language] || translations.en;
+
   const [loading, setLoading] = useState(false);
 
   async function handlePlay() {
@@ -40,7 +67,7 @@ export default function Home() {
       }
     } catch (error) {
       console.error(error);
-      alert("Something went wrong. Please try again.");
+      alert(t.error);
     } finally {
       setLoading(false);
     }
@@ -51,7 +78,7 @@ export default function Home() {
       <div className="text-center max-w-xl w-full">
 
         <p className="text-purple-400 tracking-[0.4em] text-xs mb-4">
-          DAJJAL & VEYLORA PRESENT
+          {t.present}
         </p>
 
         <h1 className="text-4xl md:text-6xl font-black tracking-wider">
@@ -62,7 +89,7 @@ export default function Home() {
         </h1>
 
         <p className="text-gray-400 mt-5 text-sm">
-          One day. One riddle. One champion.
+          {t.tagline}
         </p>
 
         <div className="mt-10 border border-purple-500/30 rounded-2xl p-8 bg-[#151020]">
@@ -70,11 +97,11 @@ export default function Home() {
           <div className="text-6xl mb-5">🔮</div>
 
           <h2 className="text-xl font-bold">
-            Are You Ready?
+            {t.ready}
           </h2>
 
           <p className="text-gray-400 text-sm mt-3">
-            A new mystery awaits you every day.
+            {t.mystery}
           </p>
 
           <button
@@ -82,13 +109,13 @@ export default function Home() {
             disabled={loading}
             className="mt-7 w-full bg-purple-600 hover:bg-purple-500 disabled:opacity-50 transition rounded-xl py-4 font-bold tracking-wider"
           >
-            {loading ? "PLEASE WAIT..." : "PLAY TODAY'S RIDDLE"}
+            {loading ? t.wait : t.play}
           </button>
 
         </div>
 
         <p className="text-gray-600 text-xs mt-8">
-          GLOBAL CHALLENGE • ALL SERVERS WELCOME
+          {t.global}
         </p>
 
       </div>
