@@ -9,7 +9,7 @@ export async function GET(request, { params }) {
     const uuidPattern =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-    if (!uuidPattern.test(id)) {
+    if (!id || !uuidPattern.test(id)) {
       return Response.json(
         { error: "Invalid player ID." },
         { status: 400 }
@@ -24,7 +24,9 @@ export async function GET(request, { params }) {
         .eq("id", id)
         .maybeSingle();
 
-    if (playerError) throw playerError;
+    if (playerError) {
+      throw playerError;
+    }
 
     if (!player) {
       return Response.json(
@@ -33,15 +35,17 @@ export async function GET(request, { params }) {
       );
     }
 
-    // Get cumulative ranking statistics
+    // Get global ranking statistics
     const { data: stats, error: statsError } =
       await supabaseAdmin
         .from("global_leaderboard")
-        .select("*")
+        .select("total_points, riddles_solved, last_completed_at")
         .eq("player_id", id)
         .maybeSingle();
 
-    if (statsError) throw statsError;
+    if (statsError) {
+      throw statsError;
+    }
 
     return Response.json({
       player,
@@ -53,7 +57,7 @@ export async function GET(request, { params }) {
     });
 
   } catch (error) {
-    console.error("Public player profile API error:", error);
+    console.error("Player profile API error:", error);
 
     return Response.json(
       { error: "Unable to load player profile." },
