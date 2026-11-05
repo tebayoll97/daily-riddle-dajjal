@@ -5,9 +5,40 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useLanguage } from "../components/LanguageProvider";
+
+const translations = {
+  en: {
+    loading: "Loading profile...",
+    title: "PLAYER PROFILE",
+    description: "Your identity in the world of daily riddles.",
+    nickname: "Nickname",
+    server: "Server",
+    joined: "Joined",
+    play: "PLAY TODAY'S RIDDLE",
+    retry: "TRY AGAIN",
+    error: "Unable to load profile.",
+    dateLocale: "en-US",
+  },
+  id: {
+    loading: "Memuat profil...",
+    title: "PROFIL PEMAIN",
+    description: "Identitasmu di dunia teka-teki harian.",
+    nickname: "Nama Pemain",
+    server: "Server",
+    joined: "Bergabung",
+    play: "MAINKAN TEKA-TEKI HARI INI",
+    retry: "COBA LAGI",
+    error: "Tidak dapat memuat profil.",
+    dateLocale: "id-ID",
+  },
+};
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const t = translations[language] || translations.en;
+
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -43,7 +74,7 @@ export default function ProfilePage() {
         setPlayer(data);
       } catch (err) {
         console.error(err);
-        setError(err.message || "Unable to load profile.");
+        setError(err.message || t.error);
       } finally {
         setLoading(false);
       }
@@ -55,7 +86,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center text-purple-300">
-        Loading profile...
+        {t.loading}
       </div>
     );
   }
@@ -64,11 +95,12 @@ export default function ProfilePage() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center">
         <p className="text-red-400">{error}</p>
+
         <button
           onClick={() => window.location.reload()}
           className="mt-4 bg-purple-600 px-5 py-3 rounded-xl"
         >
-          TRY AGAIN
+          {t.retry}
         </button>
       </div>
     );
@@ -77,7 +109,7 @@ export default function ProfilePage() {
   if (!player) return null;
 
   const joinedDate = player.created_at
-    ? new Date(player.created_at).toLocaleDateString("en-US", {
+    ? new Date(player.created_at).toLocaleDateString(t.dateLocale, {
         day: "numeric",
         month: "long",
         year: "numeric",
@@ -87,19 +119,21 @@ export default function ProfilePage() {
   return (
     <main className="min-h-[70vh] bg-[#080711] text-white px-5 py-10">
       <div className="max-w-xl mx-auto">
+
         <p className="text-purple-400 text-xs tracking-[0.3em]">
           THE DAILY RIDDLE
         </p>
 
         <h1 className="text-3xl font-black mt-3">
-          PLAYER PROFILE
+          {t.title}
         </h1>
 
         <p className="text-gray-400 text-sm mt-2">
-          Your identity in the world of daily riddles.
+          {t.description}
         </p>
 
         <div className="mt-8 rounded-2xl border border-purple-500/30 bg-[#151020] p-6">
+
           <div className="w-20 h-20 rounded-full bg-purple-600/20 border border-purple-400/40 flex items-center justify-center mx-auto">
             <span className="text-3xl font-black text-purple-300">
               {player.nickname.charAt(0).toUpperCase()}
@@ -115,20 +149,37 @@ export default function ProfilePage() {
           </p>
 
           <div className="border-t border-purple-500/20 mt-6 pt-5 space-y-4">
+
             <div className="flex justify-between gap-4 text-sm">
-              <span className="text-gray-400">Nickname</span>
-              <span className="font-semibold">{player.nickname}</span>
+              <span className="text-gray-400">
+                {t.nickname}
+              </span>
+
+              <span className="font-semibold">
+                {player.nickname}
+              </span>
             </div>
 
             <div className="flex justify-between gap-4 text-sm">
-              <span className="text-gray-400">Server</span>
-              <span className="font-semibold">{player.server_number}</span>
+              <span className="text-gray-400">
+                {t.server}
+              </span>
+
+              <span className="font-semibold">
+                {player.server_number}
+              </span>
             </div>
 
             <div className="flex justify-between gap-4 text-sm">
-              <span className="text-gray-400">Joined</span>
-              <span className="font-semibold">{joinedDate}</span>
+              <span className="text-gray-400">
+                {t.joined}
+              </span>
+
+              <span className="font-semibold">
+                {joinedDate}
+              </span>
             </div>
+
           </div>
         </div>
 
@@ -136,8 +187,9 @@ export default function ProfilePage() {
           href="/game"
           className="block text-center mt-6 w-full rounded-xl bg-purple-600 hover:bg-purple-500 py-4 font-bold tracking-wider transition"
         >
-          PLAY TODAY'S RIDDLE
+          {t.play}
         </Link>
+
       </div>
     </main>
   );
