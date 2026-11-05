@@ -16,7 +16,7 @@ const translations = {
     server: "Server Number",
     serverPlaceholder: "Example: 278",
     registering: "REGISTERING...",
-    submit: "ENTER THE GAME",
+    submit: "CREATE PLAYER PROFILE",
     missing: "Please enter your nickname and server.",
     invalidServer: "Please enter a valid server number.",
     failed: "Registration failed. Please try again.",
@@ -24,13 +24,22 @@ const translations = {
     alreadyRegistered: "You already have a player profile.",
     continue: "CONTINUE TO PROFILE",
     adminBlocked: "Administrator accounts cannot register as players.",
-    googleBlocked: "Your Google account is already connected. Please use your existing player profile.",
     accountError: "Unable to verify your account. Please try again.",
     googleLogin: "CONTINUE WITH GOOGLE",
     googleLoading: "CONNECTING TO GOOGLE...",
     googleError: "Unable to sign in with Google. Please try again.",
     or: "OR",
     guestTitle: "PLAY AS GUEST",
+    googleWelcome: "GOOGLE ACCOUNT VERIFIED",
+    googleQuestion:
+      "This Google account does not have a player profile yet. Would you like to create one?",
+    yes: "YES, CREATE PROFILE",
+    no: "NO, NOT NOW",
+    googleProfileTitle: "COMPLETE YOUR PLAYER PROFILE",
+    back: "BACK",
+    duplicate: "A player profile already exists. Redirecting to your profile...",
+    googleOnly:
+      "Please use a Google account to create this player profile.",
   },
   id: {
     registration: "PENDAFTARAN PEMAIN",
@@ -41,7 +50,7 @@ const translations = {
     server: "Nomor Server",
     serverPlaceholder: "Contoh: 278",
     registering: "MENDAFTARKAN...",
-    submit: "MASUK KE PERMAINAN",
+    submit: "BUAT PROFIL PEMAIN",
     missing: "Silakan masukkan nickname dan server.",
     invalidServer: "Silakan masukkan nomor server yang valid.",
     failed: "Pendaftaran gagal. Silakan coba lagi.",
@@ -49,15 +58,35 @@ const translations = {
     alreadyRegistered: "Kamu sudah memiliki profil pemain.",
     continue: "LANJUT KE PROFIL",
     adminBlocked: "Akun administrator tidak dapat mendaftar sebagai pemain.",
-    googleBlocked: "Akun Google kamu sudah terhubung. Silakan gunakan profil pemain yang sudah ada.",
     accountError: "Tidak dapat memeriksa akun. Silakan coba lagi.",
     googleLogin: "LANJUTKAN DENGAN GOOGLE",
     googleLoading: "MENGHUBUNGKAN KE GOOGLE...",
     googleError: "Tidak dapat login dengan Google. Silakan coba lagi.",
     or: "ATAU",
     guestTitle: "BERMAIN SEBAGAI TAMU",
+    googleWelcome: "AKUN GOOGLE BERHASIL DIVERIFIKASI",
+    googleQuestion:
+      "Akun Google ini belum memiliki profil pemain. Apakah kamu ingin membuatnya?",
+    yes: "YA, BUAT PROFIL",
+    no: "TIDAK, NANTI SAJA",
+    googleProfileTitle: "LENGKAPI PROFIL PEMAIN",
+    back: "KEMBALI",
+    duplicate: "Profil pemain sudah tersedia. Mengarahkan ke profil...",
+    googleOnly:
+      "Gunakan akun Google untuk membuat profil pemain ini.",
   },
 };
+
+function isGoogleAccount(user) {
+  const identities = user?.identities || [];
+  const providers = user?.app_metadata?.providers || [];
+
+  return (
+    user?.app_metadata?.provider === "google" ||
+    providers.includes("google") ||
+    identities.some((identity) => identity.provider === "google")
+  );
+}
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -66,13 +95,18 @@ export default function RegisterPage() {
 
   const [nickname, setNickname] = useState("");
   const [server, setServer] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [checking, setChecking] = useState(true);
+
   const [error, setError] = useState("");
   const [existingProfile, setExistingProfile] = useState(false);
   const [blocked, setBlocked] = useState(false);
+
   const [canGoogleLogin, setCanGoogleLogin] = useState(false);
+  const [googleNeedsProfile, setGoogleNeedsProfile] = useState(false);
+  const [showGoogleForm, setShowGoogleForm] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -96,6 +130,7 @@ export default function RegisterPage() {
 
         const user = session.user;
 
+        // Administrator sessions cannot register as players.
         const adminResponse = await fetch("/api/admin/me", {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
@@ -113,12 +148,13 @@ export default function RegisterPage() {
         }
 
         if (
-          adminResponse.status !== 403 &&
-          adminResponse.status !== 401
+          adminResponse.status !== 401 &&
+          adminResponse.status !== 403
         ) {
           throw new Error(t.accountError);
         }
 
+        // Find an existing player profile by the exact Auth user ID.
         const { data: player, error: playerError } =
           await supabase
             .from("players")
@@ -129,17 +165,32 @@ export default function RegisterPage() {
         if (playerError) throw playerError;
 
         if (player) {
-          if (active) {
-            setExistingProfile(true);
-          }
-        } else if (!user.is_anonymous) {
-          if (active) {
-            setBlocked(true);
-            setError(t.googleBlocked);
-          }
+          if (active) setExistingProfile(true);
+          return;
         }
 
-        if (active) setChecking(false);
+        if (user.is_anonymous) {
+          // New Guest account can use the normal registration form.
+          if (active) setChecking(false);
+          return;
+        }
+
+        if (isGoogleAccount(user)) {
+          // New Google account without a player profile.
+          if (active) {
+            setGoogleNeedsProfile(true);
+            setChecking(false);
+          }
+          return;
+        }
+
+        // Other authenticated accounts are not allowed to create
+        // a player profile through this Google registration flow.
+        if (active) {
+          setBlocked(true);
+          setError(t.accountError);
+          setChecking(false);
+        }
       } catch (err) {
         console.error("Registration account check:", err);
 
@@ -156,7 +207,7 @@ export default function RegisterPage() {
     return () => {
       active = false;
     };
-  }, [t.adminBlocked, t.accountError, t.googleBlocked]);
+  }, [t.adminBlocked, t.accountError]);
 
   async function handleGoogleLogin() {
     if (googleLoading) return;
@@ -172,12 +223,12 @@ export default function RegisterPage() {
 
       if (sessionError) throw sessionError;
 
-      // Never replace an active Guest session with another account.
+      // Never replace an active Guest or Player session.
       if (session) {
         throw new Error(
           language === "id"
-            ? "Kamu masih memiliki sesi akun aktif. Jangan login Google dari sesi ini."
-            : "You already have an active account session. Do not start Google login from this session."
+            ? "Kamu masih memiliki sesi akun aktif. Silakan gunakan akun tersebut atau logout terlebih dahulu."
+            : "You already have an active account session. Please use that account or sign out first."
         );
       }
 
@@ -201,8 +252,11 @@ export default function RegisterPage() {
     }
   }
 
-  async function handleRegister(e) {
-    e.preventDefault();
+  async function handleRegister(event) {
+    event.preventDefault();
+
+    if (loading) return;
+
     setError("");
 
     const cleanNickname = nickname.trim();
@@ -239,6 +293,7 @@ export default function RegisterPage() {
       let user = session?.user;
 
       if (user) {
+        // Check administrator identity first.
         const adminResponse = await fetch("/api/admin/me", {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
@@ -257,10 +312,11 @@ export default function RegisterPage() {
           throw new Error(t.accountError);
         }
 
-        if (!user.is_anonymous) {
-          throw new Error(t.googleBlocked);
+        if (!user.is_anonymous && !isGoogleAccount(user)) {
+          throw new Error(t.googleOnly);
         }
 
+        // Check again before inserting to prevent duplicate profiles.
         const { data: existingPlayer, error: lookupError } =
           await supabase
             .from("players")
@@ -275,12 +331,17 @@ export default function RegisterPage() {
           return;
         }
       } else {
+        // Create a Guest identity only when there is no active session.
         const { data, error: authError } =
           await supabase.auth.signInAnonymously();
 
         if (authError) throw authError;
 
         user = data.user;
+      }
+
+      if (!user) {
+        throw new Error(t.accountError);
       }
 
       const { error: insertError } = await supabase
@@ -291,7 +352,22 @@ export default function RegisterPage() {
           server_number: Number(cleanServer),
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        // If another request created the profile at the same time,
+        // do not create a second profile.
+        const { data: duplicatePlayer } = await supabase
+          .from("players")
+          .select("id")
+          .eq("auth_user_id", user.id)
+          .maybeSingle();
+
+        if (duplicatePlayer) {
+          router.replace("/profile");
+          return;
+        }
+
+        throw insertError;
+      }
 
       router.replace("/game");
     } catch (err) {
@@ -355,7 +431,42 @@ export default function RegisterPage() {
           {t.description}
         </p>
 
-        {canGoogleLogin && (
+        {/* NEW GOOGLE ACCOUNT CONFIRMATION */}
+        {googleNeedsProfile && !showGoogleForm && (
+          <div className="space-y-5">
+            <div className="rounded-xl border border-green-500/30 bg-green-500/10 p-4">
+              <p className="font-bold text-green-400">
+                ✓ {t.googleWelcome}
+              </p>
+
+              <p className="text-sm text-gray-300 mt-2 leading-relaxed">
+                {t.googleQuestion}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowGoogleForm(true);
+                setError("");
+              }}
+              className="w-full bg-purple-600 hover:bg-purple-500 rounded-xl py-4 font-bold"
+            >
+              {t.yes}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.replace("/")}
+              className="w-full bg-white/10 hover:bg-white/20 rounded-xl py-4 font-bold"
+            >
+              {t.no}
+            </button>
+          </div>
+        )}
+
+        {/* GOOGLE LOGIN */}
+        {!googleNeedsProfile && canGoogleLogin && (
           <>
             <button
               type="button"
@@ -400,56 +511,84 @@ export default function RegisterPage() {
           </>
         )}
 
-        <h2 className="text-center text-sm font-bold text-purple-300 mb-5">
-          {t.guestTitle}
-        </h2>
+        {/* GUEST OR GOOGLE PROFILE FORM */}
+        {(!googleNeedsProfile || showGoogleForm) && (
+          <>
+            <h2 className="text-center text-sm font-bold text-purple-300 mb-5">
+              {googleNeedsProfile
+                ? t.googleProfileTitle
+                : t.guestTitle}
+            </h2>
 
-        <form onSubmit={handleRegister} className="space-y-5">
-          <div>
-            <label className="text-sm text-gray-300">
-              {t.nickname}
-            </label>
+            <form onSubmit={handleRegister} className="space-y-5">
+              <div>
+                <label className="text-sm text-gray-300">
+                  {t.nickname}
+                </label>
 
-            <input
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              placeholder={t.nicknamePlaceholder}
-              maxLength={30}
-              required
-              className="w-full mt-2 p-4 rounded-xl bg-[#080711] border border-purple-500/30 outline-none focus:border-purple-500"
-            />
-          </div>
+                <input
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  placeholder={t.nicknamePlaceholder}
+                  maxLength={30}
+                  required
+                  className="w-full mt-2 p-4 rounded-xl bg-[#080711] border border-purple-500/30 outline-none focus:border-purple-500"
+                />
+              </div>
 
-          <div>
-            <label className="text-sm text-gray-300">
-              {t.server}
-            </label>
+              <div>
+                <label className="text-sm text-gray-300">
+                  {t.server}
+                </label>
 
-            <input
-              value={server}
-              onChange={(e) => setServer(e.target.value)}
-              placeholder={t.serverPlaceholder}
-              inputMode="numeric"
-              maxLength={6}
-              required
-              className="w-full mt-2 p-4 rounded-xl bg-[#080711] border border-purple-500/30 outline-none focus:border-purple-500"
-            />
-          </div>
+                <input
+                  value={server}
+                  onChange={(e) => setServer(e.target.value)}
+                  placeholder={t.serverPlaceholder}
+                  inputMode="numeric"
+                  maxLength={6}
+                  required
+                  className="w-full mt-2 p-4 rounded-xl bg-[#080711] border border-purple-500/30 outline-none focus:border-purple-500"
+                />
+              </div>
 
-          {error && (
-            <p className="text-red-400 text-sm">
-              {error}
-            </p>
-          )}
+              {error && (
+                <p className="text-red-400 text-sm">
+                  {error}
+                </p>
+              )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-purple-600 hover:bg-purple-500 disabled:opacity-50 rounded-xl py-4 font-bold tracking-wider"
-          >
-            {loading ? t.registering : t.submit}
-          </button>
-        </form>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-purple-600 hover:bg-purple-500 disabled:opacity-50 rounded-xl py-4 font-bold tracking-wider"
+              >
+                {loading ? t.registering : t.submit}
+              </button>
+
+              {googleNeedsProfile && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowGoogleForm(false);
+                    setError("");
+                  }}
+                  disabled={loading}
+                  className="w-full bg-white/10 hover:bg-white/20 rounded-xl py-3 font-bold"
+                >
+                  {t.back}
+                </button>
+              )}
+            </form>
+          </>
+        )}
+
+        {error && !googleNeedsProfile && (
+          <p className="text-red-400 text-sm mt-4">
+            {error}
+          </p>
+        )}
+
       </div>
     </main>
   );
