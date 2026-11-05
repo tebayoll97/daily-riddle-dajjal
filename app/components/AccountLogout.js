@@ -52,13 +52,15 @@ export default function AccountLogout() {
   const t = translations[language] || translations.en;
 
   const [isGuest, setIsGuest] = useState(false);
-  const [checking, setChecking] = useState(true);
+  const [checking, setChecking] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
   const [showFinalConfirm, setShowFinalConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   async function startLogout() {
+    if (checking || loading) return;
+
     setError("");
     setChecking(true);
 
