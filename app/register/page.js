@@ -26,6 +26,11 @@ const translations = {
     adminBlocked: "Administrator accounts cannot register as players.",
     googleBlocked: "Your Google account is already connected. Please use your existing player profile.",
     accountError: "Unable to verify your account. Please try again.",
+    googleLogin: "CONTINUE WITH GOOGLE",
+    googleLoading: "CONNECTING TO GOOGLE...",
+    googleError: "Unable to sign in with Google. Please try again.",
+    or: "OR",
+    guestTitle: "PLAY AS GUEST",
   },
   id: {
     registration: "PENDAFTARAN PEMAIN",
@@ -46,6 +51,11 @@ const translations = {
     adminBlocked: "Akun administrator tidak dapat mendaftar sebagai pemain.",
     googleBlocked: "Akun Google kamu sudah terhubung. Silakan gunakan profil pemain yang sudah ada.",
     accountError: "Tidak dapat memeriksa akun. Silakan coba lagi.",
+    googleLogin: "LANJUTKAN DENGAN GOOGLE",
+    googleLoading: "MENGHUBUNGKAN KE GOOGLE...",
+    googleError: "Tidak dapat login dengan Google. Silakan coba lagi.",
+    or: "ATAU",
+    guestTitle: "BERMAIN SEBAGAI TAMU",
   },
 };
 
@@ -57,10 +67,12 @@ export default function RegisterPage() {
   const [nickname, setNickname] = useState("");
   const [server, setServer] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState("");
   const [existingProfile, setExistingProfile] = useState(false);
   const [blocked, setBlocked] = useState(false);
+  const [canGoogleLogin, setCanGoogleLogin] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -75,13 +87,15 @@ export default function RegisterPage() {
         if (sessionError) throw sessionError;
 
         if (!session) {
-          if (active) setChecking(false);
+          if (active) {
+            setCanGoogleLogin(true);
+            setChecking(false);
+          }
           return;
         }
 
         const user = session.user;
 
-        // Check whether this session belongs to an administrator.
         const adminResponse = await fetch("/api/admin/me", {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
@@ -98,17 +112,19 @@ export default function RegisterPage() {
           return;
         }
 
-        if (adminResponse.status !== 403 &&
-            adminResponse.status !== 401) {
+        if (
+          adminResponse.status !== 403 &&
+          adminResponse.status !== 401
+        ) {
           throw new Error(t.accountError);
         }
 
-        // Check whether this account already has a player profile.
-        const { data: player, error: playerError } = await supabase
-          .from("players")
-          .select("id")
-          .eq("auth_user_id", user.id)
-          .maybeSingle();
+        const { data: player, error: playerError } =
+          await supabase
+            .from("players")
+            .select("id")
+            .eq("auth_user_id", user.id)
+            .maybeSingle();
 
         if (playerError) throw playerError;
 
@@ -117,7 +133,6 @@ export default function RegisterPage() {
             setExistingProfile(true);
           }
         } else if (!user.is_anonymous) {
-          // Do not create a second profile for a connected Google account.
           if (active) {
             setBlocked(true);
             setError(t.googleBlocked);
@@ -142,6 +157,49 @@ export default function RegisterPage() {
       active = false;
     };
   }, [t.adminBlocked, t.accountError, t.googleBlocked]);
+
+  async function handleGoogleLogin() {
+    if (googleLoading) return;
+
+    setGoogleLoading(true);
+    setError("");
+
+    try {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError) throw sessionError;
+
+      // Never replace an active Guest session with another account.
+      if (session) {
+        throw new Error(
+          language === "id"
+            ? "Kamu masih memiliki sesi akun aktif. Jangan login Google dari sesi ini."
+            : "You already have an active account session. Do not start Google login from this session."
+        );
+      }
+
+      const { error: oauthError } =
+        await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: `${window.location.origin}/profile`,
+            queryParams: {
+              access_type: "offline",
+              prompt: "select_account",
+            },
+          },
+        });
+
+      if (oauthError) throw oauthError;
+    } catch (err) {
+      console.error("Google login error:", err);
+      setError(err.message || t.googleError);
+      setGoogleLoading(false);
+    }
+  }
 
   async function handleRegister(e) {
     e.preventDefault();
@@ -181,7 +239,6 @@ export default function RegisterPage() {
       let user = session?.user;
 
       if (user) {
-        // Never allow an administrator to register as a player.
         const adminResponse = await fetch("/api/admin/me", {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
@@ -204,7 +261,6 @@ export default function RegisterPage() {
           throw new Error(t.googleBlocked);
         }
 
-        // A Guest account must not overwrite an existing profile.
         const { data: existingPlayer, error: lookupError } =
           await supabase
             .from("players")
@@ -298,6 +354,55 @@ export default function RegisterPage() {
         <p className="text-gray-400 text-sm text-center mt-3 mb-8">
           {t.description}
         </p>
+
+        {canGoogleLogin && (
+          <>
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              disabled={googleLoading}
+              className="w-full flex items-center justify-center gap-3 bg-white text-gray-900 hover:bg-gray-200 disabled:opacity-50 rounded-xl py-4 font-bold transition"
+            >
+              <svg
+                viewBox="0 0 48 48"
+                className="w-5 h-5"
+                aria-hidden="true"
+              >
+                <path
+                  fill="#EA4335"
+                  d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.06 13.22l7.98 6.19C11.93 13.72 17.45 9.5 24 9.5z"
+                  transform="translate(0 4)"
+                />
+                <path
+                  fill="#4285F4"
+                  d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.74 7.18l7.73 6C44.43 37.95 46.98 31.75 46.98 24.55z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M10.04 28.59A14.4 14.4 0 0 1 9.27 24c0-1.59.27-3.13.77-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.86.92 7.51 2.56 10.78l7.48-6.19z"
+                  transform="translate(0 4)"
+                />
+                <path
+                  fill="#34A853"
+                  d="M24 48c6.47 0 11.9-2.13 15.93-5.8l-7.73-6c-2.14 1.45-4.87 2.3-8.2 2.3-6.55 0-12.07-4.22-14.04-10.09l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                  transform="translate(0 -4)"
+                />
+              </svg>
+
+              {googleLoading ? t.googleLoading : t.googleLogin}
+            </button>
+
+            <div className="flex items-center gap-4 my-6">
+              <div className="h-px flex-1 bg-white/10" />
+              <span className="text-xs text-gray-500">{t.or}</span>
+              <div className="h-px flex-1 bg-white/10" />
+            </div>
+          </>
+        )}
+
+        <h2 className="text-center text-sm font-bold text-purple-300 mb-5">
+          {t.guestTitle}
+        </h2>
 
         <form onSubmit={handleRegister} className="space-y-5">
           <div>
