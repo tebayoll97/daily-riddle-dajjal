@@ -25,6 +25,7 @@ export default function AdminRiddlesPage() {
   const [riddles, setRiddles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [editingId, setEditingId] = useState(null);
@@ -179,6 +180,56 @@ export default function AdminRiddlesPage() {
       setError(err.message);
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDelete(riddle) {
+    const confirmed = window.confirm(
+      isID
+        ? `Yakin ingin menghapus teka-teki tanggal ${riddle.riddle_date}? Tindakan ini tidak dapat dibatalkan.`
+        : `Are you sure you want to delete the riddle dated ${riddle.riddle_date}? This cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    setDeletingId(riddle.id);
+    setError("");
+    setSuccess("");
+
+    try {
+      const session = await getSession();
+
+      const response = await fetch(
+        `/api/admin/riddles/${riddle.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to delete riddle.");
+      }
+
+      if (editingId === riddle.id) {
+        cancelEdit();
+      }
+
+      setSuccess(
+        isID
+          ? "Teka-teki berhasil dihapus!"
+          : "Riddle successfully deleted!"
+      );
+
+      await loadRiddles();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -537,12 +588,22 @@ export default function AdminRiddlesPage() {
                 </div>
               </div>
 
-              <div className="mt-5 pt-4 border-t border-white/10 flex justify-end">
+              <div className="mt-5 pt-4 border-t border-white/10 flex flex-wrap justify-end gap-2">
                 <button
                   onClick={() => startEdit(riddle)}
                   className="px-5 py-2 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:bg-purple-600 hover:text-white text-sm font-bold transition"
                 >
-                  ✎ {isID ? "EDIT TEKA-TEKI" : "EDIT RIDDLE"}
+                  ✎ {isID ? "EDIT" : "EDIT"}
+                </button>
+
+                <button
+                  onClick={() => handleDelete(riddle)}
+                  disabled={deletingId === riddle.id}
+                  className="px-5 py-2 rounded-xl bg-red-600/10 border border-red-500/30 text-red-400 hover:bg-red-600 hover:text-white disabled:opacity-50 text-sm font-bold transition"
+                >
+                  {deletingId === riddle.id
+                    ? isID ? "MENGHAPUS..." : "DELETING..."
+                    : isID ? "HAPUS" : "DELETE"}
                 </button>
               </div>
             </div>
