@@ -6,6 +6,18 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useLanguage } from "@/app/components/LanguageProvider";
 
+const emptyForm = {
+  riddle_date: "",
+  question_en: "",
+  question_id: "",
+  hint_en: "",
+  hint_id: "",
+  answers_en: "",
+  answers_id: "",
+  points: "100",
+  is_active: true,
+};
+
 export default function AdminRiddlesPage() {
   const { language } = useLanguage();
   const isID = language === "id";
@@ -15,18 +27,8 @@ export default function AdminRiddlesPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
-  const [form, setForm] = useState({
-    riddle_date: "",
-    question_en: "",
-    question_id: "",
-    hint_en: "",
-    hint_id: "",
-    answers_en: "",
-    answers_id: "",
-    points: "100",
-    is_active: true,
-  });
+  const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState(emptyForm);
 
   function updateForm(field, value) {
     setForm((previous) => ({
@@ -83,6 +85,37 @@ export default function AdminRiddlesPage() {
     loadRiddles();
   }, []);
 
+  function startEdit(riddle) {
+    setEditingId(riddle.id);
+
+    setForm({
+      riddle_date: riddle.riddle_date || "",
+      question_en: riddle.question_en || "",
+      question_id: riddle.question_id || "",
+      hint_en: riddle.hint_en || "",
+      hint_id: riddle.hint_id || "",
+      answers_en: (riddle.answers_en || []).join(", "),
+      answers_id: (riddle.answers_id || []).join(", "),
+      points: String(riddle.points ?? 100),
+      is_active: Boolean(riddle.is_active),
+    });
+
+    setError("");
+    setSuccess("");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setForm(emptyForm);
+    setError("");
+    setSuccess("");
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -106,38 +139,40 @@ export default function AdminRiddlesPage() {
           .filter(Boolean),
       };
 
-      const response = await fetch("/api/admin/riddles/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const isEditing = Boolean(editingId);
+
+      const response = await fetch(
+        isEditing
+          ? `/api/admin/riddles/${editingId}`
+          : "/api/admin/riddles/create",
+        {
+          method: isEditing ? "PATCH" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Failed to create riddle.");
+        throw new Error(result.error || "Failed to save riddle.");
       }
 
       setSuccess(
         isID
-          ? "Teka-teki berhasil ditambahkan!"
-          : "Riddle successfully created!"
+          ? isEditing
+            ? "Teka-teki berhasil diperbarui!"
+            : "Teka-teki berhasil ditambahkan!"
+          : isEditing
+            ? "Riddle successfully updated!"
+            : "Riddle successfully created!"
       );
 
-      setForm({
-        riddle_date: "",
-        question_en: "",
-        question_id: "",
-        hint_en: "",
-        hint_id: "",
-        answers_en: "",
-        answers_id: "",
-        points: "100",
-        is_active: true,
-      });
+      setEditingId(null);
+      setForm(emptyForm);
 
       await loadRiddles();
     } catch (err) {
@@ -161,7 +196,13 @@ export default function AdminRiddlesPage() {
     );
   }
 
-  function Field({ label, value, field, placeholder, multiline = false }) {
+  function Field({
+    label,
+    value,
+    field,
+    placeholder,
+    multiline = false,
+  }) {
     return (
       <div>
         <label className="block text-sm font-semibold text-gray-300 mb-2">
@@ -214,11 +255,13 @@ export default function AdminRiddlesPage() {
           </p>
         </div>
 
-        {/* CREATE RIDDLE FORM */}
+        {/* CREATE / EDIT FORM */}
 
         <section className="bg-white/5 border border-purple-500/20 rounded-2xl p-5 mb-8">
           <h2 className="text-lg font-black mb-5">
-            ✦ {isID ? "Tambah Teka-teki Baru" : "Add New Riddle"}
+            {editingId
+              ? `✎ ${isID ? "Edit Teka-teki" : "Edit Riddle"}`
+              : `✦ ${isID ? "Tambah Teka-teki Baru" : "Add New Riddle"}`}
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -265,12 +308,6 @@ export default function AdminRiddlesPage() {
                 value={form.answers_en}
                 placeholder="echo, an echo"
               />
-
-              <p className="text-xs text-gray-500">
-                {isID
-                  ? "Pisahkan beberapa jawaban menggunakan koma."
-                  : "Separate multiple accepted answers with commas."}
-              </p>
             </div>
 
             <div className="border-t border-white/10 pt-5 space-y-4">
@@ -299,12 +336,6 @@ export default function AdminRiddlesPage() {
                 value={form.answers_id}
                 placeholder="gema, suara gema"
               />
-
-              <p className="text-xs text-gray-500">
-                {isID
-                  ? "Pisahkan beberapa jawaban menggunakan koma."
-                  : "Separate multiple accepted answers with commas."}
-              </p>
             </div>
 
             <div className="border-t border-white/10 pt-5 space-y-4">
@@ -354,19 +385,30 @@ export default function AdminRiddlesPage() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-full rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 py-3 font-bold transition"
-            >
-              {saving
-                ? isID
-                  ? "Menyimpan..."
-                  : "Saving..."
-                : isID
-                  ? "SIMPAN TEKA-TEKI"
-                  : "SAVE RIDDLE"}
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="submit"
+                disabled={saving}
+                className="flex-1 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 py-3 font-bold transition"
+              >
+                {saving
+                  ? isID ? "Menyimpan..." : "Saving..."
+                  : editingId
+                    ? isID ? "SIMPAN PERUBAHAN" : "SAVE CHANGES"
+                    : isID ? "SIMPAN TEKA-TEKI" : "SAVE RIDDLE"}
+              </button>
+
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={cancelEdit}
+                  disabled={saving}
+                  className="rounded-xl bg-white/10 hover:bg-white/20 px-6 py-3 font-bold transition"
+                >
+                  {isID ? "BATAL" : "CANCEL"}
+                </button>
+              )}
+            </div>
 
           </form>
         </section>
@@ -493,6 +535,15 @@ export default function AdminRiddlesPage() {
                     </p>
                   </div>
                 </div>
+              </div>
+
+              <div className="mt-5 pt-4 border-t border-white/10 flex justify-end">
+                <button
+                  onClick={() => startEdit(riddle)}
+                  className="px-5 py-2 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:bg-purple-600 hover:text-white text-sm font-bold transition"
+                >
+                  ✎ {isID ? "EDIT TEKA-TEKI" : "EDIT RIDDLE"}
+                </button>
               </div>
             </div>
           ))}
