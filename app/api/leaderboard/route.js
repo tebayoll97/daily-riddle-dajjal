@@ -21,6 +21,7 @@ export async function GET() {
       total_points: player.total_points,
       riddles_solved: player.riddles_solved,
       last_completed_at: player.last_completed_at,
+      avatar_url: player.avatar_url || null,
     }));
 
     return Response.json({
