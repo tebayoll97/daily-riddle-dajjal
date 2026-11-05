@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useLanguage } from "../components/LanguageProvider";
 import GoogleAccountLink from "../components/GoogleAccountLink";
+import AccountLogout from "../components/AccountLogout";
 
 const translations = {
   en: {
@@ -153,9 +154,9 @@ export default function ProfilePage() {
           {t.description}
         </p>
 
+        {/* PLAYER PROFILE */}
         <div className="mt-8 rounded-2xl border border-purple-500/30 bg-[#151020] p-6">
 
-          {/* Profile Avatar */}
           <div className="w-28 h-28 rounded-full overflow-hidden bg-purple-600/20 border-2 border-purple-400/50 flex items-center justify-center mx-auto">
             {player.avatar_url ? (
               <img
@@ -178,7 +179,6 @@ export default function ProfilePage() {
             Server {player.server_number}
           </p>
 
-          {/* Edit Profile Button */}
           <Link
             href="/profile/edit"
             className="block text-center mt-5 w-full rounded-xl border border-purple-400/40 bg-purple-500/10 hover:bg-purple-500/20 py-3 text-purple-200 font-bold tracking-wider transition"
@@ -186,14 +186,12 @@ export default function ProfilePage() {
             ✎ {t.edit}
           </Link>
 
-          {/* Player Information */}
           <div className="border-t border-purple-500/20 mt-6 pt-5 space-y-4">
 
             <div className="flex justify-between gap-4 text-sm">
               <span className="text-gray-400">
                 {t.nickname}
               </span>
-
               <span className="font-semibold">
                 {player.nickname}
               </span>
@@ -203,7 +201,6 @@ export default function ProfilePage() {
               <span className="text-gray-400">
                 {t.server}
               </span>
-
               <span className="font-semibold">
                 {player.server_number}
               </span>
@@ -213,7 +210,6 @@ export default function ProfilePage() {
               <span className="text-gray-400">
                 {t.joined}
               </span>
-
               <span className="font-semibold">
                 {joinedDate}
               </span>
@@ -222,14 +218,34 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Google Account Security */}
-        <div className="mt-6">
-          <GoogleAccountLink />
-        </div>
+        {/* ACCOUNT SECURITY */}
+        <section
+          id="account-security"
+          className="mt-8 space-y-4 scroll-mt-32"
+        >
+          <div>
+            <p className="text-purple-400 text-xs tracking-[0.25em]">
+              ACCOUNT MANAGEMENT
+            </p>
 
+            <h2 className="text-xl font-bold mt-2">
+              Account Security
+            </h2>
+
+            <p className="text-sm text-gray-400 mt-1">
+              Protect your identity and game progress.
+            </p>
+          </div>
+
+          <GoogleAccountLink />
+
+          <AccountLogout />
+        </section>
+
+        {/* PLAY BUTTON */}
         <Link
           href="/game"
-          className="block text-center mt-6 w-full rounded-xl bg-purple-600 hover:bg-purple-500 py-4 font-bold tracking-wider transition"
+          className="block text-center mt-8 w-full rounded-xl bg-purple-600 hover:bg-purple-500 py-4 font-bold tracking-wider transition"
         >
           {t.play}
         </Link>
