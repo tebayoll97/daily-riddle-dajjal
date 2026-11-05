@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabaseAdminClient } from "@/lib/supabaseAdminClient";
 import { useLanguage } from "./LanguageProvider";
@@ -24,6 +25,7 @@ const translations = {
 };
 
 export default function Header() {
+  const pathname = usePathname();
   const { language, setLanguage } = useLanguage();
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -109,6 +111,11 @@ export default function Header() {
     });
   }
 
+  function isActive(href) {
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
+
   return (
     <header className="sticky top-0 z-50 border-b border-purple-500/20 bg-[#080711]/95 backdrop-blur-lg">
       <div className="max-w-6xl mx-auto px-4">
@@ -128,7 +135,7 @@ export default function Header() {
               onClick={() => setLanguage("en")}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                 language === "en"
-                  ? "bg-purple-600 text-white"
+                  ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
                   : "bg-white/5 text-gray-400 hover:bg-white/10"
               }`}
             >
@@ -139,7 +146,7 @@ export default function Header() {
               onClick={() => setLanguage("id")}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                 language === "id"
-                  ? "bg-purple-600 text-white"
+                  ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
                   : "bg-white/5 text-gray-400 hover:bg-white/10"
               }`}
             >
@@ -153,22 +160,46 @@ export default function Header() {
             isAdmin ? "grid-cols-5" : "grid-cols-4"
           }`}
         >
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`flex flex-col items-center justify-center gap-1 py-3 transition ${
-                link.href === "/admin"
-                  ? "text-purple-300 hover:text-white hover:bg-purple-600/20"
-                  : "text-gray-400 hover:text-purple-300 hover:bg-purple-500/10"
-              }`}
-            >
-              <span className="text-lg">{link.icon}</span>
-              <span className="text-[11px] sm:text-xs font-medium text-center">
-                {link.name}
-              </span>
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const active = isActive(link.href);
+
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={active ? "page" : undefined}
+                className={`relative flex flex-col items-center justify-center gap-1 py-3 mx-1 rounded-t-xl transition-all duration-200 ${
+                  active
+                    ? "text-purple-300 bg-purple-500/15"
+                    : "text-gray-400 hover:text-purple-300 hover:bg-purple-500/10"
+                }`}
+              >
+                <span
+                  className={`text-lg transition-all duration-200 ${
+                    active
+                      ? "text-purple-300 scale-110 drop-shadow-[0_0_8px_rgba(192,132,252,0.7)]"
+                      : ""
+                  }`}
+                >
+                  {link.icon}
+                </span>
+
+                <span
+                  className={`text-[11px] sm:text-xs text-center transition-all ${
+                    active
+                      ? "font-bold text-white"
+                      : "font-medium"
+                  }`}
+                >
+                  {link.name}
+                </span>
+
+                {active && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-full bg-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.9)]" />
+                )}
+              </Link>
+            );
+          })}
         </nav>
       </div>
     </header>
