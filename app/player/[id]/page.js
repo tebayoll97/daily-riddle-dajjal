@@ -161,10 +161,21 @@ export default function PublicPlayerProfile() {
 
         <div className="mt-10 rounded-2xl border border-purple-500/30 bg-[#151020] p-6">
 
-          <div className="w-24 h-24 rounded-full bg-purple-600/20 border border-purple-400/40 flex items-center justify-center mx-auto">
-            <span className="text-4xl font-black text-purple-300">
-              {player.nickname.charAt(0).toUpperCase()}
-            </span>
+          {/* Player Avatar */}
+          <div className="w-28 h-28 rounded-full overflow-hidden bg-purple-600/20 border-2 border-purple-400/50 flex items-center justify-center mx-auto">
+
+            {player.avatar_url ? (
+              <img
+                src={player.avatar_url}
+                alt={player.nickname}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-4xl font-black text-purple-300">
+                {player.nickname.charAt(0).toUpperCase()}
+              </span>
+            )}
+
           </div>
 
           <h2 className="text-2xl font-black text-center mt-5 break-words">
@@ -175,6 +186,7 @@ export default function PublicPlayerProfile() {
             SERVER {player.server_number}
           </p>
 
+          {/* Player Statistics */}
           <div className="grid grid-cols-2 gap-3 mt-8">
 
             <div className="bg-[#080711] rounded-xl p-5 text-center">
@@ -199,6 +211,7 @@ export default function PublicPlayerProfile() {
 
           </div>
 
+          {/* Player Information */}
           <div className="border-t border-purple-500/20 mt-6 pt-5 space-y-4">
 
             <div className="flex justify-between gap-4 text-sm">
