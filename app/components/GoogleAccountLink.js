@@ -54,10 +54,38 @@ export default function GoogleAccountLink() {
   const [isGuest, setIsGuest] = useState(false);
   const [message, setMessage] = useState("");
 
+  async function checkAccount() {
+    try {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (error) throw error;
+
+      if (!user) {
+        throw new Error(t.expired);
+      }
+
+      const hasGoogle = user.identities?.some(
+        (identity) => identity.provider === "google"
+      );
+
+      setConnected(Boolean(hasGoogle));
+      setIsGuest(Boolean(user.is_anonymous));
+      setMessage("");
+    } catch (error) {
+      console.error("Google account check:", error);
+      setMessage(error.message || t.failed);
+    } finally {
+      setChecking(false);
+    }
+  }
+
   useEffect(() => {
     let active = true;
 
-    async function checkAccount() {
+    async function initialize() {
       try {
         const {
           data: { user },
@@ -65,10 +93,7 @@ export default function GoogleAccountLink() {
         } = await supabase.auth.getUser();
 
         if (error) throw error;
-
-        if (!user) {
-          throw new Error(t.expired);
-        }
+        if (!user) throw new Error(t.expired);
 
         const hasGoogle = user.identities?.some(
           (identity) => identity.provider === "google"
@@ -85,16 +110,29 @@ export default function GoogleAccountLink() {
           setMessage(error.message || t.failed);
         }
       } finally {
-        if (active) {
-          setChecking(false);
-        }
+        if (active) setChecking(false);
       }
     }
 
-    checkAccount();
+    initialize();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (
+        event === "SIGNED_IN" ||
+        event === "USER_UPDATED" ||
+        event === "TOKEN_REFRESHED"
+      ) {
+        setTimeout(() => {
+          if (active) checkAccount();
+        }, 0);
+      }
+    });
 
     return () => {
       active = false;
+      subscription.unsubscribe();
     };
   }, [t.expired, t.failed]);
 
@@ -115,8 +153,7 @@ export default function GoogleAccountLink() {
       }
 
       if (!session.user.is_anonymous) {
-        setConnected(true);
-        setIsGuest(false);
+        await checkAccount();
         setMessage(t.alreadyConnected);
         setLoading(false);
         return;
@@ -134,12 +171,8 @@ export default function GoogleAccountLink() {
       });
 
       if (error) throw error;
-
-      // OAuth redirects the browser to Google.
-      // The profile page will check the linked identity after return.
     } catch (error) {
       console.error("Google linking error:", error);
-
       setMessage(error.message || t.failed);
       setLoading(false);
     }
@@ -157,7 +190,6 @@ export default function GoogleAccountLink() {
 
   return (
     <div className="rounded-xl border border-purple-500/20 bg-white/5 p-4 space-y-3">
-
       <div>
         <h3 className="font-bold text-white">
           {t.title}
@@ -209,7 +241,6 @@ export default function GoogleAccountLink() {
           {message}
         </p>
       )}
-
     </div>
   );
 }
