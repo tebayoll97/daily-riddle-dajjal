@@ -117,7 +117,6 @@ function playFeedbackSound(type) {
     if (!AudioContextClass) return;
 
     const context = new AudioContextClass();
-
     const oscillator = context.createOscillator();
     const gain = context.createGain();
 
@@ -128,7 +127,6 @@ function playFeedbackSound(type) {
 
     if (type === "success") {
       oscillator.type = "sine";
-
       oscillator.frequency.setValueAtTime(523.25, now);
       oscillator.frequency.setValueAtTime(659.25, now + 0.13);
       oscillator.frequency.setValueAtTime(783.99, now + 0.26);
@@ -141,9 +139,8 @@ function playFeedbackSound(type) {
 
       oscillator.start(now);
       oscillator.stop(now + 0.86);
-    } else if (type === "wrong") {
+    } else {
       oscillator.type = "triangle";
-
       oscillator.frequency.setValueAtTime(330, now);
       oscillator.frequency.setValueAtTime(220, now + 0.16);
 
@@ -186,6 +183,16 @@ export default function GamePage() {
   const [feedback, setFeedback] = useState(null);
 
   const finished = correct || attemptsLeft <= 0;
+
+  // Poin potensial untuk jawaban berikutnya.
+  // 3 kesempatan = 100, 2 = 70, 1 = 40, 0 = 0.
+  const potentialPoints = riddle
+    ? attemptsLeft > 0
+      ? Math.round(
+          riddle.points * (1 - attemptsUsed * 0.3)
+        )
+      : 0
+    : 0;
 
   useEffect(() => {
     let active = true;
@@ -441,7 +448,10 @@ export default function GamePage() {
     ? feedbackContent[feedback.type]
     : null;
 
-  const confettiPieces = Array.from({ length: 22 }, (_, index) => index);
+  const confettiPieces = Array.from(
+    { length: 22 },
+    (_, index) => index
+  );
 
   return (
     <main className="relative min-h-[70vh] overflow-hidden bg-[#080711] text-white px-4 py-8 sm:px-5 sm:py-10">
@@ -605,7 +615,7 @@ export default function GamePage() {
                 </div>
               )}
 
-              {/* Attempts and points */}
+              {/* Attempts and potential points */}
               <div className="flex items-center justify-between gap-3 mt-7">
                 <div>
                   <p className="text-gray-500 text-[10px]">
@@ -630,8 +640,9 @@ export default function GamePage() {
                   <p className="text-gray-500 text-[10px]">
                     {t.points}
                   </p>
-                  <p className="text-purple-300 font-black text-lg">
-                    {riddle.points}
+
+                  <p className="text-purple-300 font-black text-lg transition-all">
+                    {potentialPoints}
                   </p>
                 </div>
               </div>
@@ -671,17 +682,14 @@ export default function GamePage() {
 
       {/* ANSWER FEEDBACK POPUP */}
       {feedback && currentFeedback && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-5"
-          role="presentation"
-        >
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-5">
           <div
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="answer-feedback-title"
             className={`relative w-full max-w-sm overflow-hidden rounded-3xl border ${currentFeedback.border} bg-[#151020] p-7 sm:p-8 text-center shadow-[0_20px_90px_rgba(0,0,0,0.7)] animate-in fade-in zoom-in-95 duration-200`}
           >
-            {/* Success confetti */}
+            {/* Confetti on success */}
             {feedback.type === "success" && (
               <>
                 <style jsx>{`
@@ -717,19 +725,19 @@ export default function GamePage() {
                   }
                 `}</style>
 
-                {confettiPieces.map((piece) => (
+                {Array.from({ length: 22 }, (_, index) => (
                   <span
-                    key={piece}
+                    key={index}
                     className="confetti-piece"
                     style={{
-                      left: `${(piece * 37) % 100}%`,
+                      left: `${(index * 37) % 100}%`,
                       background:
-                        piece % 3 === 0
+                        index % 3 === 0
                           ? "#facc15"
-                          : piece % 3 === 1
+                          : index % 3 === 1
                             ? "#c084fc"
                             : "#4ade80",
-                      animationDelay: `${(piece % 7) * 0.08}s`,
+                      animationDelay: `${(index % 7) * 0.08}s`,
                     }}
                   />
                 ))}
@@ -754,13 +762,7 @@ export default function GamePage() {
             </h2>
 
             <p className="relative z-10 text-gray-300 text-sm leading-relaxed mt-3">
-              {feedback.type === "failed"
-                ? t.lastChanceDescription
-                : feedback.type === "wrong"
-                  ? t.wrongDescription
-                  : feedback.type === "success"
-                    ? t.successDescription
-                    : t.genericError}
+              {currentFeedback.description}
             </p>
 
             {feedback.type === "success" && (
