@@ -2,6 +2,8 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import { useLanguage } from "./LanguageProvider";
 
 const translations = {
@@ -10,18 +12,85 @@ const translations = {
     play: "Play",
     ranking: "Ranking",
     profile: "Profile",
+    admin: "Admin Dashboard",
   },
   id: {
     home: "Beranda",
     play: "Main",
     ranking: "Peringkat",
     profile: "Profil",
+    admin: "Dashboard Admin",
   },
 };
 
 export default function Header() {
   const { language, setLanguage } = useLanguage();
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const t = translations[language];
+
+  useEffect(() => {
+    let active = true;
+
+    async function checkAdmin(session) {
+      if (!session?.access_token) {
+        if (active) setIsAdmin(false);
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/admin/me", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          cache: "no-store",
+        });
+
+        const result = await response.json();
+
+        if (active) {
+          setIsAdmin(response.ok && result.success === true);
+        }
+      } catch (error) {
+        console.error("Admin check failed:", error);
+
+        if (active) setIsAdmin(false);
+      }
+    }
+
+    async function initialize() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      await checkAdmin(session);
+    }
+
+    initialize();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
+        setIsAdmin(false);
+        return;
+      }
+
+      if (
+        event === "SIGNED_IN" ||
+        event === "TOKEN_REFRESHED" ||
+        event === "USER_UPDATED"
+      ) {
+        checkAdmin(session);
+      }
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const navLinks = [
     { name: t.home, href: "/", icon: "⌂" },
@@ -29,6 +98,14 @@ export default function Header() {
     { name: t.ranking, href: "/leaderboard", icon: "♛" },
     { name: t.profile, href: "/profile", icon: "◉" },
   ];
+
+  if (isAdmin) {
+    navLinks.push({
+      name: t.admin,
+      href: "/admin",
+      icon: "⚙",
+    });
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-purple-500/20 bg-[#080711]/95 backdrop-blur-lg">
@@ -72,15 +149,23 @@ export default function Header() {
 
         </div>
 
-        <nav className="grid grid-cols-4 border-t border-purple-500/10">
+        <nav
+          className={`grid border-t border-purple-500/10 ${
+            isAdmin ? "grid-cols-5" : "grid-cols-4"
+          }`}
+        >
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="flex flex-col items-center justify-center gap-1 py-3 text-gray-400 hover:text-purple-300 hover:bg-purple-500/10 transition"
+              className={`flex flex-col items-center justify-center gap-1 py-3 transition ${
+                link.href === "/admin"
+                  ? "text-purple-300 hover:text-white hover:bg-purple-600/20"
+                  : "text-gray-400 hover:text-purple-300 hover:bg-purple-500/10"
+              }`}
             >
               <span className="text-lg">{link.icon}</span>
-              <span className="text-xs font-medium">
+              <span className="text-[11px] sm:text-xs font-medium text-center">
                 {link.name}
               </span>
             </Link>
