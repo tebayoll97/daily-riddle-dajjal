@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -24,9 +24,6 @@ const translations = {
     confirmNormal: "Are you sure you want to sign out?",
     signingOut: "SIGNING OUT...",
     failed: "Unable to sign out. Please try again.",
-    admin:
-      "Administrator accounts must sign out through the Admin Dashboard.",
-    adminLink: "OPEN ADMIN DASHBOARD",
     confirm: "CONFIRM LOGOUT",
   },
   id: {
@@ -45,9 +42,6 @@ const translations = {
     confirmNormal: "Apakah kamu yakin ingin keluar dari akun?",
     signingOut: "SEDANG KELUAR...",
     failed: "Tidak dapat logout. Silakan coba lagi.",
-    admin:
-      "Akun administrator harus logout melalui Dashboard Admin.",
-    adminLink: "BUKA DASHBOARD ADMIN",
     confirm: "KONFIRMASI LOGOUT",
   },
 };
@@ -57,87 +51,46 @@ export default function AccountLogout() {
   const { language } = useLanguage();
   const t = translations[language] || translations.en;
 
-  const [checking, setChecking] = useState(true);
   const [isGuest, setIsGuest] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [showWarning, setShowWarning] = useState(false);
   const [showFinalConfirm, setShowFinalConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    let active = true;
-
-    async function checkAccount() {
-      try {
-        const {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession();
-
-        if (sessionError) throw sessionError;
-
-        if (!session) {
-          if (active) setChecking(false);
-          return;
-        }
-
-        const adminResponse = await fetch("/api/admin/me", {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          cache: "no-store",
-        });
-
-        if (adminResponse.ok) {
-          if (active) {
-            setIsAdmin(true);
-            setChecking(false);
-          }
-          return;
-        }
-
-        if (
-          adminResponse.status !== 401 &&
-          adminResponse.status !== 403
-        ) {
-          throw new Error("Unable to verify account.");
-        }
-
-        if (active) {
-          setIsGuest(Boolean(session.user.is_anonymous));
-          setChecking(false);
-        }
-      } catch (err) {
-        console.error("Account check error:", err);
-
-        if (active) {
-          setError(err.message || t.failed);
-          setChecking(false);
-        }
-      }
-    }
-
-    checkAccount();
-
-    return () => {
-      active = false;
-    };
-  }, [t.failed]);
-
-  function startLogout() {
+  async function startLogout() {
     setError("");
+    setChecking(true);
 
-    if (isGuest) {
-      setShowWarning(true);
-      setShowFinalConfirm(false);
-      return;
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError) throw userError;
+
+      if (!user) {
+        router.replace("/register");
+        return;
+      }
+
+      const guest = Boolean(user.is_anonymous);
+
+      setIsGuest(guest);
+      setShowWarning(guest);
+      setShowFinalConfirm(!guest);
+    } catch (err) {
+      console.error("Account check error:", err);
+      setError(err.message || t.failed);
+    } finally {
+      setChecking(false);
     }
-
-    setShowFinalConfirm(true);
   }
 
   async function handleLogout() {
+    if (loading) return;
+
     setLoading(true);
     setError("");
 
@@ -147,7 +100,7 @@ export default function AccountLogout() {
 
       if (signOutError) throw signOutError;
 
-      router.replace("/");
+      router.replace("/register");
       router.refresh();
     } catch (err) {
       console.error("Logout error:", err);
@@ -156,42 +109,16 @@ export default function AccountLogout() {
     }
   }
 
-  if (checking) {
-    return (
-      <div className="mt-6 rounded-xl border border-purple-500/20 bg-white/5 p-4">
-        <p className="text-sm text-gray-400">
-          {t.checking}
-        </p>
-      </div>
-    );
-  }
-
-  if (isAdmin) {
-    return (
-      <div className="mt-6 rounded-xl border border-purple-500/20 bg-white/5 p-4 space-y-3">
-        <p className="text-sm text-gray-300">
-          {t.admin}
-        </p>
-
-        <Link
-          href="/admin"
-          className="block text-center rounded-lg bg-purple-600 py-3 font-bold text-sm"
-        >
-          {t.adminLink}
-        </Link>
-      </div>
-    );
-  }
-
   return (
     <div className="mt-6 rounded-xl border border-purple-500/20 bg-white/5 p-4 space-y-3">
 
       {!showWarning && !showFinalConfirm && (
         <button
           onClick={startLogout}
-          className="w-full rounded-lg border border-red-500/30 bg-red-500/10 py-3 text-sm font-bold text-red-300 hover:bg-red-500/20 transition"
+          disabled={checking || loading}
+          className="w-full rounded-lg border border-red-500/30 bg-red-500/10 py-3 text-sm font-bold text-red-300 hover:bg-red-500/20 transition disabled:opacity-50"
         >
-          {t.title}
+          {checking ? t.checking : t.title}
         </button>
       )}
 
