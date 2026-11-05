@@ -13,7 +13,6 @@ const translations = {
   en: {
     loading: "Loading profile...",
     title: "PLAYER PROFILE",
-    description: "Your identity in the Dajjal & Veylora Gaming Universe.",
     nickname: "Nickname",
     server: "Server",
     joined: "Joined",
@@ -21,12 +20,14 @@ const translations = {
     play: "PLAY TODAY'S RIDDLE",
     retry: "TRY AGAIN",
     error: "Unable to load profile.",
+    security: "ACCOUNT SECURITY",
+    securityTitle: "Account Security",
+    securityDescription: "Protect your account and game progress.",
     dateLocale: "en-US",
   },
   id: {
     loading: "Memuat profil...",
     title: "PROFIL PEMAIN",
-    description: "Identitasmu di Dajjal & Veylora Gaming Universe.",
     nickname: "Nama Pemain",
     server: "Server",
     joined: "Bergabung",
@@ -34,6 +35,9 @@ const translations = {
     play: "MAINKAN TEKA-TEKI HARI INI",
     retry: "COBA LAGI",
     error: "Tidak dapat memuat profil.",
+    security: "KEAMANAN AKUN",
+    securityTitle: "Keamanan Akun",
+    securityDescription: "Lindungi akun dan progres permainanmu.",
     dateLocale: "id-ID",
   },
 };
@@ -79,9 +83,7 @@ export default function ProfilePage() {
           return;
         }
 
-        if (active) {
-          setPlayer(data);
-        }
+        if (active) setPlayer(data);
       } catch (err) {
         console.error(err);
 
@@ -89,9 +91,7 @@ export default function ProfilePage() {
           setError(err.message || t.error);
         }
       } finally {
-        if (active) {
-          setLoading(false);
-        }
+        if (active) setLoading(false);
       }
     }
 
@@ -149,10 +149,6 @@ export default function ProfilePage() {
         <h1 className="text-3xl font-black mt-3">
           {t.title}
         </h1>
-
-        <p className="text-gray-400 text-sm mt-2">
-          {t.description}
-        </p>
 
         {/* PLAYER PROFILE */}
         <div className="mt-8 rounded-2xl border border-purple-500/30 bg-[#151020] p-6">
@@ -225,15 +221,15 @@ export default function ProfilePage() {
         >
           <div>
             <p className="text-purple-400 text-xs tracking-[0.25em]">
-              ACCOUNT MANAGEMENT
+              {t.security}
             </p>
 
             <h2 className="text-xl font-bold mt-2">
-              Account Security
+              {t.securityTitle}
             </h2>
 
             <p className="text-sm text-gray-400 mt-1">
-              Protect your identity and game progress.
+              {t.securityDescription}
             </p>
           </div>
 
@@ -242,7 +238,6 @@ export default function ProfilePage() {
           <AccountLogout />
         </section>
 
-        {/* PLAY BUTTON */}
         <Link
           href="/game"
           className="block text-center mt-8 w-full rounded-xl bg-purple-600 hover:bg-purple-500 py-4 font-bold tracking-wider transition"
