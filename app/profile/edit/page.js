@@ -30,6 +30,12 @@ export default function EditProfilePage() {
 
   useEffect(() => {
     loadProfile();
+
+    return () => {
+      if (preview) {
+        URL.revokeObjectURL(preview);
+      }
+    };
   }, []);
 
   async function loadProfile() {
@@ -57,7 +63,9 @@ export default function EditProfilePage() {
 
       if (!data) {
         throw new Error(
-          isID ? "Profil pemain tidak ditemukan." : "Player profile not found."
+          isID
+            ? "Profil pemain tidak ditemukan."
+            : "Player profile not found."
         );
       }
 
@@ -71,6 +79,15 @@ export default function EditProfilePage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function clearPreview() {
+    if (preview) {
+      URL.revokeObjectURL(preview);
+    }
+
+    setPreview("");
+    setSelectedFile(null);
   }
 
   function handleFileChange(event) {
@@ -97,15 +114,17 @@ export default function EditProfilePage() {
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
+    if (file.size > 10 * 1024 * 1024) {
       setError(
         isID
-          ? "Ukuran foto maksimal 2 MB."
-          : "Maximum photo size is 2 MB."
+          ? "Ukuran foto maksimal 10 MB."
+          : "Maximum photo size is 10 MB."
       );
       event.target.value = "";
       return;
     }
+
+    clearPreview();
 
     setSelectedFile(file);
     setPreview(URL.createObjectURL(file));
@@ -156,7 +175,9 @@ export default function EditProfilePage() {
 
       if (!user) {
         throw new Error(
-          isID ? "Sesi login berakhir." : "Your session has expired."
+          isID
+            ? "Sesi login berakhir."
+            : "Your session has expired."
         );
       }
 
@@ -215,7 +236,7 @@ export default function EditProfilePage() {
 
       if (updateError) throw updateError;
 
-      // Delete old photo only after profile update succeeds
+      // Delete old photo after successful update
       if (
         avatarPath &&
         avatarPath !== newAvatarPath
@@ -229,8 +250,8 @@ export default function EditProfilePage() {
       setAvatarPath(newAvatarPath || "");
       setNickname(cleanNickname);
       setServerNumber(String(cleanServer));
-      setSelectedFile(null);
-      setPreview("");
+
+      clearPreview();
       setRemoveAvatar(false);
 
       setMessage(
@@ -318,16 +339,15 @@ export default function EditProfilePage() {
               </label>
 
               <p className="text-xs text-gray-500">
-                JPG, PNG, WEBP · Max 2 MB
+                JPG, PNG, WEBP · Max 10 MB
               </p>
 
               {(avatarUrl || selectedFile) && !removeAvatar && (
                 <button
                   type="button"
                   onClick={() => {
+                    clearPreview();
                     setRemoveAvatar(true);
-                    setSelectedFile(null);
-                    setPreview("");
                     setMessage("");
                   }}
                   className="text-xs text-red-400 hover:text-red-300"
