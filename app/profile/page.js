@@ -15,6 +15,7 @@ const translations = {
     nickname: "Nickname",
     server: "Server",
     joined: "Joined",
+    edit: "EDIT PROFILE",
     play: "PLAY TODAY'S RIDDLE",
     retry: "TRY AGAIN",
     error: "Unable to load profile.",
@@ -27,6 +28,7 @@ const translations = {
     nickname: "Nama Pemain",
     server: "Server",
     joined: "Bergabung",
+    edit: "EDIT PROFIL",
     play: "MAINKAN TEKA-TEKI HARI INI",
     retry: "COBA LAGI",
     error: "Tidak dapat memuat profil.",
@@ -60,7 +62,7 @@ export default function ProfilePage() {
 
         const { data, error: playerError } = await supabase
           .from("players")
-          .select("nickname, server_number, created_at")
+          .select("nickname, server_number, created_at, avatar_url")
           .eq("auth_user_id", session.user.id)
           .maybeSingle();
 
@@ -134,10 +136,19 @@ export default function ProfilePage() {
 
         <div className="mt-8 rounded-2xl border border-purple-500/30 bg-[#151020] p-6">
 
-          <div className="w-20 h-20 rounded-full bg-purple-600/20 border border-purple-400/40 flex items-center justify-center mx-auto">
-            <span className="text-3xl font-black text-purple-300">
-              {player.nickname.charAt(0).toUpperCase()}
-            </span>
+          {/* Profile Avatar */}
+          <div className="w-28 h-28 rounded-full overflow-hidden bg-purple-600/20 border-2 border-purple-400/50 flex items-center justify-center mx-auto">
+            {player.avatar_url ? (
+              <img
+                src={player.avatar_url}
+                alt={player.nickname}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-4xl font-black text-purple-300">
+                {player.nickname.charAt(0).toUpperCase()}
+              </span>
+            )}
           </div>
 
           <h2 className="text-2xl font-bold text-center mt-4">
@@ -147,6 +158,14 @@ export default function ProfilePage() {
           <p className="text-purple-300 text-sm text-center mt-1">
             Server {player.server_number}
           </p>
+
+          {/* Edit Profile Button */}
+          <Link
+            href="/profile/edit"
+            className="block text-center mt-5 w-full rounded-xl border border-purple-400/40 bg-purple-500/10 hover:bg-purple-500/20 py-3 text-purple-200 font-bold tracking-wider transition"
+          >
+            ✎ {t.edit}
+          </Link>
 
           <div className="border-t border-purple-500/20 mt-6 pt-5 space-y-4">
 
