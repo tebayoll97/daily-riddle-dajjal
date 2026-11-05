@@ -4,31 +4,23 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 export async function GET() {
   try {
     const { data, error } = await supabaseAdmin
-      .from("scores")
-      .select(`
-        score,
-        attempts,
-        completed_at,
-        players!inner (
-          id,
-          nickname,
-          server_number
-        )
-      `)
-      .not("completed_at", "is", null)
-      .order("score", { ascending: false })
-      .order("completed_at", { ascending: true })
+      .from("global_leaderboard")
+      .select("*")
+      .order("total_points", { ascending: false })
+      .order("riddles_solved", { ascending: false })
+      .order("last_completed_at", { ascending: true })
       .limit(100);
 
     if (error) throw error;
 
-    const ranking = (data || []).map((item) => ({
-      player_id: item.players.id,
-      nickname: item.players.nickname,
-      server_number: item.players.server_number,
-      score: item.score,
-      attempts: item.attempts,
-      completed_at: item.completed_at,
+    const ranking = (data || []).map((player, index) => ({
+      rank: index + 1,
+      player_id: player.player_id,
+      nickname: player.nickname,
+      server_number: player.server_number,
+      total_points: player.total_points,
+      riddles_solved: player.riddles_solved,
+      last_completed_at: player.last_completed_at,
     }));
 
     return Response.json({
