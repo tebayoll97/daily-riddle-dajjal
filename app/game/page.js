@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import GameCharacter from "@/lib/GameCharacter";
 import { useLanguage } from "../components/LanguageProvider";
 
 const translations = {
@@ -184,8 +185,6 @@ export default function GamePage() {
 
   const finished = correct || attemptsLeft <= 0;
 
-  // Poin potensial untuk jawaban berikutnya.
-  // 3 kesempatan = 100, 2 = 70, 1 = 40, 0 = 0.
   const potentialPoints = riddle
     ? attemptsLeft > 0
       ? Math.round(
@@ -193,6 +192,63 @@ export default function GamePage() {
         )
       : 0
     : 0;
+
+  // Reaksi karakter ditentukan dari status permainan.
+  let characterReaction = {
+    character: "dajjal",
+    expression: "neutral",
+    animation: "idle",
+  };
+
+  if (submitting) {
+    characterReaction = {
+      character: "veylora",
+      expression: "thinking",
+      animation: "think",
+    };
+  } else if (feedback?.type === "success") {
+    characterReaction = {
+      character: "veylora",
+      expression: "happy",
+      animation: "bounce",
+    };
+  } else if (feedback?.type === "failed") {
+    characterReaction = {
+      character: "child",
+      expression: "sad",
+      animation: "float",
+    };
+  } else if (feedback?.type === "wrong" && attemptsLeft === 1) {
+    characterReaction = {
+      character: "dajjal",
+      expression: "surprised",
+      animation: "pop",
+    };
+  } else if (feedback?.type === "wrong") {
+    characterReaction = {
+      character: "dajjal",
+      expression: "smug",
+      animation: "pulse",
+    };
+  } else if (feedback?.type === "error") {
+    characterReaction = {
+      character: "veylora",
+      expression: "surprised",
+      animation: "pop",
+    };
+  } else if (finished && correct) {
+    characterReaction = {
+      character: "veylora",
+      expression: "happy",
+      animation: "bounce",
+    };
+  } else if (finished) {
+    characterReaction = {
+      character: "child",
+      expression: "sad",
+      animation: "float",
+    };
+  }
 
   useEffect(() => {
     let active = true;
@@ -448,20 +504,11 @@ export default function GamePage() {
     ? feedbackContent[feedback.type]
     : null;
 
-  const confettiPieces = Array.from(
-    { length: 22 },
-    (_, index) => index
-  );
-
   return (
     <main className="relative min-h-[70vh] overflow-hidden bg-[#080711] text-white px-4 py-8 sm:px-5 sm:py-10">
-
-      {/* Background glow */}
       <div className="absolute top-20 left-1/2 -translate-x-1/2 w-72 h-72 bg-purple-600/10 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="relative z-10 max-w-xl mx-auto">
-
-        {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-purple-400 text-[10px] sm:text-xs tracking-[0.3em] font-bold">
@@ -481,7 +528,6 @@ export default function GamePage() {
             </p>
           </div>
 
-          {/* Sound toggle */}
           <button
             type="button"
             onClick={() => setSoundEnabled((value) => !value)}
@@ -504,11 +550,15 @@ export default function GamePage() {
         {/* FINAL RESULT */}
         {finished ? (
           <div className="relative mt-8 overflow-hidden border border-purple-500/30 rounded-3xl bg-gradient-to-b from-[#211536] to-[#100d19] p-6 sm:p-9 text-center shadow-[0_15px_60px_rgba(88,28,135,0.12)]">
-
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-px bg-purple-400/70" />
 
-            <div className="text-6xl mb-5">
-              {correct ? "🏆" : "🌙"}
+            <div className="flex justify-center mb-3">
+              <GameCharacter
+                character={characterReaction.character}
+                expression={characterReaction.expression}
+                animation={characterReaction.animation}
+                size={170}
+              />
             </div>
 
             <p className="text-purple-400 text-[10px] tracking-[0.3em] font-bold">
@@ -544,14 +594,8 @@ export default function GamePage() {
             </div>
 
             <div className="mt-6 border-t border-purple-500/20 pt-5">
-              <p className="text-gray-500 text-xs">
-                {t.player}
-              </p>
-
-              <p className="font-bold mt-1">
-                {player.nickname}
-              </p>
-
+              <p className="text-gray-500 text-xs">{t.player}</p>
+              <p className="font-bold mt-1">{player.nickname}</p>
               <p className="text-gray-500 text-xs mt-1">
                 {t.server} {player.server_number}
               </p>
@@ -561,7 +605,6 @@ export default function GamePage() {
               <p className="text-yellow-400 font-bold text-sm tracking-wider">
                 {t.comeBack}
               </p>
-
               <p className="text-gray-400 text-xs mt-2">
                 {t.newMystery}
               </p>
@@ -575,10 +618,8 @@ export default function GamePage() {
             </Link>
           </div>
         ) : (
-          /* ACTIVE QUIZ */
           <>
             <div className="mt-8 border border-purple-500/30 rounded-3xl p-6 sm:p-8 bg-gradient-to-b from-[#1c142b] to-[#100d19] shadow-[0_15px_60px_rgba(88,28,135,0.10)]">
-
               <div className="flex items-center justify-between gap-3">
                 <p className="text-purple-400 text-[10px] tracking-[0.25em] font-bold">
                   {t.todayMystery}
@@ -589,7 +630,36 @@ export default function GamePage() {
                 </span>
               </div>
 
-              <div className="w-16 h-16 mx-auto mt-6 mb-5 rounded-2xl border border-purple-400/20 bg-purple-500/10 flex items-center justify-center shadow-[0_0_35px_rgba(168,85,247,0.10)]">
+              {/* CHARACTER */}
+              <div className="flex flex-col items-center mt-3 mb-2">
+                <GameCharacter
+                  character={characterReaction.character}
+                  expression={characterReaction.expression}
+                  animation={characterReaction.animation}
+                  size={145}
+                />
+
+                <p className="text-purple-300 text-[10px] tracking-widest font-bold mt-1">
+                  {submitting
+                    ? language === "id"
+                      ? "VEY LORA SEDANG BERPIKIR..."
+                      : "VEY LORA IS THINKING..."
+                    : feedback?.type === "success"
+                      ? language === "id"
+                        ? "HEBAT! JAWABAN BENAR"
+                        : "BRILLIANT! CORRECT ANSWER"
+                      : feedback?.type === "wrong"
+                        ? language === "id"
+                          ? "COBA LAGI!"
+                          : "TRY AGAIN!"
+                        : language === "id"
+                          ? "SIAP MENGHADAPI TANTANGAN?"
+                          : "READY FOR THE CHALLENGE?"
+                  }
+                </p>
+              </div>
+
+              <div className="w-16 h-16 mx-auto mt-3 mb-5 rounded-2xl border border-purple-400/20 bg-purple-500/10 flex items-center justify-center shadow-[0_0_35px_rgba(168,85,247,0.10)]">
                 <span className="text-4xl">🔮</span>
               </div>
 
@@ -608,14 +678,12 @@ export default function GamePage() {
                   <p className="text-yellow-400 text-[10px] tracking-[0.2em] font-bold">
                     ✦ {t.hint}
                   </p>
-
                   <p className="text-gray-300 text-sm mt-2 leading-relaxed">
                     {hint}
                   </p>
                 </div>
               )}
 
-              {/* Attempts and potential points */}
               <div className="flex items-center justify-between gap-3 mt-7">
                 <div>
                   <p className="text-gray-500 text-[10px]">
@@ -640,14 +708,12 @@ export default function GamePage() {
                   <p className="text-gray-500 text-[10px]">
                     {t.points}
                   </p>
-
-                  <p className="text-purple-300 font-black text-lg transition-all">
+                  <p className="text-purple-300 font-black text-lg">
                     {potentialPoints}
                   </p>
                 </div>
               </div>
 
-              {/* Answer form */}
               <form onSubmit={handleAnswer} className="mt-7">
                 <input
                   value={answer}
@@ -689,7 +755,6 @@ export default function GamePage() {
             aria-labelledby="answer-feedback-title"
             className={`relative w-full max-w-sm overflow-hidden rounded-3xl border ${currentFeedback.border} bg-[#151020] p-7 sm:p-8 text-center shadow-[0_20px_90px_rgba(0,0,0,0.7)] animate-in fade-in zoom-in-95 duration-200`}
           >
-            {/* Confetti on success */}
             {feedback.type === "success" && (
               <>
                 <style jsx>{`
@@ -698,9 +763,7 @@ export default function GamePage() {
                       transform: translateY(-30px) rotate(0deg);
                       opacity: 0;
                     }
-                    15% {
-                      opacity: 1;
-                    }
+                    15% { opacity: 1; }
                     100% {
                       transform: translateY(360px) rotate(720deg);
                       opacity: 0;
@@ -744,13 +807,22 @@ export default function GamePage() {
               </>
             )}
 
-            <div className={`relative z-10 w-20 h-20 mx-auto rounded-full ${currentFeedback.background} border ${currentFeedback.border} flex items-center justify-center`}>
-              <span className={`text-4xl ${currentFeedback.color}`}>
+            <div className="relative z-10 flex justify-center mb-2">
+              <GameCharacter
+                character={characterReaction.character}
+                expression={characterReaction.expression}
+                animation={characterReaction.animation}
+                size={145}
+              />
+            </div>
+
+            <div className={`relative z-10 w-16 h-16 mx-auto rounded-full ${currentFeedback.background} border ${currentFeedback.border} flex items-center justify-center`}>
+              <span className={`text-3xl ${currentFeedback.color}`}>
                 {currentFeedback.icon}
               </span>
             </div>
 
-            <p className="relative z-10 text-[10px] text-purple-400 tracking-[0.3em] font-bold mt-6">
+            <p className="relative z-10 text-[10px] text-purple-400 tracking-[0.3em] font-bold mt-5">
               THE DAILY RIDDLE
             </p>
 
@@ -770,11 +842,9 @@ export default function GamePage() {
                 <p className="text-yellow-400 text-[10px] tracking-widest font-bold">
                   {t.scoreLabel}
                 </p>
-
                 <p className="text-4xl font-black text-yellow-300 mt-2">
                   +{feedback.points}
                 </p>
-
                 <p className="text-yellow-500/70 text-xs mt-1">
                   {t.points}
                 </p>
@@ -786,7 +856,6 @@ export default function GamePage() {
                 <p className="text-gray-500 text-[10px] tracking-widest">
                   {t.remaining}
                 </p>
-
                 <p className="text-2xl font-black text-purple-300 mt-2">
                   {feedback.attemptsLeft}/3
                 </p>
