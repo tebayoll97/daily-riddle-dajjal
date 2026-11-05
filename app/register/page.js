@@ -21,8 +21,6 @@ const translations = {
     invalidServer: "Please enter a valid server number.",
     failed: "Registration failed. Please try again.",
     checking: "Checking your account...",
-    alreadyRegistered: "You already have a player profile.",
-    continue: "CONTINUE TO PROFILE",
     adminBlocked: "Administrator accounts cannot register as players.",
     accountError: "Unable to verify your account. Please try again.",
     googleLogin: "CONTINUE WITH GOOGLE",
@@ -40,6 +38,8 @@ const translations = {
     duplicate: "A player profile already exists. Redirecting to your profile...",
     googleOnly:
       "Please use a Google account to create this player profile.",
+    activeSession:
+      "You already have an active account session. Please use that account or sign out first.",
   },
   id: {
     registration: "PENDAFTARAN PEMAIN",
@@ -55,8 +55,6 @@ const translations = {
     invalidServer: "Silakan masukkan nomor server yang valid.",
     failed: "Pendaftaran gagal. Silakan coba lagi.",
     checking: "Memeriksa akun...",
-    alreadyRegistered: "Kamu sudah memiliki profil pemain.",
-    continue: "LANJUT KE PROFIL",
     adminBlocked: "Akun administrator tidak dapat mendaftar sebagai pemain.",
     accountError: "Tidak dapat memeriksa akun. Silakan coba lagi.",
     googleLogin: "LANJUTKAN DENGAN GOOGLE",
@@ -74,6 +72,8 @@ const translations = {
     duplicate: "Profil pemain sudah tersedia. Mengarahkan ke profil...",
     googleOnly:
       "Gunakan akun Google untuk membuat profil pemain ini.",
+    activeSession:
+      "Kamu masih memiliki sesi akun aktif. Silakan gunakan akun tersebut atau logout terlebih dahulu.",
   },
 };
 
@@ -101,7 +101,6 @@ export default function RegisterPage() {
   const [checking, setChecking] = useState(true);
 
   const [error, setError] = useState("");
-  const [existingProfile, setExistingProfile] = useState(false);
   const [blocked, setBlocked] = useState(false);
 
   const [canGoogleLogin, setCanGoogleLogin] = useState(false);
@@ -130,7 +129,7 @@ export default function RegisterPage() {
 
         const user = session.user;
 
-        // Administrator sessions cannot register as players.
+        // Administrator accounts cannot register as players.
         const adminResponse = await fetch("/api/admin/me", {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
@@ -154,7 +153,7 @@ export default function RegisterPage() {
           throw new Error(t.accountError);
         }
 
-        // Find an existing player profile by the exact Auth user ID.
+        // Find an existing profile using the exact Auth user ID.
         const { data: player, error: playerError } =
           await supabase
             .from("players")
@@ -165,12 +164,15 @@ export default function RegisterPage() {
         if (playerError) throw playerError;
 
         if (player) {
-          if (active) setExistingProfile(true);
+          // Existing player: go directly to their profile.
+          if (active) {
+            router.replace("/profile");
+          }
           return;
         }
 
         if (user.is_anonymous) {
-          // New Guest account can use the normal registration form.
+          // New Guest account: show the Guest registration form.
           if (active) setChecking(false);
           return;
         }
@@ -184,8 +186,7 @@ export default function RegisterPage() {
           return;
         }
 
-        // Other authenticated accounts are not allowed to create
-        // a player profile through this Google registration flow.
+        // Other authenticated accounts are not allowed here.
         if (active) {
           setBlocked(true);
           setError(t.accountError);
@@ -207,7 +208,7 @@ export default function RegisterPage() {
     return () => {
       active = false;
     };
-  }, [t.adminBlocked, t.accountError]);
+  }, [router, t.adminBlocked, t.accountError]);
 
   async function handleGoogleLogin() {
     if (googleLoading) return;
@@ -225,11 +226,7 @@ export default function RegisterPage() {
 
       // Never replace an active Guest or Player session.
       if (session) {
-        throw new Error(
-          language === "id"
-            ? "Kamu masih memiliki sesi akun aktif. Silakan gunakan akun tersebut atau logout terlebih dahulu."
-            : "You already have an active account session. Please use that account or sign out first."
-        );
+        throw new Error(t.activeSession);
       }
 
       const { error: oauthError } =
@@ -316,7 +313,7 @@ export default function RegisterPage() {
           throw new Error(t.googleOnly);
         }
 
-        // Check again before inserting to prevent duplicate profiles.
+        // Check again before inserting to prevent duplicates.
         const { data: existingPlayer, error: lookupError } =
           await supabase
             .from("players")
@@ -331,7 +328,7 @@ export default function RegisterPage() {
           return;
         }
       } else {
-        // Create a Guest identity only when there is no active session.
+        // Create a Guest identity only when no session exists.
         const { data, error: authError } =
           await supabase.auth.signInAnonymously();
 
@@ -353,8 +350,7 @@ export default function RegisterPage() {
         });
 
       if (insertError) {
-        // If another request created the profile at the same time,
-        // do not create a second profile.
+        // Handle a duplicate created by another request.
         const { data: duplicatePlayer } = await supabase
           .from("players")
           .select("id")
@@ -382,25 +378,6 @@ export default function RegisterPage() {
     return (
       <main className="min-h-screen bg-[#080711] text-white flex items-center justify-center p-6">
         <p className="text-purple-300">{t.checking}</p>
-      </main>
-    );
-  }
-
-  if (existingProfile) {
-    return (
-      <main className="min-h-screen bg-[#080711] text-white flex items-center justify-center p-6">
-        <div className="w-full max-w-md bg-[#151020] border border-purple-500/30 rounded-2xl p-8 text-center">
-          <h1 className="text-2xl font-black">
-            {t.alreadyRegistered}
-          </h1>
-
-          <button
-            onClick={() => router.replace("/profile")}
-            className="w-full mt-6 bg-purple-600 hover:bg-purple-500 rounded-xl py-4 font-bold"
-          >
-            {t.continue}
-          </button>
-        </div>
       </main>
     );
   }
