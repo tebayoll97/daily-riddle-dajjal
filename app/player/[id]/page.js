@@ -4,10 +4,53 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { useLanguage } from "../../components/LanguageProvider";
+
+const translations = {
+  en: {
+    loading: "Loading player profile...",
+    notFound: "PLAYER NOT FOUND",
+    unavailable: "This player profile is unavailable.",
+    back: "BACK TO RANKING",
+    title: "PLAYER PROFILE",
+    description: "Discover the riddle challenger's journey.",
+    totalPoints: "TOTAL POINTS",
+    solved: "RIDDLES SOLVED",
+    nickname: "Nickname",
+    server: "Server",
+    joined: "Joined",
+    lastCompleted: "Last Completed",
+    backGlobal: "← BACK TO GLOBAL RANKING",
+    error: "Unable to load player profile.",
+    genericError: "Something went wrong.",
+    dateLocale: "en-US",
+  },
+  id: {
+    loading: "Memuat profil pemain...",
+    notFound: "PEMAIN TIDAK DITEMUKAN",
+    unavailable: "Profil pemain ini tidak tersedia.",
+    back: "KEMBALI KE PERINGKAT",
+    title: "PROFIL PEMAIN",
+    description: "Lihat perjalanan pemain dalam tantangan teka-teki.",
+    totalPoints: "TOTAL POIN",
+    solved: "TEKA-TEKI SELESAI",
+    nickname: "Nama Pemain",
+    server: "Server",
+    joined: "Bergabung",
+    lastCompleted: "Terakhir Diselesaikan",
+    backGlobal: "← KEMBALI KE PERINGKAT GLOBAL",
+    error: "Tidak dapat memuat profil pemain.",
+    genericError: "Terjadi kesalahan.",
+    dateLocale: "id-ID",
+  },
+};
 
 export default function PublicPlayerProfile() {
   const params = useParams();
   const playerId = params.id;
+
+  const { language } = useLanguage();
+  const t = translations[language] || translations.en;
 
   const [player, setPlayer] = useState(null);
   const [stats, setStats] = useState(null);
@@ -28,9 +71,7 @@ export default function PublicPlayerProfile() {
         const result = await response.json();
 
         if (!response.ok) {
-          throw new Error(
-            result.error || "Unable to load player profile."
-          );
+          throw new Error(result.error || t.error);
         }
 
         setPlayer(result.player);
@@ -38,7 +79,7 @@ export default function PublicPlayerProfile() {
 
       } catch (err) {
         console.error(err);
-        setError(err.message || "Something went wrong.");
+        setError(err.message || t.genericError);
       } finally {
         setLoading(false);
       }
@@ -52,7 +93,7 @@ export default function PublicPlayerProfile() {
   if (loading) {
     return (
       <main className="min-h-[70vh] flex items-center justify-center bg-[#080711] text-purple-300">
-        Loading player profile...
+        {t.loading}
       </main>
     );
   }
@@ -60,25 +101,30 @@ export default function PublicPlayerProfile() {
   if (error || !player || !stats) {
     return (
       <main className="min-h-[70vh] bg-[#080711] text-white flex flex-col items-center justify-center px-5 text-center">
+
         <div className="text-5xl">👤</div>
+
         <h1 className="text-2xl font-black mt-5">
-          PLAYER NOT FOUND
+          {t.notFound}
         </h1>
+
         <p className="text-gray-400 text-sm mt-3">
-          {error || "This player profile is unavailable."}
+          {error || t.unavailable}
         </p>
+
         <Link
           href="/leaderboard"
           className="mt-6 bg-purple-600 hover:bg-purple-500 px-6 py-3 rounded-xl font-bold"
         >
-          BACK TO RANKING
+          {t.back}
         </Link>
+
       </main>
     );
   }
 
   const joinedDate = player.created_at
-    ? new Date(player.created_at).toLocaleDateString("en-US", {
+    ? new Date(player.created_at).toLocaleDateString(t.dateLocale, {
         day: "numeric",
         month: "long",
         year: "numeric",
@@ -86,7 +132,7 @@ export default function PublicPlayerProfile() {
     : "-";
 
   const lastPlayed = stats.last_completed_at
-    ? new Date(stats.last_completed_at).toLocaleDateString("en-US", {
+    ? new Date(stats.last_completed_at).toLocaleDateString(t.dateLocale, {
         day: "numeric",
         month: "long",
         year: "numeric",
@@ -98,15 +144,19 @@ export default function PublicPlayerProfile() {
       <div className="max-w-xl mx-auto">
 
         <div className="text-center">
+
           <p className="text-purple-400 text-xs tracking-[0.3em]">
             THE DAILY RIDDLE
           </p>
+
           <h1 className="text-3xl font-black mt-3">
-            PLAYER PROFILE
+            {t.title}
           </h1>
+
           <p className="text-gray-500 text-sm mt-2">
-            Discover the riddle challenger's journey.
+            {t.description}
           </p>
+
         </div>
 
         <div className="mt-10 rounded-2xl border border-purple-500/30 bg-[#151020] p-6">
@@ -131,8 +181,9 @@ export default function PublicPlayerProfile() {
               <p className="text-2xl font-black text-yellow-400">
                 {Number(stats.total_points).toLocaleString()}
               </p>
+
               <p className="text-gray-500 text-xs mt-2">
-                TOTAL POINTS
+                {t.totalPoints}
               </p>
             </div>
 
@@ -140,8 +191,9 @@ export default function PublicPlayerProfile() {
               <p className="text-2xl font-black text-purple-300">
                 {stats.riddles_solved}
               </p>
+
               <p className="text-gray-500 text-xs mt-2">
-                RIDDLES SOLVED
+                {t.solved}
               </p>
             </div>
 
@@ -150,28 +202,28 @@ export default function PublicPlayerProfile() {
           <div className="border-t border-purple-500/20 mt-6 pt-5 space-y-4">
 
             <div className="flex justify-between gap-4 text-sm">
-              <span className="text-gray-400">Nickname</span>
+              <span className="text-gray-400">{t.nickname}</span>
               <span className="font-semibold text-right break-all">
                 {player.nickname}
               </span>
             </div>
 
             <div className="flex justify-between gap-4 text-sm">
-              <span className="text-gray-400">Server</span>
+              <span className="text-gray-400">{t.server}</span>
               <span className="font-semibold">
                 {player.server_number}
               </span>
             </div>
 
             <div className="flex justify-between gap-4 text-sm">
-              <span className="text-gray-400">Joined</span>
+              <span className="text-gray-400">{t.joined}</span>
               <span className="font-semibold text-right">
                 {joinedDate}
               </span>
             </div>
 
             <div className="flex justify-between gap-4 text-sm">
-              <span className="text-gray-400">Last Completed</span>
+              <span className="text-gray-400">{t.lastCompleted}</span>
               <span className="font-semibold text-right">
                 {lastPlayed}
               </span>
@@ -184,7 +236,7 @@ export default function PublicPlayerProfile() {
           href="/leaderboard"
           className="block text-center mt-6 w-full rounded-xl border border-purple-500/30 hover:bg-purple-500/10 py-4 font-bold tracking-wider transition"
         >
-          ← BACK TO GLOBAL RANKING
+          {t.backGlobal}
         </Link>
 
       </div>
