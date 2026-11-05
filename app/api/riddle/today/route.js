@@ -40,7 +40,6 @@ export async function GET(request) {
       );
     }
 
-    // Get today's date using WIB
     const dateParts = new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Jakarta",
       year: "numeric",
@@ -52,14 +51,22 @@ export async function GET(request) {
       dateParts.map((part) => [part.type, part.value])
     );
 
-    const today =
-      `${dateMap.year}-${dateMap.month}-${dateMap.day}`;
+    const today = `${dateMap.year}-${dateMap.month}-${dateMap.day}`;
 
-    // Get today's riddle
     const { data: riddle, error: riddleError } =
       await supabaseAdmin
         .from("riddles")
-        .select("id, riddle_date, question, hint, points")
+        .select(`
+          id,
+          riddle_date,
+          question,
+          hint,
+          question_en,
+          question_id,
+          hint_en,
+          hint_id,
+          points
+        `)
         .eq("riddle_date", today)
         .eq("is_active", true)
         .maybeSingle();
@@ -73,7 +80,6 @@ export async function GET(request) {
       );
     }
 
-    // Get player's saved progress
     const { data: previousScore, error: scoreError } =
       await supabaseAdmin
         .from("scores")
@@ -90,12 +96,20 @@ export async function GET(request) {
 
     return Response.json({
       player,
-      riddle,
+      riddle: {
+        id: riddle.id,
+        riddle_date: riddle.riddle_date,
+        question: riddle.question_en || riddle.question,
+        hint: riddle.hint_en || riddle.hint,
+        question_en: riddle.question_en || riddle.question,
+        question_id: riddle.question_id || riddle.question,
+        hint_en: riddle.hint_en || riddle.hint,
+        hint_id: riddle.hint_id || riddle.hint,
+        points: riddle.points,
+      },
       progress: {
         attempts,
-        attemptsLeft: finished
-          ? 0
-          : Math.max(0, 3 - attempts),
+        attemptsLeft: finished ? 0 : Math.max(0, 3 - attempts),
         score: previousScore?.score || 0,
         completed: solved,
         finished,
