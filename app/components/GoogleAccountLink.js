@@ -3,8 +3,51 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useLanguage } from "./LanguageProvider";
+
+const translations = {
+  en: {
+    checking: "Checking account...",
+    title: "ACCOUNT SECURITY",
+    description:
+      "Secure your game progress by connecting your Google account.",
+    connected: "GOOGLE ACCOUNT CONNECTED",
+    connectedDescription:
+      "Your game identity is now linked to Google.",
+    guest: "GUEST ACCOUNT",
+    guestDescription:
+      "Your account is not protected by Google yet.",
+    connect: "CONTINUE WITH GOOGLE",
+    connecting: "CONNECTING...",
+    alreadyConnected: "Your account is already registered.",
+    failed: "Unable to connect your Google account.",
+    expired:
+      "Your session has expired. Please register or log in again.",
+  },
+  id: {
+    checking: "Memeriksa akun...",
+    title: "KEAMANAN AKUN",
+    description:
+      "Amankan progres permainan dengan menghubungkan akun Google.",
+    connected: "AKUN GOOGLE TERHUBUNG",
+    connectedDescription:
+      "Identitas permainanmu sekarang sudah terhubung dengan Google.",
+    guest: "AKUN TAMU",
+    guestDescription:
+      "Akunmu belum diamankan dengan Google.",
+    connect: "HUBUNGKAN DENGAN GOOGLE",
+    connecting: "MENGHUBUNGKAN...",
+    alreadyConnected: "Akunmu sudah terdaftar.",
+    failed: "Tidak dapat menghubungkan akun Google.",
+    expired:
+      "Sesi akunmu sudah berakhir. Silakan daftar atau login kembali.",
+  },
+};
 
 export default function GoogleAccountLink() {
+  const { language } = useLanguage();
+  const t = translations[language] || translations.en;
+
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [connected, setConnected] = useState(false);
@@ -15,40 +58,45 @@ export default function GoogleAccountLink() {
     let active = true;
 
     async function checkAccount() {
-      const { data, error } = await supabase.auth.getUser();
+      try {
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser();
 
-      if (error || !data.user) {
+        if (error) throw error;
+
+        if (!user) {
+          throw new Error(t.expired);
+        }
+
+        const hasGoogle = user.identities?.some(
+          (identity) => identity.provider === "google"
+        );
+
+        if (active) {
+          setConnected(Boolean(hasGoogle));
+          setIsGuest(Boolean(user.is_anonymous));
+        }
+      } catch (error) {
+        console.error("Google account check:", error);
+
+        if (active) {
+          setMessage(error.message || t.failed);
+        }
+      } finally {
         if (active) {
           setChecking(false);
         }
-        return;
-      }
-
-      const user = data.user;
-      const hasGoogle = user.identities?.some(
-        (identity) => identity.provider === "google"
-      );
-
-      if (active) {
-        setConnected(Boolean(hasGoogle));
-        setIsGuest(Boolean(user.is_anonymous));
-        setChecking(false);
       }
     }
 
     checkAccount();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      checkAccount();
-    });
-
     return () => {
       active = false;
-      subscription.unsubscribe();
     };
-  }, []);
+  }, [t.expired, t.failed]);
 
   async function connectGoogle() {
     setLoading(true);
@@ -60,14 +108,16 @@ export default function GoogleAccountLink() {
         error: sessionError,
       } = await supabase.auth.getSession();
 
-      if (sessionError || !session) {
-        throw new Error("Your session has expired. Please log in again.");
+      if (sessionError) throw sessionError;
+
+      if (!session) {
+        throw new Error(t.expired);
       }
 
       if (!session.user.is_anonymous) {
         setConnected(true);
         setIsGuest(false);
-        setMessage("Your account is already registered.");
+        setMessage(t.alreadyConnected);
         setLoading(false);
         return;
       }
@@ -83,14 +133,14 @@ export default function GoogleAccountLink() {
         },
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
+
+      // OAuth redirects the browser to Google.
+      // The profile page will check the linked identity after return.
     } catch (error) {
       console.error("Google linking error:", error);
-      setMessage(
-        error.message || "Unable to connect your Google account."
-      );
+
+      setMessage(error.message || t.failed);
       setLoading(false);
     }
   }
@@ -99,7 +149,7 @@ export default function GoogleAccountLink() {
     return (
       <div className="rounded-xl border border-purple-500/20 bg-white/5 p-4">
         <p className="text-sm text-gray-400">
-          Checking account status...
+          {t.checking}
         </p>
       </div>
     );
@@ -107,37 +157,50 @@ export default function GoogleAccountLink() {
 
   return (
     <div className="rounded-xl border border-purple-500/20 bg-white/5 p-4 space-y-3">
+
       <div>
         <h3 className="font-bold text-white">
-          Account Security
+          {t.title}
         </h3>
+
         <p className="mt-1 text-sm text-gray-400">
-          Secure your game progress by connecting your Google account.
+          {t.description}
         </p>
       </div>
 
       {connected ? (
         <div className="rounded-lg bg-green-500/10 border border-green-500/20 p-3">
           <p className="text-sm font-semibold text-green-400">
-            ✓ Google account connected
+            ✓ {t.connected}
           </p>
+
           <p className="mt-1 text-xs text-gray-400">
-            Your game identity is now linked to Google.
+            {t.connectedDescription}
           </p>
         </div>
       ) : isGuest ? (
-        <button
-          onClick={connectGoogle}
-          disabled={loading}
-          className="w-full rounded-lg bg-white px-4 py-3 text-sm font-bold text-gray-900 hover:bg-gray-200 disabled:opacity-50 transition"
-        >
-          {loading
-            ? "Connecting..."
-            : "Continue with Google"}
-        </button>
+        <>
+          <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3">
+            <p className="text-sm font-semibold text-amber-300">
+              ⚠ {t.guest}
+            </p>
+
+            <p className="mt-1 text-xs text-gray-400">
+              {t.guestDescription}
+            </p>
+          </div>
+
+          <button
+            onClick={connectGoogle}
+            disabled={loading}
+            className="w-full rounded-lg bg-white px-4 py-3 text-sm font-bold text-gray-900 hover:bg-gray-200 disabled:opacity-50 transition"
+          >
+            {loading ? t.connecting : t.connect}
+          </button>
+        </>
       ) : (
         <p className="text-sm text-gray-400">
-          Your account is not anonymous.
+          {t.alreadyConnected}
         </p>
       )}
 
@@ -147,12 +210,6 @@ export default function GoogleAccountLink() {
         </p>
       )}
 
-      {isGuest && !connected && (
-        <p className="text-xs text-gray-500">
-          Your existing nickname, avatar and game progress
-          will remain connected to this account.
-        </p>
-      )}
     </div>
   );
 }
