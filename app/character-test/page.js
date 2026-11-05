@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import GameCharacter from "@/lib/GameCharacter";
+import { getCharacterReaction } from "@/lib/characterReactions";
 
 const characters = [
   { id: "dajjal", name: "Dajjal", color: "#ff623e" },
@@ -30,6 +31,18 @@ const animations = [
   "pop",
   "pulse",
   "sleep",
+  "think",
+];
+
+const reactionEvents = [
+  { id: "gameStart", label: "Game Dimulai", icon: "🎮" },
+  { id: "checking", label: "Memeriksa", icon: "🔍" },
+  { id: "correct", label: "Jawaban Benar", icon: "🎉" },
+  { id: "wrong", label: "Jawaban Salah", icon: "❌" },
+  { id: "lastChance", label: "Kesempatan Terakhir", icon: "⚠️" },
+  { id: "completed", label: "Game Selesai", icon: "🏆" },
+  { id: "failed", label: "Gagal", icon: "😢" },
+  { id: "waiting", label: "Menunggu", icon: "💤" },
 ];
 
 export default function CharacterTestPage() {
@@ -37,20 +50,41 @@ export default function CharacterTestPage() {
   const [expression, setExpression] = useState("neutral");
   const [animation, setAnimation] = useState("idle");
   const [size, setSize] = useState(180);
+  const [message, setMessage] = useState("Pilih reaksi untuk memulai.");
+  const [activeReaction, setActiveReaction] = useState("");
 
   const currentCharacter =
     characters.find((item) => item.id === character);
+
+  function applyReaction(event) {
+    const reaction = getCharacterReaction(event);
+
+    setCharacter(reaction.character);
+    setExpression(reaction.expression);
+    setAnimation(reaction.animation);
+    setMessage(reaction.message);
+    setActiveReaction(event);
+  }
+
+  function resetCharacter() {
+    setCharacter("dajjal");
+    setExpression("neutral");
+    setAnimation("idle");
+    setSize(180);
+    setMessage("Pilih reaksi untuk memulai.");
+    setActiveReaction("");
+  }
 
   return (
     <main className="lab">
       <header className="header">
         <div className="brand">DAJJAL & VEYLORA</div>
         <h1>CHARACTER LAB</h1>
-        <p>Character Engine · Testing Room</p>
+        <p>Character Engine · Reaction Testing</p>
       </header>
 
       <section className="preview">
-        <div className="preview-label">LIVE PREVIEW</div>
+        <div className="preview-label">LIVE CHARACTER</div>
 
         <div className="character-stage">
           <GameCharacter
@@ -62,22 +96,48 @@ export default function CharacterTestPage() {
         </div>
 
         <h2>{currentCharacter?.name}</h2>
+
         <div className="current-expression">
-          {expression.toUpperCase()}
+          {expression.toUpperCase()} · {animation.toUpperCase()}
+        </div>
+
+        <div className="reaction-message">
+          {message}
         </div>
       </section>
 
       <section className="controls">
-        <h3>01. SELECT CHARACTER</h3>
+        <h3>01. REACTION SYSTEM</h3>
+        <p className="description">
+          Sentuh kejadian untuk melihat reaksi otomatis karakter.
+        </p>
+
+        <div className="reaction-grid">
+          {reactionEvents.map((event) => (
+            <button
+              key={event.id}
+              className={
+                activeReaction === event.id ? "selected" : ""
+              }
+              onClick={() => applyReaction(event.id)}
+            >
+              <span className="reaction-icon">{event.icon}</span>
+              <span>{event.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <h3>02. SELECT CHARACTER</h3>
 
         <div className="character-buttons">
           {characters.map((item) => (
             <button
               key={item.id}
-              className={
-                character === item.id ? "selected" : ""
-              }
-              onClick={() => setCharacter(item.id)}
+              className={character === item.id ? "selected" : ""}
+              onClick={() => {
+                setCharacter(item.id);
+                setActiveReaction("");
+              }}
               style={{ "--accent": item.color }}
             >
               {item.name}
@@ -85,16 +145,18 @@ export default function CharacterTestPage() {
           ))}
         </div>
 
-        <h3>02. SELECT EXPRESSION</h3>
+        <h3>03. SELECT EXPRESSION</h3>
 
         <div className="expression-grid">
           {expressions.map((item) => (
             <button
               key={item}
-              className={
-                expression === item ? "selected" : ""
-              }
-              onClick={() => setExpression(item)}
+              className={expression === item ? "selected" : ""}
+              onClick={() => {
+                setExpression(item);
+                setAnimation("none");
+                setActiveReaction("");
+              }}
             >
               <span className="expression-icon">
                 {item === "neutral" && "😐"}
@@ -111,11 +173,14 @@ export default function CharacterTestPage() {
           ))}
         </div>
 
-        <h3>03. SELECT ANIMATION</h3>
+        <h3>04. SELECT ANIMATION</h3>
 
         <select
           value={animation}
-          onChange={(event) => setAnimation(event.target.value)}
+          onChange={(event) => {
+            setAnimation(event.target.value);
+            setActiveReaction("");
+          }}
         >
           {animations.map((item) => (
             <option key={item} value={item}>
@@ -124,7 +189,7 @@ export default function CharacterTestPage() {
           ))}
         </select>
 
-        <h3>04. CHARACTER SIZE</h3>
+        <h3>05. CHARACTER SIZE</h3>
 
         <div className="size-control">
           <span>80 px</span>
@@ -143,22 +208,16 @@ export default function CharacterTestPage() {
 
         <div className="size-value">{size} PX</div>
 
-        <button
-          className="reset"
-          onClick={() => {
-            setCharacter("dajjal");
-            setExpression("neutral");
-            setAnimation("idle");
-            setSize(180);
-          }}
-        >
+        <button className="reset" onClick={resetCharacter}>
           RESET CHARACTER
         </button>
       </section>
 
       <section className="gallery">
-        <h3>05. ALL CHARACTERS PREVIEW</h3>
-        <p>Sentuh ekspresi untuk melihatnya di Live Preview.</p>
+        <h3>06. ALL CHARACTERS PREVIEW</h3>
+        <p className="description">
+          Pilih ekspresi untuk melihatnya di Live Preview.
+        </p>
 
         {characters.map((item) => (
           <div className="gallery-character" key={item.id}>
@@ -172,6 +231,7 @@ export default function CharacterTestPage() {
                     setCharacter(item.id);
                     setExpression(exp);
                     setAnimation("none");
+                    setActiveReaction("");
                   }}
                 >
                   <GameCharacter
@@ -200,12 +260,7 @@ export default function CharacterTestPage() {
           padding: 28px 16px 50px;
           color: #f4efff;
           background:
-            radial-gradient(
-              ellipse at top,
-              #30134c 0%,
-              #110b20 45%,
-              #080610 100%
-            );
+            radial-gradient(ellipse at top, #30134c 0%, #110b20 45%, #080610 100%);
         }
 
         .header {
@@ -265,11 +320,25 @@ export default function CharacterTestPage() {
         .current-expression {
           color: #c18aff;
           font-size: 11px;
-          letter-spacing: 3px;
+          letter-spacing: 2px;
         }
 
-        .controls,
-        .gallery {
+        .reaction-message {
+          margin-top: 14px;
+          padding: 12px;
+          border-radius: 10px;
+          background: #28183a;
+          color: #ead8ff;
+          font-size: 13px;
+          animation: messageIn 0.3s ease-out;
+        }
+
+        @keyframes messageIn {
+          from { opacity: 0; transform: translateY(5px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .controls, .gallery {
           max-width: 520px;
           margin: 0 auto 25px;
           padding: 20px;
@@ -289,14 +358,13 @@ export default function CharacterTestPage() {
           margin-top: 0;
         }
 
-        .character-buttons {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 8px;
+        .description {
+          color: #a99bbd;
+          font-size: 12px;
+          line-height: 1.6;
         }
 
-        button,
-        select {
+        button, select {
           color: #eee5ff;
           background: #251735;
           border: 1px solid #49315f;
@@ -305,15 +373,40 @@ export default function CharacterTestPage() {
           font-size: 12px;
         }
 
-        .character-buttons button {
-          padding: 12px 4px;
-          border-color: var(--accent);
-        }
-
         button.selected {
           background: #65358b;
           border-color: #d49bff;
           box-shadow: 0 0 12px #a34dff55;
+        }
+
+        .reaction-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 9px;
+        }
+
+        .reaction-grid button {
+          min-height: 65px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 10px;
+          text-align: left;
+        }
+
+        .reaction-icon {
+          font-size: 23px;
+        }
+
+        .character-buttons {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 8px;
+        }
+
+        .character-buttons button {
+          padding: 12px 4px;
+          border-color: var(--accent);
         }
 
         .expression-grid {
