@@ -44,6 +44,33 @@ const translations = {
   },
 };
 
+function PlayerAvatar({ player, size = "normal" }) {
+  const sizeClass =
+    size === "large"
+      ? "w-20 h-20 sm:w-24 sm:h-24 text-2xl"
+      : size === "medium"
+        ? "w-12 h-12 text-base"
+        : "w-10 h-10 text-sm";
+
+  return (
+    <div
+      className={`${sizeClass} shrink-0 rounded-full overflow-hidden border-2 border-purple-400/40 bg-purple-600/20 flex items-center justify-center`}
+    >
+      {player.avatar_url ? (
+        <img
+          src={player.avatar_url}
+          alt={player.nickname}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <span className="font-black text-purple-300">
+          {player.nickname?.charAt(0).toUpperCase() || "?"}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function LeaderboardPage() {
   const { language } = useLanguage();
   const t = translations[language] || translations.en;
@@ -157,8 +184,8 @@ export default function LeaderboardPage() {
                         {player.rank === 1
                           ? "👑"
                           : player.rank === 2
-                          ? "🥈"
-                          : "🥉"}
+                            ? "🥈"
+                            : "🥉"}
                       </div>
 
                       <p className="text-xs text-gray-400 mt-3">
@@ -167,13 +194,24 @@ export default function LeaderboardPage() {
 
                       <Link
                         href={`/player/${player.player_id}`}
-                        className={`font-black mt-2 break-words block hover:underline ${
-                          isFirst
-                            ? "text-yellow-400 text-sm sm:text-lg"
-                            : "text-white text-xs sm:text-base"
-                        }`}
+                        className="flex flex-col items-center"
                       >
-                        {player.nickname}
+                        <div className="mt-3">
+                          <PlayerAvatar
+                            player={player}
+                            size={isFirst ? "large" : "medium"}
+                          />
+                        </div>
+
+                        <span
+                          className={`font-black mt-3 break-words block hover:underline ${
+                            isFirst
+                              ? "text-yellow-400 text-sm sm:text-lg"
+                              : "text-white text-xs sm:text-base"
+                          }`}
+                        >
+                          {player.nickname}
+                        </span>
                       </Link>
 
                       <p className="text-gray-500 text-[10px] mt-1">
@@ -236,17 +274,26 @@ export default function LeaderboardPage() {
                       #{player.rank}
                     </span>
 
-                    <div className="min-w-0">
+                    <div className="flex items-center gap-3 min-w-0">
                       <Link
                         href={`/player/${player.player_id}`}
-                        className="font-bold text-sm truncate block hover:text-purple-400 transition"
+                        className="shrink-0"
                       >
-                        {player.nickname}
+                        <PlayerAvatar player={player} />
                       </Link>
 
-                      <p className="text-gray-500 text-[10px] mt-1">
-                        Server {player.server_number}
-                      </p>
+                      <div className="min-w-0">
+                        <Link
+                          href={`/player/${player.player_id}`}
+                          className="font-bold text-sm truncate block hover:text-purple-400 transition"
+                        >
+                          {player.nickname}
+                        </Link>
+
+                        <p className="text-gray-500 text-[10px] mt-1">
+                          Server {player.server_number}
+                        </p>
+                      </div>
                     </div>
 
                     <span className="text-right sm:text-center font-black text-purple-300 text-sm">
