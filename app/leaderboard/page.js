@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function LeaderboardPage() {
   const [ranking, setRanking] = useState([]);
@@ -39,7 +40,12 @@ export default function LeaderboardPage() {
   }, []);
 
   const topThree = ranking.slice(0, 3);
-  const remainingPlayers = ranking.slice(3);
+
+  const podiumOrder = [
+    topThree[1],
+    topThree[0],
+    topThree[2],
+  ];
 
   return (
     <main className="min-h-[70vh] bg-[#080711] text-white px-4 py-10">
@@ -92,17 +98,10 @@ export default function LeaderboardPage() {
             <section className="mt-12">
               <div className="grid grid-cols-3 gap-2 sm:gap-5 items-end">
 
-                {[
-                  topThree[1],
-                  topThree[0],
-                  topThree[2],
-                ].map((player, index) => {
+                {podiumOrder.map((player, index) => {
                   if (!player) return <div key={index} />;
 
-                  const actualRank =
-                    player.rank;
-
-                  const isFirst = actualRank === 1;
+                  const isFirst = player.rank === 1;
 
                   return (
                     <div
@@ -114,24 +113,27 @@ export default function LeaderboardPage() {
                       }`}
                     >
                       <div className="text-3xl sm:text-4xl">
-                        {actualRank === 1
+                        {player.rank === 1
                           ? "👑"
-                          : actualRank === 2
+                          : player.rank === 2
                           ? "🥈"
                           : "🥉"}
                       </div>
 
                       <p className="text-xs text-gray-400 mt-3">
-                        RANK #{actualRank}
+                        RANK #{player.rank}
                       </p>
 
-                      <h2 className={`font-black mt-2 break-words ${
-                        isFirst
-                          ? "text-yellow-400 text-sm sm:text-lg"
-                          : "text-white text-xs sm:text-base"
-                      }`}>
+                      <Link
+                        href={`/player/${player.player_id}`}
+                        className={`font-black mt-2 break-words block hover:underline ${
+                          isFirst
+                            ? "text-yellow-400 text-sm sm:text-lg"
+                            : "text-white text-xs sm:text-base"
+                        }`}
+                      >
                         {player.nickname}
-                      </h2>
+                      </Link>
 
                       <p className="text-gray-500 text-[10px] mt-1">
                         SERVER {player.server_number}
@@ -194,9 +196,12 @@ export default function LeaderboardPage() {
                     </span>
 
                     <div className="min-w-0">
-                      <p className="font-bold text-sm truncate">
+                      <Link
+                        href={`/player/${player.player_id}`}
+                        className="font-bold text-sm truncate block hover:text-purple-400 transition"
+                      >
                         {player.nickname}
-                      </p>
+                      </Link>
 
                       <p className="text-gray-500 text-[10px] mt-1">
                         Server {player.server_number}
