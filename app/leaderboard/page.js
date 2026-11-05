@@ -3,8 +3,51 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useLanguage } from "../components/LanguageProvider";
+
+const translations = {
+  en: {
+    tagline: "One world. One leaderboard. One champion.",
+    loading: "Loading global ranking...",
+    tryAgain: "TRY AGAIN",
+    noChampions: "NO CHAMPIONS YET",
+    noChampionsDesc: "Complete daily riddles and become the first global champion!",
+    rank: "RANK",
+    player: "PLAYER",
+    points: "POINTS",
+    solved: "SOLVED",
+    topPlayers: "TOP PLAYERS",
+    players: "PLAYERS",
+    refresh: "↻ REFRESH RANKING",
+    refreshing: "LOADING...",
+    footer: "ONE DAY. ONE RIDDLE. ONE CHAMPION.",
+    error: "Unable to load leaderboard.",
+    genericError: "Something went wrong.",
+  },
+  id: {
+    tagline: "Satu dunia. Satu peringkat. Satu juara.",
+    loading: "Memuat peringkat global...",
+    tryAgain: "COBA LAGI",
+    noChampions: "BELUM ADA JUARA",
+    noChampionsDesc: "Selesaikan teka-teki harian dan jadilah juara global pertama!",
+    rank: "RANK",
+    player: "PEMAIN",
+    points: "POIN",
+    solved: "SELESAI",
+    topPlayers: "PEMAIN TERATAS",
+    players: "PEMAIN",
+    refresh: "↻ SEGARKAN PERINGKAT",
+    refreshing: "MEMUAT...",
+    footer: "SATU HARI. SATU TEKA-TEKI. SATU JUARA.",
+    error: "Tidak dapat memuat peringkat.",
+    genericError: "Terjadi kesalahan.",
+  },
+};
 
 export default function LeaderboardPage() {
+  const { language } = useLanguage();
+  const t = translations[language] || translations.en;
+
   const [ranking, setRanking] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -21,15 +64,13 @@ export default function LeaderboardPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          result.error || "Unable to load leaderboard."
-        );
+        throw new Error(result.error || t.error);
       }
 
       setRanking(result.ranking || []);
     } catch (err) {
       console.error(err);
-      setError(err.message || "Something went wrong.");
+      setError(err.message || t.genericError);
     } finally {
       setLoading(false);
     }
@@ -61,13 +102,13 @@ export default function LeaderboardPage() {
           </h1>
 
           <p className="text-gray-500 text-sm mt-3">
-            One world. One leaderboard. One champion.
+            {t.tagline}
           </p>
         </div>
 
         {loading ? (
           <div className="text-center py-20 text-purple-300">
-            Loading global ranking...
+            {t.loading}
           </div>
         ) : error ? (
           <div className="text-center py-16">
@@ -77,7 +118,7 @@ export default function LeaderboardPage() {
               onClick={loadRanking}
               className="mt-5 bg-purple-600 px-6 py-3 rounded-xl font-bold"
             >
-              TRY AGAIN
+              {t.tryAgain}
             </button>
           </div>
         ) : ranking.length === 0 ? (
@@ -85,11 +126,11 @@ export default function LeaderboardPage() {
             <div className="text-5xl">👑</div>
 
             <h2 className="text-xl font-bold mt-5">
-              NO CHAMPIONS YET
+              {t.noChampions}
             </h2>
 
             <p className="text-gray-400 text-sm mt-3">
-              Complete daily riddles and become the first global champion!
+              {t.noChampionsDesc}
             </p>
           </div>
         ) : (
@@ -121,7 +162,7 @@ export default function LeaderboardPage() {
                       </div>
 
                       <p className="text-xs text-gray-400 mt-3">
-                        RANK #{player.rank}
+                        {t.rank} #{player.rank}
                       </p>
 
                       <Link
@@ -148,7 +189,7 @@ export default function LeaderboardPage() {
                       </p>
 
                       <p className="text-gray-500 text-[9px] mt-1">
-                        POINTS
+                        {t.points}
                       </p>
                     </div>
                   );
@@ -161,24 +202,24 @@ export default function LeaderboardPage() {
             <section className="mt-12">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="font-black tracking-wider">
-                  TOP PLAYERS
+                  {t.topPlayers}
                 </h2>
 
                 <span className="text-xs text-purple-400">
-                  {ranking.length} PLAYERS
+                  {ranking.length} {t.players}
                 </span>
               </div>
 
               <div className="rounded-2xl border border-purple-500/20 bg-[#151020] overflow-hidden">
 
                 <div className="grid grid-cols-[45px_1fr_85px] sm:grid-cols-[60px_1fr_100px_110px] gap-2 px-4 py-4 bg-purple-500/10 text-[10px] text-gray-400 font-bold tracking-wider">
-                  <span>RANK</span>
-                  <span>PLAYER</span>
+                  <span>{t.rank}</span>
+                  <span>{t.player}</span>
                   <span className="text-right sm:text-center">
-                    POINTS
+                    {t.points}
                   </span>
                   <span className="hidden sm:block text-right">
-                    SOLVED
+                    {t.solved}
                   </span>
                 </div>
 
@@ -228,11 +269,11 @@ export default function LeaderboardPage() {
           disabled={loading}
           className="w-full mt-8 border border-purple-500/30 hover:bg-purple-500/10 disabled:opacity-50 rounded-xl py-4 text-sm font-bold tracking-wider transition"
         >
-          {loading ? "LOADING..." : "↻ REFRESH RANKING"}
+          {loading ? t.refreshing : t.refresh}
         </button>
 
         <p className="text-center text-gray-600 text-xs mt-8">
-          ONE DAY. ONE RIDDLE. ONE CHAMPION.
+          {t.footer}
         </p>
 
       </div>
