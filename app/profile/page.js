@@ -6,12 +6,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useLanguage } from "../components/LanguageProvider";
+import GoogleAccountLink from "../components/GoogleAccountLink";
 
 const translations = {
   en: {
     loading: "Loading profile...",
     title: "PLAYER PROFILE",
-    description: "Your identity in the world of daily riddles.",
+    description: "Your identity in the Dajjal & Veylora Gaming Universe.",
     nickname: "Nickname",
     server: "Server",
     joined: "Joined",
@@ -24,7 +25,7 @@ const translations = {
   id: {
     loading: "Memuat profil...",
     title: "PROFIL PEMAIN",
-    description: "Identitasmu di dunia teka-teki harian.",
+    description: "Identitasmu di Dajjal & Veylora Gaming Universe.",
     nickname: "Nama Pemain",
     server: "Server",
     joined: "Bergabung",
@@ -46,10 +47,14 @@ export default function ProfilePage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let active = true;
+
     async function loadProfile() {
       try {
-        const { data: sessionData, error: sessionError } =
-          await supabase.auth.getSession();
+        const {
+          data: sessionData,
+          error: sessionError,
+        } = await supabase.auth.getSession();
 
         if (sessionError) throw sessionError;
 
@@ -73,17 +78,28 @@ export default function ProfilePage() {
           return;
         }
 
-        setPlayer(data);
+        if (active) {
+          setPlayer(data);
+        }
       } catch (err) {
         console.error(err);
-        setError(err.message || t.error);
+
+        if (active) {
+          setError(err.message || t.error);
+        }
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     }
 
     loadProfile();
-  }, [router]);
+
+    return () => {
+      active = false;
+    };
+  }, [router, t.error]);
 
   if (loading) {
     return (
@@ -111,11 +127,14 @@ export default function ProfilePage() {
   if (!player) return null;
 
   const joinedDate = player.created_at
-    ? new Date(player.created_at).toLocaleDateString(t.dateLocale, {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      })
+    ? new Date(player.created_at).toLocaleDateString(
+        t.dateLocale,
+        {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }
+      )
     : "-";
 
   return (
@@ -123,7 +142,7 @@ export default function ProfilePage() {
       <div className="max-w-xl mx-auto">
 
         <p className="text-purple-400 text-xs tracking-[0.3em]">
-          THE DAILY RIDDLE
+          DAJJAL & VEYLORA GAMING UNIVERSE
         </p>
 
         <h1 className="text-3xl font-black mt-3">
@@ -167,6 +186,7 @@ export default function ProfilePage() {
             ✎ {t.edit}
           </Link>
 
+          {/* Player Information */}
           <div className="border-t border-purple-500/20 mt-6 pt-5 space-y-4">
 
             <div className="flex justify-between gap-4 text-sm">
@@ -200,6 +220,11 @@ export default function ProfilePage() {
             </div>
 
           </div>
+        </div>
+
+        {/* Google Account Security */}
+        <div className="mt-6">
+          <GoogleAccountLink />
         </div>
 
         <Link
