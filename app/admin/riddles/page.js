@@ -26,6 +26,7 @@ export default function AdminRiddlesPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [changingStatusId, setChangingStatusId] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [editingId, setEditingId] = useState(null);
@@ -230,6 +231,66 @@ export default function AdminRiddlesPage() {
       setError(err.message);
     } finally {
       setDeletingId(null);
+    }
+  }
+
+  async function handleStatus(riddle) {
+    const nextStatus = !riddle.is_active;
+
+    const confirmed = window.confirm(
+      isID
+        ? nextStatus
+          ? "Aktifkan teka-teki ini?"
+          : "Nonaktifkan teka-teki ini?"
+        : nextStatus
+          ? "Activate this riddle?"
+          : "Deactivate this riddle?"
+    );
+
+    if (!confirmed) return;
+
+    setChangingStatusId(riddle.id);
+    setError("");
+    setSuccess("");
+
+    try {
+      const session = await getSession();
+
+      const response = await fetch(
+        `/api/admin/riddles/${riddle.id}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            is_active: nextStatus,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to change status.");
+      }
+
+      setSuccess(
+        isID
+          ? nextStatus
+            ? "Teka-teki berhasil diaktifkan!"
+            : "Teka-teki berhasil dinonaktifkan!"
+          : nextStatus
+            ? "Riddle successfully activated!"
+            : "Riddle successfully deactivated!"
+      );
+
+      await loadRiddles();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setChangingStatusId(null);
     }
   }
 
@@ -503,6 +564,18 @@ export default function AdminRiddlesPage() {
             </div>
           </div>
 
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 mb-4 text-sm text-red-300">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-3 mb-4 text-sm text-green-300">
+              {success}
+            </div>
+          )}
+
           {loading && (
             <p className="text-center py-10 text-gray-400">
               {isID ? "Memuat teka-teki..." : "Loading riddles..."}
@@ -589,22 +662,50 @@ export default function AdminRiddlesPage() {
               </div>
 
               <div className="mt-5 pt-4 border-t border-white/10 flex flex-wrap justify-end gap-2">
+
+                <button
+                  onClick={() => handleStatus(riddle)}
+                  disabled={
+                    changingStatusId === riddle.id ||
+                    deletingId === riddle.id
+                  }
+                  className={`px-4 py-2 rounded-xl border text-xs font-bold transition disabled:opacity-50 ${
+                    riddle.is_active
+                      ? "bg-yellow-500/10 border-yellow-500/30 text-yellow-400 hover:bg-yellow-500 hover:text-black"
+                      : "bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500 hover:text-white"
+                  }`}
+                >
+                  {changingStatusId === riddle.id
+                    ? isID ? "MEMPROSES..." : "PROCESSING..."
+                    : riddle.is_active
+                      ? isID ? "NONAKTIFKAN" : "DEACTIVATE"
+                      : isID ? "AKTIFKAN" : "ACTIVATE"}
+                </button>
+
                 <button
                   onClick={() => startEdit(riddle)}
-                  className="px-5 py-2 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:bg-purple-600 hover:text-white text-sm font-bold transition"
+                  disabled={
+                    changingStatusId === riddle.id ||
+                    deletingId === riddle.id
+                  }
+                  className="px-4 py-2 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:bg-purple-600 hover:text-white text-xs font-bold transition disabled:opacity-50"
                 >
-                  ✎ {isID ? "EDIT" : "EDIT"}
+                  ✎ EDIT
                 </button>
 
                 <button
                   onClick={() => handleDelete(riddle)}
-                  disabled={deletingId === riddle.id}
-                  className="px-5 py-2 rounded-xl bg-red-600/10 border border-red-500/30 text-red-400 hover:bg-red-600 hover:text-white disabled:opacity-50 text-sm font-bold transition"
+                  disabled={
+                    deletingId === riddle.id ||
+                    changingStatusId === riddle.id
+                  }
+                  className="px-4 py-2 rounded-xl bg-red-600/10 border border-red-500/30 text-red-400 hover:bg-red-600 hover:text-white disabled:opacity-50 text-xs font-bold transition"
                 >
                   {deletingId === riddle.id
                     ? isID ? "MENGHAPUS..." : "DELETING..."
                     : isID ? "HAPUS" : "DELETE"}
                 </button>
+
               </div>
             </div>
           ))}
