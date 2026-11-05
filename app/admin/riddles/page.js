@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdminClient } from "@/lib/supabaseAdminClient";
 import { useLanguage } from "@/app/components/LanguageProvider";
 
 const emptyForm = {
@@ -42,7 +42,10 @@ export default function AdminRiddlesPage() {
   async function getSession() {
     const {
       data: { session },
-    } = await supabase.auth.getSession();
+      error: sessionError,
+    } = await supabaseAdminClient.auth.getSession();
+
+    if (sessionError) throw sessionError;
 
     if (!session) {
       throw new Error(
