@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdminClient } from "@/lib/supabaseAdminClient";
 import { useLanguage } from "@/app/components/LanguageProvider";
 
 export default function AdminLoginPage() {
@@ -18,9 +18,13 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let active = true;
+
     async function checkExistingAdmin() {
       try {
-        const { data } = await supabase.auth.getSession();
+        const { data } =
+          await supabaseAdminClient.auth.getSession();
+
         const session = data?.session;
 
         if (session) {
@@ -35,15 +39,21 @@ export default function AdminLoginPage() {
             router.replace("/admin");
             return;
           }
+
+          await supabaseAdminClient.auth.signOut();
         }
       } catch (err) {
         console.error("Admin session check:", err);
       }
 
-      setChecking(false);
+      if (active) setChecking(false);
     }
 
     checkExistingAdmin();
+
+    return () => {
+      active = false;
+    };
   }, [router]);
 
   async function handleLogin(event) {
@@ -56,7 +66,7 @@ export default function AdminLoginPage() {
 
     try {
       const { data, error: loginError } =
-        await supabase.auth.signInWithPassword({
+        await supabaseAdminClient.auth.signInWithPassword({
           email: email.trim(),
           password,
         });
@@ -79,7 +89,7 @@ export default function AdminLoginPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        await supabase.auth.signOut();
+        await supabaseAdminClient.auth.signOut();
 
         throw new Error(
           result.error ||
@@ -114,11 +124,8 @@ export default function AdminLoginPage() {
 
   return (
     <main className="min-h-[80vh] bg-[#080711] text-white px-5 py-12 flex items-center justify-center">
-
       <div className="w-full max-w-md">
-
         <div className="text-center mb-8">
-
           <div className="w-16 h-16 mx-auto rounded-2xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center">
             <span className="text-3xl">♛</span>
           </div>
@@ -136,21 +143,18 @@ export default function AdminLoginPage() {
               ? "Masuk ke pusat kendali administrator."
               : "Sign in to the administrator control center."}
           </p>
-
         </div>
 
         <div className="rounded-2xl border border-purple-500/20 bg-[#151020] p-6 sm:p-8">
-
           <div className="flex items-center gap-3 mb-6">
             <span className="text-green-400">●</span>
 
             <p className="text-sm font-bold text-gray-300">
-              {isID ? "ADMINISTRATOR LOGIN" : "ADMINISTRATOR LOGIN"}
+              ADMINISTRATOR LOGIN
             </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-5">
-
             <div>
               <label className="block text-sm text-gray-300 mb-2">
                 Email
@@ -202,7 +206,6 @@ export default function AdminLoginPage() {
                   ? "MASUK SEBAGAI ADMIN"
                   : "SIGN IN AS ADMIN"}
             </button>
-
           </form>
 
           <p className="text-center text-[11px] text-gray-600 mt-6">
@@ -210,9 +213,7 @@ export default function AdminLoginPage() {
               ? "Akses khusus administrator yang terdaftar."
               : "Restricted access for registered administrators."}
           </p>
-
         </div>
-
       </div>
     </main>
   );
