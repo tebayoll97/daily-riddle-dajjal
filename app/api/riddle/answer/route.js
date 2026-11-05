@@ -2,12 +2,9 @@
 import { createHash } from "crypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-function normalizeAnswer(value) {
-  return value.trim().toLowerCase().replace(/\s+/g, " ");
-}
-
 export async function POST(request) {
   try {
+    // Authenticate player
     const authorization = request.headers.get("authorization");
 
     if (!authorization?.startsWith("Bearer ")) {
@@ -29,23 +26,7 @@ export async function POST(request) {
       );
     }
 
-    const body = await request.json();
-    const answer = body.answer;
-
-    if (typeof answer !== "string" || !answer.trim()) {
-      return Response.json(
-        { error: "Please enter your answer." },
-        { status: 400 }
-      );
-    }
-
-    if (answer.length > 200) {
-      return Response.json(
-        { error: "Answer is too long." },
-        { status: 400 }
-      );
-    }
-
+    // Get player profile
     const { data: player, error: playerError } =
       await supabaseAdmin
         .from("players")
@@ -62,6 +43,23 @@ export async function POST(request) {
       );
     }
 
+    // Read submitted answer
+    const body = await request.json();
+    const answer = body.answer;
+
+    if (typeof answer !== "string" || !answer.trim()) {
+      return Response.json(
+        { error: "Please enter an answer." },
+        { status: 400 }
+      );
+    }
+
+    const normalizedAnswer = answer
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, " ");
+
+    // Get today's date using Jakarta timezone
     const dateParts = new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Jakarta",
       year: "numeric",
@@ -73,13 +71,15 @@ export async function POST(request) {
       dateParts.map((part) => [part.type, part.value])
     );
 
-    const today =
-      `${dateMap.year}-${dateMap.month}-${dateMap.day}`;
+    const today = `${dateMap.year}-${dateMap.month}-${dateMap.day}`;
 
+    // Get today's riddle
     const { data: riddle, error: riddleError } =
       await supabaseAdmin
         .from("riddles")
-        .select("id, answer_hash, points")
+        .select(
+          "id, answer_hash, answers_en, answers_id, points"
+        )
         .eq("riddle_date", today)
         .eq("is_active", true)
         .maybeSingle();
@@ -93,7 +93,8 @@ export async function POST(request) {
       );
     }
 
-    const { data: existing, error: scoreError } =
+    // Check previous attempts
+    const { data: previousScore, error: scoreError } =
       await supabaseAdmin
         .from("scores")
         .select("id, attempts, score, completed_at")
@@ -103,79 +104,119 @@ export async function POST(request) {
 
     if (scoreError) throw scoreError;
 
-    if (existing?.completed_at) {
+    const previousAttempts = previousScore?.attempts || 0;
+
+    if (previousScore?.completed_at) {
       return Response.json({
         correct: true,
-        alreadyCompleted: true,
-        score: existing.score,
-        message: "You have already solved today's riddle.",
+        completed: true,
+        attempts: previousAttempts,
+        attemptsLeft: 0,
+        score: previousScore.score,
+        message: "You have already completed today's riddle.",
       });
     }
-
-    const previousAttempts = existing?.attempts || 0;
 
     if (previousAttempts >= 3) {
       return Response.json({
         correct: false,
-        exhausted: true,
+        finished: true,
+        attempts: previousAttempts,
         attemptsLeft: 0,
-        message: "No attempts left today.",
+        score: previousScore?.score || 0,
+        message: "No attempts left for today.",
       });
     }
 
-    const normalized = normalizeAnswer(answer);
+    // Prepare accepted answers in both languages
+    const englishAnswers = Array.isArray(riddle.answers_en)
+      ? riddle.answers_en
+      : [];
 
-    const submittedHash = createHash("sha256")
-      .update(normalized)
-      .digest("hex");
+    const indonesianAnswers = Array.isArray(riddle.answers_id)
+      ? riddle.answers_id
+      : [];
 
-    const correct = submittedHash === riddle.answer_hash;
+    const acceptedAnswers = [
+      ...englishAnswers,
+      ...indonesianAnswers,
+    ]
+      .filter((item) => typeof item === "string")
+      .map((item) =>
+        item.trim().toLowerCase().replace(/\s+/g, " ")
+      );
+
+    // Validate answer using both language lists
+    let isCorrect = acceptedAnswers.includes(normalizedAnswer);
+
+    // Compatibility with older riddles
+    if (acceptedAnswers.length === 0 && riddle.answer_hash) {
+      const submittedHash = createHash("sha256")
+        .update(normalizedAnswer)
+        .digest("hex");
+
+      isCorrect = submittedHash === riddle.answer_hash;
+    }
+
     const attempts = previousAttempts + 1;
+    const attemptsLeft = 3 - attempts;
 
-    const points = correct
-      ? Math.round(riddle.points * (1 - (attempts - 1) * 0.3))
+    const points = isCorrect
+      ? Math.round(
+          riddle.points * (1 - (attempts - 1) * 0.3)
+        )
       : 0;
+
+    const completedAt = isCorrect
+      ? new Date().toISOString()
+      : null;
 
     const scoreData = {
       player_id: player.id,
       riddle_id: riddle.id,
       attempts,
-      score: correct ? points : 0,
-      completed_at: correct ? new Date().toISOString() : null,
+      score: points,
+      completed_at: completedAt,
     };
 
-    if (existing) {
+    // Update or create score record
+    let saveError;
+
+    if (previousScore) {
       const { error } = await supabaseAdmin
         .from("scores")
         .update(scoreData)
-        .eq("id", existing.id);
+        .eq("id", previousScore.id);
 
-      if (error) throw error;
+      saveError = error;
     } else {
       const { error } = await supabaseAdmin
         .from("scores")
         .insert(scoreData);
 
-      if (error) throw error;
+      saveError = error;
     }
 
+    if (saveError) throw saveError;
+
     return Response.json({
-      correct,
+      correct: isCorrect,
+      finished: isCorrect || attemptsLeft === 0,
       attempts,
-      attemptsLeft: 3 - attempts,
-      score: correct ? points : 0,
-      message: correct
-        ? "Congratulations! Correct answer!"
-        : attempts >= 3
-          ? "Incorrect. No attempts left today."
-          : "Incorrect. Try again!",
+      attemptsLeft,
+      score: points,
+      message: isCorrect
+        ? "Correct answer!"
+        : attemptsLeft > 0
+          ? "Incorrect answer. Try again!"
+          : "No attempts left for today.",
     });
 
   } catch (error) {
     console.error("Answer API error:", error);
 
     return Response.json(
-      { error: "Internal server error." },
+      { error: "Unable to check your answer." },
       { status: 500 }
     );
   }
