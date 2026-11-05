@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdminClient } from "@/lib/supabaseAdminClient";
 import { useLanguage } from "./LanguageProvider";
 
 const translations = {
@@ -27,7 +27,7 @@ export default function Header() {
   const { language, setLanguage } = useLanguage();
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const t = translations[language];
+  const t = translations[language] || translations.en;
 
   useEffect(() => {
     let active = true;
@@ -62,7 +62,7 @@ export default function Header() {
     async function initialize() {
       const {
         data: { session },
-      } = await supabase.auth.getSession();
+      } = await supabaseAdminClient.auth.getSession();
 
       await checkAdmin(session);
     }
@@ -71,20 +71,22 @@ export default function Header() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT") {
-        setIsAdmin(false);
-        return;
-      }
+    } = supabaseAdminClient.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "SIGNED_OUT") {
+          setIsAdmin(false);
+          return;
+        }
 
-      if (
-        event === "SIGNED_IN" ||
-        event === "TOKEN_REFRESHED" ||
-        event === "USER_UPDATED"
-      ) {
-        checkAdmin(session);
+        if (
+          event === "SIGNED_IN" ||
+          event === "TOKEN_REFRESHED" ||
+          event === "USER_UPDATED"
+        ) {
+          checkAdmin(session);
+        }
       }
-    });
+    );
 
     return () => {
       active = false;
@@ -110,9 +112,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-purple-500/20 bg-[#080711]/95 backdrop-blur-lg">
       <div className="max-w-6xl mx-auto px-4">
-
         <div className="relative flex flex-col items-center py-4">
-
           <Link href="/" className="flex flex-col items-center">
             <h1 className="text-lg font-black tracking-wider text-white">
               THE <span className="text-purple-400">DAILY RIDDLE</span>
@@ -146,7 +146,6 @@ export default function Header() {
               🇮🇩 ID
             </button>
           </div>
-
         </div>
 
         <nav
@@ -171,7 +170,6 @@ export default function Header() {
             </Link>
           ))}
         </nav>
-
       </div>
     </header>
   );
