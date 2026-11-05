@@ -4,9 +4,43 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useLanguage } from "../components/LanguageProvider";
+
+const translations = {
+  en: {
+    registration: "PLAYER REGISTRATION",
+    title: "JOIN THE GAME",
+    description: "Enter your identity to join the global challenge.",
+    nickname: "Player Nickname",
+    nicknamePlaceholder: "Enter your nickname",
+    server: "Server Number",
+    serverPlaceholder: "Example: 278",
+    registering: "REGISTERING...",
+    submit: "ENTER THE GAME",
+    missing: "Please enter your nickname and server.",
+    invalidServer: "Please enter a valid server number.",
+    failed: "Registration failed. Please try again.",
+  },
+  id: {
+    registration: "PENDAFTARAN PEMAIN",
+    title: "GABUNG PERMAINAN",
+    description: "Masukkan identitasmu untuk mengikuti tantangan global.",
+    nickname: "Nama Pemain",
+    nicknamePlaceholder: "Masukkan nickname kamu",
+    server: "Nomor Server",
+    serverPlaceholder: "Contoh: 278",
+    registering: "MENDAFTARKAN...",
+    submit: "MASUK KE PERMAINAN",
+    missing: "Silakan masukkan nickname dan server.",
+    invalidServer: "Silakan masukkan nomor server yang valid.",
+    failed: "Pendaftaran gagal. Silakan coba lagi.",
+  },
+};
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const t = translations[language] || translations.en;
 
   const [nickname, setNickname] = useState("");
   const [server, setServer] = useState("");
@@ -21,12 +55,12 @@ export default function RegisterPage() {
     const cleanServer = server.trim();
 
     if (!cleanNickname || !cleanServer) {
-      setError("Please enter your nickname and server.");
+      setError(t.missing);
       return;
     }
 
     if (!/^\d+$/.test(cleanServer) || Number(cleanServer) <= 0) {
-      setError("Please enter a valid server number.");
+      setError(t.invalidServer);
       return;
     }
 
@@ -83,7 +117,7 @@ export default function RegisterPage() {
       router.push("/game");
     } catch (err) {
       console.error(err);
-      setError(err.message || "Registration failed. Please try again.");
+      setError(err.message || t.failed);
     } finally {
       setLoading(false);
     }
@@ -94,27 +128,28 @@ export default function RegisterPage() {
       <div className="w-full max-w-md bg-[#151020] border border-purple-500/30 rounded-2xl p-8">
 
         <p className="text-purple-400 text-xs tracking-[0.3em] text-center mb-4">
-          PLAYER REGISTRATION
+          {t.registration}
         </p>
 
         <h1 className="text-3xl font-black text-center">
-          JOIN THE GAME
+          {t.title}
         </h1>
 
         <p className="text-gray-400 text-sm text-center mt-3 mb-8">
-          Enter your identity to join the global challenge.
+          {t.description}
         </p>
 
         <form onSubmit={handleRegister} className="space-y-5">
+
           <div>
             <label className="text-sm text-gray-300">
-              Player Nickname
+              {t.nickname}
             </label>
 
             <input
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
-              placeholder="Enter your nickname"
+              placeholder={t.nicknamePlaceholder}
               maxLength={30}
               required
               className="w-full mt-2 p-4 rounded-xl bg-[#080711] border border-purple-500/30 outline-none focus:border-purple-500"
@@ -123,13 +158,13 @@ export default function RegisterPage() {
 
           <div>
             <label className="text-sm text-gray-300">
-              Server Number
+              {t.server}
             </label>
 
             <input
               value={server}
               onChange={(e) => setServer(e.target.value)}
-              placeholder="Example: 278"
+              placeholder={t.serverPlaceholder}
               inputMode="numeric"
               maxLength={6}
               required
@@ -148,8 +183,9 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full bg-purple-600 hover:bg-purple-500 disabled:opacity-50 rounded-xl py-4 font-bold tracking-wider"
           >
-            {loading ? "REGISTERING..." : "ENTER THE GAME"}
+            {loading ? t.registering : t.submit}
           </button>
+
         </form>
       </div>
     </main>
