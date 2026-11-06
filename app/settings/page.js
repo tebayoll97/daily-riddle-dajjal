@@ -311,7 +311,7 @@ export default function SettingsPage() {
 
   function settingCard(title, description, enabled, onClick) {
     return (
-      <div className="flex items-center justify-between gap-4 rounded-xl border border-purple-500/20 bg-white/5 p-4">
+      <div className="flex items-center justify-between gap-4 rounded-xl border border-purple-500/20 bg-white/5 p-4 ui-card">
         <div className="min-w-0">
           <h3 className="font-bold text-white">{title}</h3>
           <p className="text-xs text-gray-400 mt-1">{description}</p>
@@ -367,7 +367,7 @@ export default function SettingsPage() {
             DAJJAL & VEYLORA GAMING UNIVERSE
           </p>
 
-          <h1 className="text-3xl font-black mt-3">
+          <h1 className="text-3xl font-black mt-3 ui-title">
             {t.title}
           </h1>
 
@@ -405,7 +405,7 @@ export default function SettingsPage() {
         {activeTab === "audio" && (
           <section className="space-y-5">
             <div>
-              <h2 className="text-xl font-bold">
+              <h2 className="text-xl font-bold ui-section-title">
                 {t.audioTitle}
               </h2>
               <p className="text-sm text-gray-400 mt-1">
@@ -413,7 +413,7 @@ export default function SettingsPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-purple-500/20 bg-[#151020] p-5 space-y-5">
+            <div className="rounded-2xl border border-purple-500/20 bg-[#151020] p-5 space-y-5 ui-card">
               {settingCard(
                 t.music,
                 t.musicDescription,
@@ -457,7 +457,7 @@ export default function SettingsPage() {
         {activeTab === "display" && (
           <section className="space-y-5">
             <div>
-              <h2 className="text-xl font-bold">
+              <h2 className="text-xl font-bold ui-section-title">
                 {t.displayTitle}
               </h2>
               <p className="text-sm text-gray-400 mt-1">
@@ -465,7 +465,7 @@ export default function SettingsPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-purple-500/20 bg-[#151020] p-5">
+            <div className="rounded-2xl border border-purple-500/20 bg-[#151020] p-5 ui-card">
               <h3 className="font-bold">{t.language}</h3>
               <p className="text-xs text-gray-400 mt-1 mb-5">
                 {t.languageDescription}
@@ -510,7 +510,7 @@ export default function SettingsPage() {
         {activeTab === "gameplay" && (
           <section className="space-y-5">
             <div>
-              <h2 className="text-xl font-bold">
+              <h2 className="text-xl font-bold ui-section-title">
                 {t.gameplayTitle}
               </h2>
               <p className="text-sm text-gray-400 mt-1">
@@ -518,7 +518,7 @@ export default function SettingsPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-purple-500/20 bg-[#151020] p-5 space-y-4">
+            <div className="rounded-2xl border border-purple-500/20 bg-[#151020] p-5 space-y-4 ui-card">
               {settingCard(
                 t.confirmExit,
                 t.confirmExitDescription,
@@ -548,7 +548,7 @@ export default function SettingsPage() {
         {activeTab === "account" && (
           <section className="space-y-5">
             <div>
-              <h2 className="text-xl font-bold">
+              <h2 className="text-xl font-bold ui-section-title">
                 {t.accountTitle}
               </h2>
               <p className="text-sm text-gray-400 mt-1">
@@ -556,7 +556,7 @@ export default function SettingsPage() {
               </p>
             </div>
 
-            <div className="rounded-xl border border-purple-500/20 bg-[#151020] p-4">
+            <div className="rounded-xl border border-purple-500/20 bg-[#151020] p-4 ui-card">
               <div className="flex items-center justify-between gap-3">
                 <span className="text-sm text-gray-400">
                   {t.account}
