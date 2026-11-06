@@ -1,12 +1,17 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import GameCharacter from "@/lib/GameCharacter";
 import { useLanguage } from "../components/LanguageProvider";
+import audioEngine from "@/lib/audio/AudioEngine";
+import {
+  getAudioSettings,
+  saveAudioSettings,
+} from "@/lib/audio/audioSettings";
 
 const translations = {
   en: {
@@ -110,58 +115,6 @@ const translations = {
   },
 };
 
-function playFeedbackSound(type) {
-  try {
-    const AudioContextClass =
-      window.AudioContext || window.webkitAudioContext;
-
-    if (!AudioContextClass) return;
-
-    const context = new AudioContextClass();
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-
-    oscillator.connect(gain);
-    gain.connect(context.destination);
-
-    const now = context.currentTime;
-
-    if (type === "success") {
-      oscillator.type = "sine";
-      oscillator.frequency.setValueAtTime(523.25, now);
-      oscillator.frequency.setValueAtTime(659.25, now + 0.13);
-      oscillator.frequency.setValueAtTime(783.99, now + 0.26);
-      oscillator.frequency.setValueAtTime(1046.5, now + 0.42);
-
-      gain.gain.setValueAtTime(0.001, now);
-      gain.gain.linearRampToValueAtTime(0.16, now + 0.04);
-      gain.gain.setValueAtTime(0.16, now + 0.42);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
-
-      oscillator.start(now);
-      oscillator.stop(now + 0.86);
-    } else {
-      oscillator.type = "triangle";
-      oscillator.frequency.setValueAtTime(330, now);
-      oscillator.frequency.setValueAtTime(220, now + 0.16);
-
-      gain.gain.setValueAtTime(0.001, now);
-      gain.gain.linearRampToValueAtTime(0.12, now + 0.03);
-      gain.gain.setValueAtTime(0.12, now + 0.22);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.42);
-
-      oscillator.start(now);
-      oscillator.stop(now + 0.43);
-    }
-
-    oscillator.onended = () => {
-      context.close().catch(() => {});
-    };
-  } catch (error) {
-    console.warn("Sound playback unavailable:", error);
-  }
-}
-
 export default function GamePage() {
   const router = useRouter();
   const { language } = useLanguage();
@@ -183,17 +136,99 @@ export default function GamePage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [feedback, setFeedback] = useState(null);
 
+  const audioStartedRef = useRef(false);
+  const audioSettingsRef = useRef(null);
+
   const finished = correct || attemptsLeft <= 0;
 
   const potentialPoints = riddle
     ? attemptsLeft > 0
-      ? Math.round(
-          riddle.points * (1 - attemptsUsed * 0.3)
-        )
+      ? Math.round(riddle.points * (1 - attemptsUsed * 0.3))
       : 0
     : 0;
 
-  // Reaksi karakter ditentukan dari status permainan.
+  // AUDIO SETTINGS
+  useEffect(() => {
+    const settings = getAudioSettings();
+
+    audioSettingsRef.current = settings;
+
+    setSoundEnabled(
+      settings.musicEnabled || settings.sfxEnabled
+    );
+
+    audioEngine.setMusicVolume(
+      settings.musicEnabled ? settings.musicVolume : 0
+    );
+
+    audioEngine.setSfxVolume(
+      settings.sfxEnabled ? settings.sfxVolume : 0
+    );
+
+    audioEngine.setMuted(false);
+
+    return () => {
+      audioEngine.stopMusic();
+      audioStartedRef.current = false;
+    };
+  }, []);
+
+  // Start music after the first user interaction.
+  // This avoids mobile browser autoplay restrictions.
+  function startGameAudio() {
+    if (audioStartedRef.current || !soundEnabled) return;
+
+    const settings = audioSettingsRef.current;
+
+    if (!settings?.musicEnabled) return;
+
+    audioStartedRef.current = true;
+
+    audioEngine.setMuted(false);
+    audioEngine.setMusicVolume(settings.musicVolume);
+
+    audioEngine.startMusic();
+  }
+
+  function toggleSound() {
+    const nextEnabled = !soundEnabled;
+    setSoundEnabled(nextEnabled);
+
+    const current =
+      audioSettingsRef.current || getAudioSettings();
+
+    const updated = {
+      ...current,
+      musicEnabled: nextEnabled,
+      sfxEnabled: nextEnabled,
+    };
+
+    audioSettingsRef.current = updated;
+    saveAudioSettings(updated);
+
+    audioEngine.setMuted(false);
+
+    audioEngine.setMusicVolume(
+      nextEnabled ? updated.musicVolume : 0
+    );
+
+    audioEngine.setSfxVolume(
+      nextEnabled ? updated.sfxVolume : 0
+    );
+
+    if (nextEnabled) {
+      if (!audioStartedRef.current) {
+        audioStartedRef.current = true;
+      }
+
+      audioEngine.startMusic();
+    } else {
+      audioEngine.stopMusic();
+      audioStartedRef.current = false;
+    }
+  }
+
+  // CHARACTER REACTION
   let characterReaction = {
     character: "dajjal",
     expression: "neutral",
@@ -250,6 +285,7 @@ export default function GamePage() {
     };
   }
 
+  // LOAD GAME
   useEffect(() => {
     let active = true;
 
@@ -322,8 +358,11 @@ export default function GamePage() {
     };
   }, [router]);
 
+  // ANSWER SUBMISSION
   async function handleAnswer(event) {
     event.preventDefault();
+
+    startGameAudio();
 
     if (!answer.trim() || submitting || finished || feedback) {
       return;
@@ -381,7 +420,7 @@ export default function GamePage() {
         });
 
         if (soundEnabled) {
-          playFeedbackSound("success");
+          audioEngine.playCorrect();
         }
       } else if (remaining <= 0) {
         setFeedback({
@@ -391,7 +430,7 @@ export default function GamePage() {
         });
 
         if (soundEnabled) {
-          playFeedbackSound("wrong");
+          audioEngine.playWrong();
         }
       } else {
         setFeedback({
@@ -401,7 +440,7 @@ export default function GamePage() {
         });
 
         if (soundEnabled) {
-          playFeedbackSound("wrong");
+          audioEngine.playWrong();
         }
       }
     } catch (err) {
@@ -505,7 +544,10 @@ export default function GamePage() {
     : null;
 
   return (
-    <main className="relative min-h-[70vh] overflow-hidden bg-[#080711] text-white px-4 py-8 sm:px-5 sm:py-10">
+    <main
+      onPointerDown={startGameAudio}
+      className="relative min-h-[70vh] overflow-hidden bg-[#080711] text-white px-4 py-8 sm:px-5 sm:py-10"
+    >
       <div className="absolute top-20 left-1/2 -translate-x-1/2 w-72 h-72 bg-purple-600/10 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="relative z-10 max-w-xl mx-auto">
@@ -530,7 +572,7 @@ export default function GamePage() {
 
           <button
             type="button"
-            onClick={() => setSoundEnabled((value) => !value)}
+            onClick={toggleSound}
             aria-label={soundEnabled ? t.soundOff : t.soundOn}
             className={`shrink-0 flex items-center gap-2 rounded-xl border px-3 py-2 text-[10px] font-bold transition ${
               soundEnabled
