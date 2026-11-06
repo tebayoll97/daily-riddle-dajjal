@@ -1,4 +1,4 @@
-
+ 
 "use client";
 
 import { useEffect, useState } from "react";
@@ -80,7 +80,7 @@ export default function ProfilePage() {
 
         const { data, error: playerError } = await supabase
           .from("players")
-          .select("id, nickname, server_number, created_at, avatar_url")
+          .select("id")
           .eq("auth_user_id", session.user.id)
           .maybeSingle();
 
@@ -91,19 +91,23 @@ export default function ProfilePage() {
           return;
         }
 
-        const statsResponse = await fetch(`/api/player/${data.id}`, {
+        const profileResponse = await fetch(`/api/player/${data.id}`, {
           cache: "no-store",
         });
 
-        const statsResult = await statsResponse.json();
+        const profileResult = await profileResponse.json();
 
-        if (!statsResponse.ok) {
-          throw new Error(statsResult.error || t.error);
+        if (!profileResponse.ok) {
+          throw new Error(profileResult.error || t.error);
+        }
+
+        if (!profileResult.player) {
+          throw new Error(t.error);
         }
 
         if (active) {
-          setPlayer(data);
-          setStats(statsResult.stats || {
+          setPlayer(profileResult.player);
+          setStats(profileResult.stats || {
             total_points: 0,
             riddles_solved: 0,
             last_completed_at: null,
