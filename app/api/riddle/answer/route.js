@@ -110,42 +110,7 @@ export async function POST(request) {
       );
     }
 
-    // Check previous attempts
-    const { data: previousScore, error: scoreError } =
-      await supabaseAdmin
-        .from("scores")
-        .select("id, attempts, score, completed_at")
-        .eq("player_id", player.id)
-        .eq("riddle_id", riddle.id)
-        .maybeSingle();
-
-    if (scoreError) throw scoreError;
-
-    const previousAttempts = previousScore?.attempts || 0;
-
-    if (previousScore?.completed_at) {
-      return Response.json({
-        correct: true,
-        completed: true,
-        attempts: previousAttempts,
-        attemptsLeft: 0,
-        score: previousScore.score,
-        message: "You have already completed today's riddle.",
-      });
-    }
-
-    if (previousAttempts >= 3) {
-      return Response.json({
-        correct: false,
-        finished: true,
-        attempts: previousAttempts,
-        attemptsLeft: 0,
-        score: previousScore?.score || 0,
-        message: "No attempts left for today.",
-      });
-    }
-
-    // Prepare accepted answers in both languages
+    // Validate answer using both language lists
     const englishAnswers = Array.isArray(riddle.answers_en)
       ? riddle.answers_en
       : [];
@@ -160,10 +125,9 @@ export async function POST(request) {
     ]
       .filter((item) => typeof item === "string")
       .map((item) =>
-        item.trim().toLowerCase().replace(/\s+/g, " ")
+        item.trim().toLowerCase().replace(/\\s+/g, " ")
       );
 
-    // Validate answer using both language lists
     let isCorrect = acceptedAnswers.includes(normalizedAnswer);
 
     // Compatibility with older riddles
@@ -175,59 +139,21 @@ export async function POST(request) {
       isCorrect = submittedHash === riddle.answer_hash;
     }
 
-    const attempts = previousAttempts + 1;
-    const attemptsLeft = 3 - attempts;
+    // Persist the attempt atomically in PostgreSQL.
+    // The database function serializes concurrent submissions per player/riddle.
+    const { data: result, error: submitError } = await supabaseAdmin.rpc(
+      "submit_riddle_attempt",
+      {
+        p_player_id: player.id,
+        p_riddle_id: riddle.id,
+        p_is_correct: isCorrect,
+        p_base_points: riddle.points,
+      }
+    );
 
-    const points = isCorrect
-      ? Math.round(
-          riddle.points * (1 - (attempts - 1) * 0.3)
-        )
-      : 0;
+    if (submitError) throw submitError;
 
-    const completedAt = isCorrect
-      ? new Date().toISOString()
-      : null;
-
-    const scoreData = {
-      player_id: player.id,
-      riddle_id: riddle.id,
-      attempts,
-      score: points,
-      completed_at: completedAt,
-    };
-
-    // Update or create score record
-    let saveError;
-
-    if (previousScore) {
-      const { error } = await supabaseAdmin
-        .from("scores")
-        .update(scoreData)
-        .eq("id", previousScore.id);
-
-      saveError = error;
-    } else {
-      const { error } = await supabaseAdmin
-        .from("scores")
-        .insert(scoreData);
-
-      saveError = error;
-    }
-
-    if (saveError) throw saveError;
-
-    return Response.json({
-      correct: isCorrect,
-      finished: isCorrect || attemptsLeft === 0,
-      attempts,
-      attemptsLeft,
-      score: points,
-      message: isCorrect
-        ? "Correct answer!"
-        : attemptsLeft > 0
-          ? "Incorrect answer. Try again!"
-          : "No attempts left for today.",
-    });
+    return Response.json(result);
 
   } catch (error) {
     console.error("Answer API error:", error);
