@@ -148,6 +148,8 @@ export default function GamePage() {
     : 0;
 
   // AUDIO SETTINGS
+  // Audio tidak dihentikan saat berpindah halaman.
+  // Pengelolaan musik global akan dilakukan oleh Global Audio Controller.
   useEffect(() => {
     const settings = getAudioSettings();
 
@@ -166,15 +168,9 @@ export default function GamePage() {
     );
 
     audioEngine.setMuted(false);
-
-    return () => {
-      audioEngine.stopMusic();
-      audioStartedRef.current = false;
-    };
   }, []);
 
-  // Start music after the first user interaction.
-  // This avoids mobile browser autoplay restrictions.
+  // START MUSIC AFTER USER INTERACTION
   function startGameAudio() {
     if (audioStartedRef.current || !soundEnabled) return;
 
@@ -190,6 +186,7 @@ export default function GamePage() {
     audioEngine.startMusic();
   }
 
+  // SOUND TOGGLE
   function toggleSound() {
     const nextEnabled = !soundEnabled;
     setSoundEnabled(nextEnabled);
