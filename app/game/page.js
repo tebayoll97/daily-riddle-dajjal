@@ -149,6 +149,7 @@ export default function GamePage() {
 
   const audioStartedRef = useRef(false);
   const audioSettingsRef = useRef(null);
+  const answerLockRef = useRef(false);
 
   const finished = correct || attemptsLeft <= 0;
 
@@ -402,10 +403,18 @@ export default function GamePage() {
 
     startGameAudio();
 
-    if (!answer.trim() || submitting || finished || feedback) {
+    if (
+      !answer.trim() ||
+      answerLockRef.current ||
+      submitting ||
+      finished ||
+      feedback
+    ) {
       return;
     }
 
+    // Ref lock closes the gap before React applies the submitting state.
+    answerLockRef.current = true;
     setSubmitting(true);
 
     try {
@@ -488,6 +497,7 @@ export default function GamePage() {
         type: "error",
       });
     } finally {
+      answerLockRef.current = false;
       setSubmitting(false);
     }
   }
