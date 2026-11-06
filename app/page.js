@@ -53,7 +53,7 @@ export default function Home() {
     const update = () => {
       if (frame) return;
       frame = window.requestAnimationFrame(() => {
-        setIsWelcomeCompact((current) => current ? window.scrollY > 30 : window.scrollY > 84);
+        setIsWelcomeCompact((current) => current ? window.scrollY > 12 : window.scrollY > 180);
         frame = 0;
       });
     };
@@ -71,20 +71,20 @@ export default function Home() {
       <div className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-indigo-600/10 blur-[100px]" />
 
       <div className="relative z-20 mx-auto w-full max-w-5xl">
-        <section className="sticky z-30 mx-auto text-center" style={{ top: "104px" }}>
-          <div className={`relative mx-auto flex w-full max-w-3xl items-center justify-center rounded-2xl border border-purple-400/35 bg-[#100b20]/95 shadow-[0_0_28px_rgba(147,51,234,0.14)] backdrop-blur-xl transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isWelcomeCompact ? "min-h-[76px] px-16 py-2 sm:min-h-[88px] sm:px-24" : "mt-5 min-h-[190px] px-16 py-7 sm:min-h-[220px] sm:px-28 sm:py-9"}`}>
+        <section className="sticky z-30 mx-auto h-[220px] text-center sm:h-[250px]" style={{ top: "120px" }}>
+          <div className={`absolute inset-x-0 top-0 mx-auto flex h-[190px] w-full max-w-3xl items-center justify-center rounded-2xl border border-purple-400/35 bg-[#100b20]/95 px-3 shadow-[0_0_28px_rgba(147,51,234,0.14)] backdrop-blur-xl transition-transform duration-500 ease-out sm:h-[220px] sm:px-8 ${isWelcomeCompact ? "scale-[0.76]" : "scale-100"}`} style={{ transformOrigin: "top center" }}>
             <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-purple-300 to-transparent" />
-            <div className={`absolute left-0 z-10 transition-all duration-500 ease-out ${isWelcomeCompact ? "-top-2 -left-1 scale-[0.62] sm:scale-75" : "-top-7 -left-2 scale-100 sm:-top-9 sm:-left-4"}`}>
+            <div className="absolute -left-1 -top-6 z-10 sm:-left-3 sm:-top-8">
               <GameCharacter character="dajjal" expression="smug" animation="idle" size={76} className="drop-shadow-[0_4px_12px_rgba(239,68,68,0.28)]" />
             </div>
-            <div className={`absolute right-0 z-10 transition-all duration-500 ease-out ${isWelcomeCompact ? "-top-2 -right-1 scale-[0.62] sm:scale-75" : "-top-7 -right-2 scale-100 sm:-top-9 sm:-right-4"}`}>
+            <div className="absolute -right-1 -top-6 z-10 sm:-right-3 sm:-top-8">
               <GameCharacter character="veylora" expression="happy" animation="idle" size={76} className="drop-shadow-[0_4px_12px_rgba(192,132,252,0.28)]" />
             </div>
-            <div className="relative z-0 min-w-0">
-              <p className={`font-black tracking-[0.28em] text-purple-300 transition-all duration-500 ${isWelcomeCompact ? "text-[8px] sm:text-[9px]" : "text-[10px] sm:text-xs"}`}>{t.present}</p>
-              <h1 className={`mt-2 font-black leading-tight tracking-wide transition-all duration-500 ${isWelcomeCompact ? "text-sm sm:text-xl" : "text-2xl sm:text-5xl"}`}>
-                <span className="block text-white">{t.title}</span>
-                <span className="block text-purple-400 drop-shadow-[0_0_18px_rgba(168,85,247,0.4)]">{t.accent}</span>
+            <div className="relative z-0 w-full min-w-0 text-center">
+              <p className="text-[9px] font-black tracking-[0.28em] text-purple-300 sm:text-xs">{t.present}</p>
+              <h1 className="mt-3 whitespace-nowrap font-black leading-tight tracking-tight">
+                <span className="block text-[clamp(1.05rem,5.4vw,3rem)] text-white">{t.title}</span>
+                <span className="mt-1 block whitespace-nowrap text-[clamp(1rem,5.1vw,2.75rem)] text-purple-400 drop-shadow-[0_0_18px_rgba(168,85,247,0.4)]">{t.accent}</span>
               </h1>
             </div>
             <div className="pointer-events-none absolute inset-x-8 bottom-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
