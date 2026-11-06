@@ -15,6 +15,7 @@ import {
 
 import GoogleAccountLink from "../components/GoogleAccountLink";
 import AccountLogout from "../components/AccountLogout";
+import GameCharacter from "@/lib/GameCharacter";
 
 const gameplayStorageKey = "dajjal-gameplay-settings";
 
@@ -50,9 +51,9 @@ const translations = {
     gameplayTitle: "Gameplay Settings",
     gameplayDescription: "Manage your general gameplay preferences.",
     confirmExit: "Confirm before leaving a game",
-    confirmExitDescription: "Save this preference for future game integration.",
+    confirmExitDescription: "Ask before leaving an active game or challenge.",
     instructions: "Show game instructions",
-    instructionsDescription: "Save your preference for future game integration.",
+    instructionsDescription: "Show a short guide when a game begins.",
     accountTitle: "Account & Security",
     accountDescription: "Manage your account and protect your game progress.",
     guest: "GUEST ACCOUNT",
@@ -90,9 +91,9 @@ const translations = {
     gameplayTitle: "Pengaturan Gameplay",
     gameplayDescription: "Atur preferensi umum permainan.",
     confirmExit: "Konfirmasi sebelum meninggalkan game",
-    confirmExitDescription: "Preferensi ini disimpan untuk integrasi game berikutnya.",
+    confirmExitDescription: "Tampilkan konfirmasi sebelum meninggalkan game yang sedang berjalan.",
     instructions: "Tampilkan instruksi permainan",
-    instructionsDescription: "Preferensi ini disimpan untuk integrasi game berikutnya.",
+    instructionsDescription: "Tampilkan panduan singkat saat permainan dimulai.",
     accountTitle: "Akun & Keamanan",
     accountDescription: "Kelola akun dan lindungi progres permainanmu.",
     guest: "AKUN TAMU",
@@ -349,8 +350,9 @@ export default function SettingsPage() {
 
   if (!loaded) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center text-purple-300">
-        {t.checking}
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-2 text-purple-300">
+        <GameCharacter character="child" expression="thinking" animation="float" size={68} />
+        <p className="text-xs animate-pulse">{t.checking}</p>
       </div>
     );
   }
@@ -375,7 +377,7 @@ export default function SettingsPage() {
         </div>
 
         {/* TABS */}
-        <div className="grid grid-cols-4 gap-2 mb-6">
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-6">
           {tabs.map((tab) => {
             const active = activeTab === tab.id;
 
@@ -384,14 +386,14 @@ export default function SettingsPage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center justify-center gap-2 rounded-xl border py-3 transition ${
+                className={`min-w-0 flex flex-col items-center justify-center gap-1.5 rounded-xl border px-1 py-3 min-h-[68px] transition ${
                   active
                     ? "border-purple-400/50 bg-purple-600/20 text-purple-200"
                     : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10"
                 }`}
               >
                 <span className="text-xl">{tab.icon}</span>
-                <span className="text-[11px] font-bold">
+                <span className="text-[10px] sm:text-[11px] font-bold leading-tight text-center">
                   {t[tab.id]}
                 </span>
               </button>
