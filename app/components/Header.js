@@ -50,7 +50,7 @@ export default function Header() {
       if (frame) return;
       frame = window.requestAnimationFrame(() => {
         const y = window.scrollY;
-        setIsCompact((current) => current ? y > 28 : y > 88);
+        setIsCompact((current) => current ? y > 12 : y > 180);
         frame = 0;
       });
     };
