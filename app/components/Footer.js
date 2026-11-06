@@ -6,18 +6,18 @@ import { useLanguage } from "./LanguageProvider";
 
 const translations = {
   en: {
-    tagline: "One day. One riddle. One champion.",
+    tagline: "One Account. One Profile. Multiple Games. One Universe.",
     home: "Home",
-    play: "Play",
+    play: "Games",
     ranking: "Ranking",
     profile: "Profile",
     copyright: "All rights reserved.",
     universe: "A WORLD OF GAMES. ONE UNIVERSE.",
   },
   id: {
-    tagline: "Satu hari. Satu teka-teki. Satu juara.",
+    tagline: "Satu Akun. Satu Profil. Banyak Game. Satu Universe.",
     home: "Beranda",
-    play: "Main",
+    play: "Game",
     ranking: "Peringkat",
     profile: "Profil",
     copyright: "Hak cipta dilindungi.",
@@ -31,7 +31,7 @@ export default function Footer() {
 
   const navLinks = [
     { label: t.home, href: "/" },
-    { label: t.play, href: "/game" },
+    { label: t.play, href: "/games" },
     { label: t.ranking, href: "/leaderboard" },
     { label: t.profile, href: "/profile" },
   ];
@@ -51,7 +51,7 @@ export default function Footer() {
             href="/"
             className="text-xl font-black tracking-[0.12em] text-white hover:opacity-80 transition"
           >
-            THE <span className="text-purple-400">DAILY RIDDLE</span>
+            DAJJAL <span className="text-purple-400">& VEYLORA</span>
           </Link>
 
           {/* Tagline */}
@@ -101,7 +101,7 @@ export default function Footer() {
 
           {/* Copyright */}
           <p className="text-[10px] text-gray-600 mt-1">
-            © 2026 THE DAILY RIDDLE. {t.copyright}
+            © 2026 DAJJAL & VEYLORA GAMING UNIVERSE. {t.copyright}
           </p>
 
         </div>
