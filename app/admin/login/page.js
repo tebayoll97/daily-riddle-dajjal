@@ -126,7 +126,7 @@ export default function AdminLoginPage() {
     <main className="min-h-[80vh] bg-[#080711] text-white px-5 py-12 flex items-center justify-center">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center ui-card">
             <span className="text-3xl">♛</span>
           </div>
 
@@ -134,7 +134,7 @@ export default function AdminLoginPage() {
             THE DAILY RIDDLE
           </p>
 
-          <h1 className="text-3xl font-black mt-3">
+          <h1 className="text-3xl font-black mt-3 ui-title">
             ADMIN <span className="text-purple-400">PORTAL</span>
           </h1>
 
@@ -145,7 +145,7 @@ export default function AdminLoginPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-purple-500/20 bg-[#151020] p-6 sm:p-8">
+        <div className="rounded-2xl border border-purple-500/20 bg-[#151020] p-6 sm:p-8 ui-card">
           <div className="flex items-center gap-3 mb-6">
             <span className="text-green-400">●</span>
 
@@ -188,7 +188,7 @@ export default function AdminLoginPage() {
             </div>
 
             {error && (
-              <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+              <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300 ui-card">
                 {error}
               </div>
             )}
