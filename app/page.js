@@ -66,7 +66,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="relative flex min-h-[75vh] flex-col items-center justify-center overflow-hidden bg-[#080711] px-5 py-16 text-white sm:min-h-[82vh]">
+    <main className="relative flex min-h-[75vh] flex-col items-center justify-center overflow-x-clip bg-[#080711] px-5 py-16 text-white sm:min-h-[82vh]">
       <div className="pointer-events-none absolute left-1/2 top-1/4 h-80 w-80 -translate-x-1/2 rounded-full bg-purple-600/10 blur-[110px]" />
       <div className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-indigo-600/10 blur-[100px]" />
 
