@@ -166,3 +166,62 @@ dialog[open]::backdrop { animation: ui-backdrop-enter 180ms ease-out both; }
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* Global application of the shared motion and typography system */
+[role="alertdialog"],
+[role="dialog"],
+.ui-popup,
+[data-popup-panel],
+[data-modal-panel] {
+  position: relative;
+  overflow: hidden;
+  animation: ui-popup-enter 240ms var(--motion-standard) both;
+  box-shadow:
+    0 0 0 1px rgba(168, 85, 247, 0.22),
+    0 16px 56px rgba(76, 29, 149, 0.22),
+    0 0 28px rgba(99, 102, 241, 0.10);
+}
+
+[role="alertdialog"]::before,
+[role="dialog"]::before,
+.ui-popup::before,
+[data-popup-panel]::before,
+[data-modal-panel]::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  pointer-events: none;
+  background: var(--gradient-brand);
+  opacity: 0.85;
+}
+
+main h1:not(.welcome-title) {
+  font-size: clamp(1.45rem, 1.1rem + 2.5vw, 2.8rem) !important;
+  line-height: 1.14 !important;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+main h2 {
+  font-size: clamp(1.05rem, 0.92rem + 1vw, 1.65rem);
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+main h1:not(.welcome-title) + p {
+  font-size: clamp(0.78rem, 0.73rem + 0.32vw, 0.98rem);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [role="alertdialog"],
+  [role="dialog"],
+  .ui-popup,
+  [data-popup-panel],
+  [data-modal-panel] {
+    animation: none !important;
+  }
+}
