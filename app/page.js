@@ -82,7 +82,7 @@ export default function Home() {
             </div>
             <div className={`relative z-0 flex min-w-0 flex-col items-center justify-center text-center transition-all duration-500 ease-out ${isWelcomeCompact ? "w-full gap-0 px-12 sm:px-16" : "w-full gap-2"}`}>
               <p className={`font-black tracking-[0.24em] text-purple-300 transition-all duration-500 ${isWelcomeCompact ? "text-[7px] sm:text-[9px]" : "text-[8px] sm:text-xs"}`}>{t.present}</p>
-              <h1 className={`whitespace-nowrap font-black leading-tight tracking-tight transition-all duration-500 ${isWelcomeCompact ? "mt-0 text-[clamp(0.85rem,4.3vw,1.35rem)]" : "mt-1 text-[clamp(1.05rem,5.4vw,3rem)]"}`}>
+              <h1 className={`welcome-title whitespace-nowrap font-black leading-tight tracking-tight transition-all duration-500 ${isWelcomeCompact ? "mt-0 text-[clamp(0.85rem,4.3vw,1.35rem)]" : "mt-1 text-[clamp(1.05rem,5.4vw,3rem)]"}`}>
                 <span className="block text-white">DAJJAL FAMILY</span>
               </h1>
               <p className={`overflow-hidden whitespace-nowrap font-black text-purple-400 transition-all duration-300 ${isWelcomeCompact ? "max-h-0 scale-90 opacity-0" : "mt-1 max-h-12 scale-100 text-[clamp(1rem,5.1vw,2.75rem)] opacity-100"}`}>GAMING UNIVERSE</p>
