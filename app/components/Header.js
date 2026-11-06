@@ -4,33 +4,95 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+
 import { supabaseAdminClient } from "@/lib/supabaseAdminClient";
 import { useLanguage } from "./LanguageProvider";
+
+import audioEngine from "@/lib/audio/AudioEngine";
+import {
+  getAudioSettings,
+  saveAudioSettings,
+} from "@/lib/audio/audioSettings";
 
 const translations = {
   en: {
     home: "Home",
-    play: "Play",
+    play: "Games",
     ranking: "Ranking",
+    admin: "Admin",
+    settings: "Settings",
     profile: "Profile",
-    admin: "Admin Dashboard",
   },
   id: {
     home: "Beranda",
-    play: "Main",
+    play: "Game",
     ranking: "Peringkat",
+    admin: "Admin",
+    settings: "Pengaturan",
     profile: "Profil",
-    admin: "Dashboard Admin",
   },
 };
 
 export default function Header() {
   const pathname = usePathname();
   const { language, setLanguage } = useLanguage();
+
   const [isAdmin, setIsAdmin] = useState(false);
+  const [musicEnabled, setMusicEnabled] = useState(true);
+  const [audioLoaded, setAudioLoaded] = useState(false);
 
   const t = translations[language] || translations.en;
 
+  // LOAD GLOBAL AUDIO PREFERENCES
+  useEffect(() => {
+    const settings = getAudioSettings();
+
+    setMusicEnabled(settings.musicEnabled);
+
+    audioEngine.setMuted(false);
+
+    audioEngine.setMusicVolume(
+      settings.musicEnabled ? settings.musicVolume : 0
+    );
+
+    audioEngine.setSfxVolume(
+      settings.sfxEnabled ? settings.sfxVolume : 0
+    );
+
+    setAudioLoaded(true);
+  }, []);
+
+  // GLOBAL BGM QUICK TOGGLE
+  function toggleMusic() {
+    if (!audioLoaded) return;
+
+    const current = getAudioSettings();
+    const nextEnabled = !current.musicEnabled;
+
+    const updated = {
+      ...current,
+      musicEnabled: nextEnabled,
+    };
+
+    saveAudioSettings(updated);
+
+    setMusicEnabled(nextEnabled);
+
+    audioEngine.setMuted(false);
+
+    audioEngine.setMusicVolume(
+      nextEnabled ? updated.musicVolume : 0
+    );
+
+    if (nextEnabled) {
+      // User interaction allows the browser to attempt playback.
+      audioEngine.startMusic();
+    } else {
+      audioEngine.stopMusic();
+    }
+  }
+
+  // CHECK ADMIN SESSION
   useEffect(() => {
     let active = true;
 
@@ -52,7 +114,9 @@ export default function Header() {
         const result = await response.json();
 
         if (active) {
-          setIsAdmin(response.ok && result.success === true);
+          setIsAdmin(
+            response.ok && result.success === true
+          );
         }
       } catch (error) {
         console.error("Admin check failed:", error);
@@ -97,10 +161,21 @@ export default function Header() {
   }, []);
 
   const navLinks = [
-    { name: t.home, href: "/", icon: "⌂" },
-    { name: t.play, href: "/game", icon: "✦" },
-    { name: t.ranking, href: "/leaderboard", icon: "♛" },
-    { name: t.profile, href: "/profile", icon: "◉" },
+    {
+      name: t.home,
+      href: "/",
+      icon: "⌂",
+    },
+    {
+      name: t.play,
+      href: "/game",
+      icon: "✦",
+    },
+    {
+      name: t.ranking,
+      href: "/leaderboard",
+      icon: "♛",
+    },
   ];
 
   if (isAdmin) {
@@ -113,51 +188,129 @@ export default function Header() {
 
   function isActive(href) {
     if (href === "/") return pathname === "/";
-    return pathname === href || pathname.startsWith(`${href}/`);
+
+    return (
+      pathname === href ||
+      pathname.startsWith(`${href}/`)
+    );
   }
+
+  const iconButton =
+    "w-10 h-10 flex items-center justify-center rounded-xl border transition-all active:scale-95";
 
   return (
     <header className="sticky top-0 z-50 border-b border-purple-500/20 bg-[#080711]/95 backdrop-blur-lg">
       <div className="max-w-6xl mx-auto px-4">
-        <div className="relative flex flex-col items-center py-4">
-          <Link href="/" className="flex flex-col items-center">
-            <h1 className="text-lg font-black tracking-wider text-white">
-              THE <span className="text-purple-400">DAILY RIDDLE</span>
+
+        {/* TOP HEADER */}
+        <div className="flex items-center justify-between gap-3 py-3">
+
+          {/* BRAND */}
+          <Link
+            href="/"
+            className="min-w-0 flex flex-col"
+          >
+            <h1 className="text-sm sm:text-base font-black tracking-wide text-white leading-tight">
+              DAJJAL
+              <span className="text-purple-400">
+                {" "} & VEYLORA
+              </span>
             </h1>
 
-            <p className="text-[9px] tracking-[0.2em] text-gray-500">
-              ONE DAY. ONE RIDDLE. ONE CHAMPION.
+            <p className="text-[8px] sm:text-[9px] tracking-[0.13em] text-gray-500 mt-1">
+              GAMING UNIVERSE
             </p>
           </Link>
 
-          <div className="flex items-center gap-2 mt-3">
+          {/* GLOBAL CONTROLS */}
+          <div className="flex items-center gap-2 shrink-0">
+
+            {/* BGM */}
             <button
-              onClick={() => setLanguage("en")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                language === "en"
-                  ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
-                  : "bg-white/5 text-gray-400 hover:bg-white/10"
-              }`}
+              type="button"
+              onClick={toggleMusic}
+              disabled={!audioLoaded}
+              aria-label={
+                musicEnabled
+                  ? "Turn background music off"
+                  : "Turn background music on"
+              }
+              aria-pressed={musicEnabled}
+              title="Background Music"
+              className={`${iconButton} ${
+                musicEnabled
+                  ? "border-purple-500/40 bg-purple-500/15 text-purple-300"
+                  : "border-white/10 bg-white/5 text-gray-500"
+              } disabled:opacity-50`}
             >
-              🇬🇧 EN
+              <span className="text-lg">
+                {musicEnabled ? "♫" : "♪"}
+              </span>
             </button>
 
-            <button
-              onClick={() => setLanguage("id")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                language === "id"
-                  ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
-                  : "bg-white/5 text-gray-400 hover:bg-white/10"
+            {/* SETTINGS */}
+            <Link
+              href="/settings"
+              aria-label={t.settings}
+              title={t.settings}
+              className={`${iconButton} ${
+                isActive("/settings")
+                  ? "border-purple-500/40 bg-purple-500/15 text-purple-300"
+                  : "border-white/10 bg-white/5 text-gray-400 hover:text-purple-300 hover:border-purple-500/30"
               }`}
             >
-              🇮🇩 ID
-            </button>
+              <span className="text-lg">⚙</span>
+            </Link>
+
+            {/* PROFILE */}
+            <Link
+              href="/profile"
+              aria-label={t.profile}
+              title={t.profile}
+              className={`${iconButton} ${
+                isActive("/profile")
+                  ? "border-purple-500/40 bg-purple-500/15 text-purple-300"
+                  : "border-white/10 bg-white/5 text-gray-400 hover:text-purple-300 hover:border-purple-500/30"
+              }`}
+            >
+              <span className="text-lg">♙</span>
+            </Link>
           </div>
         </div>
 
+        {/* LANGUAGE */}
+        <div className="flex items-center justify-center gap-2 pb-3">
+          <button
+            type="button"
+            onClick={() => setLanguage("en")}
+            aria-pressed={language === "en"}
+            className={`px-3 py-1 rounded-lg text-[10px] font-bold transition ${
+              language === "en"
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
+                : "bg-white/5 text-gray-400 hover:bg-white/10"
+            }`}
+          >
+            🇬🇧 EN
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setLanguage("id")}
+            aria-pressed={language === "id"}
+            className={`px-3 py-1 rounded-lg text-[10px] font-bold transition ${
+              language === "id"
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
+                : "bg-white/5 text-gray-400 hover:bg-white/10"
+            }`}
+          >
+            🇮🇩 ID
+          </button>
+        </div>
+
+        {/* MAIN NAVIGATION */}
         <nav
           className={`grid border-t border-purple-500/10 ${
-            isAdmin ? "grid-cols-5" : "grid-cols-4"
+            isAdmin ? "grid-cols-4" : "grid-cols-3"
           }`}
         >
           {navLinks.map((link) => {
