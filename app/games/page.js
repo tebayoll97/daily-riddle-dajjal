@@ -95,7 +95,7 @@ export default function GamesPage() {
       <div className="relative z-10 mx-auto max-w-5xl">
         <div className="mb-9 text-center">
           <p className="mb-3 text-[10px] font-bold tracking-[0.35em] text-purple-400">{t.eyebrow}</p>
-          <h1 className="text-3xl font-black tracking-wide sm:text-5xl">
+          <h1 className="text-3xl font-black tracking-wide sm:text-5xl ui-title">
             {t.title} <span className="text-purple-400">{t.accent}</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-gray-400">{t.description}</p>
@@ -104,9 +104,9 @@ export default function GamesPage() {
         <section className="mb-8">
           <div className="mb-3 flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
-            <h2 className="text-[10px] font-bold tracking-[0.25em] text-emerald-300">{t.available}</h2>
+            <h2 className="text-[10px] font-bold tracking-[0.25em] text-emerald-300 ui-section-title">{t.available}</h2>
           </div>
-          <article className="relative overflow-hidden rounded-3xl border border-purple-400/30 bg-gradient-to-br from-[#241638] via-[#171024] to-[#100d19] shadow-[0_15px_60px_rgba(88,28,135,0.13)]">
+          <article className="relative overflow-hidden rounded-3xl border border-purple-400/30 bg-gradient-to-br from-[#241638] via-[#171024] to-[#100d19] shadow-[0_15px_60px_rgba(88,28,135,0.13)] ui-card">
             <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-purple-500/15 blur-3xl" />
             <div className="relative flex flex-col items-stretch sm:flex-row sm:items-center">
               <div className="relative h-44 w-full overflow-hidden sm:h-64 sm:w-[42%]">
@@ -118,7 +118,7 @@ export default function GamesPage() {
 
               <div className="max-w-xl">
                 <p className="mb-3 text-[10px] font-bold tracking-[0.3em] text-purple-300">01 · {t.available}</p>
-                <h2 className="text-2xl font-black sm:text-3xl">{t.daily}</h2>
+                <h2 className="text-2xl font-black sm:text-3xl ui-section-title">{t.daily}</h2>
                 <p className="mt-3 text-sm leading-relaxed text-gray-300">{t.dailyDesc}</p>
               </div>
               <button onClick={handlePlayDailyRiddle} disabled={loading} className="w-full shrink-0 rounded-xl bg-purple-600 px-7 py-4 text-sm font-black tracking-wider shadow-lg shadow-purple-900/30 transition hover:bg-purple-500 active:scale-[0.98] disabled:opacity-50 sm:w-auto">
@@ -132,15 +132,15 @@ export default function GamesPage() {
         <section>
           <div className="mb-3 flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-gray-500" />
-            <h2 className="text-[10px] font-bold tracking-[0.25em] text-gray-400">{t.soon}</h2>
+            <h2 className="text-[10px] font-bold tracking-[0.25em] text-gray-400 ui-section-title">{t.soon}</h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             {games.map((game, index) => (
-              <article key={game.key} className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] transition duration-300 hover:border-purple-400/30 hover:bg-purple-500/[0.06]">
+              <article key={game.key} className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] transition duration-300 hover:border-purple-400/30 hover:bg-purple-500/[0.06] ui-card">
                 <div className="relative h-36 overflow-hidden">
                   <img src={game.image} alt={game.alt} loading="lazy" className="h-full w-full object-cover opacity-75 transition duration-500 hover:scale-105" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#100d19] via-black/10 to-transparent" />
-                  <div className="absolute bottom-3 left-4 flex h-10 w-10 items-center justify-center rounded-xl border border-purple-200/20 bg-black/45 text-2xl text-purple-100 backdrop-blur">{game.icon}</div>
+                  <div className="absolute bottom-3 left-4 flex h-10 w-10 items-center justify-center rounded-xl border border-purple-200/20 bg-black/45 text-2xl text-purple-100 backdrop-blur ui-card">{game.icon}</div>
                 </div>
                 <div className="p-5">
                 <p className="mb-2 text-[9px] font-bold tracking-[0.2em] text-gray-500">0{index + 2} · {t.soon}</p>
@@ -155,9 +155,9 @@ export default function GamesPage() {
 
       {showError && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-5 backdrop-blur-sm" onClick={() => setShowError(false)}>
-          <div role="alertdialog" aria-modal="true" aria-labelledby="games-error-title" className="w-full max-w-sm rounded-2xl border border-purple-500/30 bg-[#151020] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.6)] ui-popup ui-gradient-frame" onClick={(event) => event.stopPropagation()}>
+          <div role="alertdialog" aria-modal="true" aria-labelledby="games-error-title" className="w-full max-w-sm rounded-2xl border border-purple-500/30 bg-[#151020] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.6)] ui-popup ui-gradient-frame ui-card" onClick={(event) => event.stopPropagation()}>
             <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-red-500/20 bg-red-500/10 text-2xl text-red-400">!</div>
-            <h2 id="games-error-title" className="text-center text-lg font-black">{t.errorTitle}</h2>
+            <h2 id="games-error-title" className="text-center text-lg font-black ui-section-title">{t.errorTitle}</h2>
             <p className="mt-3 text-center text-sm text-gray-400">{t.error}</p>
             <button onClick={() => setShowError(false)} className="mt-6 w-full rounded-xl bg-purple-600 py-3 text-sm font-bold transition hover:bg-purple-500">{t.close}</button>
           </div>
