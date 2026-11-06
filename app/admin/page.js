@@ -163,7 +163,7 @@ export default function AdminDashboardPage() {
       <main className="min-h-[75vh] bg-[#080711] text-white flex flex-col items-center justify-center px-5 text-center">
         <div className="text-5xl">🔒</div>
 
-        <h1 className="text-2xl font-black mt-5">
+        <h1 className="text-2xl font-black mt-5 ui-title">
           {t.accessDenied}
         </h1>
 
@@ -212,7 +212,7 @@ export default function AdminDashboardPage() {
               THE DAILY RIDDLE
             </p>
 
-            <h1 className="text-3xl sm:text-4xl font-black mt-3">
+            <h1 className="text-3xl sm:text-4xl font-black mt-3 ui-title">
               ADMIN <span className="text-purple-400">DASHBOARD</span>
             </h1>
 
@@ -231,9 +231,9 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* ADMIN INFORMATION */}
-        <section className="mt-10 rounded-2xl border border-purple-500/30 bg-[#151020] p-5 sm:p-6">
+        <section className="mt-10 rounded-2xl border border-purple-500/30 bg-[#151020] p-5 sm:p-6 ui-card">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-2xl">
+            <div className="w-14 h-14 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-2xl ui-card">
               ♛
             </div>
 
@@ -257,7 +257,7 @@ export default function AdminDashboardPage() {
 
         {/* MANAGEMENT MODULES */}
         <section className="mt-10">
-          <h2 className="text-sm font-black tracking-wider text-purple-300 mb-5">
+          <h2 className="text-sm font-black tracking-wider text-purple-300 mb-5 ui-section-title">
             {t.management}
           </h2>
 
@@ -265,7 +265,7 @@ export default function AdminDashboardPage() {
             {modules.map((module) => (
               <div
                 key={module.title}
-                className="rounded-2xl border border-purple-500/20 bg-[#151020] p-5"
+                className="rounded-2xl border border-purple-500/20 bg-[#151020] p-5 ui-card"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-3xl">
@@ -307,12 +307,12 @@ export default function AdminDashboardPage() {
             }
           }}
         >
-          <div className="w-full max-w-sm rounded-3xl border border-purple-500/30 bg-[#151020] p-6 sm:p-7 shadow-2xl shadow-purple-950/40 animate-[popupIn_0.2s_ease-out]">
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-3xl">
+          <div className="w-full max-w-sm rounded-3xl border border-purple-500/30 bg-[#151020] p-6 sm:p-7 shadow-2xl shadow-purple-950/40 animate-[popupIn_0.2s_ease-out] ui-card">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-3xl ui-card">
               🚪
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-black text-center mt-5">
+            <h2 className="text-xl sm:text-2xl font-black text-center mt-5 ui-section-title">
               {t.logoutTitle}
             </h2>
 
