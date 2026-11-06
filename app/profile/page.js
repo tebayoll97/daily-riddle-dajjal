@@ -23,6 +23,9 @@ const translations = {
     security: "ACCOUNT SECURITY",
     securityTitle: "Account Security",
     securityDescription: "Protect your account and game progress.",
+    totalPoints: "TOTAL POINTS",
+    solved: "RIDDLES SOLVED",
+    lastCompleted: "Last Completed",
     dateLocale: "en-US",
   },
   id: {
@@ -38,6 +41,9 @@ const translations = {
     security: "KEAMANAN AKUN",
     securityTitle: "Keamanan Akun",
     securityDescription: "Lindungi akun dan progres permainanmu.",
+    totalPoints: "TOTAL POIN",
+    solved: "TEKA-TEKI SELESAI",
+    lastCompleted: "Terakhir Diselesaikan",
     dateLocale: "id-ID",
   },
 };
@@ -48,6 +54,7 @@ export default function ProfilePage() {
   const t = translations[language] || translations.en;
 
   const [player, setPlayer] = useState(null);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -72,7 +79,7 @@ export default function ProfilePage() {
 
         const { data, error: playerError } = await supabase
           .from("players")
-          .select("nickname, server_number, created_at, avatar_url")
+          .select("id, nickname, server_number, created_at, avatar_url")
           .eq("auth_user_id", session.user.id)
           .maybeSingle();
 
@@ -83,7 +90,24 @@ export default function ProfilePage() {
           return;
         }
 
-        if (active) setPlayer(data);
+        const statsResponse = await fetch(`/api/player/${data.id}`, {
+          cache: "no-store",
+        });
+
+        const statsResult = await statsResponse.json();
+
+        if (!statsResponse.ok) {
+          throw new Error(statsResult.error || t.error);
+        }
+
+        if (active) {
+          setPlayer(data);
+          setStats(statsResult.stats || {
+            total_points: 0,
+            riddles_solved: 0,
+            last_completed_at: null,
+          });
+        }
       } catch (err) {
         console.error(err);
 
@@ -126,6 +150,14 @@ export default function ProfilePage() {
   }
 
   if (!player) return null;
+
+  const lastCompletedDate = stats?.last_completed_at
+    ? new Date(stats.last_completed_at).toLocaleDateString(t.dateLocale, {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
 
   const joinedDate = player.created_at
     ? new Date(player.created_at).toLocaleDateString(
@@ -175,6 +207,25 @@ export default function ProfilePage() {
             Server {player.server_number}
           </p>
 
+          <div className="grid grid-cols-2 gap-3 mt-6">
+            <div className="rounded-xl bg-[#080711] border border-purple-500/10 p-4 text-center">
+              <p className="text-2xl font-black text-yellow-400">
+                {Number(stats?.total_points || 0).toLocaleString()}
+              </p>
+              <p className="text-gray-500 text-[10px] tracking-wider mt-2">
+                {t.totalPoints}
+              </p>
+            </div>
+            <div className="rounded-xl bg-[#080711] border border-purple-500/10 p-4 text-center">
+              <p className="text-2xl font-black text-purple-300">
+                {Number(stats?.riddles_solved || 0).toLocaleString()}
+              </p>
+              <p className="text-gray-500 text-[10px] tracking-wider mt-2">
+                {t.solved}
+              </p>
+            </div>
+          </div>
+
           <Link
             href="/profile/edit"
             className="block text-center mt-5 w-full rounded-xl border border-purple-400/40 bg-purple-500/10 hover:bg-purple-500/20 py-3 text-purple-200 font-bold tracking-wider transition"
@@ -208,6 +259,15 @@ export default function ProfilePage() {
               </span>
               <span className="font-semibold">
                 {joinedDate}
+              </span>
+            </div>
+
+            <div className="flex justify-between gap-4 text-sm">
+              <span className="text-gray-400">
+                {t.lastCompleted}
+              </span>
+              <span className="font-semibold text-right">
+                {lastCompletedDate}
               </span>
             </div>
 
