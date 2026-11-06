@@ -104,7 +104,7 @@ export default function PublicPlayerProfile() {
 
         <div className="text-5xl">👤</div>
 
-        <h1 className="text-2xl font-black mt-5">
+        <h1 className="text-2xl font-black mt-5 ui-title">
           {t.notFound}
         </h1>
 
@@ -149,7 +149,7 @@ export default function PublicPlayerProfile() {
             THE DAILY RIDDLE
           </p>
 
-          <h1 className="text-3xl font-black mt-3">
+          <h1 className="text-3xl font-black mt-3 ui-title">
             {t.title}
           </h1>
 
@@ -159,7 +159,7 @@ export default function PublicPlayerProfile() {
 
         </div>
 
-        <div className="mt-10 rounded-2xl border border-purple-500/30 bg-[#151020] p-6">
+        <div className="mt-10 rounded-2xl border border-purple-500/30 bg-[#151020] p-6 ui-card">
 
           {/* Player Avatar */}
           <div className="w-28 h-28 rounded-full overflow-hidden bg-purple-600/20 border-2 border-purple-400/50 flex items-center justify-center mx-auto">
@@ -178,7 +178,7 @@ export default function PublicPlayerProfile() {
 
           </div>
 
-          <h2 className="text-2xl font-black text-center mt-5 break-words">
+          <h2 className="text-2xl font-black text-center mt-5 break-words ui-section-title">
             {player.nickname}
           </h2>
 
