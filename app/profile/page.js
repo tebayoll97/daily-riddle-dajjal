@@ -180,12 +180,12 @@ export default function ProfilePage() {
           DAJJAL & VEYLORA GAMING UNIVERSE
         </p>
 
-        <h1 className="text-3xl font-black mt-3">
+        <h1 className="text-3xl font-black mt-3 ui-title">
           {t.title}
         </h1>
 
         {/* PLAYER PROFILE */}
-        <div className="mt-8 rounded-2xl border border-purple-500/30 bg-[#151020] p-6">
+        <div className="mt-8 rounded-2xl border border-purple-500/30 bg-[#151020] p-6 ui-card">
 
           <div className="w-28 h-28 rounded-full overflow-hidden bg-purple-600/20 border-2 border-purple-400/50 flex items-center justify-center mx-auto">
             {player.avatar_url ? (
@@ -201,7 +201,7 @@ export default function ProfilePage() {
             )}
           </div>
 
-          <h2 className="text-2xl font-bold text-center mt-4">
+          <h2 className="text-2xl font-bold text-center mt-4 ui-section-title">
             {player.nickname}
           </h2>
 
@@ -210,7 +210,7 @@ export default function ProfilePage() {
           </p>
 
           <div className="grid grid-cols-2 gap-3 mt-6">
-            <div className="rounded-xl bg-[#080711] border border-purple-500/10 p-4 text-center">
+            <div className="rounded-xl bg-[#080711] border border-purple-500/10 p-4 text-center ui-card">
               <p className="text-2xl font-black text-yellow-400">
                 {Number(stats?.total_points || 0).toLocaleString()}
               </p>
@@ -218,7 +218,7 @@ export default function ProfilePage() {
                 {t.totalPoints}
               </p>
             </div>
-            <div className="rounded-xl bg-[#080711] border border-purple-500/10 p-4 text-center">
+            <div className="rounded-xl bg-[#080711] border border-purple-500/10 p-4 text-center ui-card">
               <p className="text-2xl font-black text-purple-300">
                 {Number(stats?.riddles_solved || 0).toLocaleString()}
               </p>
@@ -286,7 +286,7 @@ export default function ProfilePage() {
               {t.security}
             </p>
 
-            <h2 className="text-xl font-bold mt-2">
+            <h2 className="text-xl font-bold mt-2 ui-section-title">
               {t.securityTitle}
             </h2>
 
