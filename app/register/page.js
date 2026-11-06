@@ -41,6 +41,8 @@ const translations = {
       "Please use a Google account to create this player profile.",
     activeSession:
       "You already have an active account session. Please use that account or sign out first.",
+    successTitle: "PLAYER PROFILE CREATED!",
+    successDescription: "Your identity is ready. Entering the Gaming Universe...",
   },
   id: {
     registration: "PENDAFTARAN PEMAIN",
@@ -75,6 +77,8 @@ const translations = {
       "Gunakan akun Google untuk membuat profil pemain ini.",
     activeSession:
       "Kamu masih memiliki sesi akun aktif. Silakan gunakan akun tersebut atau logout terlebih dahulu.",
+    successTitle: "PROFIL PEMAIN BERHASIL DIBUAT!",
+    successDescription: "Identitasmu sudah siap. Memasuki Gaming Universe...",
   },
 };
 
@@ -103,6 +107,7 @@ export default function RegisterPage() {
 
   const [error, setError] = useState("");
   const [blocked, setBlocked] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
 
   const [canGoogleLogin, setCanGoogleLogin] = useState(false);
   const [googleNeedsProfile, setGoogleNeedsProfile] = useState(false);
@@ -366,7 +371,8 @@ export default function RegisterPage() {
         throw insertError;
       }
 
-      router.replace("/game");
+      setSuccessOpen(true);
+      window.setTimeout(() => router.replace("/game"), 1700);
     } catch (err) {
       console.error("Registration error:", err);
       setError(err.message || t.failed);
@@ -571,6 +577,17 @@ export default function RegisterPage() {
         )}
 
       </div>
+
+      {successOpen && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div role="alertdialog" aria-modal="true" aria-labelledby="registration-success-title" className="w-full max-w-sm rounded-3xl border border-emerald-400/30 bg-[#151020] p-6 text-center shadow-[0_20px_80px_rgba(0,0,0,0.7)]">
+            <GameCharacter character="dajjal" expression="happy" animation="float" size={80} />
+            <h2 id="registration-success-title" className="mt-3 text-lg font-black text-emerald-300">{t.successTitle}</h2>
+            <p className="mt-3 text-sm leading-relaxed text-gray-300">{t.successDescription}</p>
+            <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full w-full origin-left rounded-full bg-emerald-400 animate-pulse" /></div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
