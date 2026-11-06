@@ -168,7 +168,7 @@ export default function Header() {
     },
     {
       name: t.play,
-      href: "/game",
+      href: "/games",
       icon: "✦",
     },
     {
