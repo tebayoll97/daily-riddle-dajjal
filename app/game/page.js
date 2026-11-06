@@ -841,7 +841,7 @@ export default function GamePage() {
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="answer-feedback-title"
-            className={`relative w-full max-w-sm max-h-[90dvh] overflow-y-auto overscroll-contain rounded-3xl border ${currentFeedback.border} bg-[#151020] p-6 sm:p-8 text-center shadow-[0_20px_90px_rgba(0,0,0,0.7)] animate-in fade-in zoom-in-95 duration-200`}
+            className={`relative w-full max-w-sm max-h-[90dvh] overflow-y-auto overscroll-contain rounded-3xl border ${currentFeedback.border} bg-[#151020] p-6 sm:p-8 text-center shadow-[0_20px_90px_rgba(0,0,0,0.7)] animate-in fade-in zoom-in-95 duration-200 ui-popup ui-gradient-frame`}
           >
             {feedback.type === "success" && (
               <>
