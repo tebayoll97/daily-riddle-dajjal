@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import GameCharacter from "./lib/GameCharacter";
+import GameCharacter from "@/lib/GameCharacter";
 import { useLanguage } from "./components/LanguageProvider";
 
 const translations = {
