@@ -13,6 +13,9 @@ import {
   saveAudioSettings,
 } from "@/lib/audio/audioSettings";
 
+const gameplayStorageKey = "dajjal-gameplay-settings";
+const defaultGameplaySettings = { confirmBeforeExit: true, showInstructions: true };
+
 const translations = {
   en: {
     loading: "Loading today's mystery...",
@@ -62,6 +65,9 @@ const translations = {
     finishedLabel: "CHALLENGE FINISHED",
     scoreLabel: "YOUR SCORE",
     server: "SERVER",
+    instructionsTitle: "HOW TO PLAY",
+    instructionsBody: "Read the riddle and hint carefully. Submit your answer before your three attempts run out. Earn more points by solving it with fewer attempts.",
+    exitConfirm: "Leave this game? Your current challenge progress may be affected.",
   },
 
   id: {
@@ -112,6 +118,9 @@ const translations = {
     finishedLabel: "TANTANGAN SELESAI",
     scoreLabel: "SKOR KAMU",
     server: "SERVER",
+    instructionsTitle: "CARA BERMAIN",
+    instructionsBody: "Baca teka-teki dan petunjuk dengan teliti. Kirim jawaban sebelum tiga kesempatanmu habis. Raih poin lebih banyak dengan kesempatan sesedikit mungkin.",
+    exitConfirm: "Tinggalkan permainan ini? Progres tantangan yang sedang berjalan mungkin terpengaruh.",
   },
 };
 
@@ -135,6 +144,8 @@ export default function GamePage() {
 
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [feedback, setFeedback] = useState(null);
+  const [gameplaySettings, setGameplaySettings] = useState(defaultGameplaySettings);
+  const [instructionsOpen, setInstructionsOpen] = useState(false);
 
   const audioStartedRef = useRef(false);
   const audioSettingsRef = useRef(null);
@@ -146,6 +157,36 @@ export default function GamePage() {
       ? Math.round(riddle.points * (1 - attemptsUsed * 0.3))
       : 0
     : 0;
+
+  // LOAD GAMEPLAY PREFERENCES AND GUARD ACCIDENTAL EXIT
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(gameplayStorageKey);
+      if (stored) {
+        const settings = { ...defaultGameplaySettings, ...JSON.parse(stored) };
+        setGameplaySettings(settings);
+        setInstructionsOpen(Boolean(settings.showInstructions));
+      }
+    } catch (error) { console.error("Gameplay settings load error:", error); }
+  }, []);
+
+  useEffect(() => {
+    if (!gameplaySettings.confirmBeforeExit || finished) return;
+    const handleBeforeUnload = (event) => { event.preventDefault(); event.returnValue = ""; };
+    const handleInternalNavigation = (event) => {
+      const anchor = event.target.closest?.("a[href]");
+      if (!anchor) return;
+      const target = new URL(anchor.href, window.location.href);
+      const leavingGame = target.origin !== window.location.origin || !target.pathname.startsWith("/game");
+      if (leavingGame && !window.confirm(t.exitConfirm)) { event.preventDefault(); event.stopPropagation(); }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("click", handleInternalNavigation, true);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("click", handleInternalNavigation, true);
+    };
+  }, [gameplaySettings.confirmBeforeExit, finished, t.exitConfirm]);
 
   // AUDIO SETTINGS
   // Audio tidak dihentikan saat berpindah halaman.
@@ -454,7 +495,7 @@ export default function GamePage() {
   if (loading) {
     return (
       <main className="min-h-[65vh] bg-[#080711] text-white flex flex-col items-center justify-center gap-4 p-6">
-        <div className="w-12 h-12 rounded-full border-2 border-purple-500/20 border-t-purple-400 animate-spin" />
+        <GameCharacter character="veylora" expression="thinking" animation="float" size={76} className="my-1" />
         <p className="text-purple-300 text-sm animate-pulse">
           {t.loading}
         </p>
@@ -705,6 +746,14 @@ export default function GamePage() {
               <h2 className="text-xl sm:text-2xl font-black text-center">
                 {t.solveRiddle}
               </h2>
+
+              {gameplaySettings.showInstructions && instructionsOpen && (
+                <div className="mt-5 rounded-xl border border-purple-400/20 bg-purple-500/5 p-4 text-left">
+                  <div className="flex items-center gap-2 text-purple-300 text-xs font-bold tracking-wider"><span>✦</span><span>{t.instructionsTitle}</span></div>
+                  <p className="mt-2 text-xs sm:text-sm leading-relaxed text-gray-400">{t.instructionsBody}</p>
+                  <button type="button" onClick={() => setInstructionsOpen(false)} className="mt-3 text-[11px] font-bold text-purple-300 hover:text-white">{language === "id" ? "SEMBUNYIKAN" : "HIDE"}</button>
+                </div>
+              )}
 
               <div className="mt-6 rounded-2xl bg-[#080711]/70 border border-purple-500/10 p-5 sm:p-6">
                 <p className="text-gray-200 text-sm sm:text-base leading-8 text-center whitespace-pre-line">
