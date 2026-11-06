@@ -26,7 +26,7 @@ export default function EditProfilePage() {
   const [preview, setPreview] = useState("");
   const [removeAvatar, setRemoveAvatar] = useState(false);
 
-  const [message, setMessage] = useState("");
+  const [successOpen, setSuccessOpen] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -97,7 +97,6 @@ export default function EditProfilePage() {
     if (!file) return;
 
     setError("");
-    setMessage("");
 
     const allowedTypes = [
       "image/jpeg",
@@ -138,7 +137,6 @@ export default function EditProfilePage() {
     if (!player || saving) return;
 
     setError("");
-    setMessage("");
 
     const cleanNickname = nickname.trim();
     const cleanServer = Number(serverNumber);
@@ -255,11 +253,8 @@ export default function EditProfilePage() {
       clearPreview();
       setRemoveAvatar(false);
 
-      setMessage(
-        isID
-          ? "Profil berhasil diperbarui!"
-          : "Profile updated successfully!"
-      );
+      setSuccessOpen(true);
+      window.setTimeout(() => router.replace("/profile"), 1800);
     } catch (err) {
       // Remove newly uploaded photo if database update failed
       if (uploadedPath) {
@@ -352,8 +347,7 @@ export default function EditProfilePage() {
                   onClick={() => {
                     clearPreview();
                     setRemoveAvatar(true);
-                    setMessage("");
-                  }}
+                                  }}
                   className="text-xs text-red-400 hover:text-red-300"
                 >
                   {isID ? "Hapus Foto Profil" : "Remove Profile Photo"}
@@ -411,12 +405,6 @@ export default function EditProfilePage() {
               </div>
             )}
 
-            {message && (
-              <div className="rounded-xl border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-300">
-                {message}
-              </div>
-            )}
-
             {/* Save */}
             <button
               type="submit"
@@ -434,6 +422,28 @@ export default function EditProfilePage() {
 
           </form>
         </div>
+      {successOpen && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-md p-5">
+          <div role="alertdialog" aria-modal="true" aria-labelledby="profile-success-title" className="w-full max-w-sm rounded-3xl border border-emerald-400/30 bg-[#151020] p-7 text-center shadow-[0_20px_80px_rgba(0,0,0,0.65)]">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/10 text-4xl text-emerald-300">✓</div>
+            <h2 id="profile-success-title" className="mt-5 text-xl font-black text-emerald-300">
+              {isID ? "PROFIL BERHASIL DIPERBARUI!" : "PROFILE UPDATED!"}
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-gray-300">
+              {isID ? "Perubahan profilmu berhasil disimpan. Mengarahkan kembali ke halaman profil..." : "Your profile changes have been saved. Returning to your profile..."}
+            </p>
+            <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-white/10">
+              <div className="h-full w-full origin-left rounded-full bg-emerald-400 animate-[profileRedirect_1.8s_linear_forwards]" />
+            </div>
+            <style jsx>{`
+              @keyframes profileRedirect {
+                from { transform: scaleX(0); }
+                to { transform: scaleX(1); }
+              }
+            `}</style>
+          </div>
+        </div>
+      )}
       </div>
     </main>
   );
