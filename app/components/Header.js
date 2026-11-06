@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { supabaseAdminClient } from "@/lib/supabaseAdminClient";
 import { useLanguage } from "./LanguageProvider";
@@ -41,22 +41,41 @@ export default function Header() {
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [audioLoaded, setAudioLoaded] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
+  const headerRef = useRef(null);
 
   const t = translations[language] || translations.en;
 
   useEffect(() => {
-    let ticking = false;
+    let frame = 0;
     const handleScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(() => {
-        setIsCompact(window.scrollY > 48);
-        ticking = false;
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        const y = window.scrollY;
+        setIsCompact((current) => current ? y > 28 : y > 88);
+        frame = 0;
       });
     };
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  useEffect(() => {
+    const element = headerRef.current;
+    if (!element) return;
+    const updateHeight = () => {
+      document.documentElement.style.setProperty(
+        "--site-header-height",
+        `${Math.ceil(element.getBoundingClientRect().height)}px`
+      );
+    };
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(element);
+    return () => observer.disconnect();
   }, []);
 
   // LOAD GLOBAL AUDIO PREFERENCES
@@ -215,7 +234,7 @@ export default function Header() {
     "w-10 h-10 flex items-center justify-center rounded-xl border transition-all active:scale-95";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-purple-500/20 bg-[#080711]/95 backdrop-blur-lg">
+    <header ref={headerRef} className="sticky top-0 z-50 border-b border-purple-500/20 bg-[#080711]/95 backdrop-blur-lg">
       <div className="max-w-6xl mx-auto px-4">
 
         {/* TOP HEADER */}
@@ -366,7 +385,7 @@ export default function Header() {
                 </span>
 
                 {active && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-full bg-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.9)]" />
+                  <span className="absolute bottom-0 left-1/2 h-[2px] w-12 -translate-x-1/2 rounded-full bg-gradient-to-r from-transparent via-purple-300 to-transparent shadow-[0_0_7px_rgba(192,132,252,0.95),0_0_16px_rgba(168,85,247,0.55)]" />
                 )}
               </Link>
             );
