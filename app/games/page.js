@@ -155,7 +155,7 @@ export default function GamesPage() {
 
       {showError && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-5 backdrop-blur-sm" onClick={() => setShowError(false)}>
-          <div role="alertdialog" aria-modal="true" aria-labelledby="games-error-title" className="w-full max-w-sm rounded-2xl border border-purple-500/30 bg-[#151020] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.6)]" onClick={(event) => event.stopPropagation()}>
+          <div role="alertdialog" aria-modal="true" aria-labelledby="games-error-title" className="w-full max-w-sm rounded-2xl border border-purple-500/30 bg-[#151020] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.6)] ui-popup ui-gradient-frame" onClick={(event) => event.stopPropagation()}>
             <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-red-500/20 bg-red-500/10 text-2xl text-red-400">!</div>
             <h2 id="games-error-title" className="text-center text-lg font-black">{t.errorTitle}</h2>
             <p className="mt-3 text-center text-sm text-gray-400">{t.error}</p>
