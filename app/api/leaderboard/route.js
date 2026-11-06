@@ -9,6 +9,8 @@ export async function GET() {
       .order("total_points", { ascending: false })
       .order("riddles_solved", { ascending: false })
       .order("last_completed_at", { ascending: true })
+      // Stable tie-breaker keeps ranks deterministic when all score fields match.
+      .order("player_id", { ascending: true })
       .limit(100);
 
     if (error) throw error;
