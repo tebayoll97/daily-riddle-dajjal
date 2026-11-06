@@ -204,12 +204,6 @@ main h1:not(.welcome-title) {
   text-wrap: balance;
 }
 
-main h2 {
-  font-size: clamp(1.05rem, 0.92rem + 1vw, 1.65rem);
-  line-height: 1.25;
-  text-wrap: balance;
-}
-
 main h1:not(.welcome-title) + p {
   font-size: clamp(0.78rem, 0.73rem + 0.32vw, 0.98rem);
   line-height: 1.6;
@@ -224,4 +218,19 @@ main h1:not(.welcome-title) + p {
   [data-modal-panel] {
     animation: none !important;
   }
+}
+
+
+/* Shared card surfaces and responsive component safety */
+.ui-card {
+  min-width: 0;
+  border-color: rgba(168, 85, 247, 0.22);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14), inset 0 1px 0 rgba(192, 132, 252, 0.035);
+}
+.ui-card > * { min-width: 0; }
+.ui-title, .ui-section-title { max-width: 100%; }
+.ui-subtitle, .ui-section-subtitle { overflow-wrap: anywhere; }
+@media (max-width: 380px) {
+  main .ui-card { border-radius: 1rem; }
+  main .ui-title { letter-spacing: -0.025em; }
 }
