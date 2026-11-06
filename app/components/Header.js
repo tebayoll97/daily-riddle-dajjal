@@ -40,8 +40,24 @@ export default function Header() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [audioLoaded, setAudioLoaded] = useState(false);
+  const [isCompact, setIsCompact] = useState(false);
 
   const t = translations[language] || translations.en;
+
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        setIsCompact(window.scrollY > 48);
+        ticking = false;
+      });
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // LOAD GLOBAL AUDIO PREFERENCES
   useEffect(() => {
@@ -203,21 +219,21 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-4">
 
         {/* TOP HEADER */}
-        <div className="flex items-center justify-between gap-3 py-3">
+        <div className={`flex items-center justify-between gap-3 transition-all duration-300 ease-out ${isCompact ? "py-1.5" : "py-3"}`}>
 
           {/* BRAND */}
           <Link
             href="/"
             className="min-w-0 flex flex-col"
           >
-            <h1 className="text-sm sm:text-base font-black tracking-wide text-white leading-tight">
+            <h1 className={`font-black tracking-wide text-white leading-tight transition-all duration-300 ${isCompact ? "text-xs sm:text-sm" : "text-sm sm:text-base"}`}>
               DAJJAL
               <span className="text-purple-400">
                 {" "} & VEYLORA
               </span>
             </h1>
 
-            <p className="text-[8px] sm:text-[9px] tracking-[0.13em] text-gray-500 mt-1">
+            <p className={`overflow-hidden tracking-[0.13em] text-gray-500 transition-all duration-300 ${isCompact ? "mt-0 max-h-0 text-[0px] opacity-0" : "mt-1 max-h-4 text-[8px] opacity-100 sm:text-[9px]"}`}>
               GAMING UNIVERSE
             </p>
           </Link>
@@ -279,7 +295,7 @@ export default function Header() {
         </div>
 
         {/* LANGUAGE */}
-        <div className="flex items-center justify-center gap-2 pb-3">
+        <div className={`flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 ease-out ${isCompact ? "max-h-0 pb-0 opacity-0" : "max-h-10 pb-3 opacity-100"}`}>
           <button
             type="button"
             onClick={() => setLanguage("en")}
@@ -321,14 +337,16 @@ export default function Header() {
                 key={link.href}
                 href={link.href}
                 aria-current={active ? "page" : undefined}
-                className={`relative flex flex-col items-center justify-center gap-1 py-3 mx-1 rounded-t-xl transition-all duration-200 ${
+                className={`relative flex flex-col items-center justify-center gap-1 mx-1 rounded-t-xl transition-all duration-300 ease-out ${
+                  isCompact ? "py-1.5" : "py-3"
+                } ${
                   active
                     ? "text-purple-300 bg-purple-500/15"
                     : "text-gray-400 hover:text-purple-300 hover:bg-purple-500/10"
                 }`}
               >
                 <span
-                  className={`text-lg transition-all duration-200 ${
+                  className={`transition-all duration-300 ${isCompact ? "text-sm" : "text-lg"} ${
                     active
                       ? "text-purple-300 scale-110 drop-shadow-[0_0_8px_rgba(192,132,252,0.7)]"
                       : ""
@@ -338,7 +356,7 @@ export default function Header() {
                 </span>
 
                 <span
-                  className={`text-[11px] sm:text-xs text-center transition-all ${
+                  className={`text-center transition-all duration-300 ${isCompact ? "text-[9px] sm:text-[10px]" : "text-[11px] sm:text-xs"} ${
                     active
                       ? "font-bold text-white"
                       : "font-medium"
