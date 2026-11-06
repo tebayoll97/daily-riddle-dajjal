@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import GameCharacter from "@/lib/GameCharacter";
 import { useLanguage } from "../../components/LanguageProvider";
 
 const translations = {
@@ -58,6 +59,8 @@ export default function PublicPlayerProfile() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let active = true;
+
     async function loadProfile() {
       try {
         setLoading(true);
@@ -74,26 +77,41 @@ export default function PublicPlayerProfile() {
           throw new Error(result.error || t.error);
         }
 
-        setPlayer(result.player);
-        setStats(result.stats);
+        if (active) {
+          setPlayer(result.player);
+          setStats(result.stats);
+        }
 
       } catch (err) {
         console.error(err);
-        setError(err.message || t.genericError);
+        if (active) setError(err.message || t.genericError);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }
 
     if (playerId) {
       loadProfile();
     }
-  }, [playerId]);
+
+    return () => {
+      active = false;
+    };
+  }, [playerId, t.error, t.genericError]);
 
   if (loading) {
     return (
-      <main className="min-h-[70vh] flex items-center justify-center bg-[#080711] text-purple-300">
-        {t.loading}
+      <main className="min-h-[70vh] bg-[#080711] text-white flex flex-col items-center justify-center gap-3 p-6">
+        <GameCharacter
+          character="veylora"
+          expression="thinking"
+          animation="float"
+          size={82}
+        />
+        <div className="flex items-center gap-2 text-purple-300">
+          <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+          <p className="text-xs tracking-[0.2em] animate-pulse">{t.loading}</p>
+        </div>
       </main>
     );
   }
