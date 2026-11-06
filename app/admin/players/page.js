@@ -326,7 +326,7 @@ export default function AdminPlayersPage() {
     return (
       <main className="min-h-screen bg-[#080711] text-white flex flex-col items-center justify-center px-5 text-center">
         <div className="text-5xl">🔒</div>
-        <h1 className="text-2xl font-black mt-5">
+        <h1 className="text-2xl font-black mt-5 ui-title">
           {t.accessDenied}
         </h1>
         <button
@@ -350,7 +350,7 @@ export default function AdminPlayersPage() {
               THE DAILY RIDDLE
             </p>
 
-            <h1 className="text-3xl sm:text-4xl font-black mt-3">
+            <h1 className="text-3xl sm:text-4xl font-black mt-3 ui-title">
               {t.title}{" "}
               <span className="text-purple-400">
                 {t.titleAccent}
@@ -381,9 +381,9 @@ export default function AdminPlayersPage() {
         </header>
 
         {/* ADMIN INFO */}
-        <section className="mt-8 rounded-2xl border border-purple-500/20 bg-[#151020] p-4 sm:p-5">
+        <section className="mt-8 rounded-2xl border border-purple-500/20 bg-[#151020] p-4 sm:p-5 ui-card">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-xl">
+            <div className="w-11 h-11 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-xl ui-card">
               ♛
             </div>
 
@@ -404,7 +404,7 @@ export default function AdminPlayersPage() {
 
         {/* STATISTICS */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
-          <div className="rounded-2xl border border-purple-500/20 bg-[#151020] p-5">
+          <div className="rounded-2xl border border-purple-500/20 bg-[#151020] p-5 ui-card">
             <p className="text-[10px] tracking-widest text-gray-400 font-bold">
               {t.total}
             </p>
@@ -416,7 +416,7 @@ export default function AdminPlayersPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-amber-500/20 bg-[#151020] p-5">
+          <div className="rounded-2xl border border-amber-500/20 bg-[#151020] p-5 ui-card">
             <p className="text-[10px] tracking-widest text-amber-300 font-bold">
               {t.guest}
             </p>
@@ -428,7 +428,7 @@ export default function AdminPlayersPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-blue-500/20 bg-[#151020] p-5">
+          <div className="rounded-2xl border border-blue-500/20 bg-[#151020] p-5 ui-card">
             <p className="text-[10px] tracking-widest text-blue-300 font-bold">
               {t.google}
             </p>
@@ -442,7 +442,7 @@ export default function AdminPlayersPage() {
         </section>
 
         {/* SEARCH */}
-        <section className="mt-8 rounded-2xl border border-purple-500/20 bg-[#151020] p-4 sm:p-5">
+        <section className="mt-8 rounded-2xl border border-purple-500/20 bg-[#151020] p-4 sm:p-5 ui-card">
           <form
             onSubmit={handleSearch}
             className="flex flex-col sm:flex-row gap-3"
@@ -496,7 +496,7 @@ export default function AdminPlayersPage() {
         <section className="mt-8">
           <div className="flex items-center justify-between gap-3 mb-4">
             <div>
-              <h2 className="text-sm font-black tracking-wider text-purple-300">
+              <h2 className="text-sm font-black tracking-wider text-purple-300 ui-section-title">
                 {t.playerList}
               </h2>
               <p className="text-xs text-gray-500 mt-1">
@@ -514,14 +514,14 @@ export default function AdminPlayersPage() {
           </div>
 
           {loading ? (
-            <div className="rounded-2xl border border-purple-500/20 bg-[#151020] min-h-64 flex flex-col items-center justify-center gap-4">
+            <div className="rounded-2xl border border-purple-500/20 bg-[#151020] min-h-64 flex flex-col items-center justify-center gap-4 ui-card">
               <div className="w-10 h-10 border-4 border-purple-500/20 border-t-purple-400 rounded-full animate-spin" />
               <p className="text-xs text-purple-300 font-bold tracking-widest animate-pulse">
                 {t.loading}
               </p>
             </div>
           ) : error ? (
-            <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
+            <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center ui-card">
               <div className="text-3xl">⚠️</div>
               <p className="text-sm text-red-300 mt-3">{error}</p>
               <button
@@ -532,7 +532,7 @@ export default function AdminPlayersPage() {
               </button>
             </div>
           ) : filteredPlayers.length === 0 ? (
-            <div className="rounded-2xl border border-purple-500/20 bg-[#151020] min-h-56 flex flex-col items-center justify-center text-center px-5">
+            <div className="rounded-2xl border border-purple-500/20 bg-[#151020] min-h-56 flex flex-col items-center justify-center text-center px-5 ui-card">
               <div className="text-4xl">👥</div>
               <p className="font-bold mt-4">{t.noPlayers}</p>
               <p className="text-xs text-gray-500 mt-2">
@@ -546,10 +546,10 @@ export default function AdminPlayersPage() {
                 {filteredPlayers.map((player) => (
                   <article
                     key={player.id}
-                    className="rounded-2xl border border-purple-500/20 bg-[#151020] p-4"
+                    className="rounded-2xl border border-purple-500/20 bg-[#151020] p-4 ui-card"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 shrink-0 rounded-xl border border-purple-500/20 bg-purple-600/10 flex items-center justify-center overflow-hidden">
+                      <div className="w-12 h-12 shrink-0 rounded-xl border border-purple-500/20 bg-purple-600/10 flex items-center justify-center overflow-hidden ui-card">
                         {player.avatarUrl ? (
                           <img
                             src={player.avatarUrl}
@@ -610,7 +610,7 @@ export default function AdminPlayersPage() {
               </div>
 
               {/* DESKTOP TABLE */}
-              <div className="hidden md:block overflow-x-auto rounded-2xl border border-purple-500/20 bg-[#151020]">
+              <div className="hidden md:block overflow-x-auto rounded-2xl border border-purple-500/20 bg-[#151020] ui-card">
                 <table className="w-full text-left">
                   <thead className="bg-purple-500/5 border-b border-purple-500/20">
                     <tr className="text-[10px] text-purple-300 tracking-wider">
@@ -631,7 +631,7 @@ export default function AdminPlayersPage() {
                       >
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3 min-w-48">
-                            <div className="w-10 h-10 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center overflow-hidden">
+                            <div className="w-10 h-10 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center overflow-hidden ui-card">
                               {player.avatarUrl ? (
                                 <img
                                   src={player.avatarUrl}
@@ -681,7 +681,7 @@ export default function AdminPlayersPage() {
 
           {/* PAGINATION */}
           {!loading && !error && pagination.totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-5 rounded-2xl border border-purple-500/20 bg-[#151020] p-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-5 rounded-2xl border border-purple-500/20 bg-[#151020] p-4 ui-card">
               <p className="text-xs text-gray-400">
                 {t.page} {page} {t.of} {pagination.totalPages}
               </p>
