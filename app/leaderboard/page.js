@@ -125,7 +125,7 @@ export default function LeaderboardPage() {
             THE DAILY RIDDLE
           </p>
 
-          <h1 className="text-3xl sm:text-4xl font-black mt-3">
+          <h1 className="text-3xl sm:text-4xl font-black mt-3 ui-title">
             GLOBAL <span className="text-purple-400">RANKING</span>
           </h1>
 
@@ -151,10 +151,10 @@ export default function LeaderboardPage() {
             </button>
           </div>
         ) : ranking.length === 0 ? (
-          <div className="mt-12 border border-purple-500/20 bg-[#151020] rounded-2xl p-10 text-center">
+          <div className="mt-12 border border-purple-500/20 bg-[#151020] rounded-2xl p-10 text-center ui-card">
             <div className="text-5xl">👑</div>
 
-            <h2 className="text-xl font-bold mt-5">
+            <h2 className="text-xl font-bold mt-5 ui-section-title">
               {t.noChampions}
             </h2>
 
@@ -241,7 +241,7 @@ export default function LeaderboardPage() {
             {/* FULL RANKING */}
             <section className="mt-12">
               <div className="flex items-center justify-between mb-5">
-                <h2 className="font-black tracking-wider">
+                <h2 className="font-black tracking-wider ui-section-title">
                   {t.topPlayers}
                 </h2>
 
@@ -250,7 +250,7 @@ export default function LeaderboardPage() {
                 </span>
               </div>
 
-              <div className="rounded-2xl border border-purple-500/20 bg-[#151020] overflow-hidden">
+              <div className="rounded-2xl border border-purple-500/20 bg-[#151020] overflow-hidden ui-card">
 
                 <div className="grid grid-cols-[45px_1fr_85px] sm:grid-cols-[60px_1fr_100px_110px] gap-2 px-4 py-4 bg-purple-500/10 text-[10px] text-gray-400 font-bold tracking-wider">
                   <span>{t.rank}</span>
