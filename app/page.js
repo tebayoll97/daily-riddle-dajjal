@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import GameCharacter from "./lib/GameCharacter";
 import { useLanguage } from "./components/LanguageProvider";
 
 const translations = {
@@ -50,12 +51,22 @@ export default function Home() {
       <div className="pointer-events-none absolute left-1/2 top-1/4 h-80 w-80 -translate-x-1/2 rounded-full bg-purple-600/10 blur-[110px]" />
       <div className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-indigo-600/10 blur-[100px]" />
 
-      <div className="relative z-10 mx-auto w-full max-w-4xl text-center">
+      <div className="relative z-10 mx-auto w-full max-w-5xl text-center">
         <p className="mb-5 text-[10px] font-bold tracking-[0.4em] text-purple-300 sm:text-xs">{t.present}</p>
-        <h1 className="text-3xl font-black leading-tight tracking-wide sm:text-6xl">
-          {t.title}
-          <span className="mt-2 block text-purple-400 drop-shadow-[0_0_22px_rgba(168,85,247,0.35)]">{t.accent}</span>
-        </h1>
+        <div className="flex items-center justify-center gap-1 sm:gap-5">
+          <div className="flex shrink-0 items-end justify-center">
+            <GameCharacter character="dajjal" expression="smug" animation="idle" size={112} className="sm:!w-[176px] sm:!h-[176px]" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl font-black leading-tight tracking-wide sm:text-6xl">
+              {t.title}
+              <span className="mt-2 block text-purple-400 drop-shadow-[0_0_22px_rgba(168,85,247,0.35)]">{t.accent}</span>
+            </h1>
+          </div>
+          <div className="flex shrink-0 items-end justify-center">
+            <GameCharacter character="veylora" expression="happy" animation="idle" size={112} className="sm:!w-[176px] sm:!h-[176px]" />
+          </div>
+        </div>
         <p className="mx-auto mt-6 max-w-2xl text-sm font-semibold tracking-wide text-gray-300 sm:text-base">{t.tagline}</p>
         <p className="mx-auto mt-4 max-w-xl text-xs leading-relaxed text-gray-500 sm:text-sm">{t.description}</p>
 
