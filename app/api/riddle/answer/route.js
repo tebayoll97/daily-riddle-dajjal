@@ -125,7 +125,7 @@ export async function POST(request) {
     ]
       .filter((item) => typeof item === "string")
       .map((item) =>
-        item.trim().toLowerCase().replace(/\\s+/g, " ")
+        item.trim().toLowerCase().replace(/\s+/g, " ")
       );
 
     let isCorrect = acceptedAnswers.includes(normalizedAnswer);
