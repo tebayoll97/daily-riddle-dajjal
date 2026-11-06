@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useLanguage } from "../components/LanguageProvider";
+import GameCharacter from "@/lib/GameCharacter";
 
 const translations = {
   en: {
@@ -377,7 +378,10 @@ export default function RegisterPage() {
   if (checking) {
     return (
       <main className="min-h-screen bg-[#080711] text-white flex items-center justify-center p-6">
-        <p className="text-purple-300">{t.checking}</p>
+        <div className="flex flex-col items-center gap-2">
+          <GameCharacter character="dajjal" expression="thinking" animation="float" size={72} />
+          <p className="text-xs tracking-[0.2em] text-purple-300 animate-pulse">{t.checking}</p>
+        </div>
       </main>
     );
   }
