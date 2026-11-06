@@ -84,9 +84,9 @@ export default function GamesPage() {
   }
 
   const games = [
-    { key: "rune", icon: "ᚱ", name: t.rune, description: t.runeDesc },
-    { key: "memory", icon: "◈", name: t.memory, description: t.memoryDesc },
-    { key: "logic", icon: "✧", name: t.logic, description: t.logicDesc },
+    { key: "rune", icon: "ᚱ", name: t.rune, description: t.runeDesc, image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=900&q=85", alt: "Ancient glowing runic symbols" },
+    { key: "memory", icon: "◈", name: t.memory, description: t.memoryDesc, image: "https://images.unsplash.com/photo-1606509036992-38f2048865f5?auto=format&fit=crop&w=900&q=85", alt: "Colorful puzzle pieces" },
+    { key: "logic", icon: "✧", name: t.logic, description: t.logicDesc, image: "https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=900&q=85", alt: "Strategy board game pieces" },
   ];
 
   return (
@@ -106,9 +106,16 @@ export default function GamesPage() {
             <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
             <h2 className="text-[10px] font-bold tracking-[0.25em] text-emerald-300">{t.available}</h2>
           </div>
-          <article className="relative overflow-hidden rounded-3xl border border-purple-400/30 bg-gradient-to-br from-[#241638] via-[#171024] to-[#100d19] p-6 shadow-[0_15px_60px_rgba(88,28,135,0.13)] sm:p-9">
+          <article className="relative overflow-hidden rounded-3xl border border-purple-400/30 bg-gradient-to-br from-[#241638] via-[#171024] to-[#100d19] shadow-[0_15px_60px_rgba(88,28,135,0.13)]">
             <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-purple-500/15 blur-3xl" />
-            <div className="relative flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative flex flex-col items-stretch sm:flex-row sm:items-center">
+              <div className="relative h-44 w-full overflow-hidden sm:h-64 sm:w-[42%]">
+                <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1100&q=90" alt="Mysterious glowing puzzle scene" className="h-full w-full object-cover opacity-80" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#171024] via-transparent to-purple-950/10 sm:bg-gradient-to-r sm:from-transparent sm:to-[#171024]" />
+                <div className="absolute bottom-4 left-5 rounded-full border border-purple-200/20 bg-black/40 px-3 py-1 text-[9px] font-bold tracking-[0.2em] text-purple-100 backdrop-blur">{t.daily}</div>
+              </div>
+              <div className="flex flex-1 flex-col items-start gap-4 p-6 sm:p-8">
+
               <div className="max-w-xl">
                 <p className="mb-3 text-[10px] font-bold tracking-[0.3em] text-purple-300">01 · {t.available}</p>
                 <h2 className="text-2xl font-black sm:text-3xl">{t.daily}</h2>
@@ -117,6 +124,7 @@ export default function GamesPage() {
               <button onClick={handlePlayDailyRiddle} disabled={loading} className="w-full shrink-0 rounded-xl bg-purple-600 px-7 py-4 text-sm font-black tracking-wider shadow-lg shadow-purple-900/30 transition hover:bg-purple-500 active:scale-[0.98] disabled:opacity-50 sm:w-auto">
                 {loading ? t.wait : t.play}
               </button>
+              </div>
             </div>
           </article>
         </section>
@@ -128,11 +136,17 @@ export default function GamesPage() {
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             {games.map((game, index) => (
-              <article key={game.key} className="rounded-2xl border border-white/10 bg-white/[0.035] p-5">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-purple-400/20 bg-purple-500/10 text-2xl text-purple-300">{game.icon}</div>
+              <article key={game.key} className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] transition duration-300 hover:border-purple-400/30 hover:bg-purple-500/[0.06]">
+                <div className="relative h-36 overflow-hidden">
+                  <img src={game.image} alt={game.alt} loading="lazy" className="h-full w-full object-cover opacity-75 transition duration-500 hover:scale-105" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#100d19] via-black/10 to-transparent" />
+                  <div className="absolute bottom-3 left-4 flex h-10 w-10 items-center justify-center rounded-xl border border-purple-200/20 bg-black/45 text-2xl text-purple-100 backdrop-blur">{game.icon}</div>
+                </div>
+                <div className="p-5">
                 <p className="mb-2 text-[9px] font-bold tracking-[0.2em] text-gray-500">0{index + 2} · {t.soon}</p>
                 <h3 className="text-base font-black">{game.name}</h3>
                 <p className="mt-2 text-xs leading-relaxed text-gray-500">{game.description}</p>
+                </div>
               </article>
             ))}
           </div>
