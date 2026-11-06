@@ -72,22 +72,20 @@ export default function Home() {
 
       <div className="relative z-20 mx-auto w-full max-w-5xl">
         <section className="sticky z-30 mx-auto h-[220px] w-full text-center sm:h-[250px]" style={{ top: "120px" }}>
-          <div className={`absolute left-1/2 top-0 h-[190px] w-[calc(100vw-36px)] max-w-3xl -translate-x-1/2 rounded-2xl border border-purple-400/35 bg-[#100b20]/95 shadow-[0_0_28px_rgba(147,51,234,0.14)] backdrop-blur-xl transition-transform duration-500 ease-out sm:h-[220px] ${isWelcomeCompact ? "scale-[0.78]" : "scale-100"}`} style={{ transformOrigin: "top center" }}>
+          <div className={`absolute left-1/2 top-0 mx-auto flex -translate-x-1/2 items-center justify-center rounded-2xl border border-purple-400/35 bg-[#100b20]/95 shadow-[0_0_28px_rgba(147,51,234,0.14)] backdrop-blur-xl transition-[width,height,border-radius] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isWelcomeCompact ? "h-[66px] w-[calc(100vw-16px)] max-w-3xl rounded-xl px-3 sm:h-[72px]" : "h-[190px] w-[calc(100vw-36px)] max-w-3xl px-3 sm:h-[220px] sm:px-8"}`}>
             <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-purple-300 to-transparent sm:inset-x-8" />
-            <div className={`absolute -left-1 -top-5 z-10 transition-transform duration-500 ease-out sm:-left-3 sm:-top-8 ${isWelcomeCompact ? "scale-[0.78]" : "scale-100"}`}>
+            <div className={`absolute left-0 top-0 z-10 transition-all duration-500 ease-out ${isWelcomeCompact ? "pointer-events-none -translate-x-3 -translate-y-3 scale-50 opacity-0" : "-translate-x-1 -translate-y-5 scale-100 opacity-100 sm:-translate-x-3 sm:-translate-y-8"}`}>
               <GameCharacter character="dajjal" expression="smug" animation="idle" size={76} className="drop-shadow-[0_4px_12px_rgba(239,68,68,0.28)]" />
             </div>
-            <div className={`absolute -right-1 -top-5 z-10 transition-transform duration-500 ease-out sm:-right-3 sm:-top-8 ${isWelcomeCompact ? "scale-[0.78]" : "scale-100"}`}>
+            <div className={`absolute right-0 top-0 z-10 transition-all duration-500 ease-out ${isWelcomeCompact ? "pointer-events-none translate-x-3 -translate-y-3 scale-50 opacity-0" : "translate-x-1 -translate-y-5 scale-100 opacity-100 sm:translate-x-3 sm:-translate-y-8"}`}>
               <GameCharacter character="veylora" expression="happy" animation="idle" size={76} className="drop-shadow-[0_4px_12px_rgba(192,132,252,0.28)]" />
             </div>
-            <div className={`absolute inset-0 flex items-center justify-center px-2 text-center transition-transform duration-500 ease-out sm:px-8 ${isWelcomeCompact ? "scale-[0.92]" : "scale-100"}`} style={{ transformOrigin: "center center" }}>
-              <div className="w-full min-w-0">
-                <p className="text-[8px] font-black tracking-[0.24em] text-purple-300 sm:text-xs sm:tracking-[0.28em]">{t.present}</p>
-                <h1 className="mt-3 whitespace-nowrap font-black leading-tight tracking-tight">
-                  <span className="block text-[clamp(1.05rem,5.4vw,3rem)] text-white">DAJJAL FAMILY</span>
-                  <span className="mt-1 block whitespace-nowrap text-[clamp(1rem,5.1vw,2.75rem)] text-purple-400 drop-shadow-[0_0_18px_rgba(168,85,247,0.4)]">GAMING UNIVERSE</span>
-                </h1>
-              </div>
+            <div className={`relative z-0 flex min-w-0 flex-col items-center justify-center text-center transition-all duration-500 ease-out ${isWelcomeCompact ? "w-full gap-0" : "w-full gap-2"}`}>
+              <p className={`font-black tracking-[0.24em] text-purple-300 transition-all duration-500 ${isWelcomeCompact ? "text-[7px] sm:text-[9px]" : "text-[8px] sm:text-xs"}`}>{t.present}</p>
+              <h1 className={`whitespace-nowrap font-black leading-tight tracking-tight transition-all duration-500 ${isWelcomeCompact ? "mt-0 text-[clamp(0.85rem,4.3vw,1.35rem)]" : "mt-1 text-[clamp(1.05rem,5.4vw,3rem)]"}`}>
+                <span className="block text-white">DAJJAL FAMILY</span>
+              </h1>
+              <p className={`overflow-hidden whitespace-nowrap font-black text-purple-400 transition-all duration-300 ${isWelcomeCompact ? "max-h-0 scale-90 opacity-0" : "mt-1 max-h-12 scale-100 text-[clamp(1rem,5.1vw,2.75rem)] opacity-100"}`}>GAMING UNIVERSE</p>
             </div>
             <div className="pointer-events-none absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent sm:inset-x-8" />
           </div>
