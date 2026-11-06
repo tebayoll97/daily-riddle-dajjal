@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { supabaseAdminClient } from "@/lib/supabaseAdminClient";
 import { useLanguage } from "./LanguageProvider";
@@ -41,7 +41,6 @@ export default function Header() {
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [audioLoaded, setAudioLoaded] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
-  const headerRef = useRef(null);
 
   const t = translations[language] || translations.en;
 
@@ -61,21 +60,6 @@ export default function Header() {
       window.removeEventListener("scroll", handleScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, []);
-
-  useEffect(() => {
-    const element = headerRef.current;
-    if (!element) return;
-    const updateHeight = () => {
-      document.documentElement.style.setProperty(
-        "--site-header-height",
-        `${Math.ceil(element.getBoundingClientRect().height)}px`
-      );
-    };
-    updateHeight();
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(element);
-    return () => observer.disconnect();
   }, []);
 
   // LOAD GLOBAL AUDIO PREFERENCES
@@ -234,7 +218,7 @@ export default function Header() {
     "w-10 h-10 flex items-center justify-center rounded-xl border transition-all active:scale-95";
 
   return (
-    <header ref={headerRef} className="sticky top-0 z-50 border-b border-purple-500/20 bg-[#080711]/95 backdrop-blur-lg">
+    <header className="sticky top-0 z-50 [overflow-anchor:none] border-b border-purple-500/20 bg-[#080711]/95 backdrop-blur-lg">
       <div className="max-w-6xl mx-auto px-4">
 
         {/* TOP HEADER */}
