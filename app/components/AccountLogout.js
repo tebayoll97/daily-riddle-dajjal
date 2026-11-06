@@ -124,85 +124,81 @@ export default function AccountLogout() {
         </button>
       )}
 
-      {showWarning && isGuest && (
-        <div className="space-y-4">
-          <h3 className="font-bold text-amber-300">
-            ⚠ {t.guestTitle}
-          </h3>
-
-          <p className="text-sm text-gray-300 leading-relaxed">
-            {t.guestMessage}
-          </p>
-
-          <p className="text-sm font-semibold text-purple-300">
-            {t.guestAction}
-          </p>
-
-          <Link
-            href="/profile#account-security"
-            className="block text-center rounded-lg bg-purple-600 hover:bg-purple-500 py-3 text-sm font-bold transition"
+      {(showWarning || showFinalConfirm) && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="logout-dialog-title"
+            className="w-full max-w-sm max-h-[88dvh] overflow-y-auto overscroll-contain rounded-2xl border border-red-500/25 bg-[#151020] p-5 sm:p-6 shadow-[0_20px_80px_rgba(0,0,0,0.7)]"
           >
-            {t.connect}
-          </Link>
-
-          {!showFinalConfirm ? (
-            <button
-              onClick={() => setShowFinalConfirm(true)}
-              className="w-full rounded-lg border border-red-500/30 bg-red-500/10 py-3 text-sm font-bold text-red-300"
-            >
-              {t.logoutAnyway}
-            </button>
-          ) : (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 space-y-3">
-              <p className="text-sm text-red-300">
-                {t.confirmGuest}
-              </p>
-
-              <button
-                onClick={handleLogout}
-                disabled={loading}
-                className="w-full rounded-lg bg-red-600 hover:bg-red-500 py-3 text-sm font-bold disabled:opacity-50"
-              >
-                {loading ? t.signingOut : t.confirm}
-              </button>
-            </div>
-          )}
-
-          <button
-            onClick={() => {
-              setShowWarning(false);
-              setShowFinalConfirm(false);
-              setError("");
-            }}
-            disabled={loading}
-            className="w-full rounded-lg bg-white/10 py-3 text-sm font-bold"
-          >
-            {t.cancel}
-          </button>
-        </div>
-      )}
-
-      {showFinalConfirm && !isGuest && (
-        <div className="space-y-3">
-          <p className="text-sm text-gray-300">
-            {t.confirmNormal}
-          </p>
-
-          <button
-            onClick={handleLogout}
-            disabled={loading}
-            className="w-full rounded-lg bg-red-600 hover:bg-red-500 py-3 text-sm font-bold disabled:opacity-50"
-          >
-            {loading ? t.signingOut : t.confirm}
-          </button>
-
-          <button
-            onClick={() => setShowFinalConfirm(false)}
-            disabled={loading}
-            className="w-full rounded-lg bg-white/10 py-3 text-sm font-bold"
-          >
-            {t.cancel}
-          </button>
+            {showWarning && isGuest ? (
+              <div className="space-y-4">
+                <h3 id="logout-dialog-title" className="font-bold text-amber-300">
+                  ⚠ {t.guestTitle}
+                </h3>
+                <p className="text-sm text-gray-300 leading-relaxed">{t.guestMessage}</p>
+                <p className="text-sm font-semibold text-purple-300">{t.guestAction}</p>
+                <Link
+                  href="/profile#account-security"
+                  onClick={() => setShowWarning(false)}
+                  className="block text-center rounded-lg bg-purple-600 hover:bg-purple-500 py-3 text-sm font-bold transition"
+                >
+                  {t.connect}
+                </Link>
+                {!showFinalConfirm ? (
+                  <button
+                    onClick={() => setShowFinalConfirm(true)}
+                    className="w-full rounded-lg border border-red-500/30 bg-red-500/10 py-3 text-sm font-bold text-red-300"
+                  >
+                    {t.logoutAnyway}
+                  </button>
+                ) : (
+                  <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 space-y-3">
+                    <p className="text-sm text-red-300">{t.confirmGuest}</p>
+                    <button
+                      onClick={handleLogout}
+                      disabled={loading}
+                      className="w-full rounded-lg bg-red-600 hover:bg-red-500 py-3 text-sm font-bold disabled:opacity-50"
+                    >
+                      {loading ? t.signingOut : t.confirm}
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={() => {
+                    setShowWarning(false);
+                    setShowFinalConfirm(false);
+                    setError("");
+                  }}
+                  disabled={loading}
+                  className="w-full rounded-lg bg-white/10 py-3 text-sm font-bold"
+                >
+                  {t.cancel}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <h3 id="logout-dialog-title" className="font-bold text-red-300">{t.title}</h3>
+                <p className="text-sm text-gray-300">{t.confirmNormal}</p>
+                <button
+                  onClick={handleLogout}
+                  disabled={loading}
+                  className="w-full rounded-lg bg-red-600 hover:bg-red-500 py-3 text-sm font-bold disabled:opacity-50"
+                >
+                  {loading ? t.signingOut : t.confirm}
+                </button>
+                <button
+                  onClick={() => setShowFinalConfirm(false)}
+                  disabled={loading}
+                  className="w-full rounded-lg bg-white/10 py-3 text-sm font-bold"
+                >
+                  {t.cancel}
+                </button>
+              </div>
+            )}
+            {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+          </div>
         </div>
       )}
 
