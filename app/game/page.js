@@ -506,10 +506,10 @@ export default function GamePage() {
   if (error || !riddle || !player) {
     return (
       <main className="min-h-[65vh] bg-[#080711] text-white flex items-center justify-center p-6">
-        <div className="w-full max-w-md text-center bg-[#151020] border border-purple-500/20 rounded-2xl p-8">
+        <div className="w-full max-w-md text-center bg-[#151020] border border-purple-500/20 rounded-2xl p-8 ui-card">
           <div className="text-4xl mb-4">🔮</div>
 
-          <h1 className="text-2xl font-black text-purple-400">
+          <h1 className="text-2xl font-black text-purple-400 ui-title">
             THE DAILY RIDDLE
           </h1>
 
@@ -595,7 +595,7 @@ export default function GamePage() {
               THE DAILY RIDDLE
             </p>
 
-            <h1 className="text-2xl sm:text-3xl font-black mt-3">
+            <h1 className="text-2xl sm:text-3xl font-black mt-3 ui-title">
               {finished
                 ? correct
                   ? t.completed
@@ -629,7 +629,7 @@ export default function GamePage() {
 
         {/* FINAL RESULT */}
         {finished ? (
-          <div className="relative mt-8 overflow-hidden border border-purple-500/30 rounded-3xl bg-gradient-to-b from-[#211536] to-[#100d19] p-6 sm:p-9 text-center shadow-[0_15px_60px_rgba(88,28,135,0.12)]">
+          <div className="relative mt-8 overflow-hidden border border-purple-500/30 rounded-3xl bg-gradient-to-b from-[#211536] to-[#100d19] p-6 sm:p-9 text-center shadow-[0_15px_60px_rgba(88,28,135,0.12)] ui-card">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-px bg-purple-400/70" />
 
             <div className="flex justify-center mb-3">
@@ -645,7 +645,7 @@ export default function GamePage() {
               THE DAILY RIDDLE
             </p>
 
-            <h2 className="text-2xl sm:text-3xl font-black mt-3">
+            <h2 className="text-2xl sm:text-3xl font-black mt-3 ui-section-title">
               {correct ? t.completed : t.challengeFinished}
             </h2>
 
@@ -654,7 +654,7 @@ export default function GamePage() {
             </p>
 
             <div className="grid grid-cols-2 gap-3 mt-8">
-              <div className="bg-[#080711]/80 border border-purple-500/10 rounded-2xl p-5">
+              <div className="bg-[#080711]/80 border border-purple-500/10 rounded-2xl p-5 ui-card">
                 <p className="text-3xl font-black text-purple-300">
                   {score}
                 </p>
@@ -663,7 +663,7 @@ export default function GamePage() {
                 </p>
               </div>
 
-              <div className="bg-[#080711]/80 border border-purple-500/10 rounded-2xl p-5">
+              <div className="bg-[#080711]/80 border border-purple-500/10 rounded-2xl p-5 ui-card">
                 <p className="text-3xl font-black text-purple-300">
                   {attemptsUsed}/3
                 </p>
@@ -681,7 +681,7 @@ export default function GamePage() {
               </p>
             </div>
 
-            <div className="mt-7 rounded-2xl border border-purple-500/20 bg-[#080711]/70 p-5">
+            <div className="mt-7 rounded-2xl border border-purple-500/20 bg-[#080711]/70 p-5 ui-card">
               <p className="text-yellow-400 font-bold text-sm tracking-wider">
                 {t.comeBack}
               </p>
@@ -699,7 +699,7 @@ export default function GamePage() {
           </div>
         ) : (
           <>
-            <div className="mt-8 border border-purple-500/30 rounded-3xl p-6 sm:p-8 bg-gradient-to-b from-[#1c142b] to-[#100d19] shadow-[0_15px_60px_rgba(88,28,135,0.10)]">
+            <div className="mt-8 border border-purple-500/30 rounded-3xl p-6 sm:p-8 bg-gradient-to-b from-[#1c142b] to-[#100d19] shadow-[0_15px_60px_rgba(88,28,135,0.10)] ui-card">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-purple-400 text-[10px] tracking-[0.25em] font-bold">
                   {t.todayMystery}
@@ -739,30 +739,30 @@ export default function GamePage() {
                 </p>
               </div>
 
-              <div className="w-16 h-16 mx-auto mt-3 mb-5 rounded-2xl border border-purple-400/20 bg-purple-500/10 flex items-center justify-center shadow-[0_0_35px_rgba(168,85,247,0.10)]">
+              <div className="w-16 h-16 mx-auto mt-3 mb-5 rounded-2xl border border-purple-400/20 bg-purple-500/10 flex items-center justify-center shadow-[0_0_35px_rgba(168,85,247,0.10)] ui-card">
                 <span className="text-4xl">🔮</span>
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-black text-center">
+              <h2 className="text-xl sm:text-2xl font-black text-center ui-section-title">
                 {t.solveRiddle}
               </h2>
 
               {gameplaySettings.showInstructions && instructionsOpen && (
-                <div className="mt-5 rounded-xl border border-purple-400/20 bg-purple-500/5 p-4 text-left">
+                <div className="mt-5 rounded-xl border border-purple-400/20 bg-purple-500/5 p-4 text-left ui-card">
                   <div className="flex items-center gap-2 text-purple-300 text-xs font-bold tracking-wider"><span>✦</span><span>{t.instructionsTitle}</span></div>
                   <p className="mt-2 text-xs sm:text-sm leading-relaxed text-gray-400">{t.instructionsBody}</p>
                   <button type="button" onClick={() => setInstructionsOpen(false)} className="mt-3 text-[11px] font-bold text-purple-300 hover:text-white">{language === "id" ? "SEMBUNYIKAN" : "HIDE"}</button>
                 </div>
               )}
 
-              <div className="mt-6 rounded-2xl bg-[#080711]/70 border border-purple-500/10 p-5 sm:p-6">
+              <div className="mt-6 rounded-2xl bg-[#080711]/70 border border-purple-500/10 p-5 sm:p-6 ui-card">
                 <p className="text-gray-200 text-sm sm:text-base leading-8 text-center whitespace-pre-line">
                   {question}
                 </p>
               </div>
 
               {hint && (
-                <div className="mt-5 bg-yellow-500/5 border border-yellow-500/15 rounded-xl p-4">
+                <div className="mt-5 bg-yellow-500/5 border border-yellow-500/15 rounded-xl p-4 ui-card">
                   <p className="text-yellow-400 text-[10px] tracking-[0.2em] font-bold">
                     ✦ {t.hint}
                   </p>
@@ -926,7 +926,7 @@ export default function GamePage() {
             </p>
 
             {feedback.type === "success" && (
-              <div className="relative z-10 mt-6 rounded-2xl bg-yellow-500/10 border border-yellow-400/20 p-4">
+              <div className="relative z-10 mt-6 rounded-2xl bg-yellow-500/10 border border-yellow-400/20 p-4 ui-card">
                 <p className="text-yellow-400 text-[10px] tracking-widest font-bold">
                   {t.scoreLabel}
                 </p>
@@ -940,7 +940,7 @@ export default function GamePage() {
             )}
 
             {feedback.type === "wrong" && (
-              <div className="relative z-10 mt-6 rounded-xl bg-[#080711] border border-white/5 p-4">
+              <div className="relative z-10 mt-6 rounded-xl bg-[#080711] border border-white/5 p-4 ui-card">
                 <p className="text-gray-500 text-[10px] tracking-widest">
                   {t.remaining}
                 </p>
