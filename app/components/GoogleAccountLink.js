@@ -181,7 +181,7 @@ export default function GoogleAccountLink() {
 
   if (checking) {
     return (
-      <div className="rounded-xl border border-purple-500/20 bg-white/5 p-4">
+      <div className="rounded-xl border border-purple-500/20 bg-white/5 p-4 ui-card">
         <p className="text-sm text-gray-400">
           {t.checking}
         </p>
@@ -190,7 +190,7 @@ export default function GoogleAccountLink() {
   }
 
   return (
-    <div className="rounded-xl border border-purple-500/20 bg-white/5 p-4 space-y-3">
+    <div className="rounded-xl border border-purple-500/20 bg-white/5 p-4 space-y-3 ui-card">
       <div>
         <h3 className="font-bold text-white">
           {t.title}
@@ -239,7 +239,7 @@ export default function GoogleAccountLink() {
 
       {message && (
         <div className="fixed inset-0 z-[115] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-          <div role="alertdialog" aria-modal="true" aria-labelledby="google-account-message-title" className="w-full max-w-sm max-h-[88dvh] overflow-y-auto rounded-2xl border border-purple-500/30 bg-[#151020] p-6 text-center shadow-[0_20px_80px_rgba(0,0,0,0.7)]">
+          <div role="alertdialog" aria-modal="true" aria-labelledby="google-account-message-title" className="w-full max-w-sm max-h-[88dvh] overflow-y-auto rounded-2xl border border-purple-500/30 bg-[#151020] p-6 text-center shadow-[0_20px_80px_rgba(0,0,0,0.7)] ui-popup ui-gradient-frame ui-card">
             <GameCharacter character="veylora" expression="surprised" animation="float" size={76} />
             <h3 id="google-account-message-title" className="mt-3 text-base font-bold text-purple-200">{t.title}</h3>
             <p className="mt-3 text-sm leading-relaxed text-gray-300">{message}</p>
