@@ -1,7 +1,7 @@
-
 import "./globals.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import GlobalAudioController from "./components/GlobalAudioController";
 import { LanguageProvider } from "./components/LanguageProvider";
 
 export const metadata = {
@@ -29,6 +29,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="min-h-screen flex flex-col">
         <LanguageProvider>
+          <GlobalAudioController />
           <Header />
 
           <main className="flex-1 w-full">
