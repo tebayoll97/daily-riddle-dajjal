@@ -295,9 +295,9 @@ export default function EditProfilePage() {
           ← {isID ? "Kembali ke Profil" : "Back to Profile"}
         </Link>
 
-        <div className="mt-6 rounded-2xl border border-purple-500/20 bg-[#11101d] p-6">
+        <div className="mt-6 rounded-2xl border border-purple-500/20 bg-[#11101d] p-6 ui-card">
 
-          <h1 className="text-2xl font-black text-white">
+          <h1 className="text-2xl font-black text-white ui-title">
             {isID ? "EDIT PROFIL" : "EDIT PROFILE"}
           </h1>
 
@@ -400,7 +400,7 @@ export default function EditProfilePage() {
 
             {/* Messages */}
             {error && (
-              <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+              <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300 ui-card">
                 {error}
               </div>
             )}
@@ -424,9 +424,9 @@ export default function EditProfilePage() {
         </div>
       {successOpen && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-md p-5">
-          <div role="alertdialog" aria-modal="true" aria-labelledby="profile-success-title" className="w-full max-w-sm rounded-3xl border border-emerald-400/30 bg-[#151020] p-7 text-center shadow-[0_20px_80px_rgba(0,0,0,0.65)] ui-popup ui-gradient-frame">
+          <div role="alertdialog" aria-modal="true" aria-labelledby="profile-success-title" className="w-full max-w-sm rounded-3xl border border-emerald-400/30 bg-[#151020] p-7 text-center shadow-[0_20px_80px_rgba(0,0,0,0.65)] ui-popup ui-gradient-frame ui-card">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/10 text-4xl text-emerald-300">✓</div>
-            <h2 id="profile-success-title" className="mt-5 text-xl font-black text-emerald-300">
+            <h2 id="profile-success-title" className="mt-5 text-xl font-black text-emerald-300 ui-section-title">
               {isID ? "PROFIL BERHASIL DIPERBARUI!" : "PROFILE UPDATED!"}
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-gray-300">
