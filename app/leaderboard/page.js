@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "../components/LanguageProvider";
+import GameCharacter from "@/lib/GameCharacter";
 
 const translations = {
   en: {
@@ -134,8 +135,9 @@ export default function LeaderboardPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-20 text-purple-300">
-            {t.loading}
+          <div className="flex flex-col items-center justify-center gap-2 py-16 text-purple-300">
+            <GameCharacter character="dajjal" expression="thinking" animation="float" size={72} />
+            <p className="text-xs animate-pulse">{t.loading}</p>
           </div>
         ) : error ? (
           <div className="text-center py-16">
