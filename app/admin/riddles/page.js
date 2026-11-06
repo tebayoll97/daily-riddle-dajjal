@@ -359,7 +359,7 @@ export default function AdminRiddlesPage() {
         </Link>
 
         <div className="mt-6 mb-8">
-          <h1 className="text-2xl font-black">
+          <h1 className="text-2xl font-black ui-title">
             {isID ? "Manajemen Teka-teki" : "Daily Riddles"}
           </h1>
 
@@ -372,8 +372,8 @@ export default function AdminRiddlesPage() {
 
         {/* CREATE / EDIT FORM */}
 
-        <section className="bg-white/5 border border-purple-500/20 rounded-2xl p-5 mb-8">
-          <h2 className="text-lg font-black mb-5">
+        <section className="bg-white/5 border border-purple-500/20 rounded-2xl p-5 mb-8 ui-card">
+          <h2 className="text-lg font-black mb-5 ui-section-title">
             {editingId
               ? `✎ ${isID ? "Edit Teka-teki" : "Edit Riddle"}`
               : `✦ ${isID ? "Tambah Teka-teki Baru" : "Add New Riddle"}`}
@@ -489,13 +489,13 @@ export default function AdminRiddlesPage() {
             </div>
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-sm text-red-300">
+              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-sm text-red-300 ui-card">
                 {error}
               </div>
             )}
 
             {success && (
-              <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-sm text-green-300">
+              <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-sm text-green-300 ui-card">
                 {success}
               </div>
             )}
@@ -532,7 +532,7 @@ export default function AdminRiddlesPage() {
 
         <section>
           <div className="flex items-center justify-between gap-3 mb-5">
-            <h2 className="text-lg font-black">
+            <h2 className="text-lg font-black ui-section-title">
               {isID ? "Daftar Teka-teki" : "Riddle List"}
             </h2>
 
@@ -546,7 +546,7 @@ export default function AdminRiddlesPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 mb-6">
-            <div className="bg-white/5 border border-purple-500/20 rounded-2xl p-4">
+            <div className="bg-white/5 border border-purple-500/20 rounded-2xl p-4 ui-card">
               <p className="text-xs text-gray-400">
                 {isID ? "Total Teka-teki" : "Total Riddles"}
               </p>
@@ -556,7 +556,7 @@ export default function AdminRiddlesPage() {
               </p>
             </div>
 
-            <div className="bg-white/5 border border-purple-500/20 rounded-2xl p-4">
+            <div className="bg-white/5 border border-purple-500/20 rounded-2xl p-4 ui-card">
               <p className="text-xs text-gray-400">
                 {isID ? "Aktif" : "Active"}
               </p>
@@ -568,13 +568,13 @@ export default function AdminRiddlesPage() {
           </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 mb-4 text-sm text-red-300">
+            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 mb-4 text-sm text-red-300 ui-card">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-3 mb-4 text-sm text-green-300">
+            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-3 mb-4 text-sm text-green-300 ui-card">
               {success}
             </div>
           )}
@@ -586,7 +586,7 @@ export default function AdminRiddlesPage() {
           )}
 
           {!loading && riddles.length === 0 && (
-            <div className="text-center py-12 bg-white/5 border border-white/10 rounded-2xl">
+            <div className="text-center py-12 bg-white/5 border border-white/10 rounded-2xl ui-card">
               <p className="text-gray-400">
                 {isID
                   ? "Belum ada teka-teki."
@@ -598,7 +598,7 @@ export default function AdminRiddlesPage() {
           {!loading && riddles.map((riddle) => (
             <div
               key={riddle.id}
-              className="bg-white/5 border border-purple-500/20 rounded-2xl p-5 mb-4"
+              className="bg-white/5 border border-purple-500/20 rounded-2xl p-5 mb-4 ui-card"
             >
               <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <div>
