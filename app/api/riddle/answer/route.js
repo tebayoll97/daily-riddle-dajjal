@@ -43,13 +43,30 @@ export async function POST(request) {
       );
     }
 
-    // Read submitted answer
-    const body = await request.json();
-    const answer = body.answer;
+    // Read and validate submitted answer
+    let body;
+
+    try {
+      body = await request.json();
+    } catch {
+      return Response.json(
+        { error: "Invalid request body." },
+        { status: 400 }
+      );
+    }
+
+    const answer = body?.answer;
 
     if (typeof answer !== "string" || !answer.trim()) {
       return Response.json(
         { error: "Please enter an answer." },
+        { status: 400 }
+      );
+    }
+
+    if (answer.length > 200) {
+      return Response.json(
+        { error: "Answer is too long. Maximum 200 characters." },
         { status: 400 }
       );
     }
