@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useLanguage } from "@/app/components/LanguageProvider";
+import GameCharacter from "@/lib/GameCharacter";
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -279,8 +280,11 @@ export default function EditProfilePage() {
 
   if (loading) {
     return (
-      <main className="min-h-[70vh] flex items-center justify-center text-purple-300">
-        {isID ? "Memuat profil..." : "Loading profile..."}
+      <main className="min-h-[70vh] flex flex-col items-center justify-center gap-2 text-purple-300">
+        <GameCharacter character="veylora" expression="thinking" animation="float" size={68} />
+        <p className="text-xs tracking-[0.2em] animate-pulse">
+          {isID ? "Memuat profil..." : "Loading profile..."}
+        </p>
       </main>
     );
   }
