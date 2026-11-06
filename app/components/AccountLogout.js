@@ -130,7 +130,7 @@ export default function AccountLogout() {
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="logout-dialog-title"
-            className="w-full max-w-sm max-h-[88dvh] overflow-y-auto overscroll-contain rounded-2xl border border-red-500/25 bg-[#151020] p-5 sm:p-6 shadow-[0_20px_80px_rgba(0,0,0,0.7)]"
+            className="w-full max-w-sm max-h-[88dvh] overflow-y-auto overscroll-contain rounded-2xl border border-red-500/25 bg-[#151020] p-5 sm:p-6 shadow-[0_20px_80px_rgba(0,0,0,0.7)] ui-popup ui-gradient-frame"
           >
             {showWarning && isGuest ? (
               <div className="space-y-4">
