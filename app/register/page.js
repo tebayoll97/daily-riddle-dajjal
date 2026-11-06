@@ -395,7 +395,7 @@ export default function RegisterPage() {
   if (blocked) {
     return (
       <main className="min-h-screen bg-[#080711] text-white flex items-center justify-center p-6">
-        <div className="w-full max-w-md bg-[#151020] border border-purple-500/30 rounded-2xl p-8 text-center">
+        <div className="w-full max-w-md bg-[#151020] border border-purple-500/30 rounded-2xl p-8 text-center ui-card">
           <p className="text-red-400">{error}</p>
         </div>
       </main>
@@ -404,13 +404,13 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen bg-[#080711] text-white flex items-center justify-center p-6">
-      <div className="w-full max-w-md bg-[#151020] border border-purple-500/30 rounded-2xl p-8">
+      <div className="w-full max-w-md bg-[#151020] border border-purple-500/30 rounded-2xl p-8 ui-card">
 
         <p className="text-purple-400 text-xs tracking-[0.3em] text-center mb-4">
           {t.registration}
         </p>
 
-        <h1 className="text-3xl font-black text-center">
+        <h1 className="text-3xl font-black text-center ui-title">
           {t.title}
         </h1>
 
@@ -421,7 +421,7 @@ export default function RegisterPage() {
         {/* NEW GOOGLE ACCOUNT CONFIRMATION */}
         {googleNeedsProfile && !showGoogleForm && (
           <div className="space-y-5">
-            <div className="rounded-xl border border-green-500/30 bg-green-500/10 p-4">
+            <div className="rounded-xl border border-green-500/30 bg-green-500/10 p-4 ui-card">
               <p className="font-bold text-green-400">
                 ✓ {t.googleWelcome}
               </p>
@@ -501,7 +501,7 @@ export default function RegisterPage() {
         {/* GUEST OR GOOGLE PROFILE FORM */}
         {(!googleNeedsProfile || showGoogleForm) && (
           <>
-            <h2 className="text-center text-sm font-bold text-purple-300 mb-5">
+            <h2 className="text-center text-sm font-bold text-purple-300 mb-5 ui-section-title">
               {googleNeedsProfile
                 ? t.googleProfileTitle
                 : t.guestTitle}
@@ -580,9 +580,9 @@ export default function RegisterPage() {
 
       {successOpen && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-          <div role="alertdialog" aria-modal="true" aria-labelledby="registration-success-title" className="w-full max-w-sm rounded-3xl border border-emerald-400/30 bg-[#151020] p-6 text-center shadow-[0_20px_80px_rgba(0,0,0,0.7)]">
+          <div role="alertdialog" aria-modal="true" aria-labelledby="registration-success-title" className="w-full max-w-sm rounded-3xl border border-emerald-400/30 bg-[#151020] p-6 text-center shadow-[0_20px_80px_rgba(0,0,0,0.7)] ui-popup ui-gradient-frame ui-card">
             <GameCharacter character="dajjal" expression="happy" animation="float" size={80} />
-            <h2 id="registration-success-title" className="mt-3 text-lg font-black text-emerald-300">{t.successTitle}</h2>
+            <h2 id="registration-success-title" className="mt-3 text-lg font-black text-emerald-300 ui-section-title">{t.successTitle}</h2>
             <p className="mt-3 text-sm leading-relaxed text-gray-300">{t.successDescription}</p>
             <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full w-full origin-left rounded-full bg-emerald-400 animate-pulse" /></div>
           </div>
