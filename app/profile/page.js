@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { useLanguage } from "../components/LanguageProvider";
 import GoogleAccountLink from "../components/GoogleAccountLink";
 import AccountLogout from "../components/AccountLogout";
+import GameCharacter from "@/lib/GameCharacter";
 
 const translations = {
   en: {
@@ -128,8 +129,9 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center text-purple-300">
-        {t.loading}
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-2 text-purple-300">
+        <GameCharacter character="veylora" expression="thinking" animation="float" size={68} />
+        <p className="text-xs tracking-[0.2em] animate-pulse">{t.loading}</p>
       </div>
     );
   }
