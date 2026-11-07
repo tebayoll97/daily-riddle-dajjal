@@ -45,6 +45,24 @@ export async function GET(request, { params }) {
       lastPlayedAt: item.last_played_at,
     }));
 
+    const { data: activityRows, error: activityError } = await supabaseAdmin
+      .from("game_result_events")
+      .select("id, score, won, created_at, games(name, slug)")
+      .eq("player_id", id)
+      .order("created_at", { ascending: false })
+      .limit(15);
+
+    if (activityError) throw activityError;
+
+    const activity = (activityRows || []).map((item) => ({
+      id: item.id,
+      gameName: item.games?.name || "Unknown Game",
+      slug: item.games?.slug || null,
+      score: Number(item.score || 0),
+      won: Boolean(item.won),
+      createdAt: item.created_at,
+    }));
+
     const summary = stats.reduce(
       (total, item) => ({
         totalPoints: total.totalPoints + item.totalPoints,
@@ -57,7 +75,7 @@ export async function GET(request, { params }) {
 
     return Response.json({
       player: { ...player, avatar_url: player.avatar_url || null },
-      stats: { summary, games: stats },
+      stats: { summary, games: stats, activity },
     });
   } catch (error) {
     console.error("Player profile API error:", error);
