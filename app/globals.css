@@ -640,3 +640,108 @@ main :is(input,textarea,select) { max-width: 100%; }
 @media (min-width: 768px) {
   .ui-page { width: min(100% - 3rem, var(--ui-content-width)); }
 }
+
+
+/* =========================================================
+   HEADING + SECTION FRAME AUDIT PASS
+   Apply the shared hierarchy to existing semantic page markup.
+   ========================================================= */
+
+/* Final heading tokens win over legacy HUD declarations. */
+.ui-title, main h1:not(.welcome-title) {
+  color: var(--ui-h1-primary) !important;
+  font-size: clamp(23px, 2.1vw, 34px) !important;
+  font-weight: 950 !important;
+  text-transform: uppercase !important;
+  line-height: 1.12 !important;
+  border-left: 0 !important;
+}
+.ui-title::after, main h1:not(.welcome-title)::after {
+  width: min(100%, 5.5rem) !important;
+  height: 2px !important;
+  background: linear-gradient(90deg, transparent, var(--ui-heading-line) 22%, #b88bd5 50%, var(--ui-heading-line) 78%, transparent) !important;
+  box-shadow: 0 0 8px rgba(166,107,206,.24) !important;
+}
+.ui-section-title, main h2 {
+  display: block;
+  color: var(--ui-h2) !important;
+  font-size: clamp(18px, 1.55vw, 25px) !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+  text-transform: uppercase !important;
+  border: 0 !important;
+  border-left: 3px solid var(--ui-heading-line) !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  padding: .12rem 0 .12rem .8rem !important;
+}
+.ui-section-title::after, main h2::after { content: none !important; }
+main h3 {
+  color: var(--ui-h3) !important;
+  font-size: clamp(16px, 1.3vw, 21px) !important;
+  font-weight: 850 !important;
+  line-height: 1.25 !important;
+  text-transform: uppercase !important;
+  border: 0 !important;
+  border-left: 2px solid var(--ui-heading-line) !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  padding: .1rem 0 .1rem .7rem !important;
+}
+main h4 {
+  color: var(--ui-h4) !important;
+  font-size: clamp(14px, 1.1vw, 18px) !important;
+  font-weight: 800 !important;
+  line-height: 1.3 !important;
+  text-transform: uppercase !important;
+  border: 0 !important;
+  border-left: 1px solid var(--ui-heading-line) !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  padding: .08rem 0 .08rem .6rem !important;
+}
+
+/* Existing semantic sections become the frame for their heading + content. */
+main section:has(> h2),
+main section:has(> div > h2),
+main section:has(> h2.ui-section-title),
+main section:has(> div > h2.ui-section-title) {
+  min-width: 0;
+  padding: clamp(.85rem, 1.5vw, 1.25rem);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-card);
+  background: linear-gradient(145deg, rgba(22,17,34,.94), rgba(13,12,23,.94));
+  box-shadow: inset 0 1px rgba(255,255,255,.02);
+}
+/* A section already styled as a card keeps its own padding and surface. */
+main section.ui-card:has(> h2),
+main section.ui-card:has(> div > h2),
+main section[class*="rounded-"]:has(> h2),
+main section[class*="rounded-"]:has(> div > h2) {
+  border-color: var(--ui-border);
+}
+
+/* Headings inside reusable component cards remain component-level headings. */
+main article h3, main .ui-card h3, main [role="dialog"] h2 {
+  letter-spacing: -.015em;
+}
+main :is(.ui-subtitle,.ui-section-subtitle) {
+  color: var(--ui-text-secondary) !important;
+  line-height: 1.55;
+}
+
+/* Dedicated mobile composition: tighter section frames and hierarchy. */
+@media (max-width: 767px) {
+  .ui-title, main h1:not(.welcome-title) { font-size: clamp(23px, 5.6vw, 26px) !important; }
+  .ui-section-title, main h2 { font-size: clamp(18px, 4.6vw, 20px) !important; padding-left: .65rem !important; }
+  main h3 { font-size: clamp(16px, 4.1vw, 18px) !important; padding-left: .58rem !important; }
+  main h4 { font-size: clamp(14px, 3.7vw, 16px) !important; padding-left: .52rem !important; }
+  main section:has(> h2), main section:has(> div > h2),
+  main section:has(> h2.ui-section-title), main section:has(> div > h2.ui-section-title) {
+    padding: .75rem;
+    border-radius: 12px;
+  }
+}
