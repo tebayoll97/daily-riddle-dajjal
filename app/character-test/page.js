@@ -76,14 +76,16 @@ export default function CharacterTestPage() {
   }
 
   return (
-    <main className="lab">\n      <div className="lab-inner">
+    <main className="lab">
+      <div className="lab-inner">
       <header className="header">
         <div className="brand">DAJJAL FAMILY · GAMING UNIVERSE</div>
         <h1>CHARACTER LAB</h1>
         <p>Character Engine · Reaction Testing</p>
       </header>
 
-      <div className="workspace">\n      <section className="preview">
+      <div className="workspace">
+      <section className="preview">
         <div className="preview-label">LIVE CHARACTER</div>
 
         <div className="character-stage">
@@ -213,7 +215,9 @@ export default function CharacterTestPage() {
         </button>
       </section>
 
-      </div>\n\n      <section className="gallery">
+      </div>
+
+      <section className="gallery">
         <h3>06. ALL CHARACTERS PREVIEW</h3>
         <p className="description">
           Pilih ekspresi untuk melihatnya di Live Preview.
