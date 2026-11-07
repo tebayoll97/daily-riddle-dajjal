@@ -200,7 +200,7 @@ export default function AdminDashboardPage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#080711] text-white px-4 py-8 sm:px-6 sm:py-12">
-      <div className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[ min(90vw, 50rem)] -translate-x-1/2 rounded-full bg-purple-600/10 blur-[100px]" />
+      <div className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[min(90vw,50rem)] -translate-x-1/2 rounded-full bg-purple-600/10 blur-[100px]" />
       <div className="relative mx-auto max-w-6xl">
         <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
