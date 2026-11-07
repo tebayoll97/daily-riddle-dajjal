@@ -424,7 +424,6 @@ export default function AdminPlayersPage() {
             >
               ← {t.back}
             </button>
-
           </div>
         </header>
 
