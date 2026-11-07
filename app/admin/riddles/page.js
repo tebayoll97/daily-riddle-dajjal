@@ -353,9 +353,11 @@ export default function AdminRiddlesPage() {
 
         <Link
           href="/admin"
-          className="text-sm text-purple-400 hover:text-purple-300"
+          className="group inline-flex items-center gap-2 rounded-xl border border-purple-500/30 bg-gradient-to-r from-purple-500/15 to-blue-500/10 px-4 py-2.5 text-xs sm:text-sm font-bold text-purple-200 shadow-lg shadow-purple-950/20 transition-all duration-300 hover:-translate-y-0.5 hover:border-purple-400/60 hover:from-purple-500/25 hover:to-blue-500/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
         >
-          ← {isID ? "Kembali ke Dashboard" : "Back to Dashboard"}
+          <span className="text-base transition-transform duration-300 group-hover:-translate-x-1">←</span>
+          <span>{isID ? "Kembali ke Dashboard" : "Back to Dashboard"}</span>
+          <span className="ml-1 rounded-md bg-white/10 px-1.5 py-0.5 text-[9px] tracking-wider text-purple-300">ADMIN</span>
         </Link>
 
         <div className="mt-6 mb-8">
