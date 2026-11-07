@@ -395,7 +395,7 @@ export default function GamePage() {
     return () => {
       active = false;
     };
-  }, [router]);
+  }, [router, t.genericError, t.unableToLoad]);
 
   // ANSWER SUBMISSION
   async function handleAnswer(event) {
