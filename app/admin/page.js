@@ -1,64 +1,74 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabaseAdminClient } from "@/lib/supabaseAdminClient";
 import { useLanguage } from "@/app/components/LanguageProvider";
 
-const translations = {
+const copy = {
   en: {
-    checking: "Verifying administrator...",
-    title: "ADMIN DASHBOARD",
-    subtitle: "Welcome to the control center of The Daily Riddle.",
-    admin: "ADMINISTRATOR",
+    checking: "VERIFYING ADMIN ACCESS...",
+    title: "ADMIN",
+    accent: "DASHBOARD",
+    subtitle: "Your control center for The Daily Riddle.",
+    admin: "SIGNED IN AS",
     secure: "SECURE ACCESS VERIFIED",
-    management: "CONTENT MANAGEMENT",
+    management: "MANAGEMENT",
     riddles: "Daily Riddles",
-    riddlesDesc: "Create, edit, schedule, and manage daily riddles.",
+    riddlesDesc: "Create, edit, schedule, and manage daily challenges.",
     players: "Player Management",
-    playersDesc: "View player accounts and their information.",
+    playersDesc: "Browse player accounts, servers, and game activity.",
     statistics: "Game Statistics",
-    statisticsDesc: "Monitor player activity and game performance.",
+    statisticsDesc: "Track engagement, scores, and overall game performance.",
+    open: "OPEN MODULE",
     coming: "COMING SOON",
+    quick: "QUICK ACCESS",
+    login: "ADMIN PORTAL",
     logout: "SIGN OUT",
     loggingOut: "SIGNING OUT...",
     logoutTitle: "SIGN OUT?",
-    logoutMessage: "Are you sure you want to sign out of the admin dashboard?",
-    cancel: "NO, STAY",
-    confirmLogout: "YES, SIGN OUT",
-    accessDenied: "Administrator access denied.",
+    logoutMessage: "Are you sure you want to leave the admin dashboard?",
+    cancel: "CANCEL",
+    confirm: "YES, SIGN OUT",
+    denied: "Administrator access denied.",
     error: "Unable to verify administrator access.",
+    footer: "THE DAILY RIDDLE · ADMIN CONTROL CENTER",
   },
   id: {
-    checking: "Memverifikasi administrator...",
-    title: "DASHBOARD ADMIN",
-    subtitle: "Selamat datang di pusat kendali The Daily Riddle.",
-    admin: "ADMINISTRATOR",
+    checking: "MEMVERIFIKASI AKSES ADMIN...",
+    title: "DASHBOARD",
+    accent: "ADMIN",
+    subtitle: "Pusat kendali The Daily Riddle.",
+    admin: "MASUK SEBAGAI",
     secure: "AKSES AMAN TERVERIFIKASI",
-    management: "PENGELOLAAN KONTEN",
+    management: "PENGELOLAAN",
     riddles: "Teka-Teki Harian",
-    riddlesDesc: "Buat, edit, jadwalkan, dan kelola teka-teki harian.",
+    riddlesDesc: "Buat, edit, jadwalkan, dan kelola tantangan harian.",
     players: "Manajemen Pemain",
-    playersDesc: "Lihat akun pemain dan informasi mereka.",
+    playersDesc: "Lihat akun pemain, server, dan aktivitas permainan.",
     statistics: "Statistik Permainan",
-    statisticsDesc: "Pantau aktivitas pemain dan performa permainan.",
+    statisticsDesc: "Pantau aktivitas, perolehan poin, dan performa game.",
+    open: "BUKA MENU",
     coming: "SEGERA HADIR",
+    quick: "AKSES CEPAT",
+    login: "PORTAL ADMIN",
     logout: "KELUAR",
     loggingOut: "SEDANG KELUAR...",
     logoutTitle: "KELUAR DARI ADMIN?",
     logoutMessage: "Apakah kamu yakin ingin keluar dari dashboard administrator?",
-    cancel: "TIDAK, TETAP DI SINI",
-    confirmLogout: "YA, KELUAR",
-    accessDenied: "Akses administrator ditolak.",
+    cancel: "BATAL",
+    confirm: "YA, KELUAR",
+    denied: "Akses administrator ditolak.",
     error: "Tidak dapat memverifikasi akses administrator.",
+    footer: "THE DAILY RIDDLE · PUSAT KENDALI ADMIN",
   },
 };
 
 export default function AdminDashboardPage() {
   const router = useRouter();
   const { language } = useLanguage();
-  const t = translations[language] || translations.en;
+  const t = copy[language] || copy.en;
 
   const [admin, setAdmin] = useState(null);
   const [checking, setChecking] = useState(true);
@@ -77,67 +87,48 @@ export default function AdminDashboardPage() {
         if (sessionError) throw sessionError;
 
         const session = data?.session;
-
         if (!session) {
           router.replace("/admin/login");
           return;
         }
 
         const response = await fetch("/api/admin/me", {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
+          headers: { Authorization: `Bearer ${session.access_token}` },
           cache: "no-store",
         });
-
         const result = await response.json();
 
         if (!response.ok) {
           await supabaseAdminClient.auth.signOut();
-
           if (response.status === 401 || response.status === 403) {
             router.replace("/admin/login");
             return;
           }
-
           throw new Error(result.error || t.error);
         }
 
-        if (active) {
-          setAdmin(result.admin);
-        }
+        if (active) setAdmin(result.admin);
       } catch (err) {
         console.error("Admin dashboard error:", err);
-
-        if (active) {
-          setError(err.message || t.error);
-        }
+        if (active) setError(err.message || t.error);
       } finally {
-        if (active) {
-          setChecking(false);
-        }
+        if (active) setChecking(false);
       }
     }
 
     verifyAccess();
-
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [router]);
 
   async function handleLogout() {
     if (loggingOut) return;
-
     setLoggingOut(true);
     setError("");
 
     try {
       const { error: logoutError } =
         await supabaseAdminClient.auth.signOut();
-
       if (logoutError) throw logoutError;
-
       router.replace("/admin/login");
     } catch (err) {
       console.error("Admin logout error:", err);
@@ -149,11 +140,13 @@ export default function AdminDashboardPage() {
 
   if (checking) {
     return (
-      <main className="min-h-[75vh] bg-[#080711] flex flex-col items-center justify-center text-purple-300 gap-4">
-        <div className="w-10 h-10 border-4 border-purple-500/20 border-t-purple-400 rounded-full animate-spin" />
-        <p className="text-xs tracking-widest animate-pulse">
-          {t.checking}
-        </p>
+      <main className="min-h-[75vh] bg-[#080711] flex flex-col items-center justify-center gap-5 px-5 text-purple-200">
+        <div className="relative flex h-16 w-16 items-center justify-center">
+          <div className="absolute inset-0 rounded-full border border-purple-500/20" />
+          <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-purple-400 border-r-cyan-400 animate-spin" />
+          <span className="text-2xl">♛</span>
+        </div>
+        <p className="ui-eyebrow animate-pulse">{t.checking}</p>
       </main>
     );
   }
@@ -161,22 +154,14 @@ export default function AdminDashboardPage() {
   if (error && !admin) {
     return (
       <main className="min-h-[75vh] bg-[#080711] text-white flex flex-col items-center justify-center px-5 text-center">
-        <div className="text-5xl">🔒</div>
-
-        <h1 className="text-2xl font-black mt-5 ui-title">
-          {t.accessDenied}
-        </h1>
-
-        <p className="text-sm text-red-400 mt-3">
-          {error}
-        </p>
-
-        <button
-          onClick={() => router.replace("/admin/login")}
-          className="mt-6 rounded-xl bg-purple-600 hover:bg-purple-500 px-6 py-3 font-bold"
-        >
-          ADMIN LOGIN
-        </button>
+        <div className="ui-gradient-frame ui-card rounded-2xl p-7 max-w-md w-full">
+          <div className="text-4xl">🔒</div>
+          <h1 className="ui-section-title mt-4">{t.denied}</h1>
+          <p className="text-sm text-red-300 mt-3">{error}</p>
+          <Link href="/admin/login" className="ui-interactive inline-flex mt-6 rounded-xl bg-purple-600 hover:bg-purple-500 px-6 py-3 font-bold text-sm">
+            {t.login}
+          </Link>
+        </div>
       </main>
     );
   }
@@ -185,189 +170,145 @@ export default function AdminDashboardPage() {
 
   const modules = [
     {
+      href: "/admin/riddles",
       icon: "🧩",
+      number: "01",
       title: t.riddles,
       description: t.riddlesDesc,
+      available: true,
+      accent: "from-purple-500/20 via-violet-500/5",
     },
     {
+      href: "/admin/players",
       icon: "👥",
+      number: "02",
       title: t.players,
       description: t.playersDesc,
+      available: true,
+      accent: "from-blue-500/20 via-indigo-500/5",
     },
     {
+      href: null,
       icon: "📊",
+      number: "03",
       title: t.statistics,
       description: t.statisticsDesc,
+      available: false,
+      accent: "from-cyan-500/15 via-blue-500/5",
     },
   ];
 
   return (
-    <main className="min-h-screen bg-[#080711] text-white px-4 py-10">
-      <div className="max-w-5xl mx-auto">
-
-        {/* HEADER */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+    <main className="relative min-h-screen overflow-hidden bg-[#080711] text-white px-4 py-8 sm:px-6 sm:py-12">
+      <div className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[ min(90vw, 50rem)] -translate-x-1/2 rounded-full bg-purple-600/10 blur-[100px]" />
+      <div className="relative mx-auto max-w-6xl">
+        <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-purple-400 text-xs tracking-[0.3em]">
-              THE DAILY RIDDLE
-            </p>
-
-            <h1 className="text-3xl sm:text-4xl font-black mt-3 ui-title">
-              ADMIN <span className="text-purple-400">DASHBOARD</span>
+            <p className="ui-eyebrow">THE DAILY RIDDLE <span className="text-cyan-300">/ CONTROL CENTER</span></p>
+            <h1 className="ui-title">
+              {t.title} <span className="ui-gradient-text">{t.accent}</span>
             </h1>
-
-            <p className="text-gray-500 text-sm mt-2">
-              {t.subtitle}
-            </p>
+            <p className="ui-section-subtitle mt-3">{t.subtitle}</p>
           </div>
-
           <button
+            type="button"
             onClick={() => setShowLogoutModal(true)}
             disabled={loggingOut}
-            className="rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-50 px-5 py-3 text-sm font-bold text-red-300 transition"
+            className="ui-interactive inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-red-400/25 bg-red-500/10 px-5 py-3 text-sm font-bold text-red-200 hover:border-red-400/50 hover:bg-red-500/15 disabled:opacity-50"
           >
-            {loggingOut ? t.loggingOut : t.logout}
+            <span>↗</span>{t.logout}
           </button>
-        </div>
+        </header>
 
-        {/* ADMIN INFORMATION */}
-        <section className="mt-10 rounded-2xl border border-purple-500/30 bg-[#151020] p-5 sm:p-6 ui-card">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-2xl ui-card">
-              ♛
-            </div>
-
+        <section className="ui-gradient-frame ui-card mt-8 rounded-2xl p-4 sm:p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-purple-400/25 bg-purple-500/15 text-2xl">♛</div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs text-purple-300 font-bold tracking-wider">
-                {t.admin}
-              </p>
-
-              <p className="font-bold text-white mt-1 break-all">
-                {admin.email}
-              </p>
+              <p className="ui-eyebrow mb-1">{t.admin}</p>
+              <p className="break-all font-semibold text-white">{admin.email}</p>
+            </div>
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-2 text-[10px] font-extrabold tracking-wider text-emerald-300">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
+              {t.secure}
             </div>
           </div>
-
-          <div className="mt-5 pt-4 border-t border-purple-500/20">
-            <p className="text-xs text-green-400 font-bold">
-              ● {t.secure}
-            </p>
-          </div>
         </section>
 
-        {/* MANAGEMENT MODULES */}
         <section className="mt-10">
-          <h2 className="text-sm font-black tracking-wider text-purple-300 mb-5 ui-section-title">
-            {t.management}
-          </h2>
+          <div className="mb-5 flex items-end justify-between gap-3">
+            <div>
+              <p className="ui-eyebrow mb-1">{t.quick}</p>
+              <h2 className="ui-section-title">{t.management}</h2>
+            </div>
+            <span className="text-[10px] font-bold tracking-[0.18em] text-gray-600">03 MODULES</span>
+          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {modules.map((module) => (
-              <div
-                key={module.title}
-                className="rounded-2xl border border-purple-500/20 bg-[#151020] p-5 ui-card"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-3xl">
-                    {module.icon}
-                  </span>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {modules.map((module) => {
+              const content = (
+                <>
+                  <div className={`absolute inset-0 bg-gradient-to-br ${module.accent} to-transparent opacity-80`} />
+                  <div className="relative flex items-start justify-between gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-black/25 text-2xl">
+                      {module.icon}
+                    </div>
+                    <span className="font-mono text-xs tracking-widest text-gray-600">{module.number}</span>
+                  </div>
+                  <div className="relative mt-7">
+                    <h3 className="text-lg font-extrabold tracking-tight">{module.title}</h3>
+                    <p className="mt-2 min-h-[3.2rem] text-sm leading-relaxed text-gray-400">{module.description}</p>
+                  </div>
+                  <div className="relative mt-6 flex items-center justify-between border-t border-white/10 pt-4">
+                    <span className={module.available ? "text-[10px] font-extrabold tracking-[0.16em] text-purple-300" : "text-[10px] font-extrabold tracking-[0.16em] text-gray-500"}>
+                      {module.available ? t.open : t.coming}
+                    </span>
+                    <span className={module.available ? "text-lg text-cyan-300 transition-transform group-hover:translate-x-1" : "text-gray-600"} aria-hidden="true">
+                      {module.available ? "→" : "· · ·"}
+                    </span>
+                  </div>
+                </>
+              );
 
-                  <span className="rounded-full bg-purple-500/10 border border-purple-500/20 px-3 py-1 text-[9px] font-bold text-purple-300">
-                    {t.coming}
-                  </span>
+              const className = "ui-interactive ui-card group relative flex min-h-[230px] flex-col overflow-hidden rounded-2xl border border-purple-500/20 bg-[#11101d] p-5 text-left shadow-lg shadow-black/10 hover:-translate-y-1 hover:border-purple-400/50 hover:shadow-purple-950/30 focus-visible:outline-none";
+
+              return module.available ? (
+                <Link key={module.number} href={module.href} className={className}>
+                  {content}
+                </Link>
+              ) : (
+                <div key={module.number} aria-disabled="true" className={`${className} cursor-not-allowed opacity-65`}>
+                  {content}
                 </div>
-
-                <h3 className="font-black text-lg mt-5">
-                  {module.title}
-                </h3>
-
-                <p className="text-gray-400 text-sm mt-2 leading-relaxed">
-                  {module.description}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
-        <p className="text-center text-gray-600 text-xs mt-12">
-          THE DAILY RIDDLE · ADMIN CONTROL CENTER · 2026
-        </p>
+        <footer className="mt-12 border-t border-white/5 pt-5 text-center text-[10px] font-semibold tracking-[0.18em] text-gray-600">
+          {t.footer} · 2026
+        </footer>
       </div>
 
-      {/* LOGOUT CONFIRMATION POPUP */}
       {showLogoutModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-5 py-6"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-5 py-6 backdrop-blur-sm"
           onMouseDown={(event) => {
-            if (
-              event.target === event.currentTarget &&
-              !loggingOut
-            ) {
-              setShowLogoutModal(false);
-            }
+            if (event.target === event.currentTarget && !loggingOut) setShowLogoutModal(false);
           }}
         >
-          <div className="w-full max-w-sm rounded-3xl border border-purple-500/30 bg-[#151020] p-6 sm:p-7 shadow-2xl shadow-purple-950/40 animate-[popupIn_0.2s_ease-out] ui-card">
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-3xl ui-card">
-              🚪
+          <div role="dialog" aria-modal="true" aria-labelledby="admin-logout-title" className="ui-popup ui-gradient-frame ui-card w-full max-w-sm rounded-3xl p-6 sm:p-7">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-red-400/20 bg-red-500/10 text-2xl">↗</div>
+            <h2 id="admin-logout-title" className="ui-section-title mt-5 text-center">{t.logoutTitle}</h2>
+            <p className="mt-3 text-center text-sm leading-relaxed text-gray-400">{t.logoutMessage}</p>
+            {error && <p role="alert" className="mt-4 text-center text-xs text-red-300">{error}</p>}
+            <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <button type="button" onClick={() => setShowLogoutModal(false)} disabled={loggingOut} className="ui-interactive rounded-xl border border-purple-400/25 bg-purple-500/10 px-4 py-3 text-xs font-extrabold text-purple-200 hover:bg-purple-500/20 disabled:opacity-50">{t.cancel}</button>
+              <button type="button" onClick={handleLogout} disabled={loggingOut} className="ui-interactive rounded-xl bg-red-600 px-4 py-3 text-xs font-extrabold text-white hover:bg-red-500 disabled:opacity-50">{loggingOut ? t.loggingOut : t.confirm}</button>
             </div>
-
-            <h2 className="text-xl sm:text-2xl font-black text-center mt-5 ui-section-title">
-              {t.logoutTitle}
-            </h2>
-
-            <p className="text-sm text-gray-400 text-center mt-3 leading-relaxed">
-              {t.logoutMessage}
-            </p>
-
-            {error && (
-              <p className="text-xs text-red-400 text-center mt-4">
-                {error}
-              </p>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-7">
-              <button
-                onClick={() => setShowLogoutModal(false)}
-                disabled={loggingOut}
-                className="rounded-xl border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 px-4 py-3 text-xs font-black text-purple-300 transition disabled:opacity-50"
-              >
-                {t.cancel}
-              </button>
-
-              <button
-                onClick={handleLogout}
-                disabled={loggingOut}
-                className="rounded-xl border border-red-500/30 bg-red-600 hover:bg-red-500 px-4 py-3 text-xs font-black text-white transition disabled:opacity-50"
-              >
-                {loggingOut ? t.loggingOut : t.confirmLogout}
-              </button>
-            </div>
-
-            {loggingOut && (
-              <div className="flex items-center justify-center gap-2 mt-5 text-purple-300">
-                <div className="w-4 h-4 border-2 border-purple-500/30 border-t-purple-400 rounded-full animate-spin" />
-                <span className="text-[10px] tracking-widest animate-pulse">
-                  {t.loggingOut}
-                </span>
-              </div>
-            )}
+            {loggingOut && <p className="mt-5 animate-pulse text-center text-[10px] font-bold tracking-widest text-purple-300">{t.loggingOut}</p>}
           </div>
         </div>
       )}
-
-      <style jsx global>{`
-        @keyframes popupIn {
-          from {
-            opacity: 0;
-            transform: translateY(12px) scale(0.96);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-      `}</style>
     </main>
   );
 }
