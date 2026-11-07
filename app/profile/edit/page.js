@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -31,26 +31,7 @@ export default function EditProfilePage() {
   const [successOpen, setSuccessOpen] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    let active = true;
-    loadProfile(() => active);
-
-    return () => {
-      active = false;
-
-      if (previewUrlRef.current) {
-        URL.revokeObjectURL(previewUrlRef.current);
-        previewUrlRef.current = "";
-      }
-
-      if (redirectTimerRef.current) {
-        window.clearTimeout(redirectTimerRef.current);
-        redirectTimerRef.current = null;
-      }
-    };
-  }, []);
-
-  async function loadProfile(isActive = () => true) {
+  const loadProfile = useCallback(async (isActive = () => true) => {
     setLoading(true);
     setError("");
 
@@ -94,7 +75,26 @@ export default function EditProfilePage() {
     } finally {
       if (isActive()) setLoading(false);
     }
-  }
+  }, [isID, router]);
+
+  useEffect(() => {
+    let active = true;
+    loadProfile(() => active);
+
+    return () => {
+      active = false;
+
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = "";
+      }
+
+      if (redirectTimerRef.current) {
+        window.clearTimeout(redirectTimerRef.current);
+        redirectTimerRef.current = null;
+      }
+    };
+  }, [loadProfile]);
 
   function clearPreview() {
     if (previewUrlRef.current) {
