@@ -802,7 +802,7 @@ main :is(.ui-subtitle,.ui-section-subtitle) {
   min-width: 0;
 }
 @media (max-width: 767px) {
-  .ui-route-frame { padding: .35rem; border-radius: 14px; }
+  .ui-route-frame { padding: 0; border-radius: 0; }
   .ui-route-frame main section:has(> h2),
   .ui-route-frame main section:has(> div > h2),
   .ui-route-frame main section:has(> h3),
