@@ -402,24 +402,24 @@ export default function AdminPlayersPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#080711] text-white px-3 sm:px-4 py-5 sm:py-10">
+    <main className="min-h-screen bg-[#080711] text-white px-3 sm:px-4 py-4 sm:py-10">
       <div className="max-w-6xl mx-auto">
 
         {/* HEADER */}
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-5">
           <div>
             <p className="text-purple-400 text-xs tracking-[0.3em]">
               THE DAILY RIDDLE
             </p>
 
-            <h1 className="text-3xl sm:text-4xl font-black mt-3 ui-title">
+            <h1 className="text-2xl sm:text-4xl font-black mt-2 sm:mt-3 ui-title">
               {t.title}{" "}
               <span className="text-purple-400">
                 {t.titleAccent}
               </span>
             </h1>
 
-            <p className="text-gray-500 text-sm mt-2">
+            <p className="text-gray-500 text-xs sm:text-sm mt-1.5 sm:mt-2">
               {t.subtitle}
             </p>
           </div>
@@ -435,7 +435,7 @@ export default function AdminPlayersPage() {
         </header>
 
         {/* ADMIN INFO */}
-        <section className="mt-8 rounded-2xl border border-purple-500/20 bg-[#151020] p-3 sm:p-5 ui-card">
+        <section className="mt-5 sm:mt-8 rounded-xl sm:rounded-2xl border border-purple-500/20 bg-[#151020] p-3 sm:p-5 ui-card">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-xl ui-card">
               ♛
@@ -457,12 +457,12 @@ export default function AdminPlayersPage() {
         </section>
 
         {/* STATISTICS */}
-        <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
-          <div className="rounded-2xl border border-purple-500/20 bg-[#151020] p-3 sm:p-5 ui-card">
+        <section className="grid grid-cols-3 gap-2 sm:gap-3 mt-4 sm:mt-6">
+          <div className="rounded-xl sm:rounded-2xl border border-purple-500/20 bg-[#151020] p-2.5 sm:p-5 ui-card">
             <p className="text-[10px] tracking-widest text-gray-400 font-bold">
               {t.total}
             </p>
-            <p className="text-2xl sm:text-3xl font-black text-white mt-3 tabular-nums">
+            <p className="text-xl sm:text-3xl font-black text-white mt-2 sm:mt-3 tabular-nums">
               {pagination.total.toLocaleString()}
             </p>
             <p className="text-[10px] text-gray-500 mt-2">
@@ -470,11 +470,11 @@ export default function AdminPlayersPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-amber-500/20 bg-[#151020] p-3 sm:p-5 ui-card">
+          <div className="rounded-xl sm:rounded-2xl border border-amber-500/20 bg-[#151020] p-2.5 sm:p-5 ui-card">
             <p className="text-[10px] tracking-widest text-amber-300 font-bold">
               {t.guest}
             </p>
-            <p className="text-2xl sm:text-3xl font-black text-amber-300 mt-3 tabular-nums">
+            <p className="text-xl sm:text-3xl font-black text-amber-300 mt-2 sm:mt-3 tabular-nums">
               {guestCount}
             </p>
             <p className="text-[10px] text-gray-500 mt-2">
@@ -482,11 +482,11 @@ export default function AdminPlayersPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-blue-500/20 bg-[#151020] p-3 sm:p-5 ui-card">
+          <div className="rounded-xl sm:rounded-2xl border border-blue-500/20 bg-[#151020] p-2.5 sm:p-5 ui-card">
             <p className="text-[10px] tracking-widest text-blue-300 font-bold">
               {t.google}
             </p>
-            <p className="text-2xl sm:text-3xl font-black text-blue-300 mt-3 tabular-nums">
+            <p className="text-xl sm:text-3xl font-black text-blue-300 mt-2 sm:mt-3 tabular-nums">
               {googleCount}
             </p>
             <p className="text-[10px] text-gray-500 mt-2">
@@ -496,29 +496,29 @@ export default function AdminPlayersPage() {
         </section>
 
         {/* SEARCH */}
-        <section className="mt-8 rounded-2xl border border-purple-500/20 bg-[#151020] p-4 sm:p-3 sm:p-5 ui-card">
+        <section className="mt-5 sm:mt-8 rounded-xl sm:rounded-2xl border border-purple-500/20 bg-[#151020] p-3 sm:p-5 ui-card">
           <form
             onSubmit={handleSearch}
-            className="flex flex-col sm:flex-row gap-2 sm:gap-3"
+            className="flex flex-row gap-2 sm:gap-3"
           >
             <input
               type="search"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder={t.search}
-              className="flex-1 min-w-0 rounded-lg sm:rounded-xl border border-purple-500/20 bg-[#0B0913] px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-white outline-none focus:border-purple-400 transition placeholder:text-gray-600"
+              className="flex-1 min-w-0 rounded-lg sm:rounded-xl border border-purple-500/20 bg-[#0B0913] px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/15 transition placeholder:text-gray-600"
             />
 
             <button
               type="submit"
               disabled={loading}
-              className="rounded-lg sm:rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-black transition"
+              className="shrink-0 rounded-lg sm:rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:brightness-110 active:scale-[0.98] disabled:opacity-50 px-3 sm:px-6 py-2.5 sm:py-3 text-[10px] sm:text-sm font-black tracking-wide transition shadow-lg shadow-purple-950/20"
             >
               {t.searchButton}
             </button>
           </form>
 
-          <div className="flex flex-wrap gap-2 mt-4">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-3 sm:mt-4">
             {filters.map((item) => {
               const active = filter === item;
 
@@ -533,7 +533,7 @@ export default function AdminPlayersPage() {
                 <button
                   key={item}
                   onClick={() => handleFilterChange(item)}
-                  className={`rounded-full border px-3 sm:px-4 py-1.5 sm:py-2 text-[9px] sm:text-[10px] font-black tracking-wider transition ${
+                  className={`rounded-full border px-3 sm:px-4 py-1.5 sm:py-2 text-[9px] sm:text-[10px] font-black tracking-wider transition active:scale-[0.97] ${
                     active
                       ? "bg-purple-600 border-purple-400 text-white shadow-lg shadow-purple-900/30"
                       : "bg-[#0B0913] border-purple-500/20 text-gray-400 hover:border-purple-400/50 hover:text-white"
@@ -547,8 +547,8 @@ export default function AdminPlayersPage() {
         </section>
 
         {/* PLAYER LIST */}
-        <section className="mt-8">
-          <div className="flex items-center justify-between gap-3 mb-4">
+        <section className="mt-5 sm:mt-8">
+          <div className="flex items-center justify-between gap-3 mb-3">
             <div>
               <h2 className="text-sm font-black tracking-wider text-purple-300 ui-section-title">
                 {t.playerList}
@@ -561,7 +561,7 @@ export default function AdminPlayersPage() {
             <button
               onClick={loadPlayers}
               disabled={loading}
-              className="rounded-lg border border-purple-500/20 bg-purple-500/10 hover:bg-purple-500/20 px-3 py-2 text-xs font-bold text-purple-300 disabled:opacity-50"
+              className="rounded-lg border border-purple-500/25 bg-purple-500/10 hover:bg-purple-500/20 px-3 py-2 text-[10px] sm:text-xs font-bold text-purple-300 disabled:opacity-50 active:scale-[0.97] transition"
             >
               ↻ REFRESH
             </button>
