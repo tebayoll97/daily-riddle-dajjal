@@ -62,7 +62,7 @@ const translations = {
     details: "PLAYER DETAILS",
     expand: "VIEW DETAILS",
     collapse: "HIDE DETAILS",
-    footer: "THE DAILY RIDDLE · PLAYER CONTROL CENTER",
+    footer: "DAJJAL FAMILY · GAMING UNIVERSE · PLAYER CONTROL CENTER",
   },
   id: {
     checking: "Memverifikasi administrator...",
@@ -408,9 +408,7 @@ export default function AdminPlayersPage() {
         {/* HEADER */}
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-5">
           <div>
-            <p className="text-purple-400 text-xs tracking-[0.3em]">
-              THE DAILY RIDDLE
-            </p>
+            <p className="ui-eyebrow">DAJJAL FAMILY <span className="text-cyan-300">/ GAMING UNIVERSE</span></p>
 
             <h1 className="text-2xl sm:text-4xl font-black mt-2 sm:mt-3 ui-title">
               {t.title}{" "}
@@ -419,7 +417,7 @@ export default function AdminPlayersPage() {
               </span>
             </h1>
 
-            <p className="text-gray-500 text-xs sm:text-sm mt-1.5 sm:mt-2">
+            <p className="ui-section-subtitle mt-1.5 sm:mt-2">
               {t.subtitle}
             </p>
           </div>
