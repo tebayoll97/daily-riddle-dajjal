@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useLanguage } from "../components/LanguageProvider";
@@ -56,6 +56,24 @@ export default function GamesPage() {
   const t = translations[language] || translations.en;
   const [loading, setLoading] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [catalogGames, setCatalogGames] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    async function loadCatalog() {
+      const { data, error } = await supabase
+        .from("games")
+        .select("id, slug, name, description, status, sort_order")
+        .order("sort_order", { ascending: true });
+      if (error) {
+        console.error("Game catalog load error:", error);
+        return;
+      }
+      if (active) setCatalogGames(data || []);
+    }
+    loadCatalog();
+    return () => { active = false; };
+  }, []);
 
   async function handlePlayDailyRiddle() {
     if (loading) return;
@@ -83,11 +101,18 @@ export default function GamesPage() {
     }
   }
 
-  const games = [
-    { key: "rune", icon: "ᚱ", name: t.rune, description: t.runeDesc, image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=900&q=85", alt: "Ancient glowing runic symbols" },
-    { key: "memory", icon: "◈", name: t.memory, description: t.memoryDesc, image: "https://images.unsplash.com/photo-1606509036992-38f2048865f5?auto=format&fit=crop&w=900&q=85", alt: "Colorful puzzle pieces" },
-    { key: "logic", icon: "✧", name: t.logic, description: t.logicDesc, image: "https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=900&q=85", alt: "Strategy board game pieces" },
-  ];
+  const gameArtwork = {
+    "rune-puzzle": { icon: "ᚱ", image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=900&q=85", alt: "Ancient glowing runic symbols" },
+    "memory-challenge": { icon: "◈", image: "https://images.unsplash.com/photo-1606509036992-38f2048865f5?auto=format&fit=crop&w=900&q=85", alt: "Colorful puzzle pieces" },
+    "logic-battle": { icon: "✧", image: "https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=900&q=85", alt: "Strategy board game pieces" },
+  };
+  const games = catalogGames
+    .filter((game) => game.slug !== "daily-riddle" && game.status !== "archived")
+    .map((game) => ({
+      ...game,
+      ...(gameArtwork[game.slug] || { icon: "✦", image: "", alt: game.name }),
+      description: game.description || "",
+    }));
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#080711] text-white px-4 py-10 sm:py-14">
@@ -143,7 +168,7 @@ export default function GamesPage() {
                   <div className="absolute bottom-3 left-4 flex h-10 w-10 items-center justify-center rounded-xl border border-purple-200/20 bg-black/45 text-2xl text-purple-100 backdrop-blur ui-card">{game.icon}</div>
                 </div>
                 <div className="p-5">
-                <p className="mb-2 text-[9px] font-bold tracking-[0.2em] text-gray-500">0{index + 2} · {t.soon}</p>
+                <p className="mb-2 text-[9px] font-bold tracking-[0.2em] text-gray-500">0{game.sort_order || index + 2} · {t.soon}</p>
                 <h3 className="text-base font-black">{game.name}</h3>
                 <p className="mt-2 text-xs leading-relaxed text-gray-500">{game.description}</p>
                 </div>
