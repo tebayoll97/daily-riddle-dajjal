@@ -263,7 +263,7 @@ export default function CharacterTestPage() {
         .lab-inner{width:min(100%,1240px);margin:0 auto}
         .header{text-align:center;margin:0 auto 24px}
         .brand{color:#c18aff;font-size:10px;letter-spacing:.28em;font-weight:900}
-        .header h1{font-size:clamp(25px,3vw,38px);line-height:1.1;letter-spacing:.06em;margin:10px 0 7px;font-weight:950;background:linear-gradient(100deg,#fff,#d8a6ff 55%,#8bdcff);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .header h1{font-size:clamp(25px,3vw,38px);line-height:1.1;letter-spacing:.06em;margin:10px 0 7px;padding:15px 18px;font-weight:950;color:#fff;border:1px solid rgba(139,92,246,.34);border-radius:16px;background:radial-gradient(ellipse at 0% 0%,rgba(124,58,237,.22),transparent 58%),linear-gradient(115deg,rgba(35,20,58,.96),rgba(18,20,39,.96) 62%,rgba(13,24,38,.96));box-shadow:inset 0 1px rgba(255,255,255,.035),0 10px 30px rgba(0,0,0,.16)}
         .header p{color:#a99bbd;font-size:12px}
         .workspace{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);align-items:start;gap:20px}
         .preview{min-width:0;position:sticky;top:18px;padding:22px;text-align:center;border:1px solid rgba(174,103,230,.38);border-radius:22px;background:linear-gradient(145deg,rgba(34,20,52,.96),rgba(15,12,27,.96));box-shadow:0 18px 55px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.035)}
@@ -275,7 +275,7 @@ export default function CharacterTestPage() {
         .reaction-message{max-width:440px;margin:14px auto 0;padding:12px 14px;border:1px solid rgba(172,105,223,.18);border-radius:12px;background:rgba(40,24,58,.72);color:#ead8ff;font-size:13px;line-height:1.5;animation:messageIn .3s ease-out}
         @keyframes messageIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
         .controls,.gallery{min-width:0;padding:22px;border:1px solid rgba(120,78,158,.28);border-radius:20px;background:linear-gradient(145deg,rgba(24,16,37,.96),rgba(14,11,24,.96));box-shadow:0 14px 40px rgba(0,0,0,.16)}
-        h3{color:#d0a0ff;font-size:11px;letter-spacing:.14em;font-weight:900;margin:24px 0 12px}
+        h3{color:#e5d4ff;font-size:11px;letter-spacing:.12em;font-weight:900;margin:24px 0 12px;padding:10px 12px;border:1px solid rgba(99,102,241,.22);border-left:3px solid #9b5cff;border-radius:10px;background:linear-gradient(105deg,rgba(37,25,57,.82),rgba(18,20,36,.72));box-shadow:inset 0 1px rgba(255,255,255,.025)}
         .controls h3:first-child{margin-top:0}
         .description{color:#a99bbd;font-size:12px;line-height:1.6}
         button,select{color:#eee5ff;background:rgba(37,23,53,.9);border:1px solid rgba(132,91,166,.34);border-radius:11px;cursor:pointer;font-size:12px;transition:border-color .18s,background .18s,transform .18s,box-shadow .18s}
@@ -306,7 +306,7 @@ export default function CharacterTestPage() {
         .gallery-grid button span{font-size:10px;color:#cdb8df}
         footer{text-align:center;color:#806b98;font-size:9px;letter-spacing:.18em;line-height:2;margin-top:28px}
         @media(max-width:700px){
-          .lab{padding:18px 12px 34px}.header{margin-bottom:16px}.brand{font-size:9px;letter-spacing:.22em}.header h1{margin-top:8px;font-size:25px}.header p{font-size:11px}
+          .lab{padding:18px 12px 34px}.header{margin-bottom:16px}.brand{font-size:9px;letter-spacing:.22em}.header h1{margin-top:8px;padding:13px 12px;font-size:25px}.header p{font-size:11px}
           .workspace{display:flex;flex-direction:column;gap:12px}.preview,.controls,.gallery{width:100%;padding:15px;border-radius:16px}
           .preview{position:sticky;top:124px;z-index:40;display:grid;grid-template-columns:112px minmax(0,1fr);grid-template-areas:"label label" "stage name" "stage expression" "message message";align-items:center;column-gap:12px;padding:11px 12px;background:rgba(22,14,34,.97);backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
           .preview-label{grid-area:label;justify-self:start;font-size:9px;margin-bottom:4px}.character-stage{grid-area:stage;min-height:112px;height:112px;margin:0}.preview h2{grid-area:name;text-align:left;font-size:16px;margin:0 0 3px}.current-expression{grid-area:expression;text-align:left;font-size:9px}.reaction-message{grid-area:message;max-width:none;margin:7px 0 0;padding:7px 9px;font-size:10px;line-height:1.35}
