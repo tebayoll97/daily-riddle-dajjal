@@ -27,6 +27,10 @@ const translations = {
     bestScore: "Best",
     streak: "Streak",
     noStats: "No game statistics yet.",
+    activity: "RECENT ACTIVITY",
+    noActivity: "No game activity yet.",
+    won: "VICTORY",
+    lost: "COMPLETED",
     dateLocale: "en-US",
   },
   id: {
@@ -48,6 +52,10 @@ const translations = {
     bestScore: "Terbaik",
     streak: "Rekor Beruntun",
     noStats: "Belum ada statistik permainan.",
+    activity: "RIWAYAT AKTIVITAS",
+    noActivity: "Belum ada aktivitas permainan.",
+    won: "MENANG",
+    lost: "SELESAI",
     dateLocale: "id-ID",
   },
 };
@@ -251,6 +259,38 @@ export default function PublicPlayerProfile() {
                 <p className="font-black text-purple-300 whitespace-nowrap">{game.totalPoints.toLocaleString()} pts</p>
               </div>
             )) : <p className="text-sm text-gray-400 text-center py-3">{t.noStats}</p>}
+          </div>
+        </section>
+
+        {/* RECENT GAME ACTIVITY */}
+        <section className="mt-5 rounded-2xl border border-purple-500/20 bg-[#151020] p-5 ui-card">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-purple-400 text-xs tracking-[0.25em]">{t.activity}</p>
+            <span className="text-[10px] text-gray-500">LAST 15</span>
+          </div>
+          <div className="mt-4 space-y-2">
+            {stats.activity?.length ? stats.activity.map((item) => (
+              <div key={item.id} className="flex items-center justify-between gap-3 rounded-xl bg-black/20 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="font-bold text-sm truncate">{item.gameName}</p>
+                  <p className="mt-1 text-[10px] text-gray-500">
+                    {new Date(item.createdAt).toLocaleString(t.dateLocale, {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="font-black text-sm text-purple-300">{item.score.toLocaleString()} pts</p>
+                  <p className={`text-[9px] font-bold tracking-wider ${item.won ? "text-emerald-400" : "text-gray-500"}`}>
+                    {item.won ? t.won : t.lost}
+                  </p>
+                </div>
+              </div>
+            )) : <p className="py-4 text-center text-sm text-gray-500">{t.noActivity}</p>}
           </div>
         </section>
 
