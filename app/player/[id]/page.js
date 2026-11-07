@@ -24,6 +24,8 @@ const translations = {
     points: "Total Points",
     gamesPlayed: "Sessions",
     wins: "Wins",
+    bestScore: "Best",
+    streak: "Streak",
     noStats: "No game statistics yet.",
     dateLocale: "en-US",
   },
@@ -43,6 +45,8 @@ const translations = {
     points: "Total Poin",
     gamesPlayed: "Sesi Bermain",
     wins: "Kemenangan",
+    bestScore: "Terbaik",
+    streak: "Rekor Beruntun",
     noStats: "Belum ada statistik permainan.",
     dateLocale: "id-ID",
   },
@@ -242,6 +246,7 @@ export default function PublicPlayerProfile() {
                 <div className="min-w-0">
                   <p className="font-bold text-sm truncate">{game.gameName}</p>
                   <p className="text-xs text-gray-400">{game.gamesPlayed} {t.gamesPlayed.toLowerCase()} · {game.wins} {t.wins.toLowerCase()}</p>
+                  <p className="text-[10px] text-gray-500 mt-1">{t.bestScore}: {game.bestScore.toLocaleString()} · {t.streak}: {game.longestStreak}</p>
                 </div>
                 <p className="font-black text-purple-300 whitespace-nowrap">{game.totalPoints.toLocaleString()} pts</p>
               </div>
