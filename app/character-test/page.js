@@ -76,14 +76,14 @@ export default function CharacterTestPage() {
   }
 
   return (
-    <main className="lab">
+    <main className="lab">\n      <div className="lab-inner">
       <header className="header">
         <div className="brand">DAJJAL & VEYLORA</div>
         <h1>CHARACTER LAB</h1>
         <p>Character Engine · Reaction Testing</p>
       </header>
 
-      <section className="preview">
+      <div className="workspace">\n      <section className="preview">
         <div className="preview-label">LIVE CHARACTER</div>
 
         <div className="character-stage">
@@ -213,7 +213,7 @@ export default function CharacterTestPage() {
         </button>
       </section>
 
-      <section className="gallery">
+      </div>\n\n      <section className="gallery">
         <h3>06. ALL CHARACTERS PREVIEW</h3>
         <p className="description">
           Pilih ekspresi untuk melihatnya di Live Preview.
@@ -255,286 +255,64 @@ export default function CharacterTestPage() {
       </footer>
 
       <style jsx>{`
-        .lab {
-          min-height: 100vh;
-          padding: 24px 16px 48px;
-          color: #f4efff;
-          background:
-            radial-gradient(ellipse at 50% -12%, #3b1b59 0%, transparent 44%),
-            linear-gradient(145deg, #0d0917 0%, #080610 58%, #10091b 100%);
+        .lab{min-height:100vh;padding:24px clamp(14px,3vw,34px) 48px;color:#f4efff;background:radial-gradient(ellipse at 50% -12%,rgba(105,45,155,.34),transparent 42%),radial-gradient(ellipse at 90% 30%,rgba(38,91,140,.12),transparent 36%),#080711}
+        .lab-inner{width:min(100%,1240px);margin:0 auto}
+        .header{text-align:center;margin:0 auto 24px}
+        .brand{color:#c18aff;font-size:10px;letter-spacing:.28em;font-weight:900}
+        .header h1{font-size:clamp(25px,3vw,38px);line-height:1.1;letter-spacing:.06em;margin:10px 0 7px;font-weight:950;background:linear-gradient(100deg,#fff,#d8a6ff 55%,#8bdcff);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .header p{color:#a99bbd;font-size:12px}
+        .workspace{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);align-items:start;gap:20px}
+        .preview{min-width:0;position:sticky;top:18px;padding:22px;text-align:center;border:1px solid rgba(174,103,230,.38);border-radius:22px;background:linear-gradient(145deg,rgba(34,20,52,.96),rgba(15,12,27,.96));box-shadow:0 18px 55px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.035)}
+        .preview-label{display:inline-flex;align-items:center;gap:8px;color:#d1a2ff;font-size:10px;letter-spacing:.2em;font-weight:900}
+        .preview-label:before{content:"";width:6px;height:6px;border-radius:50%;background:#9d5cff;box-shadow:0 0 12px #b66cff}
+        .character-stage{min-height:310px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:10px 0 2px;border-radius:18px;background:radial-gradient(ellipse at center,rgba(139,76,190,.18),transparent 62%),linear-gradient(180deg,rgba(255,255,255,.018),transparent)}
+        .preview h2{margin:10px 0 5px;font-size:23px;font-weight:900}
+        .current-expression{color:#c18aff;font-size:10px;letter-spacing:.16em;font-weight:800}
+        .reaction-message{max-width:440px;margin:14px auto 0;padding:12px 14px;border:1px solid rgba(172,105,223,.18);border-radius:12px;background:rgba(40,24,58,.72);color:#ead8ff;font-size:13px;line-height:1.5;animation:messageIn .3s ease-out}
+        @keyframes messageIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+        .controls,.gallery{min-width:0;padding:22px;border:1px solid rgba(120,78,158,.28);border-radius:20px;background:linear-gradient(145deg,rgba(24,16,37,.96),rgba(14,11,24,.96));box-shadow:0 14px 40px rgba(0,0,0,.16)}
+        h3{color:#d0a0ff;font-size:11px;letter-spacing:.14em;font-weight:900;margin:24px 0 12px}
+        .controls h3:first-child{margin-top:0}
+        .description{color:#a99bbd;font-size:12px;line-height:1.6}
+        button,select{color:#eee5ff;background:rgba(37,23,53,.9);border:1px solid rgba(132,91,166,.34);border-radius:11px;cursor:pointer;font-size:12px;transition:border-color .18s,background .18s,transform .18s,box-shadow .18s}
+        button:hover{border-color:rgba(205,155,255,.72);background:rgba(83,48,113,.8)}
+        button:active{transform:scale(.98)}
+        button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid #c18aff;outline-offset:3px}
+        button.selected{background:linear-gradient(135deg,#7136a0,#4b2a70);border-color:#d49bff;box-shadow:0 0 0 1px rgba(212,155,255,.12),0 7px 20px rgba(125,55,175,.2)}
+        .reaction-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+        .reaction-grid button{min-height:58px;display:flex;align-items:center;gap:10px;padding:10px 12px;text-align:left}
+        .reaction-icon{font-size:21px}
+        .character-buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+        .character-buttons button{min-height:42px;padding:9px 5px;border-color:var(--accent);font-weight:800}
+        .expression-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+        .expression-grid button{min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-transform:capitalize}
+        .expression-icon{font-size:22px}
+        select{width:100%;min-height:44px;padding:10px 13px;outline:none}
+        .size-control{display:flex;align-items:center;gap:10px;font-size:10px;color:#b9a8ca}
+        .size-control input{flex:1;min-width:0;accent-color:#bb72ff}
+        .size-value{text-align:center;margin-top:8px;color:#d5adff;font-size:11px;font-weight:800}
+        .reset{width:100%;min-height:44px;padding:11px;margin-top:18px;background:linear-gradient(100deg,#48216c,#66358d);border-color:#8750ad;font-weight:900;letter-spacing:.1em}
+        .gallery{margin-top:20px}
+        .gallery>h3{margin-top:0}
+        .gallery>p{color:#a99bbd;font-size:12px}
+        .gallery-character{margin-top:24px;padding-top:18px;border-top:1px solid rgba(153,112,187,.15)}
+        .gallery-character h4{color:#e4c9ff;margin-bottom:12px;font-size:14px;font-weight:900}
+        .gallery-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:9px}
+        .gallery-grid button{min-width:0;min-height:128px;padding:7px 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-transform:capitalize;overflow:hidden;background:rgba(34,22,48,.72)}
+        .gallery-grid button span{font-size:10px;color:#cdb8df}
+        footer{text-align:center;color:#806b98;font-size:9px;letter-spacing:.18em;line-height:2;margin-top:28px}
+        @media(max-width:700px){
+          .lab{padding:18px 12px 34px}.header{margin-bottom:16px}.brand{font-size:9px;letter-spacing:.22em}.header h1{margin-top:8px;font-size:25px}.header p{font-size:11px}
+          .workspace{display:flex;flex-direction:column;gap:12px}.preview,.controls,.gallery{width:100%;padding:15px;border-radius:16px}
+          .preview{position:relative;top:auto}.character-stage{min-height:210px;margin:7px 0 0}.preview h2{font-size:19px;margin-top:7px}
+          .reaction-message{margin-top:10px;padding:10px 11px;font-size:12px}.controls h3{margin:19px 0 10px;font-size:10px}.description{font-size:11px}
+          .reaction-grid{gap:7px}.reaction-grid button{min-height:52px;padding:8px 9px;gap:8px;font-size:11px}.reaction-icon{font-size:19px}
+          .character-buttons{gap:6px}.character-buttons button{min-height:40px;font-size:10px}.expression-grid{gap:6px}.expression-grid button{min-height:65px;font-size:10px}.expression-icon{font-size:20px}
+          .gallery{margin-top:12px}.gallery-character{margin-top:18px;padding-top:14px}.gallery-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.gallery-grid button{min-height:112px;padding:5px 2px}.gallery-grid button span{font-size:9px}
         }
-
-        .header {
-          max-width: 1200px;
-          margin: 0 auto 24px;
-          text-align: center;
-        }
-        .brand {
-          color: #c18aff;
-          font-size: 10px;
-          letter-spacing: 3px;
-          font-weight: 800;
-        }
-        .header h1 {
-          font-size: clamp(25px, 4vw, 36px);
-          letter-spacing: 2px;
-          line-height: 1.1;
-          margin: 10px 0 6px;
-          font-weight: 900;
-          background: linear-gradient(90deg, #f0d9ff, #b66cff, #79d9ff);
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-        }
-        .header p { color: #a99bbd; font-size: 12px; }
-
-        .preview, .controls, .gallery {
-          border: 1px solid rgba(174, 112, 225, .22);
-          background: linear-gradient(145deg, rgba(28, 18, 43, .96), rgba(15, 11, 25, .96));
-          box-shadow: 0 14px 40px rgba(0, 0, 0, .18), inset 0 1px rgba(255,255,255,.025);
-          backdrop-filter: blur(12px);
-        }
-        .preview {
-          width: 100%;
-          max-width: 560px;
-          margin: 0 auto 16px;
-          padding: 16px;
-          text-align: center;
-          border-radius: 20px;
-        }
-        .preview-label {
-          color: #c18aff;
-          font-size: 10px;
-          letter-spacing: 2.5px;
-          font-weight: 800;
-        }
-        .character-stage {
-          min-height: 210px;
-          height: clamp(210px, 35vw, 280px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-          margin: 5px 0;
-          border-radius: 16px;
-          background:
-            radial-gradient(ellipse at 50% 58%, rgba(139, 75, 190, .16), transparent 58%),
-            linear-gradient(180deg, rgba(255,255,255,.018), transparent);
-        }
-        .preview h2 { margin: 5px 0 4px; font-size: 20px; font-weight: 850; }
-        .current-expression {
-          color: #c18aff;
-          font-size: 10px;
-          letter-spacing: 1.8px;
-          font-weight: 800;
-        }
-        .reaction-message {
-          margin-top: 11px;
-          padding: 10px 12px;
-          border: 1px solid rgba(174,112,225,.14);
-          border-radius: 12px;
-          background: rgba(40, 24, 58, .72);
-          color: #ead8ff;
-          font-size: 12px;
-          line-height: 1.5;
-          animation: messageIn .3s ease-out;
-        }
-        @keyframes messageIn {
-          from { opacity: 0; transform: translateY(5px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        .controls, .gallery {
-          width: 100%;
-          max-width: 560px;
-          margin: 0 auto 16px;
-          padding: 16px;
-          border-radius: 18px;
-          min-width: 0;
-        }
-        h3 {
-          color: #d0a2ff;
-          font-size: 11px;
-          letter-spacing: 1.2px;
-          font-weight: 850;
-          margin: 20px 0 10px;
-        }
-        .controls h3:first-child { margin-top: 0; }
-        .description { color: #a99bbd; font-size: 11px; line-height: 1.55; }
-
-        button, select {
-          color: #eee5ff;
-          background: rgba(37, 23, 53, .88);
-          border: 1px solid rgba(142, 93, 180, .32);
-          border-radius: 11px;
-          cursor: pointer;
-          font-size: 11px;
-          transition: background .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease;
-        }
-        button:hover, select:hover {
-          border-color: rgba(202, 151, 255, .7);
-          background: rgba(76, 42, 105, .9);
-        }
-        button:active { transform: scale(.98); }
-        button:focus-visible, select:focus-visible, input:focus-visible {
-          outline: 2px solid #c18aff;
-          outline-offset: 3px;
-        }
-        button.selected {
-          background: linear-gradient(135deg, #693b91, #482765);
-          border-color: #d49bff;
-          box-shadow: 0 0 0 1px rgba(212,155,255,.12), 0 5px 18px #a34dff25;
-        }
-
-        .reaction-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-        .reaction-grid button {
-          min-height: 50px;
-          display: flex;
-          align-items: center;
-          gap: 9px;
-          padding: 9px 10px;
-          text-align: left;
-          line-height: 1.25;
-        }
-        .reaction-icon { font-size: 19px; flex: 0 0 auto; }
-        .character-buttons { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
-        .character-buttons button {
-          min-height: 42px;
-          padding: 8px 4px;
-          border-color: color-mix(in srgb, var(--accent) 48%, transparent);
-          font-weight: 750;
-        }
-        .expression-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
-        .expression-grid button {
-          min-width: 0;
-          min-height: 64px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 4px;
-          text-transform: capitalize;
-        }
-        .expression-icon { font-size: 21px; }
-        select { width: 100%; padding: 11px 12px; outline: none; }
-        .size-control {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          color: #b9a8ca;
-          font-size: 10px;
-        }
-        .size-control input { flex: 1; min-width: 0; accent-color: #bb72ff; }
-        .size-value { text-align: center; margin-top: 7px; color: #d5adff; font-size: 11px; font-weight: 800; }
-        .reset {
-          width: 100%;
-          min-height: 42px;
-          padding: 10px 13px;
-          margin-top: 15px;
-          background: linear-gradient(100deg, #60318a, #43205f);
-          border-color: #8750ad;
-          font-weight: 850;
-          letter-spacing: .8px;
-        }
-
-        .gallery > p { color: #a99bbd; font-size: 11px; }
-        .gallery-character { margin-top: 20px; }
-        .gallery-character h4 { color: #e4c9ff; margin-bottom: 10px; font-size: 13px; font-weight: 800; }
-        .gallery-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
-        .gallery-grid button {
-          min-width: 0;
-          min-height: 104px;
-          padding: 5px 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 2px;
-          text-transform: capitalize;
-          overflow: hidden;
-        }
-        .gallery-grid button span { font-size: 9px; color: #c8b4dd; }
-        footer {
-          text-align: center;
-          color: #806b98;
-          font-size: 9px;
-          letter-spacing: 1.7px;
-          line-height: 2;
-          margin: 25px auto 0;
-        }
-
-        /* Tablet and desktop: a dedicated two-column testing workspace. */
-        @media (min-width: 900px) {
-          .lab {
-            display: grid;
-            grid-template-columns: minmax(320px, 430px) minmax(0, 1fr);
-            grid-template-areas:
-              "header header"
-              "preview controls"
-              "preview gallery"
-              "footer footer";
-            align-items: start;
-            column-gap: 22px;
-            row-gap: 0;
-            max-width: 1440px;
-            margin: 0 auto;
-            padding: 30px 28px 56px;
-          }
-          .header { grid-area: header; width: 100%; margin-bottom: 26px; }
-          .preview {
-            grid-area: preview;
-            position: sticky;
-            top: 22px;
-            max-width: none;
-            margin: 0;
-            padding: 22px;
-          }
-          .character-stage { height: 330px; }
-          .controls { grid-area: controls; max-width: none; margin: 0 0 18px; padding: 22px; }
-          .gallery { grid-area: gallery; max-width: none; margin: 0; padding: 22px; }
-          .gallery-grid { grid-template-columns: repeat(4, minmax(100px, 1fr)); gap: 10px; }
-          .gallery-grid button { min-height: 130px; }
-          .gallery-grid button span { font-size: 10px; }
-          .reaction-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-        }
-
-        @media (min-width: 1200px) {
-          .lab { grid-template-columns: minmax(360px, 470px) minmax(0, 1fr); column-gap: 28px; padding-left: 36px; padding-right: 36px; }
-          .character-stage { height: 390px; }
-          .gallery-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-        }
-
-        /* Mobile: compact controls, full-width touch targets, single-column flow. */
-        @media (max-width: 480px) {
-          .lab { padding: 17px 11px 34px; }
-          .header { margin-bottom: 16px; }
-          .brand { font-size: 9px; letter-spacing: 2.4px; }
-          .header h1 { margin-top: 8px; font-size: 25px; }
-          .header p { font-size: 11px; }
-          .preview { padding: 12px; margin-bottom: 12px; border-radius: 16px; }
-          .character-stage { height: 190px; min-height: 190px; }
-          .preview h2 { font-size: 18px; }
-          .reaction-message { margin-top: 9px; padding: 9px 10px; font-size: 11px; }
-          .controls, .gallery { padding: 13px; margin-bottom: 12px; border-radius: 15px; }
-          h3 { margin: 17px 0 9px; font-size: 10px; }
-          .description { font-size: 10px; }
-          .reaction-grid { gap: 6px; }
-          .reaction-grid button { min-height: 46px; padding: 8px; gap: 7px; font-size: 10px; }
-          .reaction-icon { font-size: 17px; }
-          .character-buttons button { min-height: 39px; font-size: 10px; }
-          .expression-grid { gap: 6px; }
-          .expression-grid button { min-height: 59px; font-size: 10px; }
-          .expression-icon { font-size: 19px; }
-          .gallery-character { margin-top: 16px; }
-          .gallery-grid { gap: 5px; }
-          .gallery-grid button { min-height: 88px; }
-          .gallery-grid button span { font-size: 8px; }
-          footer { font-size: 8px; letter-spacing: 1.2px; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
-        }
+        @media(min-width:701px){.preview{min-height:480px}.controls{padding:24px}.gallery-grid button:hover{transform:translateY(-2px)}}
+        @media(min-width:1100px){.workspace{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}.character-stage{min-height:360px}.gallery{padding:26px}}
+        @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
       `}</style>
     </main>
   );
