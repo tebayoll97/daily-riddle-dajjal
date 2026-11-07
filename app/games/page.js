@@ -57,6 +57,7 @@ export default function GamesPage() {
   const [loading, setLoading] = useState(false);
   const [showError, setShowError] = useState(false);
   const [catalogGames, setCatalogGames] = useState([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -67,9 +68,13 @@ export default function GamesPage() {
         .order("sort_order", { ascending: true });
       if (error) {
         console.error("Game catalog load error:", error);
+        if (active) setCatalogLoading(false);
         return;
       }
-      if (active) setCatalogGames(data || []);
+      if (active) {
+        setCatalogGames(data || []);
+        setCatalogLoading(false);
+      }
     }
     loadCatalog();
     return () => { active = false; };
@@ -160,9 +165,14 @@ export default function GamesPage() {
             <span className="h-2 w-2 rounded-full bg-gray-500" />
             <h2 className="text-[10px] font-bold tracking-[0.25em] text-gray-400 ui-section-title">{t.soon}</h2>
           </div>
+          {catalogLoading ? (
+            <div className="grid gap-3 sm:grid-cols-3" aria-label={t.wait}>
+              {[1, 2, 3].map((item) => <div key={item} className="h-56 rounded-2xl border border-purple-500/15 bg-purple-500/5 animate-pulse" />)}
+            </div>
+          ) : (
           <div className="grid gap-3 sm:grid-cols-3">
             {games.map((game, index) => (
-              <article key={game.key} className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] transition duration-300 hover:border-purple-400/30 hover:bg-purple-500/[0.06] ui-card">
+              <article key={game.id || game.slug} className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] transition duration-300 hover:border-purple-400/30 hover:bg-purple-500/[0.06] ui-card">
                 <div className="relative h-36 overflow-hidden">
                   <img src={game.image} alt={game.alt} loading="lazy" className="h-full w-full object-cover opacity-75 transition duration-500 hover:scale-105" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#100d19] via-black/10 to-transparent" />
@@ -176,6 +186,7 @@ export default function GamesPage() {
               </article>
             ))}
           </div>
+          )}
         </section>
       </div>
 
