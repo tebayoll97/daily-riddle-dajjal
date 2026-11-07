@@ -207,7 +207,7 @@ export default function ProfilePage() {
       <div className="max-w-xl mx-auto">
 
         <p className="text-purple-400 text-xs tracking-[0.3em]">
-          DAJJAL & VEYLORA GAMING UNIVERSE
+          DAJJAL FAMILY · GAMING UNIVERSE
         </p>
 
         <h1 className="text-3xl font-black mt-3 ui-title">
