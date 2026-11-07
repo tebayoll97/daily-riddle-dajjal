@@ -58,6 +58,7 @@ export default function ProfilePage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [avatarFailed, setAvatarFailed] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -107,6 +108,7 @@ export default function ProfilePage() {
 
         if (active) {
           setPlayer(profileResult.player);
+          setAvatarFailed(false);
           setStats(profileResult.stats || {
             total_points: 0,
             riddles_solved: 0,
@@ -192,15 +194,16 @@ export default function ProfilePage() {
         <div className="mt-8 rounded-2xl border border-purple-500/30 bg-[#151020] p-6 ui-card">
 
           <div className="w-28 h-28 rounded-full overflow-hidden bg-purple-600/20 border-2 border-purple-400/50 flex items-center justify-center mx-auto">
-            {player.avatar_url ? (
+            {player.avatar_url && !avatarFailed ? (
               <img
                 src={player.avatar_url}
-                alt={player.nickname}
+                alt={player.nickname || "Player avatar"}
+                onError={() => setAvatarFailed(true)}
                 className="w-full h-full object-cover"
               />
             ) : (
               <span className="text-4xl font-black text-purple-300">
-                {player.nickname.charAt(0).toUpperCase()}
+                {(player.nickname || "?").charAt(0).toUpperCase()}
               </span>
             )}
           </div>
