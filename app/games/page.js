@@ -110,8 +110,9 @@ export default function GamesPage() {
     .filter((game) => game.slug !== "daily-riddle" && game.status !== "archived")
     .map((game) => ({
       ...game,
+      name: game.slug === "rune-puzzle" ? t.rune : game.slug === "memory-challenge" ? t.memory : game.slug === "logic-battle" ? t.logic : game.name,
+      description: game.slug === "rune-puzzle" ? t.runeDesc : game.slug === "memory-challenge" ? t.memoryDesc : game.slug === "logic-battle" ? t.logicDesc : (game.description || ""),
       ...(gameArtwork[game.slug] || { icon: "✦", image: "", alt: game.name }),
-      description: game.description || "",
     }));
 
   return (
