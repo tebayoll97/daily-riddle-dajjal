@@ -425,12 +425,11 @@ export default function AdminPlayersPage() {
               ← {t.back}
             </button>
 
-            <button
           </div>
         </header>
 
         {/* ADMIN INFO */}
-        <section className="mt-8 rounded-2xl border border-purple-500/20 bg-[#151020] p-4 sm:p-3 sm:p-5 ui-card">
+        <section className="mt-8 rounded-2xl border border-purple-500/20 bg-[#151020] p-3 sm:p-5 ui-card">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-xl ui-card">
               ♛
