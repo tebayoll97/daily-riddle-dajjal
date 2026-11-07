@@ -230,10 +230,7 @@ export default function Header() {
             className="min-w-0 flex flex-col"
           >
             <h1 className={`font-black tracking-wide text-white leading-tight transition-all duration-300 ${isCompact ? "text-xs sm:text-sm" : "text-sm sm:text-base"}`}>
-              DAJJAL
-              <span className="text-purple-400">
-                {" "} & VEYLORA
-              </span>
+              DAJJAL FAMILY
             </h1>
 
             <p className={`overflow-hidden tracking-[0.13em] text-gray-500 transition-all duration-300 ${isCompact ? "mt-0 max-h-0 text-[0px] opacity-0" : "mt-1 max-h-4 text-[8px] opacity-100 sm:text-[9px]"}`}>
