@@ -119,7 +119,7 @@ const translations = {
     details: "DETAIL PEMAIN",
     expand: "LIHAT DETAIL",
     collapse: "TUTUP DETAIL",
-    footer: "THE DAILY RIDDLE · PLAYER CONTROL CENTER",
+    footer: "DAJJAL FAMILY · GAMING UNIVERSE · PLAYER CONTROL CENTER",
   },
 };
 
