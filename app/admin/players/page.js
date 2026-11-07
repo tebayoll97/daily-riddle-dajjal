@@ -830,7 +830,7 @@ export default function AdminPlayersPage() {
               className="w-full max-w-md rounded-2xl border border-purple-500/30 bg-[#151020] p-5 sm:p-6 shadow-2xl shadow-purple-950/40 ui-card"
             >
               <div className="text-2xl mb-3">{actionType === "delete" ? "⚠️" : actionType === "ban" ? "🛡️" : "🔓"}</div>
-              <h2 id="player-action-title" className="text-lg font-black text-white">
+              <h2 id="player-action-title" className="text-lg font-black text-white ui-section-title">
                 {t.actionTitle}
               </h2>
               <p className="text-sm font-bold text-purple-300 mt-2 break-words">
