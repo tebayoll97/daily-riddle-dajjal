@@ -20,6 +20,11 @@ const translations = {
     edit: "EDIT PROFILE",
     retry: "TRY AGAIN",
     error: "Unable to load profile.",
+    stats: "GAME UNIVERSE STATS",
+    points: "Total Points",
+    gamesPlayed: "Sessions",
+    wins: "Wins",
+    noStats: "No game statistics yet.",
     security: "ACCOUNT SECURITY",
     securityTitle: "Account Security",
     securityDescription: "Protect your account and game progress.",
@@ -34,6 +39,11 @@ const translations = {
     edit: "EDIT PROFIL",
     retry: "COBA LAGI",
     error: "Tidak dapat memuat profil.",
+    stats: "STATISTIK GAME UNIVERSE",
+    points: "Total Poin",
+    gamesPlayed: "Sesi Bermain",
+    wins: "Kemenangan",
+    noStats: "Belum ada statistik permainan.",
     security: "KEAMANAN AKUN",
     securityTitle: "Keamanan Akun",
     securityDescription: "Lindungi akun dan progres permainanmu.",
@@ -46,7 +56,7 @@ export default function ProfilePage() {
   const { language } = useLanguage();
   const t = translations[language] || translations.en;
 
-  const [player, setPlayer] = useState(null);
+  const [player, setPlayer] = useState(null);\n  const [stats, setStats] = useState({ summary: {}, games: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [avatarFailed, setAvatarFailed] = useState(false);
@@ -98,7 +108,7 @@ export default function ProfilePage() {
         }
 
         if (active) {
-          setPlayer(profileResult.player);
+          setPlayer(profileResult.player);\n          setStats(profileResult.stats || { summary: {}, games: [] });
           setAvatarFailed(false);
         }
       } catch (err) {
@@ -232,6 +242,34 @@ export default function ProfilePage() {
 
           </div>
         </div>
+
+        {/* UNIVERSAL GAME STATISTICS */}
+        <section className="mt-8 rounded-2xl border border-purple-500/30 bg-[#151020] p-5 ui-card">
+          <p className="text-purple-400 text-xs tracking-[0.25em]">{t.stats}</p>
+          <div className="grid grid-cols-3 gap-2 mt-4">
+            {[
+              { label: t.points, value: stats.summary?.totalPoints || 0 },
+              { label: t.gamesPlayed, value: stats.summary?.gamesPlayed || 0 },
+              { label: t.wins, value: stats.summary?.wins || 0 },
+            ].map((item) => (
+              <div key={item.label} className="rounded-xl bg-purple-500/10 border border-purple-500/20 p-3 text-center min-w-0">
+                <p className="text-xl font-black text-white">{item.value.toLocaleString()}</p>
+                <p className="text-[10px] text-gray-400 mt-1 break-words">{item.label}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 space-y-2">
+            {stats.games?.length ? stats.games.map((game) => (
+              <div key={game.gameId} className="flex items-center justify-between gap-3 rounded-xl bg-black/20 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="font-bold text-sm truncate">{game.gameName}</p>
+                  <p className="text-xs text-gray-400">{game.gamesPlayed} {t.gamesPlayed.toLowerCase()} · {game.wins} {t.wins.toLowerCase()}</p>
+                </div>
+                <p className="font-black text-purple-300 whitespace-nowrap">{game.totalPoints.toLocaleString()} pts</p>
+              </div>
+            )) : <p className="text-sm text-gray-400 text-center py-3">{t.noStats}</p>}
+          </div>
+        </section>
 
         {/* ACCOUNT SECURITY */}
         <section
