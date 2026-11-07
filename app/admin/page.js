@@ -33,7 +33,7 @@ const copy = {
     confirm: "YES, SIGN OUT",
     denied: "Administrator access denied.",
     error: "Unable to verify administrator access.",
-    footer: "THE DAILY RIDDLE · ADMIN CONTROL CENTER",
+    footer: "DAJJAL FAMILY · ADMIN CONTROL CENTER",
   },
   id: {
     checking: "MEMVERIFIKASI AKSES ADMIN...",
@@ -61,7 +61,7 @@ const copy = {
     confirm: "YA, KELUAR",
     denied: "Akses administrator ditolak.",
     error: "Tidak dapat memverifikasi akses administrator.",
-    footer: "THE DAILY RIDDLE · PUSAT KENDALI ADMIN",
+    footer: "DAJJAL FAMILY · PUSAT KENDALI ADMIN",
   },
 };
 
@@ -204,7 +204,7 @@ export default function AdminDashboardPage() {
       <div className="relative mx-auto max-w-6xl">
         <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="ui-eyebrow">THE DAILY RIDDLE <span className="text-cyan-300">/ CONTROL CENTER</span></p>
+            <p className="ui-eyebrow">DAJJAL FAMILY <span className="text-cyan-300">/ ADMIN CONTROL CENTER</span></p>
             <h1 className="ui-title">
               {t.title} <span className="ui-gradient-text">{t.accent}</span>
             </h1>
