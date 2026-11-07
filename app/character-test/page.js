@@ -78,7 +78,7 @@ export default function CharacterTestPage() {
   return (
     <main className="lab">\n      <div className="lab-inner">
       <header className="header">
-        <div className="brand">DAJJAL & VEYLORA</div>
+        <div className="brand">DAJJAL FAMILY · GAMING UNIVERSE</div>
         <h1>CHARACTER LAB</h1>
         <p>Character Engine · Reaction Testing</p>
       </header>
@@ -249,7 +249,7 @@ export default function CharacterTestPage() {
       </section>
 
       <footer>
-        DAJJAL & VEYLORA GAMING UNIVERSE
+        DAJJAL FAMILY · GAMING UNIVERSE
         <br />
         CHARACTER ENGINE 1.0
       </footer>
