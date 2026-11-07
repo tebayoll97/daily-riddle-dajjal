@@ -78,16 +78,7 @@ main h1:not(.welcome-title) {
   text-wrap: balance;
 }
 .ui-title::before,
-main h1:not(.welcome-title)::before {
-  content: "DAJJAL FAMILY  /  GAMING UNIVERSE";
-  display: block;
-  margin-bottom: .55rem;
-  color: #a78bfa;
-  font-size: .58rem;
-  font-weight: 850;
-  line-height: 1.4;
-  letter-spacing: .17em;
-}
+main h1:not(.welcome-title)::before { content: none; }
 .ui-title::after,
 main h1:not(.welcome-title)::after {
   content: "";
