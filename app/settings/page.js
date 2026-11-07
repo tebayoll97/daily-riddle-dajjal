@@ -364,7 +364,7 @@ export default function SettingsPage() {
         {/* PAGE HEADER */}
         <div className="mb-7">
           <p className="text-purple-400 text-xs tracking-[0.3em]">
-            DAJJAL & VEYLORA GAMING UNIVERSE
+            DAJJAL FAMILY · GAMING UNIVERSE
           </p>
 
           <h1 className="text-3xl font-black mt-3 ui-title">
