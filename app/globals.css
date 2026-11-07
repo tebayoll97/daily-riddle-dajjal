@@ -282,3 +282,199 @@ main h1:not(.welcome-title) + p {
   main .ui-card { border-radius: 1rem; }
   main .ui-title { letter-spacing: -0.025em; }
 }
+
+
+/* =========================================================
+   GAMING UNIVERSE DESIGN SYSTEM V2
+   Responsive composition: dedicated mobile + desktop rules
+   ========================================================= */
+:root {
+  --surface-1: #100d1a;
+  --surface-2: #151020;
+  --surface-3: #1b1528;
+  --line-soft: rgba(168, 85, 247, .16);
+  --line-mid: rgba(168, 85, 247, .26);
+  --text-primary: #f7f4ff;
+  --text-secondary: #b8b1c7;
+  --text-muted: #8d879c;
+  --radius-card: 16px;
+  --radius-control: 11px;
+}
+
+/* Page heading: compact HUD, not a giant banner */
+.ui-title,
+main h1:not(.welcome-title) {
+  padding: clamp(12px, 1.7vw, 20px) clamp(15px, 2vw, 24px) !important;
+  border-radius: 15px !important;
+  border-color: rgba(155, 105, 235, .28) !important;
+  background:
+    linear-gradient(110deg, rgba(35, 22, 55, .94), rgba(16, 19, 34, .94) 72%),
+    #11101b !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.035), 0 7px 22px rgba(0,0,0,.12) !important;
+  font-size: clamp(1.35rem, 1.1rem + 1.35vw, 2.15rem) !important;
+  line-height: 1.12 !important;
+  letter-spacing: -.035em !important;
+}
+.ui-title::after,
+main h1:not(.welcome-title)::after {
+  width: 3.6rem !important;
+  height: 3px !important;
+  margin-top: .55rem !important;
+  box-shadow: 0 0 9px rgba(168,85,247,.24) !important;
+}
+.ui-eyebrow {
+  margin-bottom: .35rem !important;
+  font-size: .66rem !important;
+  letter-spacing: .15em !important;
+  color: #b99af5 !important;
+}
+.ui-subtitle,
+main h1:not(.welcome-title) + p {
+  margin-top: .55rem !important;
+  color: var(--text-secondary) !important;
+  font-size: clamp(.82rem, .78rem + .2vw, .94rem) !important;
+  line-height: 1.5 !important;
+}
+
+/* Section headings are secondary hierarchy */
+.ui-section-title {
+  padding: .65rem .85rem !important;
+  border: 1px solid rgba(132, 95, 190, .17) !important;
+  border-left: 3px solid #9b5cff !important;
+  border-radius: 11px !important;
+  background: linear-gradient(100deg, rgba(32,24,47,.82), rgba(18,18,31,.72)) !important;
+  box-shadow: none !important;
+  font-size: clamp(.98rem, .92rem + .42vw, 1.2rem) !important;
+  line-height: 1.25 !important;
+}
+.ui-section-title::after {
+  width: 2.1rem !important;
+  margin-top: .4rem !important;
+  opacity: .7 !important;
+}
+.ui-section-subtitle { margin-top: .35rem !important; color: var(--text-muted) !important; }
+
+/* Surfaces: fewer nested borders and more deliberate depth */
+.ui-card {
+  border: 1px solid var(--line-soft) !important;
+  border-radius: var(--radius-card) !important;
+  background: linear-gradient(145deg, rgba(22,17,34,.96), rgba(13,12,23,.96)) !important;
+  box-shadow: 0 7px 22px rgba(0,0,0,.12), inset 0 1px rgba(255,255,255,.025) !important;
+}
+.ui-card .ui-card {
+  border-color: rgba(168,85,247,.12) !important;
+  background: rgba(255,255,255,.025) !important;
+  box-shadow: none !important;
+}
+main :is(input:not([type="range"]), textarea, select) {
+  border-radius: var(--radius-control);
+}
+main button, main a[role="button"] {
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+main button:active { transform: scale(.985); }
+
+/* Settings layout: compact category tabs and cleaner setting rows */
+main > div.max-w-2xl { max-width: 48rem; }
+main > div.max-w-2xl > .mb-7 { margin-bottom: 1.25rem !important; }
+main > div.max-w-2xl > .grid.grid-cols-4 { gap: .55rem !important; margin-bottom: 1.35rem !important; }
+main > div.max-w-2xl > .grid.grid-cols-4 button {
+  min-height: 62px !important;
+  padding: .55rem .35rem !important;
+  border-radius: 12px !important;
+  border-color: rgba(168,85,247,.13);
+  background: rgba(255,255,255,.035);
+}
+main > div.max-w-2xl > .grid.grid-cols-4 button[aria-pressed="true"] {
+  border-color: rgba(181,125,255,.52) !important;
+  background: linear-gradient(145deg, rgba(110,47,168,.25), rgba(75,48,120,.13)) !important;
+  box-shadow: inset 0 0 0 1px rgba(192,132,252,.08), 0 5px 15px rgba(91,33,182,.10);
+}
+main > div.max-w-2xl section > .rounded-2xl.ui-card,
+main > div.max-w-2xl section > .rounded-xl.ui-card {
+  padding: clamp(12px, 2vw, 20px) !important;
+  gap: 1rem !important;
+}
+main > div.max-w-2xl section .ui-card > .flex.items-center.justify-between {
+  min-height: 66px;
+  gap: 12px !important;
+  padding: 12px 14px !important;
+  border: 1px solid rgba(168,85,247,.12) !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,.025) !important;
+}
+main > div.max-w-2xl section .ui-card h3 {
+  font-size: .95rem;
+  line-height: 1.3;
+}
+main > div.max-w-2xl section .ui-card p.text-xs {
+  color: var(--text-muted) !important;
+  line-height: 1.45;
+}
+main > div.max-w-2xl section input[type="range"] { accent-color: #b66cff; }
+
+/* Header: tighter vertical rhythm, active navigation clarity */
+header.sticky { background: rgba(8,7,17,.94) !important; border-color: rgba(168,85,247,.16) !important; }
+header.sticky > div { max-width: 76rem; }
+header.sticky nav { border-color: rgba(168,85,247,.12) !important; }
+header.sticky nav a { min-height: 54px; }
+header.sticky nav a[aria-current="page"] {
+  background: linear-gradient(180deg, rgba(139,72,210,.16), rgba(139,72,210,.055)) !important;
+}
+header.sticky nav a[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 22%;
+  right: 22%;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg,#a855f7,#22d3ee);
+}
+header.sticky button, header.sticky a[aria-label] { border-radius: 11px !important; }
+
+/* Consistent content width and spacing */
+main { min-width: 0; }
+main > div { min-width: 0; }
+main section { min-width: 0; }
+main :is(.rounded-xl,.rounded-2xl,.rounded-3xl) { scroll-margin-top: 100px; }
+
+@media (max-width: 640px) {
+  body { font-size: 14px; }
+  header.sticky > div { padding-left: 12px; padding-right: 12px; }
+  header.sticky nav a { min-height: 48px; padding-top: .45rem !important; padding-bottom: .45rem !important; }
+  header.sticky nav a > span:first-child { font-size: 1rem !important; }
+  header.sticky nav a > span:nth-child(2) { font-size: 10px !important; }
+  .ui-title, main h1:not(.welcome-title) {
+    padding: 12px 14px !important;
+    border-radius: 13px !important;
+    font-size: clamp(1.28rem, 5.1vw, 1.75rem) !important;
+  }
+  .ui-title::after, main h1:not(.welcome-title)::after { margin-top: .45rem !important; }
+  .ui-eyebrow { font-size: 9px !important; letter-spacing: .13em !important; }
+  .ui-subtitle, main h1:not(.welcome-title) + p { font-size: .82rem !important; }
+  .ui-section-title { padding: .58rem .75rem !important; font-size: 1rem !important; }
+  .ui-section-title::after { margin-top: .32rem !important; }
+  .ui-card { border-radius: 14px !important; }
+  main > div.max-w-2xl > .grid.grid-cols-4 { gap: 6px !important; }
+  main > div.max-w-2xl > .grid.grid-cols-4 button { min-height: 58px !important; gap: 5px !important; }
+  main > div.max-w-2xl > .grid.grid-cols-4 button span:first-child { font-size: 1.05rem !important; }
+  main > div.max-w-2xl > .grid.grid-cols-4 button span:last-child { font-size: 10px !important; }
+  main > div.max-w-2xl section .ui-card > .flex.items-center.justify-between { padding: 10px 11px !important; min-height: 62px; }
+  main > div.max-w-2xl section .ui-card button[aria-pressed] { flex: 0 0 48px; width: 48px !important; height: 26px !important; }
+  main > div.max-w-2xl section .ui-card button[aria-pressed] span { width: 18px !important; height: 18px !important; }
+  main > div.max-w-2xl section .ui-card button[aria-pressed] span.translate-x-8 { transform: translateX(25px) !important; }
+  main.px-4 { padding-left: 14px !important; padding-right: 14px !important; }
+  main.py-8 { padding-top: 22px !important; padding-bottom: 28px !important; }
+}
+
+@media (min-width: 768px) {
+  main { padding-top: 2.5rem; padding-bottom: 3rem; }
+  .ui-title, main h1:not(.welcome-title) { border-radius: 17px !important; }
+  .ui-card { border-radius: 17px !important; }
+  header.sticky nav a { min-height: 58px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  header.sticky *, main button, main a { transition-duration: .01ms !important; }
+}
