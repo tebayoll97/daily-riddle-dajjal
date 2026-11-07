@@ -32,9 +32,12 @@ export default function EditProfilePage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    loadProfile();
+    let active = true;
+    loadProfile(() => active);
 
     return () => {
+      active = false;
+
       if (previewUrlRef.current) {
         URL.revokeObjectURL(previewUrlRef.current);
         previewUrlRef.current = "";
@@ -47,13 +50,15 @@ export default function EditProfilePage() {
     };
   }, []);
 
-  async function loadProfile() {
+  async function loadProfile(isActive = () => true) {
     setLoading(true);
     setError("");
 
     try {
       const { data: sessionData } =
         await supabase.auth.getSession();
+
+      if (!isActive()) return;
 
       const user = sessionData?.session?.user;
 
@@ -68,6 +73,7 @@ export default function EditProfilePage() {
         .eq("auth_user_id", user.id)
         .maybeSingle();
 
+      if (!isActive()) return;
       if (profileError) throw profileError;
 
       if (!data) {
@@ -84,9 +90,9 @@ export default function EditProfilePage() {
       setAvatarUrl(data.avatar_url || "");
       setAvatarPath(data.avatar_path || "");
     } catch (err) {
-      setError(err.message);
+      if (isActive()) setError(err.message);
     } finally {
-      setLoading(false);
+      if (isActive()) setLoading(false);
     }
   }
 
