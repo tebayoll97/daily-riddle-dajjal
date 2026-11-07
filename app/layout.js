@@ -33,7 +33,9 @@ export default function RootLayout({ children }) {
           <Header />
 
           <main className="flex-1 w-full">
-            {children}
+            <div className="ui-route-frame">
+              {children}
+            </div>
           </main>
 
           <Footer />
