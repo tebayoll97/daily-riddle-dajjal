@@ -319,6 +319,7 @@ export default function CharacterTestPage() {
         @media(min-width:1100px){.workspace{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}.character-stage{min-height:360px}.gallery{padding:26px}}
         @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
       `}</style>
+      </div>
     </main>
   );
 }
