@@ -230,7 +230,7 @@ export default function EditProfilePage() {
         newAvatarPath = null;
       }
 
-      const { error: updateError } = await supabase
+      const { data: updatedPlayer, error: updateError } = await supabase
         .from("players")
         .update({
           nickname: cleanNickname,
@@ -239,9 +239,19 @@ export default function EditProfilePage() {
           avatar_path: newAvatarPath,
         })
         .eq("id", player.id)
-        .eq("auth_user_id", user.id);
+        .eq("auth_user_id", user.id)
+        .select("id")
+        .maybeSingle();
 
       if (updateError) throw updateError;
+
+      if (!updatedPlayer) {
+        throw new Error(
+          isID
+            ? "Profil tidak berhasil diperbarui. Muat ulang halaman lalu coba lagi."
+            : "Profile was not updated. Reload the page and try again."
+        );
+      }
 
       if (
         avatarPath &&
