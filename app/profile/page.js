@@ -27,6 +27,10 @@ const translations = {
     bestScore: "Best",
     streak: "Streak",
     noStats: "No game statistics yet.",
+    activity: "RECENT ACTIVITY",
+    noActivity: "No recorded game activity yet.",
+    won: "VICTORY",
+    lost: "COMPLETED",
     security: "ACCOUNT SECURITY",
     securityTitle: "Account Security",
     securityDescription: "Protect your account and game progress.",
@@ -48,6 +52,10 @@ const translations = {
     bestScore: "Terbaik",
     streak: "Rekor Beruntun",
     noStats: "Belum ada statistik permainan.",
+    activity: "RIWAYAT AKTIVITAS",
+    noActivity: "Belum ada aktivitas permainan yang tercatat.",
+    won: "MENANG",
+    lost: "SELESAI",
     security: "KEAMANAN AKUN",
     securityTitle: "Keamanan Akun",
     securityDescription: "Lindungi akun dan progres permainanmu.",
@@ -61,7 +69,7 @@ export default function ProfilePage() {
   const t = translations[language] || translations.en;
 
   const [player, setPlayer] = useState(null);
-  const [stats, setStats] = useState({ summary: {}, games: [] });
+  const [stats, setStats] = useState({ summary: {}, games: [], activity: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [avatarFailed, setAvatarFailed] = useState(false);
@@ -112,9 +120,31 @@ export default function ProfilePage() {
           throw new Error(t.error);
         }
 
+        // Read recent activity with the authenticated client.
+        // Row-level security limits this query to the signed-in player's records.
+        const { data: activityRows, error: activityError } = await supabase
+          .from("game_result_events")
+          .select("id, score, won, created_at, games(name, slug)")
+          .eq("player_id", data.id)
+          .order("created_at", { ascending: false })
+          .limit(15);
+
+        if (activityError) throw activityError;
+
+        const activity = (activityRows || []).map((item) => ({
+          id: item.id,
+          gameName: item.games?.name || "Unknown Game",
+          score: Number(item.score || 0),
+          won: Boolean(item.won),
+          createdAt: item.created_at,
+        }));
+
         if (active) {
           setPlayer(profileResult.player);
-          setStats(profileResult.stats || { summary: {}, games: [] });
+          setStats({
+            ...(profileResult.stats || { summary: {}, games: [] }),
+            activity,
+          });
           setAvatarFailed(false);
         }
       } catch (err) {
@@ -275,6 +305,50 @@ export default function ProfilePage() {
                 <p className="font-black text-purple-300 whitespace-nowrap">{game.totalPoints.toLocaleString()} pts</p>
               </div>
             )) : <p className="text-sm text-gray-400 text-center py-3">{t.noStats}</p>}
+          </div>
+        </section>
+
+        {/* RECENT GAME ACTIVITY */}
+        <section className="mt-8 rounded-2xl border border-purple-500/30 bg-[#151020] p-5 ui-card">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-purple-400 text-xs tracking-[0.25em]">{t.activity}</p>
+              <p className="text-[10px] text-gray-500 mt-1">LAST 15 SESSIONS</p>
+            </div>
+            <span className="w-9 h-9 rounded-xl border border-purple-400/20 bg-purple-500/10 flex items-center justify-center text-purple-300">◷</span>
+          </div>
+
+          <div className="mt-4 space-y-2">
+            {stats.activity?.length ? stats.activity.map((item) => (
+              <div key={item.id} className="flex items-center gap-3 rounded-xl border border-white/5 bg-black/20 px-3 py-3">
+                <div className={`w-9 h-9 shrink-0 rounded-lg flex items-center justify-center text-sm font-black ${item.won ? "bg-emerald-500/10 text-emerald-300" : "bg-purple-500/10 text-purple-300"}`}>
+                  {item.won ? "✓" : "◆"}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-xs sm:text-sm truncate">{item.gameName}</p>
+                  <p className="text-[10px] text-gray-500 mt-1">
+                    {new Date(item.createdAt).toLocaleString(t.dateLocale, {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="font-black text-sm text-purple-200">{item.score.toLocaleString()}</p>
+                  <p className={`text-[9px] font-bold tracking-wider mt-1 ${item.won ? "text-emerald-300" : "text-gray-500"}`}>
+                    {item.won ? t.won : t.lost}
+                  </p>
+                </div>
+              </div>
+            )) : (
+              <div className="rounded-xl border border-dashed border-purple-500/20 bg-black/10 px-4 py-7 text-center">
+                <span className="text-2xl text-purple-400/70">◷</span>
+                <p className="text-xs text-gray-400 mt-2">{t.noActivity}</p>
+              </div>
+            )}
           </div>
         </section>
 
