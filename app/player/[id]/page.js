@@ -20,7 +20,7 @@ const translations = {
     backGlobal: "← EXPLORE ALL GAMES",
     error: "Unable to load player profile.",
     genericError: "Something went wrong.",
-    dateLocale: "en-US",
+    stats: "GAME UNIVERSE STATS",\n    points: "Total Points",\n    gamesPlayed: "Sessions",\n    wins: "Wins",\n    noStats: "No game statistics yet.",\n    dateLocale: "en-US",
   },
   id: {
     loading: "Memuat profil pemain...",
@@ -34,7 +34,7 @@ const translations = {
     backGlobal: "← JELAJAHI SEMUA GAME",
     error: "Tidak dapat memuat profil pemain.",
     genericError: "Terjadi kesalahan.",
-    dateLocale: "id-ID",
+    stats: "STATISTIK GAME UNIVERSE",\n    points: "Total Poin",\n    gamesPlayed: "Sesi Bermain",\n    wins: "Kemenangan",\n    noStats: "Belum ada statistik permainan.",\n    dateLocale: "id-ID",
   },
 };
 
@@ -45,7 +45,7 @@ export default function PublicPlayerProfile() {
   const { language } = useLanguage();
   const t = translations[language] || translations.en;
 
-  const [player, setPlayer] = useState(null);
+  const [player, setPlayer] = useState(null);\n  const [stats, setStats] = useState({ summary: {}, games: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -69,7 +69,7 @@ export default function PublicPlayerProfile() {
         }
 
         if (active) {
-          setPlayer(result.player);
+          setPlayer(result.player);\n          setStats(result.stats || { summary: {}, games: [] });
         }
 
       } catch (err) {
