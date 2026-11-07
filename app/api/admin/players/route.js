@@ -106,6 +106,7 @@ export async function GET(request) {
     const enrichedPlayers = await Promise.all(
       playerList.map(async (player) => {
         let accountType = "UNKNOWN";
+        let isBanned = false;
 
         if (player.auth_user_id) {
           const { data, error } =
@@ -115,6 +116,7 @@ export async function GET(request) {
 
           if (!error && data?.user) {
             const user = data.user;
+            isBanned = Boolean(user.banned_until && new Date(user.banned_until).getTime() > Date.now());
             const providers =
               user.app_metadata?.providers || [];
 
@@ -147,6 +149,7 @@ export async function GET(request) {
           avatarUrl: player.avatar_url,
           createdAt: player.created_at,
           accountType,
+          isBanned,
           totalPoints: stats.totalPoints,
           gamesPlayed: stats.gamesPlayed,
         };
