@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -12,6 +11,9 @@ export default function EditProfilePage() {
   const router = useRouter();
   const { language } = useLanguage();
   const isID = language === "id";
+
+  const previewUrlRef = useRef("");
+  const redirectTimerRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -33,8 +35,14 @@ export default function EditProfilePage() {
     loadProfile();
 
     return () => {
-      if (preview) {
-        URL.revokeObjectURL(preview);
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = "";
+      }
+
+      if (redirectTimerRef.current) {
+        window.clearTimeout(redirectTimerRef.current);
+        redirectTimerRef.current = null;
       }
     };
   }, []);
@@ -83,8 +91,9 @@ export default function EditProfilePage() {
   }
 
   function clearPreview() {
-    if (preview) {
-      URL.revokeObjectURL(preview);
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = "";
     }
 
     setPreview("");
@@ -126,8 +135,10 @@ export default function EditProfilePage() {
 
     clearPreview();
 
+    const nextPreview = URL.createObjectURL(file);
+    previewUrlRef.current = nextPreview;
     setSelectedFile(file);
-    setPreview(URL.createObjectURL(file));
+    setPreview(nextPreview);
     setRemoveAvatar(false);
   }
 
@@ -183,7 +194,6 @@ export default function EditProfilePage() {
       let newAvatarUrl = avatarUrl;
       let newAvatarPath = avatarPath;
 
-      // Upload new photo
       if (selectedFile) {
         const extension =
           selectedFile.type === "image/png"
@@ -215,13 +225,11 @@ export default function EditProfilePage() {
         newAvatarUrl = publicData.publicUrl;
       }
 
-      // Remove photo
       if (removeAvatar) {
         newAvatarUrl = null;
         newAvatarPath = null;
       }
 
-      // Update player profile
       const { error: updateError } = await supabase
         .from("players")
         .update({
@@ -235,7 +243,6 @@ export default function EditProfilePage() {
 
       if (updateError) throw updateError;
 
-      // Delete old photo after successful update
       if (
         avatarPath &&
         avatarPath !== newAvatarPath
@@ -254,9 +261,10 @@ export default function EditProfilePage() {
       setRemoveAvatar(false);
 
       setSuccessOpen(true);
-      window.setTimeout(() => router.replace("/profile"), 1800);
+      redirectTimerRef.current = window.setTimeout(() => {
+        router.replace("/profile");
+      }, 1800);
     } catch (err) {
-      // Remove newly uploaded photo if database update failed
       if (uploadedPath) {
         await supabase.storage
           .from("avatars")
@@ -309,7 +317,6 @@ export default function EditProfilePage() {
 
           <form onSubmit={handleSave} className="mt-8 space-y-6">
 
-            {/* Avatar */}
             <div className="flex flex-col items-center gap-4">
 
               <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-purple-500/50 bg-purple-950/40 flex items-center justify-center">
@@ -347,7 +354,7 @@ export default function EditProfilePage() {
                   onClick={() => {
                     clearPreview();
                     setRemoveAvatar(true);
-                                  }}
+                  }}
                   className="text-xs text-red-400 hover:text-red-300"
                 >
                   {isID ? "Hapus Foto Profil" : "Remove Profile Photo"}
@@ -366,7 +373,6 @@ export default function EditProfilePage() {
 
             </div>
 
-            {/* Nickname */}
             <div>
               <label className="block text-sm text-gray-300 mb-2">
                 Nickname
@@ -382,7 +388,6 @@ export default function EditProfilePage() {
               />
             </div>
 
-            {/* Server */}
             <div>
               <label className="block text-sm text-gray-300 mb-2">
                 {isID ? "Nomor Server" : "Server Number"}
@@ -398,14 +403,12 @@ export default function EditProfilePage() {
               />
             </div>
 
-            {/* Messages */}
             {error && (
               <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300 ui-card">
                 {error}
               </div>
             )}
 
-            {/* Save */}
             <button
               type="submit"
               disabled={saving}
