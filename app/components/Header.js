@@ -222,7 +222,7 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-4">
 
         {/* TOP HEADER */}
-        <div className={`flex items-center justify-between gap-3 transition-all duration-300 ease-out ${isCompact ? "py-1.5" : "py-3"}`}>
+        <div className={`flex items-center justify-between gap-3 transition-all duration-300 ease-out ${isCompact ? "py-1" : "py-2"}`}>
 
           {/* BRAND */}
           <Link
@@ -295,7 +295,7 @@ export default function Header() {
         </div>
 
         {/* LANGUAGE */}
-        <div className={`flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 ease-out ${isCompact ? "max-h-0 pb-0 opacity-0" : "max-h-10 pb-3 opacity-100"}`}>
+        <div className={`flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 ease-out ${isCompact ? "max-h-0 pb-0 opacity-0" : "max-h-8 pb-2 opacity-100"}`}>
           <button
             type="button"
             onClick={() => setLanguage("en")}
@@ -338,7 +338,7 @@ export default function Header() {
                 href={link.href}
                 aria-current={active ? "page" : undefined}
                 className={`relative flex flex-col items-center justify-center gap-1 mx-1 rounded-t-xl transition-all duration-300 ease-out ${
-                  isCompact ? "py-1.5" : "py-3"
+                  isCompact ? "py-1" : "py-2"
                 } ${
                   active
                     ? "text-purple-300 bg-purple-500/15"
