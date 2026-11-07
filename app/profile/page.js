@@ -56,7 +56,8 @@ export default function ProfilePage() {
   const { language } = useLanguage();
   const t = translations[language] || translations.en;
 
-  const [player, setPlayer] = useState(null);\n  const [stats, setStats] = useState({ summary: {}, games: [] });
+  const [player, setPlayer] = useState(null);
+  const [stats, setStats] = useState({ summary: {}, games: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [avatarFailed, setAvatarFailed] = useState(false);
@@ -108,7 +109,8 @@ export default function ProfilePage() {
         }
 
         if (active) {
-          setPlayer(profileResult.player);\n          setStats(profileResult.stats || { summary: {}, games: [] });
+          setPlayer(profileResult.player);
+          setStats(profileResult.stats || { summary: {}, games: [] });
           setAvatarFailed(false);
         }
       } catch (err) {
