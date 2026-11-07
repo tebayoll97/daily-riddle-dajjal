@@ -364,13 +364,23 @@ export default function EditProfilePage() {
                 JPG, PNG, WEBP · Max 10 MB
               </p>
 
-              {(avatarUrl || selectedFile) && !removeAvatar && (
+              {selectedFile && (
                 <button
                   type="button"
                   onClick={() => {
                     clearPreview();
-                    setRemoveAvatar(true);
+                    setRemoveAvatar(false);
                   }}
+                  className="text-xs text-gray-300 hover:text-white"
+                >
+                  {isID ? "Batalkan Pilihan Foto" : "Cancel Photo Selection"}
+                </button>
+              )}
+
+              {avatarUrl && !selectedFile && !removeAvatar && (
+                <button
+                  type="button"
+                  onClick={() => setRemoveAvatar(true)}
                   className="text-xs text-red-400 hover:text-red-300"
                 >
                   {isID ? "Hapus Foto Profil" : "Remove Profile Photo"}
