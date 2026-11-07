@@ -6,12 +6,12 @@ import { LanguageProvider } from "./components/LanguageProvider";
 
 export const metadata = {
   title: {
-    default: "Dajjal & Veylora Gaming Universe",
-    template: "%s | Dajjal & Veylora Gaming Universe",
+    default: "Dajjal Family | Gaming Universe",
+    template: "%s | Dajjal Family | Gaming Universe",
   },
   description:
     "One Account. One Profile. Multiple Games. One Universe. Explore Daily Riddle, Rune Puzzle, Memory Challenge, Logic Battle, and more.",
-  applicationName: "Dajjal & Veylora Gaming Universe",
+  applicationName: "Dajjal Family | Gaming Universe",
   keywords: [
     "Dajjal",
     "Veylora",
