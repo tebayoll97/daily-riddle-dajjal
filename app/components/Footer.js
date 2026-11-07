@@ -101,7 +101,7 @@ export default function Footer() {
 
           {/* Copyright */}
           <p className="text-[10px] text-gray-600 mt-1">
-            © 2026 DAJJAL & VEYLORA GAMING UNIVERSE. {t.copyright}
+            © 2026 DAJJAL FAMILY · GAMING UNIVERSE. {t.copyright}
           </p>
 
         </div>
