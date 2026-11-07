@@ -59,6 +59,9 @@ const translations = {
     logoutLoading: "SIGNING OUT...",
     searchButton: "SEARCH",
     emptySearch: "Enter a nickname to search.",
+    details: "PLAYER DETAILS",
+    expand: "VIEW DETAILS",
+    collapse: "HIDE DETAILS",
     footer: "THE DAILY RIDDLE · PLAYER CONTROL CENTER",
   },
   id: {
@@ -113,6 +116,9 @@ const translations = {
     logoutLoading: "SEDANG KELUAR...",
     searchButton: "CARI",
     emptySearch: "Masukkan nickname untuk mencari.",
+    details: "DETAIL PEMAIN",
+    expand: "LIHAT DETAIL",
+    collapse: "TUTUP DETAIL",
     footer: "THE DAILY RIDDLE · PLAYER CONTROL CENTER",
   },
 };
@@ -168,6 +174,7 @@ export default function AdminPlayersPage() {
     total: 0,
     totalPages: 0,
   });
+  const [expandedPlayerId, setExpandedPlayerId] = useState(null);
   const [actionTarget, setActionTarget] = useState(null);
   const [actionType, setActionType] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -589,89 +596,100 @@ export default function AdminPlayersPage() {
           ) : (
             <>
               {/* MOBILE PLAYER CARDS */}
-              <div className="grid grid-cols-1 md:hidden gap-3">
-                {filteredPlayers.map((player) => (
-                  <article
-                    key={player.id}
-                    className="rounded-2xl border border-purple-500/20 bg-[#151020] p-3 sm:p-4 ui-card"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-lg sm:rounded-xl border border-purple-500/20 bg-purple-600/10 flex items-center justify-center overflow-hidden ui-card">
-                        {player.avatarUrl ? (
-                          <img
-                            src={player.avatarUrl}
-                            alt=""
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-xl">👤</span>
-                        )}
+              <div className="grid grid-cols-1 md:hidden gap-2.5">
+                {filteredPlayers.map((player) => {
+                  const expanded = expandedPlayerId === player.id;
+                  return (
+                    <article
+                      key={player.id}
+                      className={`overflow-hidden rounded-xl border bg-[#151020] transition-all duration-300 ui-card ${expanded ? "border-purple-400/40 shadow-lg shadow-purple-950/20" : "border-purple-500/20"}`}
+                    >
+                      <div className="flex items-center gap-2.5 p-3">
+                        <div className="w-11 h-11 shrink-0 rounded-xl border border-purple-500/25 bg-purple-600/10 flex items-center justify-center overflow-hidden">
+                          {player.avatarUrl ? (
+                            <img src={player.avatarUrl} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-xl">👤</span>
+                          )}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <p className="font-extrabold text-sm text-white truncate">
+                            {player.nickname || "Unnamed Player"}
+                          </p>
+                          <p className="text-[11px] text-gray-400 mt-0.5">
+                            {t.server} {player.serverNumber || "-"}
+                          </p>
+                        </div>
+
+                        <span className={`shrink-0 rounded-full border px-2 py-1 text-[9px] font-black ${accountStyle(player.accountType)}`}>
+                          {player.accountType}
+                        </span>
+
+                        <button
+                          type="button"
+                          aria-expanded={expanded}
+                          aria-label={expanded ? t.collapse : t.expand}
+                          onClick={() => setExpandedPlayerId(expanded ? null : player.id)}
+                          className={`w-8 h-8 shrink-0 rounded-lg border flex items-center justify-center text-purple-300 transition-all duration-300 ${expanded ? "rotate-180 border-purple-400/40 bg-purple-500/15" : "border-purple-500/20 bg-purple-500/5"}`}
+                        >
+                          <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4" aria-hidden="true">
+                            <path d="m5 7.5 5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
                       </div>
 
-                      <div className="min-w-0 flex-1">
-                        <p className="font-black text-sm break-words">
-                          {player.nickname || "Unnamed Player"}
-                        </p>
-                        <p className="text-[10px] text-gray-500 mt-1">
-                          {t.server} {player.serverNumber || "-"}
-                        </p>
-                      </div>
+                      {expanded && (
+                        <div className="border-t border-purple-500/15 px-3 pb-3 pt-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                          <p className="text-[9px] font-black tracking-[0.18em] text-purple-300 mb-2">
+                            {t.details}
+                          </p>
 
-                      <span
-                        className={`shrink-0 rounded-full border px-2 py-1 text-[9px] font-black ${accountStyle(player.accountType)}`}
-                      >
-                        {player.accountType}
-                      </span>
-                    </div>
+                          <div className="grid grid-cols-3 gap-2 rounded-lg bg-black/20 p-2.5">
+                            <div className="min-w-0">
+                              <p className="text-[9px] text-gray-500 font-bold">{t.points}</p>
+                              <p className="text-sm font-black text-purple-300 mt-1 tabular-nums">
+                                {(player.totalPoints || 0).toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[9px] text-gray-500 font-bold">{t.games}</p>
+                              <p className="text-sm font-black text-white mt-1 tabular-nums">
+                                {player.gamesPlayed || 0}
+                              </p>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[9px] text-gray-500 font-bold">{t.joined}</p>
+                              <p className="text-[11px] font-bold text-white mt-1 leading-tight">
+                                {formatDate(player.createdAt, language)}
+                              </p>
+                            </div>
+                          </div>
 
-                    <div className="grid grid-cols-3 gap-2 mt-3 pt-3 sm:mt-4 sm:pt-4 border-t border-purple-500/10">
-                      <div>
-                        <p className="text-[9px] text-gray-500 font-bold">
-                          {t.points}
-                        </p>
-                        <p className="font-black text-purple-300 mt-1">
-                          {player.totalPoints.toLocaleString()}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-[9px] text-gray-500 font-bold">
-                          {t.games}
-                        </p>
-                        <p className="font-black mt-1">
-                          {player.gamesPlayed}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-[9px] text-gray-500 font-bold">
-                          {t.joined}
-                        </p>
-                        <p className="text-xs font-bold mt-1">
-                          {formatDate(player.createdAt, language)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-purple-500/10">
-                      <span className={`text-[9px] font-black rounded-full px-2 py-1 border ${player.isBanned ? "border-red-500/30 bg-red-500/10 text-red-300" : "border-green-500/20 bg-green-500/10 text-green-300"}`}>
-                        {player.isBanned ? t.banned : t.active}
-                      </span>
-                      <button
-                        onClick={() => openPlayerAction(player, player.isBanned ? "unban" : "ban")}
-                        className="ml-auto rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 text-[9px] font-bold text-amber-300"
-                      >
-                        {player.isBanned ? t.unban : t.ban}
-                      </button>
-                      <button
-                        onClick={() => openPlayerAction(player, "delete")}
-                        className="rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-[9px] font-bold text-red-300"
-                      >
-                        {t.delete}
-                      </button>
-                    </div>
-                  </article>
-                ))}
+                          <div className="flex items-center justify-between gap-2 mt-3">
+                            <span className={`text-[9px] font-black rounded-full px-2.5 py-1.5 border ${player.isBanned ? "border-red-500/30 bg-red-500/10 text-red-300" : "border-green-500/20 bg-green-500/10 text-green-300"}`}>
+                              {player.isBanned ? t.banned : t.active}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => openPlayerAction(player, player.isBanned ? "unban" : "ban")}
+                                className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[10px] font-bold text-amber-300 active:scale-[0.98] transition"
+                              >
+                                {player.isBanned ? t.unban : t.ban}
+                              </button>
+                              <button
+                                onClick={() => openPlayerAction(player, "delete")}
+                                className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[10px] font-bold text-red-300 active:scale-[0.98] transition"
+                              >
+                                {t.delete}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </article>
+                  );
+                })}
               </div>
 
               {/* DESKTOP TABLE */}
