@@ -15,6 +15,10 @@ export async function POST(request) {
   try {
     const body = await request.json();
 
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return Response.json({ error: "Invalid request body." }, { status: 400 });
+    }
+
     const {
       riddle_date,
       question_en,
@@ -28,11 +32,15 @@ export async function POST(request) {
     } = body;
 
     if (
-      !riddle_date ||
-      !question_en?.trim() ||
-      !question_id?.trim() ||
-      !hint_en?.trim() ||
-      !hint_id?.trim()
+      typeof riddle_date !== "string" ||
+      typeof question_en !== "string" ||
+      typeof question_id !== "string" ||
+      typeof hint_en !== "string" ||
+      typeof hint_id !== "string" ||
+      !question_en.trim() ||
+      !question_id.trim() ||
+      !hint_en.trim() ||
+      !hint_id.trim()
     ) {
       return Response.json(
         { error: "Please complete all required fields." },
@@ -44,7 +52,9 @@ export async function POST(request) {
       !Array.isArray(answers_en) ||
       !Array.isArray(answers_id) ||
       answers_en.length === 0 ||
-      answers_id.length === 0
+      answers_id.length === 0 ||
+      answers_en.length > 30 ||
+      answers_id.length > 30
     ) {
       return Response.json(
         { error: "At least one accepted answer is required for each language." },
@@ -64,12 +74,18 @@ export async function POST(request) {
 
     if (
       cleanAnswersEn.length === 0 ||
-      cleanAnswersId.length === 0
+      cleanAnswersId.length === 0 ||
+      cleanAnswersEn.some((answer) => answer.length > 120) ||
+      cleanAnswersId.some((answer) => answer.length > 120)
     ) {
       return Response.json(
         { error: "Accepted answers cannot be empty." },
         { status: 400 }
       );
+    }
+
+    if (question_en.length > 2000 || question_id.length > 2000 || hint_en.length > 500 || hint_id.length > 500) {
+      return Response.json({ error: "Question or hint is too long." }, { status: 400 });
     }
 
     const parsedDate = new Date(`${riddle_date}T00:00:00Z`);
