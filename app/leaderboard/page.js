@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "../components/LanguageProvider";
 import GameCharacter from "@/lib/GameCharacter";
@@ -80,7 +80,7 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  async function loadRanking() {
+  const loadRanking = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -102,11 +102,11 @@ export default function LeaderboardPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [t.error, t.genericError]);
 
   useEffect(() => {
     loadRanking();
-  }, []);
+  }, [loadRanking]);
 
   const topThree = ranking.slice(0, 3);
 
