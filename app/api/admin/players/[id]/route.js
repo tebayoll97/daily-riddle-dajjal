@@ -36,7 +36,7 @@ export async function PATCH(request, { params }) {
     if (result.response) return result.response;
 
     const body = await request.json();
-    if (!["ban", "unban"].includes(body.action)) {
+    if (!["ban", "unban"].includes(body?.action)) {
       return Response.json({ error: "Invalid player action." }, { status: 400 });
     }
 
