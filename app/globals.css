@@ -478,3 +478,165 @@ main :is(.rounded-xl,.rounded-2xl,.rounded-3xl) { scroll-margin-top: 100px; }
 @media (prefers-reduced-motion: reduce) {
   header.sticky *, main button, main a { transition-duration: .01ms !important; }
 }
+
+
+
+/* =========================================================
+   MASTER RESPONSIVE UI + FINAL HEADING SYSTEM
+   Single source of truth for all application routes.
+   Pages should use .ui-page / .ui-frame-* and heading classes.
+   ========================================================= */
+:root {
+  --ui-bg: #080711;
+  --ui-surface: #151020;
+  --ui-surface-raised: #1b1528;
+  --ui-border: rgba(168, 85, 247, .20);
+  --ui-text: #f7f4ff;
+  --ui-text-secondary: #c3b8d2;
+  --ui-text-muted: #978da7;
+  --ui-h1-primary: #ffffff;
+  --ui-h1-accent: #c58bff;
+  --ui-h2: #e5d5ff;
+  --ui-h3: #d8c5f5;
+  --ui-h4: #c8b6e2;
+  --ui-heading-line: #9561bd;
+  --ui-radius-page: 16px;
+  --ui-radius-card: 14px;
+  --ui-content-width: 76rem;
+}
+
+/* Master page layout: desktop composition */
+.ui-page {
+  width: min(100% - 2rem, var(--ui-content-width));
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.15rem, 2vw, 1.8rem);
+  min-width: 0;
+}
+.ui-page-header,
+.ui-frame-h1 {
+  min-width: 0;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-page);
+  background:
+    radial-gradient(ellipse at 0 0, rgba(124,58,237,.16), transparent 58%),
+    linear-gradient(120deg, rgba(35,22,55,.94), rgba(16,19,34,.96) 72%);
+  box-shadow: inset 0 1px rgba(255,255,255,.035), 0 8px 24px rgba(0,0,0,.13);
+}
+.ui-frame-h2,
+.ui-frame-h3,
+.ui-frame-h4 {
+  min-width: 0;
+  padding: clamp(.85rem, 1.5vw, 1.25rem);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-card);
+  background: linear-gradient(145deg, rgba(22,17,34,.96), rgba(13,12,23,.96));
+}
+.ui-frame-h2 { border-color: rgba(168,85,247,.24); }
+.ui-frame-h3 { border-color: rgba(168,85,247,.17); background: rgba(21,16,32,.88); }
+.ui-frame-h4 { border-color: rgba(168,85,247,.12); background: rgba(255,255,255,.025); }
+
+/* H1: two-tone title and one-hue faded underline; no left rail */
+.ui-heading-h1,
+main h1:not(.welcome-title) {
+  color: var(--ui-h1-primary);
+  font-size: clamp(23px, 2.1vw, 34px) !important;
+  font-weight: 950;
+  line-height: 1.12 !important;
+  letter-spacing: -.035em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.ui-heading-h1::before,
+main h1:not(.welcome-title)::before { content: none !important; }
+.ui-heading-h1::after,
+main h1:not(.welcome-title)::after {
+  content: "";
+  display: block;
+  width: min(100%, 5.5rem);
+  height: 2px;
+  margin-top: .72rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--ui-heading-line) 22%, #b88bd5 50%, var(--ui-heading-line) 78%, transparent) !important;
+  box-shadow: 0 0 8px rgba(166,107,206,.24) !important;
+}
+.ui-heading-h1 .ui-heading-accent { color: var(--ui-h1-accent); }
+.ui-page-header > :is(p,.ui-subtitle),
+.ui-frame-h1 > :is(p,.ui-subtitle),
+main h1:not(.welcome-title) + p {
+  color: var(--ui-text-secondary);
+  font-size: clamp(.82rem, .78rem + .2vw, .96rem);
+  line-height: 1.6;
+}
+
+/* H2-H4: one color each, progressively smaller, left rail only */
+.ui-heading-h2, main h2,
+.ui-heading-h3, main h3,
+.ui-heading-h4, main h4 {
+  position: relative;
+  padding-left: .8rem;
+  border-left: 2px solid var(--ui-heading-line);
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.ui-heading-h2, main h2 {
+  color: var(--ui-h2);
+  font-size: clamp(18px, 1.55vw, 25px);
+  font-weight: 900;
+  line-height: 1.2;
+  border-left-width: 3px;
+}
+.ui-heading-h3, main h3 {
+  color: var(--ui-h3);
+  font-size: clamp(16px, 1.3vw, 21px);
+  font-weight: 850;
+  line-height: 1.25;
+  border-left-width: 2px;
+}
+.ui-heading-h4, main h4 {
+  color: var(--ui-h4);
+  font-size: clamp(14px, 1.1vw, 18px);
+  font-weight: 800;
+  line-height: 1.3;
+  border-left-width: 1px;
+}
+.ui-heading-h2::after, .ui-heading-h3::after, .ui-heading-h4::after,
+main h2::after, main h3::after, main h4::after { content: none !important; }
+.ui-heading-h2 + p, main h2 + p,
+.ui-heading-h3 + p, main h3 + p,
+.ui-heading-h4 + p, main h4 + p {
+  color: var(--ui-text-muted);
+  line-height: 1.55;
+}
+
+/* Reusable master surfaces and responsive primitives */
+.ui-surface, .ui-card, .ui-panel {
+  min-width: 0;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-card);
+  background: linear-gradient(145deg, rgba(22,17,34,.96), rgba(13,12,23,.96));
+}
+.ui-stack { display: flex; flex-direction: column; gap: clamp(.75rem, 1.5vw, 1.25rem); min-width: 0; }
+.ui-grid-responsive { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: clamp(.75rem, 1.5vw, 1.25rem); }
+.ui-content { width: 100%; max-width: var(--ui-content-width); margin-inline: auto; min-width: 0; }
+main, main > *, main section, main article { min-width: 0; }
+main :is(img,video,canvas,svg) { max-width: 100%; }
+main :is(input,textarea,select) { max-width: 100%; }
+
+@media (max-width: 767px) {
+  .ui-page { width: min(100% - 1.5rem, var(--ui-content-width)); gap: .9rem; }
+  .ui-page-header, .ui-frame-h1 { padding: .85rem .9rem; border-radius: 13px; }
+  .ui-frame-h2, .ui-frame-h3, .ui-frame-h4 { padding: .75rem; border-radius: 12px; }
+  .ui-heading-h1, main h1:not(.welcome-title) { font-size: clamp(23px, 5.6vw, 26px) !important; }
+  .ui-heading-h2, main h2 { font-size: clamp(18px, 4.6vw, 20px); }
+  .ui-heading-h3, main h3 { font-size: clamp(16px, 4.1vw, 18px); }
+  .ui-heading-h4, main h4 { font-size: clamp(14px, 3.7vw, 16px); }
+  .ui-heading-h2, .ui-heading-h3, .ui-heading-h4,
+  main h2, main h3, main h4 { padding-left: .65rem; }
+  .ui-grid-responsive { grid-template-columns: minmax(0, 1fr); }
+}
+@media (min-width: 768px) {
+  .ui-page { width: min(100% - 3rem, var(--ui-content-width)); }
+}
