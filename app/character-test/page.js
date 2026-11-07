@@ -304,7 +304,8 @@ export default function CharacterTestPage() {
         @media(max-width:700px){
           .lab{padding:18px 12px 34px}.header{margin-bottom:16px}.brand{font-size:9px;letter-spacing:.22em}.header h1{margin-top:8px;font-size:25px}.header p{font-size:11px}
           .workspace{display:flex;flex-direction:column;gap:12px}.preview,.controls,.gallery{width:100%;padding:15px;border-radius:16px}
-          .preview{position:relative;top:auto}.character-stage{min-height:210px;margin:7px 0 0}.preview h2{font-size:19px;margin-top:7px}
+          .preview{position:sticky;top:108px;z-index:40;display:grid;grid-template-columns:112px minmax(0,1fr);grid-template-areas:"label label" "stage name" "stage expression" "message message";align-items:center;column-gap:12px;padding:11px 12px;background:rgba(22,14,34,.97);backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+          .preview-label{grid-area:label;justify-self:start;font-size:9px;margin-bottom:4px}.character-stage{grid-area:stage;min-height:112px;height:112px;margin:0}.preview h2{grid-area:name;text-align:left;font-size:16px;margin:0 0 3px}.current-expression{grid-area:expression;text-align:left;font-size:9px}.reaction-message{grid-area:message;max-width:none;margin:7px 0 0;padding:7px 9px;font-size:10px;line-height:1.35}
           .reaction-message{margin-top:10px;padding:10px 11px;font-size:12px}.controls h3{margin:19px 0 10px;font-size:10px}.description{font-size:11px}
           .reaction-grid{gap:7px}.reaction-grid button{min-height:52px;padding:8px 9px;gap:8px;font-size:11px}.reaction-icon{font-size:19px}
           .character-buttons{gap:6px}.character-buttons button{min-height:40px;font-size:10px}.expression-grid{gap:6px}.expression-grid button{min-height:65px;font-size:10px}.expression-icon{font-size:20px}
