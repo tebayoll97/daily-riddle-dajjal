@@ -32,11 +32,11 @@ export default function RootLayout({ children }) {
           <GlobalAudioController />
           <Header />
 
-          <main className="flex-1 w-full">
+          <div className="flex-1 w-full">
             <div className="ui-route-frame">
               {children}
             </div>
-          </main>
+          </div>
 
           <Footer />
         </LanguageProvider>
