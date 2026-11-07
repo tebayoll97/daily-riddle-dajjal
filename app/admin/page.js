@@ -156,7 +156,7 @@ export default function AdminDashboardPage() {
       <main className="min-h-[75vh] bg-[#080711] text-white flex flex-col items-center justify-center px-5 text-center">
         <div className="ui-gradient-frame ui-card rounded-2xl p-7 max-w-md w-full">
           <div className="text-4xl">🔒</div>
-          <h1 className="ui-section-title mt-4">{t.denied}</h1>
+          <h1 className="ui-title mt-4">{t.denied}</h1>
           <p className="text-sm text-red-300 mt-3">{error}</p>
           <Link href="/admin/login" className="ui-interactive inline-flex mt-6 rounded-xl bg-purple-600 hover:bg-purple-500 px-6 py-3 font-bold text-sm">
             {t.login}
