@@ -93,7 +93,15 @@ export default function MamahNgamukPage() {
     } catch {}
   }, []);
 
+  const enterGameFullscreen = useCallback(() => {
+    const root = document.querySelector(".mamah-game");
+    if (root && !document.fullscreenElement && root.requestFullscreen) {
+      root.requestFullscreen().catch(() => {});
+    }
+  }, []);
+
   const start = useCallback(() => {
+    enterGameFullscreen();
     const g = gameRef.current;
     if (!g) return;
     Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, elapsed: 0, speed: 0.29, spawn: 4.8, chase: 0, scoreTick: -1, coinCount: 0 });
@@ -105,7 +113,7 @@ export default function MamahNgamukPage() {
     setStatus("playing");
     tone(660);
     startMusic();
-  }, [tone, startMusic]);
+  }, [tone, startMusic, enterGameFullscreen]);
 
   const move = useCallback((direction) => {
     const g = gameRef.current;
@@ -124,6 +132,17 @@ export default function MamahNgamukPage() {
     if (!soundOn) stopMusic();
     else if (gameRef.current?.running && !gameRef.current?.paused) startMusic();
   }, [soundOn, startMusic, stopMusic]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const trapBack = () => {
+      window.history.pushState({ mamahGame: true }, "", window.location.href);
+      setConfirmExit(true);
+    };
+    window.history.pushState({ mamahGame: true }, "", window.location.href);
+    window.addEventListener("popstate", trapBack);
+    return () => window.removeEventListener("popstate", trapBack);
+  }, []);
 
   useEffect(() => {
     try { setBest(Number(localStorage.getItem(BEST_KEY)) || 0); } catch {}
@@ -223,7 +242,7 @@ export default function MamahNgamukPage() {
 
       // Urban roadside skyline, streetlights and shopfront silhouettes.
       for (let i = 0; i < 13; i++) {
-        const x = i * 78 - (g.distance * 22 % 78);
+        const x = i * 78 - (g.distance * 1.4 % 78);
         const height = 65 + (i * 31 % 95);
         ctx.fillStyle = i % 2 ? "#211d38" : "#29213f";
         ctx.fillRect(x, 480 - height, 48, height);
@@ -233,7 +252,7 @@ export default function MamahNgamukPage() {
 
       // Residential streetscape: repeating houses on both sides, scaled by perspective.
       for (let i = 0; i < 6; i++) {
-        const z = ((i / 6) + (g.distance * 0.025 % 1)) % 1;
+        const z = ((i / 6) + (g.distance * 0.0012 % 1)) % 1;
         const y = 500 + z * z * 930;
         const leftRoadEdge = 365 - z * 355;
         const rightRoadEdge = 535 + z * 355;
@@ -266,7 +285,7 @@ export default function MamahNgamukPage() {
 
       // Streetlights along both sidewalks; warm lamps become larger toward the camera.
       for (let i = 0; i < 4; i++) {
-        const z = ((i / 4) + (g.distance * 0.025 % 1)) % 1;
+        const z = ((i / 4) + (g.distance * 0.0012 % 1)) % 1;
         const y = 500 + z * z * 930;
         const spread = 30 + z * 410;
         const poleH = 36 + z * 118;
@@ -516,7 +535,7 @@ export default function MamahNgamukPage() {
       const p = g.player;
       g.distance += g.speed * dt;
       g.elapsed += dt;
-      g.speed = Math.min(.39, g.speed + .000002 * dt);
+      g.speed = Math.min(.46, g.speed + .0000032 * dt);
       p.lane += (p.targetLane - p.lane) * Math.min(1, dt * 0.24);
       const wasAirborne = p.jump > 0;
       p.jump = Math.max(0, p.jump - dt * .00135);
@@ -536,7 +555,7 @@ export default function MamahNgamukPage() {
           [{ lane:0, kind:"roadblock", z:0 }],
           [{ lane:-1, kind:"van", z:0 },{ lane:1, kind:"roadblock", z:-.04 }],
         ];
-        const intensity = Math.min(1, g.elapsed / 150000);
+        const intensity = Math.min(1, g.elapsed / 90000);
         const pattern = patterns[Math.floor(Math.random() * patterns.length)].map((item) => ({ ...item }));
         // As the run continues, add a second vehicle more often and occasionally a third staggered vehicle,
         // while always reserving at least one lane as a safe route.
@@ -554,10 +573,10 @@ export default function MamahNgamukPage() {
           for (let i=0;i<4;i++) g.items.push({ lane:openLane, z:-.12-i*.09, kind:"coin", resolved:false });
         }
         // Traffic density rises gradually: spawn gaps shrink from 4.8s to about 2.7s.
-        const spawnGap = Math.max(2.7, 4.8 - intensity * 2.1);
+        const spawnGap = Math.max(1.95, 4.5 - intensity * 2.45);
         g.spawn = spawnGap + Math.random() * .55;
       }
-      g.items.forEach((item) => { item.prevZ = item.z; item.z += g.speed * dt * .001; });
+      g.items.forEach((item) => { item.prevZ = item.z; item.z += g.speed * dt * .00108; });
       g.items = g.items.filter((item) => item.z < 1.12);
       const coinHits = g.items.filter((item) => item.kind === "coin" && !item.resolved && item.z > .91 && item.z < 1.04 && Math.abs(item.lane - p.lane) < .42);
       if (coinHits.length) {
