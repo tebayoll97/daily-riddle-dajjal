@@ -15,6 +15,7 @@ export default function MamahNgamukPage() {
   const sheetRef = useRef(null);
   const obstacleSheetRef = useRef(null);
   const childSheetRef = useRef(null);
+  const veyloraSheetRef = useRef(null);
   const soundRef = useRef(true);
   const audioRef = useRef(null);
   const musicRef = useRef({ timer: null, oscillators: [] });
@@ -146,7 +147,11 @@ export default function MamahNgamukPage() {
     const childSheet = new Image();
     childSheet.onload = () => { childSheetRef.current = childSheet; };
     childSheet.onerror = () => { childSheetRef.current = null; };
-    childSheet.src = "/mini-game/mamah-ngamuk/sprite/anak-dajjal.png";
+    childSheet.src = "/mini-game/mamah-ngamuk/sprite/anak_dajjal_back.png";
+    const veyloraSheet = new Image();
+    veyloraSheet.onload = () => { veyloraSheetRef.current = veyloraSheet; };
+    veyloraSheet.onerror = () => { veyloraSheetRef.current = null; };
+    veyloraSheet.src = "/mini-game/mamah-ngamuk/sprite/veylora_back.png";
     let bootFallback;
     const finishBoot = () => {
       window.clearTimeout(bootFallback);
@@ -190,6 +195,18 @@ export default function MamahNgamukPage() {
       const sprite = childSheetRef.current;
       if (sprite?.complete && sprite.naturalWidth > 0 && sprite.naturalHeight > 0) {
         // Use the authored 8 × 6 atlas grid without requiring one exact export resolution.
+        const cellW = sprite.naturalWidth / 8;
+        const cellH = sprite.naturalHeight / 6;
+        const col = Math.max(0, Math.min(7, frame));
+        ctx.drawImage(sprite, col * cellW, row * cellH, cellW, cellH, x - width / 2, y - height, width, height);
+        return true;
+      }
+      return false;
+    };
+
+    const drawVeyloraSprite = (row, x, y, width, height, frame = 0) => {
+      const sprite = veyloraSheetRef.current;
+      if (sprite?.complete && sprite.naturalWidth > 0 && sprite.naturalHeight > 0) {
         const cellW = sprite.naturalWidth / 8;
         const cellH = sprite.naturalHeight / 6;
         const col = Math.max(0, Math.min(7, frame));
@@ -342,9 +359,12 @@ export default function MamahNgamukPage() {
       // Mama follows the player's lane and stays visibly behind the child on screen.
       const mamaX = laneX(player.lane, 1);
       const mamaY = (g.caught ? 1325 : 1460) + Math.sin(time / 150) * 3;
-      const mamaDrawn = drawSprite(2, mamaX, mamaY, 96, 122, Math.floor(time / 170) % 4);
+      const mamaDrawn = drawVeyloraSprite(1, mamaX, mamaY, 112, 150, Math.floor(time / 115) % 8);
       if (!mamaDrawn) {
-        ctx.font = "58px system-ui"; ctx.textAlign = "center"; ctx.fillText("👩🏻", mamaX, mamaY - 8);
+        const legacyMamaDrawn = drawSprite(2, mamaX, mamaY, 96, 122, Math.floor(time / 170) % 4);
+        if (!legacyMamaDrawn) {
+          ctx.font = "58px system-ui"; ctx.textAlign = "center"; ctx.fillText("👩🏻", mamaX, mamaY - 8);
+        }
       }
       ctx.save();
       ctx.translate(mamaX + 40, mamaY - 55);
