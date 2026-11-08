@@ -50,7 +50,7 @@ export default function MamahNgamukPage() {
   const start = useCallback(() => {
     const g = gameRef.current;
     if (!g) return;
-    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, speed: 0.22, spawn: 5.2, chase: 0, scoreTick: -1, coinCount: 0 });
+    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, speed: 0.265, spawn: 4.6, chase: 0, scoreTick: -1, coinCount: 0 });
     Object.assign(g.player, { lane: 0, targetLane: 0, jump: 0, slide: 0 });
     g.items = [];
     setScore(0);
@@ -372,7 +372,7 @@ export default function MamahNgamukPage() {
       if (!g.running || g.paused) return;
       const p = g.player;
       g.distance += g.speed * dt;
-      g.speed = Math.min(.31, g.speed + .000004 * dt);
+      g.speed = Math.min(.36, g.speed + .0000025 * dt);
       p.lane += (p.targetLane - p.lane) * Math.min(1, dt * 0.24);
       p.jump = Math.max(0, p.jump - dt * .00135);
       p.slide = 0;
@@ -397,9 +397,9 @@ export default function MamahNgamukPage() {
           for (let i=0;i<4;i++) g.items.push({ lane:openLane, z:-.12-i*.09, kind:"coin", resolved:false });
         }
         // Leave enough distance for the complete pattern to pass before the next one.
-        g.spawn = 5.2 + Math.random() * 1.2;
+        g.spawn = 4.6 + Math.random() * 1.0;
       }
-      g.items.forEach((item) => { item.z += g.speed * dt * .001; });
+      g.items.forEach((item) => { item.prevZ = item.z; item.z += g.speed * dt * .001; });
       g.items = g.items.filter((item) => item.z < 1.12);
       const coinHits = g.items.filter((item) => item.kind === "coin" && !item.resolved && item.z > .91 && item.z < 1.04 && Math.abs(item.lane - p.lane) < .42);
       if (coinHits.length) {
@@ -408,17 +408,21 @@ export default function MamahNgamukPage() {
         setCoins(g.coinCount);
         tone(880, .045);
       }
-      // Swept collision window: account for vehicle depth, player lane width and lateral movement.
-      const PLAYER_Z = .965;
-      const PLAYER_HALF_LANE = .31;
+      // Swept collision: test the obstacle's full depth crossing the player's actual ground plane.
+      // This avoids misses between frames and avoids late hits after the vehicle has passed.
+      const PLAYER_Z = .90;
+      const PLAYER_LANE_RADIUS = .39;
       const obstacleHit = g.items.find((item) => {
         if (item.kind === "coin" || item.resolved) return false;
-        const vehicleHalfDepth = item.kind === "truck" || item.kind === "bus" ? .075 : .055;
-        const depthOverlap = Math.abs(item.z - PLAYER_Z) <= vehicleHalfDepth + .018;
-        const laneOverlap = Math.abs(item.lane - p.lane) <= PLAYER_HALF_LANE + .12;
+        const halfDepth = item.kind === "truck" || item.kind === "bus" ? .085 : .065;
+        const previousZ = Number.isFinite(item.prevZ) ? item.prevZ : item.z;
+        const nearestZ = Math.min(previousZ, item.z) - halfDepth;
+        const farthestZ = Math.max(previousZ, item.z) + halfDepth;
+        const depthOverlap = nearestZ <= PLAYER_Z && farthestZ >= PLAYER_Z;
+        const laneOverlap = Math.abs(item.lane - p.lane) <= PLAYER_LANE_RADIUS;
         if (!depthOverlap || !laneOverlap) return false;
-        // Vehicles are solid; only low roadblocks can be cleared with a well-timed jump.
-        if (item.kind === "roadblock") return p.jump < .24;
+        // Cars are solid lane blockers. Only low road debris can be cleared by jumping.
+        if (item.kind === "roadblock") return p.jump < .30;
         return true;
       });
       if (obstacleHit) {
@@ -489,9 +493,9 @@ export default function MamahNgamukPage() {
     const dx = event.clientX - touchRef.current.x;
     const dy = event.clientY - touchRef.current.y;
     touchRef.current = null;
-    if (Math.max(Math.abs(dx), Math.abs(dy)) < 28) return;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
     if (Math.abs(dx) > Math.abs(dy)) move(dx < 0 ? "left" : "right");
-    else if (dy < -28) move("jump");
+    else if (dy < -24) move("jump");
   };
 
   return (
