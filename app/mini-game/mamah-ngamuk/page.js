@@ -14,6 +14,7 @@ export default function MamahNgamukPage() {
   const rafRef = useRef(0);
   const sheetRef = useRef(null);
   const obstacleSheetRef = useRef(null);
+  const childSheetRef = useRef(null);
   const soundRef = useRef(true);
   const audioRef = useRef(null);
   const touchRef = useRef(null);
@@ -94,6 +95,10 @@ export default function MamahNgamukPage() {
     gameRef.current = g;
 
     const sheet = new Image();
+    const childSheet = new Image();
+    childSheet.onload = () => { childSheetRef.current = childSheet; };
+    childSheet.onerror = () => { childSheetRef.current = null; };
+    childSheet.src = "/mini-game/mamah-ngamuk/sprite/anak-dajjal.png";
     let bootFallback;
     const finishBoot = () => {
       window.clearTimeout(bootFallback);
@@ -128,6 +133,18 @@ export default function MamahNgamukPage() {
         const cw = s.naturalWidth / 4;
         const ch = s.naturalHeight / 6;
         ctx.drawImage(s, (frame % 4) * cw, row * ch, cw, ch, x - width / 2, y - height, width, height);
+        return true;
+      }
+      return false;
+    };
+
+    const drawChildSprite = (row, x, y, width, height, frame = 0) => {
+      const sprite = childSheetRef.current;
+      if (sprite?.complete && sprite.naturalWidth >= 2048 && sprite.naturalHeight >= 1536) {
+        const cellW = sprite.naturalWidth / 8;
+        const cellH = sprite.naturalHeight / 6;
+        const col = Math.max(0, Math.min(7, frame));
+        ctx.drawImage(sprite, col * cellW, row * cellH, cellW, cellH, x - width / 2, y - height, width, height);
         return true;
       }
       return false;
@@ -288,11 +305,29 @@ export default function MamahNgamukPage() {
       ctx.restore();
 
       const childY = (g.caught ? 1330 : 1300) - player.jump * 210;
-      const childHeight = player.slide > 0 ? 62 : 112;
-      const childWidth = player.slide > 0 ? 76 : 82;
-      const childDrawn = drawSprite(4, px, childY + bounce, childWidth * 1.18, childHeight * 1.18, Math.floor(time / 105) % 4);
+      const childHeight = player.slide > 0 ? 112 : 190;
+      const childWidth = player.slide > 0 ? 92 : 148;
+      let childRow = 1; // RUN
+      let childFrame = Math.floor(time / 95) % 8;
+      if (g.caught) {
+        childRow = 5; // CAUGHT
+        childFrame = Math.min(7, Math.floor((time - (g.caughtAt || time)) / 150));
+      } else if (player.jump > 0) {
+        childRow = 2; // JUMP
+        childFrame = Math.min(7, Math.max(0, Math.floor((1 - player.jump / 0.72) * 8)));
+      } else if (g.wasJumping) {
+        childRow = 3; // LAND
+        childFrame = Math.min(7, Math.floor((time - g.landedAt) / 90));
+        if (childFrame >= 7) g.wasJumping = false;
+      }
+      if (g.scaredUntil && time < g.scaredUntil && !g.caught) {
+        childRow = 4; // SCARED
+        childFrame = Math.floor(time / 105) % 8;
+      }
+      const childDrawn = drawChildSprite(childRow, px, childY + bounce, childWidth, childHeight, childFrame);
       if (!childDrawn) {
-        ctx.font = "62px system-ui"; ctx.textAlign = "center"; ctx.fillText("🧒", px, childY + bounce);
+        const legacyDrawn = drawSprite(4, px, childY + bounce, childWidth * .9, childHeight * .9, Math.floor(time / 130) % 4);
+        if (!legacyDrawn) { ctx.font = "62px system-ui"; ctx.textAlign = "center"; ctx.fillText("🧒", px, childY + bounce); }
       }
       if (g.caught) {
         ctx.save();
@@ -339,6 +374,7 @@ export default function MamahNgamukPage() {
       g.running = false;
       g.over = true;
       g.caught = true;
+      g.caughtAt = performance.now();
       const finalDistance = Math.floor(g.distance);
       const finalScore = finalDistance * 12 + g.coinCount * 25;
       setDistanceResult(finalDistance);
@@ -361,7 +397,9 @@ export default function MamahNgamukPage() {
       g.distance += g.speed * dt;
       g.speed = Math.min(.39, g.speed + .000002 * dt);
       p.lane += (p.targetLane - p.lane) * Math.min(1, dt * 0.24);
+      const wasAirborne = p.jump > 0;
       p.jump = Math.max(0, p.jump - dt * .00135);
+      if (wasAirborne && p.jump === 0) { g.wasJumping = true; g.landedAt = performance.now(); }
       p.slide = 0;
       g.spawn -= dt * 0.001;
       if (g.spawn <= 0) {
@@ -414,6 +452,7 @@ export default function MamahNgamukPage() {
       });
       if (obstacleHit) {
         obstacleHit.resolved = true;
+        g.scaredUntil = performance.now() + 420;
         // One collision ends the run: Mama catches Anak Dajjal immediately.
         finish();
         return;
