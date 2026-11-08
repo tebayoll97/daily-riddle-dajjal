@@ -20,6 +20,7 @@ export default function MiniGamePage() {
   const [score, setScore] = useState(0);
   const [best, setBest] = useState(0);
   const [soundOn, setSoundOn] = useState(true);
+  const [confirmExit, setConfirmExit] = useState(false);
 
   const playTone = useCallback((frequency, duration = 0.08) => {
     if (!soundRef.current || typeof window === "undefined") return;
@@ -325,8 +326,8 @@ export default function MiniGamePage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#080711] px-4 py-7 text-white sm:py-10">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 sm:gap-6">
+    <main className="mini-game-screen fixed inset-0 z-[60] h-[100dvh] w-full overflow-hidden overscroll-none bg-[#080711] px-3 pb-[max(8px,env(safe-area-inset-bottom))] pt-[max(8px,env(safe-area-inset-top))] text-white sm:px-5">
+      <div className="mx-auto flex h-full w-full max-w-[620px] flex-col gap-2 overflow-hidden">
         <div className="flex items-center justify-between gap-3">
           <Link
             href="/games"
@@ -344,7 +345,7 @@ export default function MiniGamePage() {
           </button>
         </div>
 
-        <header className="text-center">
+        <header className="shrink-0 text-center">
           <p className="ui-eyebrow">DAJJAL FAMILY · ARCADE</p>
           <h1 className="ui-title text-center">
             RUN &amp; <span className="text-purple-300">JUMP</span>
@@ -354,8 +355,8 @@ export default function MiniGamePage() {
           </p>
         </header>
 
-        <section className="overflow-hidden rounded-3xl border border-purple-400/20 bg-[#100d1d] p-3 shadow-[0_20px_70px_rgba(76,29,149,.16)] sm:p-5">
-          <div className="mb-3 flex items-center justify-between px-1 sm:mb-4">
+        <section className="flex min-h-0 flex-1 flex-col justify-center overflow-hidden rounded-3xl border border-purple-400/20 bg-[#100d1d] p-2 shadow-[0_20px_70px_rgba(76,29,149,.16)]">
+          <div className="mb-2 flex shrink-0 items-center justify-between px-1">
             <div>
               <p className="text-[9px] font-black tracking-[.22em] text-purple-300">DISTANCE</p>
               <p className="font-mono text-2xl font-black tabular-nums sm:text-3xl">
@@ -370,7 +371,7 @@ export default function MiniGamePage() {
             </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-2xl border border-purple-300/15 bg-[#0c0a17]">
+          <div className="relative flex shrink-0 items-center overflow-hidden rounded-2xl border border-purple-300/15 bg-[#0c0a17]">
             <canvas
               ref={canvasRef}
               className="block aspect-[900/320] w-full touch-none"
@@ -401,7 +402,7 @@ export default function MiniGamePage() {
             )}
           </div>
 
-          <div className="mt-4 flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
+          <div className="mt-2 flex shrink-0 flex-col items-center gap-2">
             <p className="text-center text-[11px] text-gray-500">
               TAP layar untuk melompat · SPACE / ↑ di desktop
             </p>
@@ -409,32 +410,28 @@ export default function MiniGamePage() {
               type="button"
               onClick={jump}
               disabled={status === "over"}
-              className="ui-interactive w-full rounded-xl border border-purple-400/30 bg-purple-500/10 px-6 py-3 text-sm font-black text-purple-100 hover:bg-purple-500/20 sm:w-auto disabled:opacity-40"
+              className="ui-interactive w-full rounded-xl border border-purple-400/30 bg-purple-500/10 px-6 py-2.5 text-sm font-black text-purple-100 hover:bg-purple-500/20 disabled:opacity-40"
             >
               JUMP ↑
             </button>
           </div>
         </section>
 
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
-          <div className="rounded-xl border border-white/8 bg-white/[.025] p-3 text-center">
-            <p className="text-[9px] font-bold tracking-wider text-gray-500">GOAL</p>
-            <p className="mt-1 text-xs font-bold text-purple-100">SURVIVE</p>
-          </div>
-          <div className="rounded-xl border border-white/8 bg-white/[.025] p-3 text-center">
-            <p className="text-[9px] font-bold tracking-wider text-gray-500">CONTROL</p>
-            <p className="mt-1 text-xs font-bold text-purple-100">TAP / SPACE</p>
-          </div>
-          <div className="rounded-xl border border-white/8 bg-white/[.025] p-3 text-center">
-            <p className="text-[9px] font-bold tracking-wider text-gray-500">CHALLENGE</p>
-            <p className="mt-1 text-xs font-bold text-purple-100">BEAT YOUR BEST</p>
-          </div>
-        </div>
-
-        <p className="text-center text-[10px] tracking-wider text-gray-600">
-          DAJJAL FAMILY · GAMING UNIVERSE
-        </p>
       </div>
+      {confirmExit && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/85 p-5 backdrop-blur-md" onClick={() => setConfirmExit(false)}>
+          <section role="alertdialog" aria-modal="true" aria-labelledby="exit-game-title" className="ui-popup w-full max-w-sm rounded-3xl border border-purple-300/25 bg-[#151020] p-6 text-center shadow-2xl" onClick={(event) => event.stopPropagation()}>
+            <div className="mb-3 text-4xl">🚪</div>
+            <p className="ui-eyebrow">LEAVE THIS GAME?</p>
+            <h2 id="exit-game-title" className="text-xl font-black text-white">KELUAR DARI GAME?</h2>
+            <p className="mt-3 text-sm leading-relaxed text-gray-400">Permainan akan ditinggalkan dan sesi yang sedang berjalan akan berakhir. Yakin ingin keluar?</p>
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <button type="button" onClick={() => setConfirmExit(false)} className="ui-interactive rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-black text-gray-300">LANJUT MAIN</button>
+              <button type="button" onClick={() => { window.location.href = "/mini-game"; }} className="ui-interactive rounded-xl bg-purple-600 px-4 py-3 text-xs font-black text-white">YA, KELUAR</button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }
