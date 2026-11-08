@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import * as THREE from "three";
 import "./mamah-ngamuk.css";
 
 const W = 900;
@@ -11,7 +10,6 @@ const LANES = [-1, 0, 1];
 
 export default function MamahNgamukPage() {
   const canvasRef = useRef(null);
-  const threeCanvasRef = useRef(null);
   const gameRef = useRef(null);
   const rafRef = useRef(0);
   const sheetRef = useRef(null);
@@ -52,7 +50,7 @@ export default function MamahNgamukPage() {
   const start = useCallback(() => {
     const g = gameRef.current;
     if (!g) return;
-    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, speed: 0.105, spawn: 2.8, chase: 0, scoreTick: -1, coinCount: 0 });
+    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, speed: 0.22, spawn: 1.8, chase: 0, scoreTick: -1, coinCount: 0 });
     Object.assign(g.player, { lane: 0, targetLane: 0, jump: 0, slide: 0 });
     g.items = [];
     setScore(0);
@@ -74,10 +72,6 @@ export default function MamahNgamukPage() {
     if (direction === "jump" && g.player.jump <= 0 && g.player.slide <= 0) {
       g.player.jump = 0.72;
       tone(570, 0.1);
-    }
-    if (direction === "slide" && g.player.jump <= 0) {
-      g.player.slide = 0.58;
-      tone(260, 0.1);
     }
   }, [start, tone]);
 
@@ -133,7 +127,7 @@ export default function MamahNgamukPage() {
       return group;
     };
     const g = {
-      running: false, paused: false, over: false, distance: 0, speed: 0.18, spawn: 3.4, chase: 0, scoreTick: -1, coinCount: 0,
+      running: false, paused: false, over: false, distance: 0, speed: 0.22, spawn: 1.8, chase: 0, scoreTick: -1, coinCount: 0,
       player: { lane: 0, targetLane: 0, jump: 0, slide: 0 },
       items: [],
     };
@@ -152,13 +146,6 @@ export default function MamahNgamukPage() {
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      renderer.setSize(rect.width, rect.height, false);
-      const visibleWidth = H * (rect.width / Math.max(1, rect.height));
-      camera3d.left = (W - visibleWidth) / 2;
-      camera3d.right = (W + visibleWidth) / 2;
-      camera3d.top = H;
-      camera3d.bottom = 0;
-      camera3d.updateProjectionMatrix();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.max(1, Math.round(rect.width * dpr));
       canvas.height = Math.max(1, Math.round(rect.height * dpr));
@@ -183,12 +170,12 @@ export default function MamahNgamukPage() {
     const draw = (time) => {
       const sky = ctx.createLinearGradient(0, 0, 0, H);
       sky.addColorStop(0, "#17132d");
-      sky.addColorStop(0.58, "#282044");
-      sky.addColorStop(1, "#11101b");
+      sky.addColorStop(0.58, "#46556a");
+      sky.addColorStop(1, "#202735");
       ctx.fillStyle = sky;
       ctx.fillRect(0, 0, W, H);
 
-      // Distant skyline and atmospheric lights.
+      // Urban roadside skyline, streetlights and shopfront silhouettes.
       for (let i = 0; i < 13; i++) {
         const x = i * 78 - (g.distance * 22 % 78);
         const height = 65 + (i * 31 % 95);
@@ -198,18 +185,18 @@ export default function MamahNgamukPage() {
         for (let wy = 495 - height; wy < 474; wy += 17) ctx.fillRect(x + 10, wy, 4, 5);
       }
 
-      // Perspective road.
-      ctx.fillStyle = "#171321";
+      // Asphalt highway with shoulder lanes and road markings.
+      ctx.fillStyle = "#353b45";
       ctx.beginPath();
       ctx.moveTo(365, 480); ctx.lineTo(535, 480); ctx.lineTo(890, H); ctx.lineTo(10, H); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = "#211b30";
+      ctx.fillStyle = "#252b34";
       ctx.beginPath();
       ctx.moveTo(390, 480); ctx.lineTo(510, 480); ctx.lineTo(820, H); ctx.lineTo(80, H); ctx.closePath(); ctx.fill();
       // Raised road shoulders add depth while the art assets are still procedural.
       ctx.fillStyle = "rgba(112,75,155,.22)";
       ctx.beginPath(); ctx.moveTo(365,480); ctx.lineTo(390,480); ctx.lineTo(80,H); ctx.lineTo(10,H); ctx.closePath(); ctx.fill();
       ctx.beginPath(); ctx.moveTo(510,480); ctx.lineTo(535,480); ctx.lineTo(890,H); ctx.lineTo(820,H); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = "rgba(184,145,255,.5)";
+      ctx.strokeStyle = "rgba(235,225,190,.55)";
       ctx.lineWidth = 3;
       ctx.beginPath(); ctx.moveTo(365, 480); ctx.lineTo(10, H); ctx.moveTo(535, 480); ctx.lineTo(890, H); ctx.stroke();
 
@@ -219,7 +206,7 @@ export default function MamahNgamukPage() {
           const z = ((i / 8) + (g.distance * 0.65 % 1)) % 1;
           const y = 480 + z * z * 1010;
           const x = W / 2 + (laneLine ? 1 : -1) * (13 + z * 160);
-          ctx.strokeStyle = "rgba(193,163,255,.28)";
+          ctx.strokeStyle = "rgba(240,235,215,.42)";
           ctx.lineWidth = 1 + z * 3;
           ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 12 + z * 34); ctx.stroke();
         }
@@ -238,17 +225,23 @@ export default function MamahNgamukPage() {
         ctx.translate(x, y);
         ctx.fillStyle = "rgba(0,0,0,.35)";
         ctx.beginPath(); ctx.ellipse(0, 3*scale, w*.72, h*.18, 0, 0, Math.PI*2); ctx.fill();
-        if (item.kind === "train") {
-          const tw=w*1.42, th=h*1.65;
-          ctx.fillStyle="#302943"; ctx.fillRect(-tw/2,-th,tw,th);
-          ctx.fillStyle="#4e456a"; ctx.fillRect(-tw/2,-th,tw,th*.2);
-          ctx.fillStyle="#b85e70"; ctx.fillRect(-tw/2,-th*.78,tw,th*.17);
-          for(let wi=-1;wi<=1;wi++) {
-            ctx.fillStyle="#b8c9d9"; ctx.fillRect(wi*tw*.29-tw*.085,-th*.65,tw*.17,th*.32);
-            ctx.fillStyle="#e8c47a"; ctx.fillRect(wi*tw*.29-tw*.018,-th*.25,tw*.036,th*.05);
-          }
-          ctx.fillStyle="#171321"; ctx.fillRect(-tw*.36,-th*.08,tw*.72,th*.1);
-          ctx.fillStyle="#c38a55"; ctx.fillRect(-tw*.44,-th*.02,tw*.88,th*.06);
+        if (item.kind === "sedan" || item.kind === "taxi" || item.kind === "van" || item.kind === "truck" || item.kind === "bus") {
+          const truck = item.kind === "truck" || item.kind === "bus";
+          const van = item.kind === "van";
+          const cw = w * (truck ? 1.72 : van ? 1.55 : 1.42);
+          const ch = h * (truck ? 2.05 : van ? 1.9 : 1.72);
+          const body = item.kind === "taxi" ? "#e8bb42" : item.kind === "van" ? "#547f9e" : item.kind === "truck" ? "#477d72" : item.kind === "bus" ? "#d36e55" : "#c85d61";
+          ctx.fillStyle="#11151c"; ctx.beginPath(); ctx.ellipse(0,3*scale,cw*.62,ch*.12,0,0,Math.PI*2); ctx.fill();
+          ctx.fillStyle="#171c25"; ctx.fillRect(-cw*.46,-ch*.16,cw*.18,ch*.46); ctx.fillRect(cw*.28,-ch*.16,cw*.18,ch*.46);
+          ctx.fillStyle=body; ctx.fillRect(-cw*.5,-ch*.72,cw,ch*.62);
+          ctx.fillStyle=truck ? "#6b7e88" : "#27384b";
+          ctx.beginPath(); ctx.moveTo(-cw*.37,-ch*.7); ctx.lineTo(-cw*.23,-ch*.98); ctx.lineTo(cw*.28,-ch*.98); ctx.lineTo(cw*.43,-ch*.7); ctx.closePath(); ctx.fill();
+          ctx.fillStyle="#a9d1df"; ctx.fillRect(-cw*.29,-ch*.91,cw*.24,ch*.17); ctx.fillRect(cw*.05,-ch*.91,cw*.24,ch*.17);
+          ctx.fillStyle="#f9e8b1"; ctx.fillRect(-cw*.43,-ch*.28,cw*.12,ch*.08); ctx.fillRect(cw*.31,-ch*.28,cw*.12,ch*.08);
+          ctx.fillStyle="#a93e49"; ctx.fillRect(-cw*.42,-ch*.08,cw*.13,ch*.08); ctx.fillRect(cw*.29,-ch*.08,cw*.13,ch*.08);
+          ctx.fillStyle="rgba(255,255,255,.2)"; ctx.fillRect(-cw*.46,-ch*.7,cw*.92,ch*.06);
+          if(item.kind==="taxi"){ctx.fillStyle="#fff0a8";ctx.fillRect(-cw*.12,-ch*1.04,cw*.24,ch*.08);}
+          if(truck){ctx.fillStyle="#c3cbd0";ctx.fillRect(-cw*.42,-ch*.7,cw*.84,ch*.44);ctx.strokeStyle="#72828b";ctx.lineWidth=2;ctx.strokeRect(-cw*.42,-ch*.7,cw*.84,ch*.44);}
         } else if (item.kind === "log") {
           ctx.fillStyle="#75472f"; ctx.fillRect(-w*.7,-h*.62,w*1.4,h*.55);
           ctx.fillStyle="#b77a49"; ctx.beginPath(); ctx.ellipse(-w*.7,-h*.35,h*.27,h*.27,0,0,Math.PI*2); ctx.fill();
@@ -375,30 +368,30 @@ export default function MamahNgamukPage() {
       if (!g.running || g.paused) return;
       const p = g.player;
       g.distance += g.speed * dt;
-      g.speed = Math.min(.235, g.speed + .0000015 * dt);
+      g.speed = Math.min(.31, g.speed + .000004 * dt);
       p.lane += (p.targetLane - p.lane) * Math.min(1, dt * 0.24);
-      p.jump = Math.max(0, p.jump - dt * .0015);
-      p.slide = Math.max(0, p.slide - dt * .0017);
+      p.jump = Math.max(0, p.jump - dt * .00135);
+      p.slide = 0;
       g.spawn -= dt * 0.001;
       if (g.spawn <= 0) {
-        // Pattern-based endless-runner generator: each row leaves at least one safe lane.
+        // Traffic patterns: cars occupy lanes, always leaving a clear route.
         const patterns = [
-          [{ row: 0, blocks: [[-1,"train"],[0,"log"]] }, { row: .28, blocks: [[0,"barrier"],[1,"arch"]] }],
-          [{ row: 0, blocks: [[0,"train"],[1,"log"]] }, { row: .3, blocks: [[-1,"arch"],[1,"barrier"]] }],
-          [{ row: 0, blocks: [[-1,"log"],[1,"train"]] }, { row: .3, blocks: [[-1,"barrier"],[0,"arch"]] }],
-          [{ row: 0, blocks: [[-1,"train"]] }, { row: .24, blocks: [[0,"log"],[1,"barrier"]] }],
-          [{ row: 0, blocks: [[1,"train"]] }, { row: .26, blocks: [[-1,"arch"],[0,"log"]] }],
+          [{ lane:-1, kind:"sedan", z:0 },{ lane:0, kind:"taxi", z:-.04 }],
+          [{ lane:0, kind:"van", z:0 },{ lane:1, kind:"sedan", z:-.05 }],
+          [{ lane:-1, kind:"truck", z:0 },{ lane:1, kind:"taxi", z:-.06 }],
+          [{ lane:1, kind:"bus", z:0 },{ lane:0, kind:"sedan", z:-.05 }],
+          [{ lane:-1, kind:"taxi", z:0 },{ lane:0, kind:"van", z:-.05 }],
+          [{ lane:0, kind:"truck", z:0 }],
+          [{ lane:-1, kind:"sedan", z:0 },{ lane:1, kind:"van", z:-.04 }],
         ];
         const pattern = patterns[Math.floor(Math.random() * patterns.length)];
-        pattern.forEach((row) => {
-          row.blocks.forEach(([lane,kind]) => g.items.push({ lane, z: -row.row, kind }));
-          const openLane = LANES.find((lane) => !row.blocks.some(([blocked]) => blocked === lane));
-          if (openLane !== undefined) {
-            for (let i=0;i<3;i++) g.items.push({ lane:openLane, z:-row.row-i*.075, kind:"coin" });
-          }
-        });
+        pattern.forEach((item) => g.items.push({ ...item, resolved:false }));
+        const openLane = LANES.find((lane) => !pattern.some((item) => item.lane === lane));
+        if (openLane !== undefined && Math.random() < .8) {
+          for (let i=0;i<4;i++) g.items.push({ lane:openLane, z:-.12-i*.09, kind:"coin", resolved:false });
+        }
         // Leave enough distance for the complete pattern to pass before the next one.
-        g.spawn = 6.2 + Math.random() * 1.4;
+        g.spawn = 3.8 + Math.random() * 1.1;
       }
       g.items.forEach((item) => { item.z += g.speed * dt * .001; });
       g.items = g.items.filter((item) => item.z < 1.12);
@@ -409,15 +402,17 @@ export default function MamahNgamukPage() {
         setCoins(g.coinCount);
         tone(880, .045);
       }
+      // Swept collision window: account for vehicle depth, player lane width and lateral movement.
+      const PLAYER_Z = .965;
+      const PLAYER_HALF_LANE = .31;
       const obstacleHit = g.items.find((item) => {
-        if (item.kind === "coin" || item.resolved || item.z <= .91 || item.z >= 1.04 || Math.abs(item.lane - p.lane) >= .42) return false;
-        const failedMove =
-          (item.kind === "log" && p.jump < .22) ||
-          (item.kind === "barrier" && p.jump < .22) ||
-          (item.kind === "arch" && p.slide < .18) ||
-          (item.kind === "crate" && p.jump < .2) ||
-          (item.kind === "train"); // trains must be avoided by changing lanes
-        return failedMove;
+        if (item.kind === "coin" || item.resolved) return false;
+        const vehicleHalfDepth = item.kind === "truck" || item.kind === "bus" ? .075 : .055;
+        const depthOverlap = Math.abs(item.z - PLAYER_Z) <= vehicleHalfDepth + .018;
+        const laneOverlap = Math.abs(item.lane - p.lane) <= PLAYER_HALF_LANE + .12;
+        if (!depthOverlap || !laneOverlap) return false;
+        // Cars are solid and cannot be jumped over; jumping is reserved for low road hazards.
+        return true;
       });
       if (obstacleHit) {
         obstacleHit.resolved = true;
@@ -438,27 +433,6 @@ export default function MamahNgamukPage() {
       g.lastTime = time;
       update(dt);
       draw(time);
-      const activeMeshes = new Set();
-      g.items.forEach((item) => {
-        if (item.kind === "coin" || item.z < -0.08 || item.z > 1.15) return;
-        let mesh = obstacleMeshes.get(item);
-        if (!mesh) {
-          mesh = makeObstacle(item.kind);
-          scene3d.add(mesh);
-          obstacleMeshes.set(item, mesh);
-        }
-        activeMeshes.add(item);
-        const z = Math.max(0, item.z);
-        const scale = 0.44 + z * 1.42;
-        const screenX = laneX(item.lane, z);
-        const screenY = 480 + z * z * 1010;
-        mesh.position.set(screenX, H - screenY, 70 + z * 80);
-        mesh.scale.setScalar(scale);
-      });
-      for (const [item, mesh] of obstacleMeshes) {
-        if (!activeMeshes.has(item)) { scene3d.remove(mesh); obstacleMeshes.delete(item); }
-      }
-      renderer.render(scene3d, camera3d);
       rafRef.current = requestAnimationFrame(frame);
     };
 
@@ -472,7 +446,6 @@ export default function MamahNgamukPage() {
       if (event.code === "ArrowLeft" || event.code === "KeyA") move("left");
       if (event.code === "ArrowRight" || event.code === "KeyD") move("right");
       if (event.code === "ArrowUp" || event.code === "Space" || event.code === "KeyW") move("jump");
-      if (event.code === "ArrowDown" || event.code === "KeyS") move("slide");
     };
     window.addEventListener("keydown", key);
     return () => {
@@ -483,8 +456,6 @@ export default function MamahNgamukPage() {
       window.removeEventListener("keydown", key);
       gameRef.current = null;
       sheetRef.current = null;
-      obstacleMeshes.forEach((mesh) => { scene3d.remove(mesh); mesh.traverse((child) => { if (child.geometry) child.geometry.dispose(); if (child.material) { if (Array.isArray(child.material)) child.material.forEach((m) => m.dispose()); else child.material.dispose(); } }); });
-      renderer.dispose();
     };
   }, [move, tone]);
 
@@ -511,15 +482,14 @@ export default function MamahNgamukPage() {
     const dx = event.clientX - touchRef.current.x;
     const dy = event.clientY - touchRef.current.y;
     touchRef.current = null;
-    if (Math.max(Math.abs(dx), Math.abs(dy)) < 22) return;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 28) return;
     if (Math.abs(dx) > Math.abs(dy)) move(dx < 0 ? "left" : "right");
-    else move(dy < 0 ? "jump" : "slide");
+    else if (dy < -28) move("jump");
   };
 
   return (
     <main className="mamah-game mini-game-screen" aria-label="Mamah Ngamuk game">
       <canvas ref={canvasRef} className="mamah-game__world" aria-label="Dunia permainan Mamah Ngamuk" onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={() => { touchRef.current = null; }} />
-      <canvas ref={threeCanvasRef} className="mamah-game__3d-world" aria-hidden="true" />
       <div className="mamah-game__vignette" aria-hidden="true" />
       {status === "loading" && <section className="mamah-screen mamah-screen--loading"><div className="mamah-loader"><span>DF</span></div><p className="mamah-brand__eyebrow">DAJJAL FAMILY · GAMING UNIVERSE</p><h1 className="mamah-logo">MAMAH <span>NGAMUK!</span></h1><p className="mamah-loading-label">MENYIAPKAN DUNIA GAME...</p></section>}
       {status === "ready" && <section className="mamah-screen mamah-screen--menu">
@@ -528,8 +498,7 @@ export default function MamahNgamukPage() {
         <p className="mamah-menu-hint">SWIPE UNTUK BERGERAK · HINDARI RINTANGAN · KUMPULKAN KOIN</p>
       </section>}
       {status === "playing" && <>
-        <div className="mamah-hud"><button type="button" className="mamah-hud__icon" onClick={pause} aria-label="Pause game">Ⅱ</button><div className="mamah-hud__stats"><div><small>SCORE</small><strong>{String(score).padStart(6,"0")}</strong></div><div><small>COINS</small><strong className="is-gold">🪙 {coins}</strong></div><div><small>BEST</small><strong>{String(best).padStart(6,"0")}</strong></div></div><button type="button" className="mamah-hud__icon" onClick={() => setSoundOn(v => !v)} aria-label={soundOn ? "Matikan suara" : "Nyalakan suara"}>{soundOn ? "♫" : "♪"}</button></div>
-        <div className="mamah-controls"><button type="button" onClick={() => move("left")} aria-label="Kiri">←</button><button type="button" onClick={() => move("jump")} aria-label="Lompat">↑</button><button type="button" onClick={() => move("slide")} aria-label="Merunduk">↓</button><button type="button" onClick={() => move("right")} aria-label="Kanan">→</button></div><p className="mamah-controls-hint">GESER LAYAR ATAU GUNAKAN TOMBOL</p>
+        <div className="mamah-hud mamah-hud--minimal"><div className="mamah-hud__stats"><div><small>DISTANCE</small><strong>{Math.floor(score / 12)} m</strong></div><div><small>COINS</small><strong className="is-gold">🪙 {coins}</strong></div><div><small>BEST</small><strong>{String(best).padStart(6,"0")}</strong></div></div></div>
       </>}
       {status === "paused" && <section className="mamah-overlay"><div className="mamah-dialog"><span className="mamah-dialog__emoji">Ⅱ</span><p className="mamah-dialog__eyebrow">PERMAINAN DIJEDA</p><h2>ISTIRAHAT DULU?</h2><button className="mamah-button mamah-button--primary" onClick={resume}>▶ LANJUTKAN</button><button className="mamah-button" onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setConfirmExit(true)}>↩ KELUAR GAME</button></div></section>}
       {status === "caught" && <section className="mamah-catch-caption" aria-live="assertive"><strong>PULANG! MANDI!</strong></section>}\n      {status === "over" && <section className="mamah-overlay"><div className="mamah-dialog mamah-dialog--result"><span className="mamah-dialog__emoji">🧹</span><p className="mamah-dialog__eyebrow">MAMA BERHASIL MENANGKAP!</p><h2>KETANGKAP MAMAH!</h2><div className="mamah-result mamah-result--primary"><span>JARAK TEMPUH <strong>{distanceResult} m</strong></span><span>TOTAL KOIN <strong>🪙 {coins}</strong></span></div><div className="mamah-result"><span>SKOR AKHIR <strong>{String(score).padStart(6,"0")}</strong></span><span>BEST <strong>{String(best).padStart(6,"0")}</strong></span></div><button className="mamah-button mamah-button--primary" onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setStatus("ready")}>⌂ MENU UTAMA</button></div></section>}
