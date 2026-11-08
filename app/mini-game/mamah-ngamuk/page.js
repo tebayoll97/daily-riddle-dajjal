@@ -705,7 +705,7 @@ export default function MamahNgamukPage() {
 
   const goHome = () => {
     const g = gameRef.current;
-    if (g) { g.running = false; g.paused = false; }
+    if (g) { g.running = false; g.paused = false; g.over = false; g.caught = false; }
     stopMusic();
     setWaveNotice("");
     setStatus("ready");
