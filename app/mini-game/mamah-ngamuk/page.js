@@ -154,6 +154,10 @@ export default function MamahNgamukPage() {
       ctx.fillStyle = "#211b30";
       ctx.beginPath();
       ctx.moveTo(390, 480); ctx.lineTo(510, 480); ctx.lineTo(820, H); ctx.lineTo(80, H); ctx.closePath(); ctx.fill();
+      // Raised road shoulders add depth while the art assets are still procedural.
+      ctx.fillStyle = "rgba(112,75,155,.22)";
+      ctx.beginPath(); ctx.moveTo(365,480); ctx.lineTo(390,480); ctx.lineTo(80,H); ctx.lineTo(10,H); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(510,480); ctx.lineTo(535,480); ctx.lineTo(890,H); ctx.lineTo(820,H); ctx.closePath(); ctx.fill();
       ctx.strokeStyle = "rgba(184,145,255,.5)";
       ctx.lineWidth = 3;
       ctx.beginPath(); ctx.moveTo(365, 480); ctx.lineTo(10, H); ctx.moveTo(535, 480); ctx.lineTo(890, H); ctx.stroke();
@@ -189,7 +193,35 @@ export default function MamahNgamukPage() {
           const size = 22 + item.z * 58;
           ctx.save();
           ctx.translate(x, y);
+          // Soft contact shadow and dimensional base for every obstacle.
+          ctx.fillStyle = "rgba(0,0,0,.34)";
+          ctx.beginPath(); ctx.ellipse(0, 2, size * .9, size * .2, 0, 0, Math.PI * 2); ctx.fill();
           if (item.kind === "barrier") {
+            ctx.fillStyle = "#713c58";
+            ctx.fillRect(-size * .7, -size * .12, size * 1.4, size * .2);
+            ctx.fillStyle = "#dc6c69";
+            ctx.fillRect(-size * .7, -size * .75, size * 1.4, size * .75);
+            ctx.fillStyle = "rgba(255,255,255,.22)";
+            ctx.fillRect(-size * .7, -size * .75, size * 1.4, size * .1);
+            ctx.fillStyle = "#a94f62";
+            ctx.beginPath(); ctx.moveTo(size*.7,-size*.75); ctx.lineTo(size*.88,-size*.58); ctx.lineTo(size*.88,-size*.03); ctx.lineTo(size*.7,0); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = "#f7c2a2";
+            ctx.fillRect(-size * .7, -size * .75, size * 1.4, size * .14);
+            ctx.fillStyle = "#4a3044";
+            ctx.fillRect(-size * .55, -size * .1, size * .16, size * .48);
+            ctx.fillRect(size * .39, -size * .1, size * .16, size * .48);
+          } else if (item.kind === "arch") {
+            ctx.fillStyle = "#4d3b70";
+            ctx.fillRect(-size*.72,-size*1.25,size*.24,size*1.25);
+            ctx.fillRect(size*.48,-size*1.25,size*.24,size*1.25);
+            ctx.fillStyle = "#a995d8";
+            ctx.fillRect(-size * .72, -size * 1.25, size * .24, size * 1.25);
+            ctx.fillRect(size * .48, -size * 1.25, size * .24, size * 1.25);
+            ctx.fillStyle = "#8a72bd";
+            ctx.fillRect(-size * .72, -size * 1.25, size * 1.44, size * .26);
+            ctx.fillStyle = "rgba(255,255,255,.22)";
+            ctx.fillRect(-size * .68, -size * 1.22, size * 1.36, size * .06);
+          } else {
             ctx.fillStyle = "#dc6c69";
             ctx.fillRect(-size * .7, -size * .75, size * 1.4, size * .75);
             ctx.fillStyle = "#f7c2a2";
@@ -197,14 +229,12 @@ export default function MamahNgamukPage() {
             ctx.fillStyle = "#4a3044";
             ctx.fillRect(-size * .55, -size * .1, size * .16, size * .48);
             ctx.fillRect(size * .39, -size * .1, size * .16, size * .48);
-          } else if (item.kind === "arch") {
-            ctx.fillStyle = "#8a72bd";
-            ctx.fillRect(-size * .72, -size * 1.25, size * .24, size * 1.25);
-            ctx.fillRect(size * .48, -size * 1.25, size * .24, size * 1.25);
-            ctx.fillRect(-size * .72, -size * 1.25, size * 1.44, size * .26);
-          } else {
             ctx.fillStyle = "#b8a7d5";
             ctx.beginPath(); ctx.moveTo(0, -size); ctx.lineTo(size * .72, 0); ctx.lineTo(-size * .72, 0); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = "#8573a7";
+            ctx.beginPath(); ctx.moveTo(size*.72,0); ctx.lineTo(size*.9,-size*.12); ctx.lineTo(size*.18,-size*1.12); ctx.lineTo(0,-size); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = "rgba(255,255,255,.3)";
+            ctx.beginPath(); ctx.moveTo(0,-size); ctx.lineTo(size*.72,0); ctx.lineTo(-size*.72,0); ctx.closePath(); ctx.stroke();
             ctx.fillStyle = "#7d6b9d";
             ctx.fillRect(-size * .62, -size * .18, size * 1.24, size * .18);
           }
@@ -311,8 +341,9 @@ export default function MamahNgamukPage() {
       g.chase = Math.max(0, g.chase - .00012 * dt);
       if (g.chase >= 1) { finish(); return; }
       const points = Math.floor(g.distance * 12) + g.coinCount * 25;
-      if (Math.floor(g.distance * 12 / 10) !== g.scoreTick) {
-        g.scoreTick = Math.floor(g.distance * 12 / 10) * 10;
+      const scoreBucket = Math.floor(g.distance * 12 / 10);
+      if (scoreBucket !== g.scoreTick) {
+        g.scoreTick = scoreBucket;
         setScore(points);
       }
     };
