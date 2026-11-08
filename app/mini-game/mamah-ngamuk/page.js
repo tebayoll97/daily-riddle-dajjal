@@ -49,7 +49,7 @@ export default function MamahNgamukPage() {
   const start = useCallback(() => {
     const g = gameRef.current;
     if (!g) return;
-    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, speed: 0.34, spawn: 1.2, chase: 0, scoreTick: -1, coinCount: 0 });
+    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, speed: 0.34, spawn: 4.6, chase: 0, scoreTick: -1, coinCount: 0 });
     Object.assign(g.player, { lane: 0, targetLane: 0, jump: 0, slide: 0 });
     g.items = [];
     setScore(0);
@@ -91,7 +91,7 @@ export default function MamahNgamukPage() {
     if (!ctx) return;
 
     const g = {
-      running: false, paused: false, over: false, distance: 0, speed: 0.34, spawn: 1.2, chase: 0, scoreTick: -1, coinCount: 0,
+      running: false, paused: false, over: false, distance: 0, speed: 0.34, spawn: 4.6, chase: 0, scoreTick: -1, coinCount: 0,
       player: { lane: 0, targetLane: 0, jump: 0, slide: 0 },
       items: [],
     };
@@ -198,7 +198,44 @@ export default function MamahNgamukPage() {
           // Soft contact shadow and dimensional base for every obstacle.
           ctx.fillStyle = "rgba(0,0,0,.34)";
           ctx.beginPath(); ctx.ellipse(0, 2, size * .9, size * .2, 0, 0, Math.PI * 2); ctx.fill();
-          if (item.kind === "barrier") {
+          if (item.kind === "train") {
+            // Large stationary train carriage occupying a whole lane: dodge sideways.
+            const w = size * 1.9;
+            const h = size * 1.55;
+            ctx.fillStyle = "#302943";
+            ctx.fillRect(-w*.5, -h*.9, w, h*.9);
+            ctx.fillStyle = "#4f456b";
+            ctx.beginPath(); ctx.moveTo(-w*.5,-h*.9); ctx.lineTo(-w*.34,-h*1.08); ctx.lineTo(w*.66,-h*1.08); ctx.lineTo(w*.5,-h*.9); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = "#b45e6c";
+            ctx.fillRect(-w*.5, -h*.9, w, h*.18);
+            ctx.fillStyle = "#a9a0c9";
+            for (let wi=-1;wi<=1;wi++) {
+              ctx.fillRect(wi*w*.29-w*.095,-h*.68,w*.19,h*.34);
+              ctx.fillStyle = "#f5d58b";
+              ctx.fillRect(wi*w*.29-w*.025,-h*.24,w*.05,h*.07);
+              ctx.fillStyle = "#a9a0c9";
+            }
+            ctx.fillStyle = "#171321";
+            ctx.fillRect(-w*.38,-h*.08,w*.76,h*.1);
+            ctx.fillStyle = "#0d0b15";
+            ctx.beginPath(); ctx.arc(-w*.3,0,size*.14,0,Math.PI*2); ctx.arc(w*.3,0,size*.14,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#e6b66f";
+            ctx.fillRect(-w*.46,-h*.03,w*.92,h*.07);
+          } else if (item.kind === "log") {
+            // Wooden log with rounded ends; jump over it.
+            const w=size*1.55, h=size*.52;
+            ctx.fillStyle="#613a2d";
+            ctx.beginPath(); ctx.ellipse(0,-h*.1,w*.52,h*.55,0,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle="#a96d42";
+            ctx.fillRect(-w*.48,-h*.68,w*.96,h*.58);
+            ctx.fillStyle="#c18a56";
+            ctx.beginPath(); ctx.ellipse(-w*.48,-h*.39,h*.3,h*.3,0,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle="#75472f";
+            ctx.beginPath(); ctx.ellipse(w*.48,-h*.39,h*.3,h*.3,0,0,Math.PI*2); ctx.fill();
+            ctx.strokeStyle="#e2b17b"; ctx.lineWidth=Math.max(1,size*.035);
+            ctx.beginPath(); ctx.moveTo(-w*.3,-h*.58); ctx.lineTo(w*.3,-h*.58); ctx.stroke();
+            ctx.fillStyle="#38271f"; ctx.fillRect(-w*.34,-h*.12,w*.68,h*.13);
+          } else if (item.kind === "barrier") {
             ctx.fillStyle = "#713c58";
             ctx.fillRect(-size * .7, -size * .12, size * 1.4, size * .2);
             ctx.fillStyle = "#dc6c69";
@@ -316,22 +353,23 @@ export default function MamahNgamukPage() {
       p.slide = Math.max(0, p.slide - dt * .0017);
       g.spawn -= dt;
       if (g.spawn <= 0) {
-        // Subway-style readable patterns: one main obstacle with open escape lanes.
+        // Subway Surfers-inspired readable obstacle cadence: long gaps and open lanes.
         const lane = LANES[Math.floor(Math.random() * 3)];
         const roll = Math.random();
-        if (roll < .28) {
-          // A short coin trail rewards a safe lane without blocking the route.
-          for (let i = 0; i < 4; i++) g.items.push({ lane, z: -i * .13, kind: "coin" });
+        if (roll < .20) {
+          // Coin trail in an otherwise clear lane.
+          for (let i = 0; i < 5; i++) g.items.push({ lane, z: -i * .12, kind: "coin" });
         } else {
-          const kind = roll < .53 ? "barrier" : roll < .77 ? "arch" : "crate";
+          // Each obstacle tests one clear action: jump, slide, or lane change.
+          const kind = roll < .39 ? "log" : roll < .56 ? "barrier" : roll < .73 ? "arch" : roll < .91 ? "train" : "crate";
           g.items.push({ lane, z: 0, kind });
-          // Coins may appear in a different lane, never as a wall of obstacles.
-          if (Math.random() < .48) {
+          // Optional reward trail in one of the two safe lanes.
+          if (Math.random() < .52) {
             const safeLane = LANES.filter((value) => value !== lane)[Math.floor(Math.random() * 2)];
-            for (let i = 0; i < 3; i++) g.items.push({ lane: safeLane, z: -.1 - i * .13, kind: "coin" });
+            for (let i = 0; i < 3; i++) g.items.push({ lane: safeLane, z: -.12 - i * .13, kind: "coin" });
           }
         }
-        g.spawn = 2.25 + Math.random() * 1.05;
+        g.spawn = 4.6 + Math.random() * 1.8;
       }
       g.items.forEach((item) => { item.z += g.speed * dt * .0012; });
       g.items = g.items.filter((item) => item.z < 1.12);
@@ -345,9 +383,11 @@ export default function MamahNgamukPage() {
       const obstacleHit = g.items.find((item) => {
         if (item.kind === "coin" || item.resolved || item.z <= .91 || item.z >= 1.04 || Math.abs(item.lane - p.lane) >= .42) return false;
         const failedMove =
+          (item.kind === "log" && p.jump < .22) ||
           (item.kind === "barrier" && p.jump < .22) ||
           (item.kind === "arch" && p.slide < .18) ||
-          (item.kind === "crate" && p.jump < .2);
+          (item.kind === "crate" && p.jump < .2) ||
+          (item.kind === "train"); // trains must be avoided by changing lanes
         return failedMove;
       });
       if (obstacleHit) {
