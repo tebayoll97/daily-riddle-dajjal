@@ -44,6 +44,9 @@ export default function Header() {
 
   const t = translations[language] || translations.en;
 
+  // Mini-games use an immersive full-screen layout without the main website chrome.
+  if (pathname?.startsWith("/mini-game")) return null;
+
   useEffect(() => {
     let frame = 0;
     const handleScroll = () => {
