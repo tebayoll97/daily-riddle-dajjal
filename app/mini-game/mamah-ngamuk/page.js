@@ -7,6 +7,13 @@ const W = 900;
 const H = 1600;
 const BEST_KEY = "mamah-ngamuk-best-v1";
 const LANES = [-1, 0, 1];
+const WAVE_STAGES = [
+  { at: 0, alert: "WAVE 1  ·  AWAL PELARIAN" },
+  { at: 10000, alert: "WAVE 2  ·  MULAI PANIK!" },
+  { at: 25000, alert: "WAVE 3  ·  JAM MACET!" },
+  { at: 50000, alert: "WAVE 4  ·  KEJARAN MAMAH!" },
+  { at: 100000, alert: "WAVE 5  ·  CHAOS MODE!" },
+];
 
 export default function MamahNgamukPage() {
   const canvasRef = useRef(null);
@@ -21,6 +28,7 @@ export default function MamahNgamukPage() {
   const musicRef = useRef({ timer: null, oscillators: [] });
   const touchRef = useRef(null);
   const catchTimerRef = useRef(null);
+  const waveNoticeTimerRef = useRef(null);
   const [status, setStatus] = useState("loading");
   const [score, setScore] = useState(0);
   const [coins, setCoins] = useState(0);
@@ -29,6 +37,7 @@ export default function MamahNgamukPage() {
   const [soundOn, setSoundOn] = useState(true);
   const [confirmExit, setConfirmExit] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [waveNotice, setWaveNotice] = useState("");
 
   const tone = useCallback((frequency = 520, duration = 0.08) => {
     if (!soundRef.current || typeof window === "undefined") return;
@@ -104,7 +113,10 @@ export default function MamahNgamukPage() {
     enterGameFullscreen();
     const g = gameRef.current;
     if (!g) return;
-    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, elapsed: 0, speed: 0.29, spawn: 4.8, chase: 0, scoreTick: -1, coinCount: 0 });
+    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, elapsed: 0, speed: 0.29, spawn: 3.8, chase: 0, scoreTick: -1, coinCount: 0, waveIndex: 0 });
+    window.clearTimeout(waveNoticeTimerRef.current);
+    setWaveNotice(WAVE_STAGES[0].alert);
+    waveNoticeTimerRef.current = window.setTimeout(() => setWaveNotice(""), 2000);
     Object.assign(g.player, { lane: 0, targetLane: 0, jump: 0, slide: 0 });
     g.items = [];
     setScore(0);
@@ -153,7 +165,7 @@ export default function MamahNgamukPage() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     const g = {
-      running: false, paused: false, over: false, distance: 0, speed: 0.29, spawn: 4.8, chase: 0, scoreTick: -1, coinCount: 0,
+      running: false, paused: false, over: false, distance: 0, elapsed: 0, speed: 0.29, spawn: 3.8, chase: 0, scoreTick: -1, coinCount: 0, waveIndex: 0,
       player: { lane: 0, targetLane: 0, jump: 0, slide: 0 },
       items: [],
     };
@@ -329,7 +341,7 @@ export default function MamahNgamukPage() {
       // Lane dashes moving toward the player.
       for (let laneLine = 0; laneLine < 2; laneLine++) {
         for (let i = 0; i < 8; i++) {
-          const z = ((i / 8) + (g.distance * 0.025 % 1)) % 1;
+          const z = ((i / 8) + (g.distance * 0.0012 % 1)) % 1;
           const y = 480 + z * z * 1010;
           const x = W / 2 + (laneLine ? 1 : -1) * (13 + z * 160);
           ctx.strokeStyle = "rgba(240,235,215,.42)";
@@ -535,7 +547,17 @@ export default function MamahNgamukPage() {
       const p = g.player;
       g.distance += g.speed * dt;
       g.elapsed += dt;
-      g.speed = Math.min(.46, g.speed + .0000032 * dt);
+      const difficulty = Math.min(1, g.distance / 100000);
+      g.speed = Math.min(.47, .29 + difficulty * .18);
+      const reachedWave = WAVE_STAGES[g.waveIndex + 1];
+      if (reachedWave && g.distance >= reachedWave.at) {
+        g.waveIndex += 1;
+        setWaveNotice(reachedWave.alert);
+        window.clearTimeout(waveNoticeTimerRef.current);
+        waveNoticeTimerRef.current = window.setTimeout(() => setWaveNotice(""), 2000);
+        tone(740, .12);
+        window.setTimeout(() => tone(980, .16), 115);
+      }
       p.lane += (p.targetLane - p.lane) * Math.min(1, dt * 0.24);
       const wasAirborne = p.jump > 0;
       p.jump = Math.max(0, p.jump - dt * .00135);
@@ -555,16 +577,16 @@ export default function MamahNgamukPage() {
           [{ lane:0, kind:"roadblock", z:0 }],
           [{ lane:-1, kind:"van", z:0 },{ lane:1, kind:"roadblock", z:-.04 }],
         ];
-        const intensity = Math.min(1, g.elapsed / 90000);
+        const intensity = difficulty;
         const pattern = patterns[Math.floor(Math.random() * patterns.length)].map((item) => ({ ...item }));
         // As the run continues, add a second vehicle more often and occasionally a third staggered vehicle,
         // while always reserving at least one lane as a safe route.
-        if (intensity > .22 && pattern.length === 1 && Math.random() < intensity * .72) {
+        if (intensity > .16 && pattern.length === 1 && Math.random() < intensity * .88) {
           const free = LANES.filter((lane) => !pattern.some((item) => item.lane === lane));
           const extraLane = free[Math.floor(Math.random() * free.length)];
           pattern.push({ lane: extraLane, kind: ["sedan", "taxi", "van", "bus"][Math.floor(Math.random() * 4)], z: -.18 });
         }
-        if (intensity > .58 && pattern.length === 2 && Math.random() < .22) {
+        if (intensity > .48 && pattern.length === 2 && Math.random() < .35) {
           pattern[1].z = -.22;
         }
         pattern.forEach((item) => g.items.push({ ...item, resolved:false }));
@@ -573,10 +595,10 @@ export default function MamahNgamukPage() {
           for (let i=0;i<4;i++) g.items.push({ lane:openLane, z:-.12-i*.09, kind:"coin", resolved:false });
         }
         // Traffic density rises gradually: spawn gaps shrink from 4.8s to about 2.7s.
-        const spawnGap = Math.max(1.95, 4.5 - intensity * 2.45);
+        const spawnGap = Math.max(1.75, 4.2 - intensity * 2.45);
         g.spawn = spawnGap + Math.random() * .55;
       }
-      g.items.forEach((item) => { item.prevZ = item.z; item.z += g.speed * dt * .00108; });
+      g.items.forEach((item) => { item.prevZ = item.z; item.z += g.speed * dt * .00105; });
       g.items = g.items.filter((item) => item.z < 1.12);
       const coinHits = g.items.filter((item) => item.kind === "coin" && !item.resolved && item.z > .91 && item.z < 1.04 && Math.abs(item.lane - p.lane) < .42);
       if (coinHits.length) {
@@ -639,6 +661,7 @@ export default function MamahNgamukPage() {
       cancelAnimationFrame(rafRef.current);
       window.clearTimeout(bootFallback);
       window.clearTimeout(catchTimerRef.current);
+      window.clearTimeout(waveNoticeTimerRef.current);
       observer.disconnect();
       window.removeEventListener("keydown", key);
       gameRef.current = null;
@@ -689,6 +712,7 @@ export default function MamahNgamukPage() {
         <p className="mamah-menu-hint">SWIPE UNTUK BERGERAK · HINDARI RINTANGAN · KUMPULKAN KOIN</p>
       </section>}
       {status === "playing" && <>
+        {waveNotice && <div className="mamah-wave-alert" role="status" aria-live="polite">{waveNotice}</div>}
         <div className="mamah-hud mamah-hud--minimal"><div className="mamah-hud__stats"><div><small>DISTANCE</small><strong>{Math.floor(score / 12)} m</strong></div><div><small>COINS</small><strong className="is-gold">🪙 {coins}</strong></div><div><small>BEST</small><strong>{String(best).padStart(6,"0")}</strong></div></div></div>
       </>}
       {status === "paused" && <section className="mamah-overlay"><div className="mamah-dialog"><span className="mamah-dialog__emoji">Ⅱ</span><p className="mamah-dialog__eyebrow">PERMAINAN DIJEDA</p><h2>ISTIRAHAT DULU?</h2><button className="mamah-button mamah-button--primary" onClick={resume}>▶ LANJUTKAN</button><button className="mamah-button" onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setConfirmExit(true)}>↩ KELUAR GAME</button></div></section>}
