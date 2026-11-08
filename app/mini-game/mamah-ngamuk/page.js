@@ -25,9 +25,9 @@ export default function MamahNgamukPage() {
   const tone = useCallback((frequency = 520, duration = 0.08) => {
     if (!soundRef.current || typeof window === "undefined") return;
     try {
-      const Audio = window.AudioContext || window.webkitAudioContext;
-      if (!Audio) return;
-      const ctx = audioRef.current || new Audio();
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      const ctx = audioRef.current || new AudioContextClass();
       audioRef.current = ctx;
       if (ctx.state === "suspended") ctx.resume();
       const osc = ctx.createOscillator();
@@ -58,8 +58,8 @@ export default function MamahNgamukPage() {
   const move = useCallback((direction) => {
     const g = gameRef.current;
     if (!g) return;
-    if (!g.running) {
-      if (!g.over) start();
+    if (!g.running || g.paused) {
+      if (!g.over && !g.paused) start();
       return;
     }
     if (direction === "left") g.player.targetLane = Math.max(-1, g.player.targetLane - 1);
@@ -233,7 +233,7 @@ export default function MamahNgamukPage() {
         ctx.fillStyle = "rgba(235,83,122," + (pressure * .12) + ")";
         ctx.fillRect(0, H - 32, W, 32);
       }
-      if (!g.running) {
+      if (!g.running || g.paused) {
         ctx.fillStyle = "rgba(5,4,12,.25)";
         ctx.fillRect(0, 0, W, H);
       }
@@ -254,7 +254,7 @@ export default function MamahNgamukPage() {
     };
 
     const update = (dt) => {
-      if (!g.running) return;
+      if (!g.running || g.paused) return;
       const p = g.player;
       g.distance += g.speed * dt;
       g.speed = Math.min(.72, g.speed + .000025 * dt);
