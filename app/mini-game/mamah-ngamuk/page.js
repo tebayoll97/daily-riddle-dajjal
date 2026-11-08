@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import * as THREE from "three";
 import "./mamah-ngamuk.css";
 
 const W = 900;
@@ -10,6 +11,7 @@ const LANES = [-1, 0, 1];
 
 export default function MamahNgamukPage() {
   const canvasRef = useRef(null);
+  const threeCanvasRef = useRef(null);
   const gameRef = useRef(null);
   const rafRef = useRef(0);
   const sheetRef = useRef(null);
@@ -88,7 +90,64 @@ export default function MamahNgamukPage() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const threeCanvas = threeCanvasRef.current;
+    if (!ctx || !threeCanvas) return;
+
+    // Lightweight real-time 3D layer for prototype obstacles.
+    const renderer = new THREE.WebGLRenderer({ canvas: threeCanvas, alpha: true, antialias: true, powerPreference: "low-power" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    const scene3d = new THREE.Scene();
+    const camera3d = new THREE.OrthographicCamera(0, W, 0, H, 0.1, 3000);
+    camera3d.position.set(W / 2, H / 2, 1800);
+    camera3d.lookAt(W / 2, H / 2, 0);
+    scene3d.add(new THREE.HemisphereLight(0xe8d9ff, 0x24172f, 2.1));
+    const keyLight = new THREE.DirectionalLight(0xffd6b0, 2.4);
+    keyLight.position.set(-350, 1250, 900);
+    keyLight.castShadow = true;
+    scene3d.add(keyLight);
+    const obstacleMeshes = new Map();
+    const makeMaterial = (color, roughness = 0.78, metalness = 0.04) => new THREE.MeshStandardMaterial({ color, roughness, metalness });
+    const makeObstacle = (kind) => {
+      const group = new THREE.Group();
+      const addBox = (w,h,d,x,y,z,color) => {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), makeMaterial(color));
+        mesh.position.set(x,y,z); mesh.castShadow = true; mesh.receiveShadow = true; group.add(mesh);
+        return mesh;
+      };
+      if (kind === "train") {
+        addBox(154, 104, 70, 0, 8, 0, 0x4d4568);
+        addBox(158, 18, 74, 0, 48, 2, 0xb85e70);
+        addBox(164, 12, 78, 0, 62, 0, 0x9184b5);
+        [-48,0,48].forEach((x) => {
+          addBox(35,38,5,x,12,39,0xb7c9d9);
+          addBox(25,5,3,x,12,43,0x5d6b82);
+        });
+        [-52,52].forEach((x) => {
+          const wheel = new THREE.Mesh(new THREE.CylinderGeometry(10,10,8,16),makeMaterial(0x17131f));
+          wheel.rotation.z=Math.PI/2; wheel.position.set(x,-48,20); wheel.castShadow=true; group.add(wheel);
+        });
+        addBox(132,8,8,0,-47,40,0xe6b66f);
+      } else if (kind === "log") {
+        const log = new THREE.Mesh(new THREE.CylinderGeometry(18,18,120,20),makeMaterial(0xa96d42));
+        log.rotation.z=Math.PI/2; log.position.y=-2; log.castShadow=true; log.receiveShadow=true; group.add(log);
+        [-59,59].forEach((x) => {
+          const end = new THREE.Mesh(new THREE.CylinderGeometry(18,18,4,20),makeMaterial(0xd0a06b));
+          end.rotation.z=Math.PI/2; end.position.set(x,-2,1); group.add(end);
+        });
+        const stripe = addBox(78,4,3,0,9,18,0xe0b47c);
+      } else if (kind === "arch") {
+        addBox(20,110,22,-48,0,0,0x9c87c8); addBox(20,110,22,48,0,0,0x9c87c8); addBox(116,20,24,0,55,0,0x7561a6);
+      } else if (kind === "barrier") {
+        addBox(124,64,28,0,0,0,0xd66c6a); addBox(132,12,34,0,34,0,0xf0b6a0); addBox(14,34,18,-42,-49,0,0x4b3045); addBox(14,34,18,42,-49,0,0x4b3045);
+      } else {
+        addBox(104,76,72,0,0,0,0xb96a69); addBox(112,12,80,0,42,0,0xe2aa8c); addBox(12,72,6,0,0,38,0x8d4d61);
+      }
+      return group;
+    };
 
     const g = {
       running: false, paused: false, over: false, distance: 0, speed: 0.34, spawn: 4.6, chase: 0, scoreTick: -1, coinCount: 0,
@@ -110,6 +169,7 @@ export default function MamahNgamukPage() {
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
+      renderer.setSize(rect.width, rect.height, false);
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.max(1, Math.round(rect.width * dpr));
       canvas.height = Math.max(1, Math.round(rect.height * dpr));
@@ -409,6 +469,27 @@ export default function MamahNgamukPage() {
       g.lastTime = time;
       update(dt);
       draw(time);
+      const activeMeshes = new Set();
+      g.items.forEach((item) => {
+        if (item.kind === "coin" || item.z < -0.08 || item.z > 1.15) return;
+        let mesh = obstacleMeshes.get(item);
+        if (!mesh) {
+          mesh = makeObstacle(item.kind);
+          scene3d.add(mesh);
+          obstacleMeshes.set(item, mesh);
+        }
+        activeMeshes.add(item);
+        const z = Math.max(0, item.z);
+        const scale = 0.25 + z * 0.95;
+        const screenX = laneX(item.lane, z);
+        const screenY = 480 + z * z * 1010;
+        mesh.position.set(screenX, H - screenY, 70 + z * 80);
+        mesh.scale.setScalar(scale);
+      });
+      for (const [item, mesh] of obstacleMeshes) {
+        if (!activeMeshes.has(item)) { scene3d.remove(mesh); obstacleMeshes.delete(item); }
+      }
+      renderer.render(scene3d, camera3d);
       rafRef.current = requestAnimationFrame(frame);
     };
 
@@ -432,6 +513,8 @@ export default function MamahNgamukPage() {
       window.removeEventListener("keydown", key);
       gameRef.current = null;
       sheetRef.current = null;
+      obstacleMeshes.forEach((mesh) => { scene3d.remove(mesh); mesh.traverse((child) => { if (child.geometry) child.geometry.dispose(); if (child.material) { if (Array.isArray(child.material)) child.material.forEach((m) => m.dispose()); else child.material.dispose(); } }); });
+      renderer.dispose();
     };
   }, [move, tone]);
 
@@ -466,6 +549,7 @@ export default function MamahNgamukPage() {
   return (
     <main className="mamah-game mini-game-screen" aria-label="Mamah Ngamuk game">
       <canvas ref={canvasRef} className="mamah-game__world" aria-label="Dunia permainan Mamah Ngamuk" onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={() => { touchRef.current = null; }} />
+      <canvas ref={threeCanvasRef} className="mamah-game__3d-world" aria-hidden="true" />
       <div className="mamah-game__vignette" aria-hidden="true" />
       {status === "loading" && <section className="mamah-screen mamah-screen--loading"><div className="mamah-loader"><span>DF</span></div><p className="mamah-brand__eyebrow">DAJJAL FAMILY · GAMING UNIVERSE</p><h1 className="mamah-logo">MAMAH <span>NGAMUK!</span></h1><p className="mamah-loading-label">MENYIAPKAN DUNIA GAME...</p></section>}
       {status === "ready" && <section className="mamah-screen mamah-screen--menu">
