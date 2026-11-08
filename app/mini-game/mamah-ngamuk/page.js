@@ -101,7 +101,7 @@ export default function MamahNgamukPage() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     const scene3d = new THREE.Scene();
-    const camera3d = new THREE.OrthographicCamera(0, W, 0, H, 0.1, 3000);
+    const camera3d = new THREE.OrthographicCamera(0, W, H, 0, 0.1, 3000);
     camera3d.position.set(W / 2, H / 2, 1800);
     camera3d.lookAt(W / 2, H / 2, 0);
     scene3d.add(new THREE.HemisphereLight(0xe8d9ff, 0x24172f, 2.1));
@@ -170,6 +170,12 @@ export default function MamahNgamukPage() {
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
       renderer.setSize(rect.width, rect.height, false);
+      const visibleWidth = H * (rect.width / Math.max(1, rect.height));
+      camera3d.left = (W - visibleWidth) / 2;
+      camera3d.right = (W + visibleWidth) / 2;
+      camera3d.top = H;
+      camera3d.bottom = 0;
+      camera3d.updateProjectionMatrix();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.max(1, Math.round(rect.width * dpr));
       canvas.height = Math.max(1, Math.round(rect.height * dpr));
