@@ -36,7 +36,7 @@ export default function MiniGamePage() {
       const gain = context.createGain();
       oscillator.type = "triangle";
       oscillator.frequency.setValueAtTime(frequency, context.currentTime);
-      gain.gain.setValueAtTime(0.012, context.currentTime);
+      gain.gain.setValueAtTime(0.04, context.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
       oscillator.connect(gain);
       gain.connect(context.destination);
