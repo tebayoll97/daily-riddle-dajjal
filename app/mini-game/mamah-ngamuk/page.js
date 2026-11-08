@@ -471,23 +471,6 @@ export default function MamahNgamukPage() {
         ctx.restore();
       }
 
-      if (g.caught) {
-        const pulse = 1 + Math.sin(time / 75) * .045;
-        ctx.save();
-        ctx.translate(W / 2, 255);
-        ctx.scale(pulse, pulse);
-        ctx.fillStyle = "rgba(19,10,30,.88)";
-        ctx.strokeStyle = "#ffd48b";
-        ctx.lineWidth = 6;
-        ctx.beginPath(); ctx.roundRect(-230,-48,460,96,28); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = "#fff2cf";
-        ctx.font = "1000 42px system-ui";
-        ctx.textAlign = "center";
-        ctx.shadowColor = "#ff8b4b"; ctx.shadowBlur = 18;
-        ctx.fillText("PULANG! MANDI!",0,14);
-        ctx.restore();
-      }
-
       // Chase pressure glow at the lower edge.
       const pressure = Math.min(1, g.chase);
       if (pressure > 0.02) {
