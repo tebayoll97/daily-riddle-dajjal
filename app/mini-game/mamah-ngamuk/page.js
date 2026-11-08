@@ -389,7 +389,7 @@ export default function MamahNgamukPage() {
           const cellSize = 512;
           const cellStep = 544;
           const [col, row] = atlasCell;
-          const spriteSize = 190 * scale;
+          const spriteSize = 152 * scale; // 20% smaller than the previous 190px size.
           ctx.drawImage(
             obstacleAtlas,
             col * cellStep, row * cellStep, cellSize, cellSize,
@@ -398,8 +398,8 @@ export default function MamahNgamukPage() {
         } else if (["mbg", "kopdes", "sedotwc", "jenazah", "sawit", "lpg"].includes(item.kind)) {
           const truck = ["kopdes", "sedotwc", "sawit", "lpg"].includes(item.kind);
           const van = item.kind === "mbg" || item.kind === "jenazah";
-          const cw = w * (truck ? 1.72 : van ? 1.55 : 1.42);
-          const ch = h * (truck ? 2.05 : van ? 1.9 : 1.72);
+          const cw = w * (truck ? 1.72 : van ? 1.55 : 1.42) * 0.8;
+          const ch = h * (truck ? 2.05 : van ? 1.9 : 1.72) * 0.8;
           const body = item.kind === "mbg" ? "#4b9b54" : item.kind === "kopdes" ? "#d94b43" : item.kind === "sedotwc" ? "#e2b83f" : item.kind === "jenazah" ? "#20232b" : item.kind === "sawit" ? "#d99c2b" : "#4b9c43";
           ctx.fillStyle="#11151c"; ctx.beginPath(); ctx.ellipse(0,3*scale,cw*.62,ch*.12,0,0,Math.PI*2); ctx.fill();
           ctx.fillStyle="#171c25"; ctx.fillRect(-cw*.46,-ch*.16,cw*.18,ch*.46); ctx.fillRect(cw*.28,-ch*.16,cw*.18,ch*.46);
@@ -562,7 +562,7 @@ export default function MamahNgamukPage() {
       g.elapsed += dt;
       const difficulty = Math.min(1, g.distance / 100000);
       // Vehicle movement speed rises linearly: Wave 1 = 1x, Wave 2 = 2x, Wave 3 = 3x...
-      const waveSpeedMultipliers = [1, 1, 2.5, 3, 3.5];
+      const waveSpeedMultipliers = [1, 1.5, 2, 2.5, 3];
       g.carSpeed = baseRunSpeed * (waveSpeedMultipliers[Math.min(g.waveIndex, 4)] || 3.5);
       const reachedWave = WAVE_STAGES[g.waveIndex + 1];
       if (reachedWave && g.distance >= reachedWave.at) {
