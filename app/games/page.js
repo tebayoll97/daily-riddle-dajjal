@@ -171,15 +171,15 @@ export default function GamesPage() {
               <h3 className="text-xl font-black text-white">RUN & JUMP</h3>
               <p className="mt-1 max-w-xl text-xs leading-relaxed text-gray-400">Lari tanpa henti bersama karakter universe kita. Lompat, hindari rintangan, dan pecahkan rekor jarakmu.</p>
             </div>
-            <button type="button" onClick={() => router.push("/mini-game")} className="w-full shrink-0 rounded-xl bg-purple-600 px-6 py-3 text-xs font-black tracking-wider text-white transition hover:bg-purple-500 active:scale-[.98] sm:w-auto">PLAY MINI GAME →</button>
+            <button type="button" onClick={() => router.push("/mini-game/run-jump")} className="w-full shrink-0 rounded-xl bg-purple-600 px-6 py-3 text-xs font-black tracking-wider text-white transition hover:bg-purple-500 active:scale-[.98] sm:w-auto">PLAY MINI GAME →</button>
           </article>
           <article className="mt-3 flex flex-col items-start gap-4 rounded-2xl border border-amber-300/20 bg-gradient-to-r from-[#2a2119] to-[#14101d] p-5 sm:flex-row sm:items-center sm:justify-between ui-card">
             <div>
               <p className="mb-1 text-[9px] font-black tracking-[.2em] text-amber-300">NEW · 2.5D ENDLESS RUNNER</p>
-              <h3 className="text-xl font-black text-white">MAMA&apos;S CHASE</h3>
-              <p className="mt-1 max-w-xl text-xs leading-relaxed text-gray-400">Anak Dajjal berlari menghindari rintangan dan mengumpulkan koin, sementara Mama Veylora mengejar sambil membawa sapu!</p>
+              <h3 className="text-xl font-black text-white">MAMAH NGAMUK</h3>
+              <p className="mt-1 max-w-xl text-xs leading-relaxed text-gray-400">Anak Dajjal berlari menghindari rintangan dan mengumpulkan koin, sementara Mamah Veylora mengejar sambil membawa sapu!</p>
             </div>
-            <button type="button" onClick={() => router.push("/universe-runner")} className="ui-interactive w-full shrink-0 rounded-xl bg-amber-600 px-6 py-3 text-xs font-black tracking-wider text-white transition hover:bg-amber-500 active:scale-[.98] sm:w-auto">PLAY MAMA&apos;S CHASE →</button>
+            <button type="button" onClick={() => router.push("/mini-game/mamah-ngamuk")} className="ui-interactive w-full shrink-0 rounded-xl bg-amber-600 px-6 py-3 text-xs font-black tracking-wider text-white transition hover:bg-amber-500 active:scale-[.98] sm:w-auto">PLAY MAMAH NGAMUK →</button>
           </article>
         </section>
 
