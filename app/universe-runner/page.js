@@ -361,7 +361,7 @@ export default function UniverseRunnerPage() {
 
         <header className="text-center">
           <p className="ui-eyebrow">DAJJAL FAMILY · ARCADE</p>
-          <h1 className="ui-title text-center">MAMA'S <span className="text-purple-300">CHASE</span></h1>
+          <h1 className="ui-title text-center">MAMA&apos;S <span className="text-purple-300">CHASE</span></h1>
           <p className="ui-subtitle mx-auto text-center">Anak Dajjal kabur! Mama Veylora mengejar sambil membawa sapu. Jangan sampai tertangkap! 😂</p>
         </header>
 
@@ -392,7 +392,7 @@ export default function UniverseRunnerPage() {
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <div className="rounded-xl border border-white/8 bg-white/[.025] p-3 text-center"><p className="text-[9px] font-bold tracking-wider text-gray-500">RUNNER</p><p className="mt-1 text-xs font-bold text-purple-100">ANAK DAJJAL</p></div>
           <div className="rounded-xl border border-white/8 bg-white/[.025] p-3 text-center"><p className="text-[9px] font-bold tracking-wider text-gray-500">CHASER</p><p className="mt-1 text-xs font-bold text-purple-100">MAMA VEYLORA</p></div>
-          <div className="rounded-xl border border-white/8 bg-white/[.025] p-3 text-center"><p className="text-[9px] font-bold tracking-wider text-gray-500">SPECIAL ITEM</p><p className="mt-1 text-xs font-bold text-purple-100">🧹 MAMA'S BROOM</p></div>
+          <div className="rounded-xl border border-white/8 bg-white/[.025] p-3 text-center"><p className="text-[9px] font-bold tracking-wider text-gray-500">SPECIAL ITEM</p><p className="mt-1 text-xs font-bold text-purple-100">🧹 MAMA&apos;S BROOM</p></div>
         </div>
         <p className="text-center text-[10px] tracking-wider text-gray-600">DAJJAL FAMILY · GAMING UNIVERSE</p>
       </div>
