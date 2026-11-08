@@ -813,3 +813,28 @@ main :is(.ui-subtitle,.ui-section-subtitle) {
     border-radius: 11px;
   }
 }
+
+
+/* Immersive mini-game viewport: lock document scrolling while a game is open. */
+html:has(.mini-game-screen),
+body:has(.mini-game-screen) {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden !important;
+  overscroll-behavior: none;
+  touch-action: pan-x pan-y;
+}
+body:has(.mini-game-screen) > * { min-height: 0; }
+.mini-game-screen {
+  isolation: isolate;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+.mini-game-screen :is(button, a) { flex-shrink: 0; }
+@media (max-height: 720px) {
+  .mini-game-screen { gap: .35rem !important; }
+  .mini-game-screen > div { gap: .35rem !important; }
+  .mini-game-screen .ui-title { padding-block: .4rem !important; }
+  .mini-game-screen .ui-subtitle { margin-top: .25rem !important; }
+}
