@@ -543,14 +543,14 @@ export default function MamahNgamukPage() {
       g.environmentDistance += baseRunSpeed * dt;
       g.elapsed += dt;
       const difficulty = Math.min(1, g.distance / 100000);
-      const waveCarSpeed = baseRunSpeed * Math.pow(2, g.waveIndex);
-      g.carSpeed = waveCarSpeed;
+      // Vehicle movement speed rises linearly: Wave 1 = 1x, Wave 2 = 2x, Wave 3 = 3x...
+      g.carSpeed = baseRunSpeed * (g.waveIndex + 1);
       const reachedWave = WAVE_STAGES[g.waveIndex + 1];
       if (reachedWave && g.distance >= reachedWave.at) {
         g.waveIndex += 1;
         setWaveNotice(reachedWave.alert);
         window.clearTimeout(waveNoticeTimerRef.current);
-        waveNoticeTimerRef.current = window.setTimeout(() => setWaveNotice(""), 2000);
+        waveNoticeTimerRef.current = window.setTimeout(() => setWaveNotice(""), 4000);
         tone(740, .12);
         window.setTimeout(() => tone(980, .16), 115);
       }
@@ -561,29 +561,22 @@ export default function MamahNgamukPage() {
       p.slide = 0;
       g.spawn -= dt * 0.001;
       if (g.spawn <= 0) {
-        // Traffic patterns: cars occupy lanes, always leaving a clear route.
-        const intensity = difficulty;
-        // Each wave creates multi-car traffic bursts. Every depth row leaves at least
-        // one lane open, while staggered rows can occupy all three lanes over time.
+        // Exact vehicle count rises by one each wave: 2, 3, 4, 5, 6...
+        // One vehicle is placed per staggered row; the safe gap zigzags across lanes.
         const safeLane = LANES[Math.floor(Math.random() * LANES.length)];
         const vehicleKinds = ["sedan", "taxi", "van", "truck", "bus"];
-        const burstRows = intensity < .2 ? 1 : intensity < .42 ? 2 : intensity < .68 ? 3 : 4;
-        const rowSpacing = .16 + intensity * .035;
+        const vehicleCount = 2 + g.waveIndex;
+        const rowSpacing = Math.max(.125, .18 - g.waveIndex * .008);
         const pattern = [];
-        for (let row = 0; row < burstRows; row++) {
-          const safeLaneIndex = LANES.indexOf(safeLane);
-          // Move the safe gap between left, center and right on consecutive rows.
+        const safeLaneIndex = LANES.indexOf(safeLane);
+        for (let row = 0; row < vehicleCount; row++) {
           const rowSafeLane = LANES[(safeLaneIndex + row) % LANES.length];
-          const rowLanes = LANES.filter((lane) => lane !== rowSafeLane);
-          // Early waves usually use one vehicle per row; later waves fill both blocked lanes.
-          const fillBoth = intensity > .24 && Math.random() < (.28 + intensity * .62);
-          const selectedLanes = fillBoth ? rowLanes : [rowLanes[Math.floor(Math.random() * rowLanes.length)]];
-          selectedLanes.forEach((lane) => {
-            pattern.push({
-              lane,
-              kind: vehicleKinds[Math.floor(Math.random() * vehicleKinds.length)],
-              z: -row * rowSpacing - (Math.random() * .035),
-            });
+          const blockedLanes = LANES.filter((lane) => lane !== rowSafeLane);
+          const vehicleLane = blockedLanes[Math.floor(Math.random() * blockedLanes.length)];
+          pattern.push({
+            lane: vehicleLane,
+            kind: vehicleKinds[Math.floor(Math.random() * vehicleKinds.length)],
+            z: -row * rowSpacing - Math.random() * .025,
           });
         }
         pattern.forEach((item) => g.items.push({ ...item, resolved:false }));
@@ -595,9 +588,10 @@ export default function MamahNgamukPage() {
             g.items.push({ lane:coinLane, z:-.10-i*.075, kind:"coin", resolved:false });
           }
         }
-        // More traffic waves per minute and higher approach speed in later stages.
-        const spawnGap = Math.max(1.15, 3.65 - intensity * 2.5);
-        g.spawn = spawnGap + Math.random() * (.32 - intensity * .12);
+        // Vehicle arrival frequency rises by 0.5x per wave: 1x, 1.5x, 2x, 2.5x...
+        const arrivalRateMultiplier = 1 + g.waveIndex * .5;
+        const spawnGap = 3.2 / arrivalRateMultiplier;
+        g.spawn = spawnGap + Math.random() * .18;
       }
       g.items.forEach((item) => { item.prevZ = item.z; item.z += g.carSpeed * dt * .00105; });
       g.items = g.items.filter((item) => item.z < 1.12);
