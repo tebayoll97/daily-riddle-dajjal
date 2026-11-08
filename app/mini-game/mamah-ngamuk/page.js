@@ -16,7 +16,7 @@ export default function MamahNgamukPage() {
   const soundRef = useRef(true);
   const audioRef = useRef(null);
   const touchRef = useRef(null);
-  const [status, setStatus] = useState("ready");
+  const [status, setStatus] = useState("loading");
   const [score, setScore] = useState(0);
   const [coins, setCoins] = useState(0);
   const [best, setBest] = useState(0);
@@ -96,8 +96,14 @@ export default function MamahNgamukPage() {
     gameRef.current = g;
 
     const sheet = new Image();
-    sheet.onload = () => { sheetRef.current = sheet; };
-    sheet.onerror = () => { sheetRef.current = null; };
+    let bootFallback;
+    const finishBoot = () => {
+      window.clearTimeout(bootFallback);
+      setStatus("ready");
+    };
+    bootFallback = window.setTimeout(finishBoot, 1400);
+    sheet.onload = () => { sheetRef.current = sheet; finishBoot(); };
+    sheet.onerror = () => { sheetRef.current = null; finishBoot(); };
     sheet.src = "/universe-characters.png";
 
     const resize = () => {
@@ -105,7 +111,10 @@ export default function MamahNgamukPage() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.max(1, Math.round(rect.width * dpr));
       canvas.height = Math.max(1, Math.round(rect.height * dpr));
-      ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+      const scale = Math.max(canvas.width / W, canvas.height / H);
+      const offsetX = (canvas.width - W * scale) / 2;
+      const offsetY = (canvas.height - H * scale) / 2;
+      ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
     };
 
     const laneX = (lane, z) => W / 2 + lane * (38 + z * 148);
@@ -331,6 +340,7 @@ export default function MamahNgamukPage() {
     window.addEventListener("keydown", key);
     return () => {
       cancelAnimationFrame(rafRef.current);
+      window.clearTimeout(bootFallback);
       observer.disconnect();
       window.removeEventListener("keydown", key);
       gameRef.current = null;
@@ -370,6 +380,7 @@ export default function MamahNgamukPage() {
     <main className="mamah-game mini-game-screen" aria-label="Mamah Ngamuk game">
       <canvas ref={canvasRef} className="mamah-game__world" aria-label="Dunia permainan Mamah Ngamuk" onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={() => { touchRef.current = null; }} />
       <div className="mamah-game__vignette" aria-hidden="true" />
+      {status === "loading" && <section className="mamah-screen mamah-screen--loading"><div className="mamah-loader"><span>DF</span></div><p className="mamah-brand__eyebrow">DAJJAL FAMILY · GAMING UNIVERSE</p><h1 className="mamah-logo">MAMAH <span>NGAMUK!</span></h1><p className="mamah-loading-label">MENYIAPKAN DUNIA GAME...</p></section>}
       {status === "ready" && <section className="mamah-screen mamah-screen--menu">
         <div className="mamah-brand"><span className="mamah-brand__eyebrow">DAJJAL FAMILY · GAMING UNIVERSE</span><h1 className="mamah-logo">MAMAH <span>NGAMUK!</span></h1><p className="mamah-tagline">ANAK DAJJAL KABUR. MAMAH VEYLORA MENGEJAR!</p></div>
         <div className="mamah-menu-card"><div className="mamah-menu-card__coin">🪙 <strong>{coins}</strong></div><button type="button" className="mamah-button mamah-button--primary" onClick={start}>▶ MULAI MAIN</button><button type="button" className="mamah-button" onClick={() => setSettingsOpen(true)}>⚙ PENGATURAN</button><button type="button" className="mamah-button mamah-button--quiet" onClick={() => setConfirmExit(true)}>↩ KELUAR KE GAME LIBRARY</button></div>
