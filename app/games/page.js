@@ -160,6 +160,21 @@ export default function GamesPage() {
           </article>
         </section>
 
+        <section className="mb-8">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-purple-400 shadow-[0_0_10px_rgba(168,85,247,.7)]" />
+            <h2 className="text-[10px] font-bold tracking-[0.25em] text-purple-200 ui-section-title">ARCADE MINI GAME</h2>
+          </div>
+          <article className="flex flex-col items-start gap-4 rounded-2xl border border-purple-400/25 bg-gradient-to-r from-[#211532] to-[#11101e] p-5 sm:flex-row sm:items-center sm:justify-between ui-card">
+            <div>
+              <p className="mb-1 text-[9px] font-black tracking-[.2em] text-purple-300">NEW · PLAYABLE NOW</p>
+              <h3 className="text-xl font-black text-white">RUN & JUMP</h3>
+              <p className="mt-1 max-w-xl text-xs leading-relaxed text-gray-400">Lari tanpa henti bersama karakter universe kita. Lompat, hindari rintangan, dan pecahkan rekor jarakmu.</p>
+            </div>
+            <button type="button" onClick={() => router.push("/mini-game")} className="w-full shrink-0 rounded-xl bg-purple-600 px-6 py-3 text-xs font-black tracking-wider text-white transition hover:bg-purple-500 active:scale-[.98] sm:w-auto">PLAY MINI GAME →</button>
+          </article>
+        </section>
+
         <section>
           <div className="mb-3 flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-gray-500" />
