@@ -222,21 +222,16 @@ export default function MamahNgamukPage() {
             ctx.fillStyle = "rgba(255,255,255,.22)";
             ctx.fillRect(-size * .68, -size * 1.22, size * 1.36, size * .06);
           } else {
-            ctx.fillStyle = "#dc6c69";
-            ctx.fillRect(-size * .7, -size * .75, size * 1.4, size * .75);
-            ctx.fillStyle = "#f7c2a2";
-            ctx.fillRect(-size * .7, -size * .75, size * 1.4, size * .14);
-            ctx.fillStyle = "#4a3044";
-            ctx.fillRect(-size * .55, -size * .1, size * .16, size * .48);
-            ctx.fillRect(size * .39, -size * .1, size * .16, size * .48);
-            ctx.fillStyle = "#b8a7d5";
-            ctx.beginPath(); ctx.moveTo(0, -size); ctx.lineTo(size * .72, 0); ctx.lineTo(-size * .72, 0); ctx.closePath(); ctx.fill();
-            ctx.fillStyle = "#8573a7";
-            ctx.beginPath(); ctx.moveTo(size*.72,0); ctx.lineTo(size*.9,-size*.12); ctx.lineTo(size*.18,-size*1.12); ctx.lineTo(0,-size); ctx.closePath(); ctx.fill();
-            ctx.fillStyle = "rgba(255,255,255,.3)";
-            ctx.beginPath(); ctx.moveTo(0,-size); ctx.lineTo(size*.72,0); ctx.lineTo(-size*.72,0); ctx.closePath(); ctx.stroke();
-            ctx.fillStyle = "#7d6b9d";
-            ctx.fillRect(-size * .62, -size * .18, size * 1.24, size * .18);
+            // Crate: front face, shaded side and top plane for a simple 2.5D cube.
+            ctx.fillStyle = "#b96a69";
+            ctx.fillRect(-size * .62, -size * .82, size * 1.24, size * .82);
+            ctx.fillStyle = "#8d4d61";
+            ctx.beginPath(); ctx.moveTo(size*.62,-size*.82); ctx.lineTo(size*.82,-size*.65); ctx.lineTo(size*.82,size*.02); ctx.lineTo(size*.62,0); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = "#f2b4a1";
+            ctx.beginPath(); ctx.moveTo(-size*.62,-size*.82); ctx.lineTo(-size*.42,-size); ctx.lineTo(size*.82,-size*.82); ctx.lineTo(size*.62,-size*.65); ctx.closePath(); ctx.fill();
+            ctx.strokeStyle = "rgba(255,255,255,.32)";
+            ctx.lineWidth = Math.max(1,size*.045);
+            ctx.strokeRect(-size*.52,-size*.7,size*1.04,size*.58);
           }
           ctx.restore();
         }
