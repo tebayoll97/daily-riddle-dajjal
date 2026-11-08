@@ -245,3 +245,71 @@
   touch-action:manipulation;
 }
 .mamah-game-actions button:active { transform:translateY(1px) scale(.96); }
+
+/* HOME SCREEN — full-screen menu layout */
+.mamah-screen--menu {
+  justify-content:flex-start;
+  gap:clamp(8px,1.8vh,16px);
+  padding: max(12px,env(safe-area-inset-top)) 18px max(10px,env(safe-area-inset-bottom));
+  overflow:hidden;
+  background:
+    radial-gradient(ellipse at 50% 40%,rgba(112,65,161,.22),transparent 48%),
+    linear-gradient(180deg,rgba(8,5,20,.30),rgba(8,5,20,.72));
+}
+.mamah-home-header { width:min(100%,470px); display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.mamah-home-header .mamah-brand__eyebrow { font-size:clamp(8px,2.2vw,10px); letter-spacing:.14em; text-align:left; }
+.mamah-sound-toggle { flex:0 0 auto; padding:7px 10px; border:1px solid #d7b7ff66; border-radius:999px; color:#f4eaff; background:#211632c9; font-size:9px; font-weight:1000; letter-spacing:.08em; }
+.mamah-home-title { width:min(100%,460px); text-align:center; }
+.mamah-home-title .mamah-logo { margin:4px 0 3px; font-size:clamp(40px,10.8vw,68px); }
+.mamah-home-title .mamah-tagline { margin:6px 0 0; color:#f6d9ff; font-size:clamp(9px,2.5vw,11px); letter-spacing:.15em; }
+.mamah-home-hero { position:relative; display:flex; align-items:center; justify-content:center; width:min(100%,440px); min-height:clamp(170px,27vh,270px); flex:1 1 auto; max-height:310px; overflow:hidden; border:1px solid rgba(226,190,255,.22); border-radius:28px; background:radial-gradient(ellipse at 50% 75%,rgba(255,168,91,.25),transparent 48%),linear-gradient(145deg,rgba(65,43,99,.66),rgba(15,11,32,.44)); box-shadow:inset 0 1px rgba(255,255,255,.15),0 12px 30px rgba(0,0,0,.28); }
+.mamah-home-hero:before { content:""; position:absolute; inset:auto -12% -32% -12%; height:60%; transform:perspective(140px) rotateX(28deg); background:repeating-linear-gradient(90deg,transparent 0 19%,rgba(255,218,151,.22) 19.5% 20%,transparent 20.5% 39%); border-top:1px solid #f5c88c55; }
+.mamah-hero-mama,.mamah-hero-child { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; filter:drop-shadow(0 10px 8px rgba(0,0,0,.4)); }
+.mamah-hero-mama { transform:translate(10px,5px) rotate(-5deg); }
+.mamah-hero-child { z-index:2; transform:translate(-4px,24px) rotate(5deg); }
+.mamah-hero-face { display:grid; width:clamp(86px,25vw,130px); aspect-ratio:1; place-items:center; border:3px solid rgba(255,255,255,.72); border-radius:42% 48% 45% 46%; background:linear-gradient(145deg,#fff0d9,#d9b7ff); box-shadow:inset 0 -8px 15px #573a7044,0 7px 0 #432b63; font-size:clamp(54px,16vw,88px); }
+.mamah-hero-child .mamah-hero-face { width:clamp(78px,22vw,116px); background:linear-gradient(145deg,#fff1d4,#ffc5b6); }
+.mamah-hero-mama small,.mamah-hero-child small { padding:4px 8px; border:1px solid #fff4; border-radius:999px; color:#fff; background:#211632d9; font-size:8px; font-weight:1000; letter-spacing:.1em; white-space:nowrap; }
+.mamah-hero-broom { position:absolute; z-index:3; top:-7px; left:-24px; font-size:clamp(38px,10vw,52px); transform:rotate(-35deg); filter:drop-shadow(0 3px 4px #0008); }
+.mamah-hero-speed { position:absolute; color:#ffcf70; font-size:42px; text-shadow:0 0 20px #ffb54b; animation:mamah-pulse 1.2s ease-in-out infinite; }
+.mamah-hero-speed--left { left:8%; top:18%; }
+.mamah-hero-speed--right { right:8%; bottom:20%; animation-delay:.5s; }
+.mamah-home-bottom { width:min(100%,440px); display:flex; flex-direction:column; gap:clamp(7px,1.3vh,12px); flex:0 0 auto; }
+.mamah-home-record { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.mamah-home-record>div { display:flex; flex-direction:column; gap:4px; padding:9px 12px; border:1px solid #e5c9ff45; border-radius:13px; background:rgba(18,12,34,.78); text-align:left; }
+.mamah-home-record small { color:#cbb2e9; font-size:8px; font-weight:1000; letter-spacing:.13em; }
+.mamah-home-record strong { color:#ffe18a; font:1000 clamp(15px,4vw,19px)/1 ui-monospace,monospace; }
+.mamah-home-record i { color:#e9d9ff; font-size:10px; font-style:normal; }
+.mamah-play-button { min-height:clamp(48px,7vh,60px); margin:0; border-radius:18px; font-size:clamp(15px,4vw,18px); letter-spacing:.12em; animation:mamah-play-pulse 1.8s ease-in-out infinite; }
+.mamah-home-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; }
+.mamah-home-grid button { display:flex; min-width:0; min-height:66px; flex-direction:column; align-items:center; justify-content:center; gap:5px; padding:7px 3px; border:1px solid rgba(224,190,255,.34); border-radius:14px; color:#f4eaff; background:linear-gradient(155deg,rgba(62,43,91,.94),rgba(21,15,37,.96)); box-shadow:inset 0 1px rgba(255,255,255,.12),0 4px 10px #0005; font-size:clamp(7px,2vw,9px); font-weight:1000; letter-spacing:.04em; }
+.mamah-home-grid button:active { transform:translateY(2px); }
+.mamah-home-grid button span { font-size:22px; line-height:1; }
+.mamah-home-bottom .mamah-menu-hint { max-width:none; margin:0; font-size:8px; letter-spacing:.07em; }
+.mamah-exit-link { align-self:center; color:#b9a6d0; font-size:8px; font-weight:900; letter-spacing:.12em; text-decoration:underline; text-underline-offset:3px; }
+.mamah-menu-panel { max-height: min(78dvh,620px); overflow:auto; }
+.mamah-panel-stat { display:flex; align-items:center; justify-content:space-between; margin:14px 0; padding:15px; border:1px solid #ffdc8b66; border-radius:14px; background:#251a37; color:#e7d5f8; font-size:10px; font-weight:900; }
+.mamah-panel-stat strong { color:#ffe18a; font:1000 19px ui-monospace,monospace; }
+.mamah-howto-row { display:flex; align-items:center; gap:14px; margin:10px 0; padding:11px; border:1px solid #ffffff22; border-radius:13px; background:#120d20aa; color:#fff; text-align:left; font-size:11px; font-weight:1000; letter-spacing:.06em; }
+.mamah-howto-row>b { display:grid; width:38px; height:38px; flex:0 0 38px; place-items:center; border-radius:11px; color:#351a09; background:linear-gradient(#fff0a8,#ffbd42); font-size:21px; }
+.mamah-howto-row small { color:#cdbadd; font-size:10px; font-weight:600; letter-spacing:0; }
+.mamah-achievement { display:flex; align-items:center; gap:10px; margin:10px 0; padding:11px; border:1px solid #ffffff22; border-radius:13px; background:#120d20aa; text-align:left; }
+.mamah-achievement>span { font-size:25px; }
+.mamah-achievement div { display:flex; flex:1; flex-direction:column; gap:3px; }
+.mamah-achievement b { color:#fff; font-size:10px; }
+.mamah-achievement small { color:#cdbadd; font-size:9px; }
+.mamah-achievement strong { color:#ffe18a; font-size:8px; }
+@keyframes mamah-play-pulse { 50% { transform:scale(1.018); filter:brightness(1.08); } }
+@media (max-height:700px) {
+ .mamah-screen--menu { gap:7px; padding-top:max(8px,env(safe-area-inset-top)); padding-bottom:max(7px,env(safe-area-inset-bottom)); }
+ .mamah-home-title .mamah-logo { font-size:clamp(34px,8vw,48px); }
+ .mamah-home-hero { min-height:130px; max-height:180px; }
+ .mamah-hero-face { width:75px; font-size:48px; }
+ .mamah-hero-child .mamah-hero-face { width:68px; }
+ .mamah-home-grid button { min-height:55px; }
+ .mamah-home-grid button span { font-size:18px; }
+ .mamah-home-bottom { gap:6px; }
+ .mamah-home-record>div { padding:7px 10px; }
+ .mamah-menu-hint { display:block; }
+}
+@media (prefers-reduced-motion:reduce) { .mamah-play-button,.mamah-hero-speed { animation:none; } }
