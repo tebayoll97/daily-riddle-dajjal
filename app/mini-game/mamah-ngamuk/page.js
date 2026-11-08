@@ -566,7 +566,7 @@ export default function MamahNgamukPage() {
         const safeLane = LANES[Math.floor(Math.random() * LANES.length)];
         const vehicleKinds = ["sedan", "taxi", "van", "truck", "bus"];
         const vehicleCount = 2 + g.waveIndex;
-        const rowSpacing = Math.max(.125, .18 - g.waveIndex * .008);
+        const rowSpacing = Math.max(.25, (.18 - g.waveIndex * .008) * 2);
         const pattern = [];
         const safeLaneIndex = LANES.indexOf(safeLane);
         for (let row = 0; row < vehicleCount; row++) {
