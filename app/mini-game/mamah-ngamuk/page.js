@@ -188,7 +188,8 @@ export default function MamahNgamukPage() {
 
     const drawChildSprite = (row, x, y, width, height, frame = 0) => {
       const sprite = childSheetRef.current;
-      if (sprite?.complete && sprite.naturalWidth >= 2048 && sprite.naturalHeight >= 1536) {
+      if (sprite?.complete && sprite.naturalWidth > 0 && sprite.naturalHeight > 0) {
+        // Use the authored 8 × 6 atlas grid without requiring one exact export resolution.
         const cellW = sprite.naturalWidth / 8;
         const cellH = sprite.naturalHeight / 6;
         const col = Math.max(0, Math.min(7, frame));
@@ -338,13 +339,15 @@ export default function MamahNgamukPage() {
       const px = laneX(player.lane, 1); // Lane 0 is the exact road center at game start.
       const bounce = g.running && player.jump <= 0 && player.slide <= 0 ? Math.sin(time / 65) * 4 : 0;
       // Mama Veylora stays behind the child; her broom swings while she runs.
-      const mamaY = (g.caught ? 1240 : 1165) + Math.sin(time / 150) * 3;
-      const mamaDrawn = drawSprite(2, W / 2, mamaY, 82, 104, Math.floor(time / 170) % 4);
+      // Mama follows the player's lane and stays visibly behind the child on screen.
+      const mamaX = laneX(player.lane, 1);
+      const mamaY = (g.caught ? 1325 : 1460) + Math.sin(time / 150) * 3;
+      const mamaDrawn = drawSprite(2, mamaX, mamaY, 96, 122, Math.floor(time / 170) % 4);
       if (!mamaDrawn) {
-        ctx.font = "58px system-ui"; ctx.textAlign = "center"; ctx.fillText("👩🏻", px - 4, mamaY - 8);
+        ctx.font = "58px system-ui"; ctx.textAlign = "center"; ctx.fillText("👩🏻", mamaX, mamaY - 8);
       }
       ctx.save();
-      ctx.translate(W / 2 + 36, mamaY - 48);
+      ctx.translate(mamaX + 40, mamaY - 55);
       ctx.rotate(g.caught ? (-1.35 + Math.sin(time / 70) * 1.2) : Math.sin(time / 105) * .32 - .45);
       ctx.strokeStyle = "#9b6a43"; ctx.lineWidth = 7; ctx.lineCap = "round";
       ctx.beginPath(); ctx.moveTo(0, 25); ctx.lineTo(40, -28); ctx.stroke();
