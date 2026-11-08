@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 const W = 900;
-const H = 520;
+const H = 1600;
 const BEST_KEY = "mamah-ngamuk-best-v1";
 const LANES = [-1, 0, 1];
 
@@ -46,7 +46,7 @@ export default function MamahNgamukPage() {
   const start = useCallback(() => {
     const g = gameRef.current;
     if (!g) return;
-    Object.assign(g, { running: true, over: false, distance: 0, speed: 0.34, spawn: 1.1, chase: 0, scoreTick: -1, coinCount: 0 });
+    Object.assign(g, { running: true, paused: false, over: false, distance: 0, speed: 0.34, spawn: 1.1, chase: 0, scoreTick: -1, coinCount: 0 });
     Object.assign(g.player, { lane: 0, targetLane: 0, jump: 0, slide: 0 });
     g.items = [];
     setScore(0);
@@ -87,7 +87,7 @@ export default function MamahNgamukPage() {
     if (!ctx) return;
 
     const g = {
-      running: false, over: false, distance: 0, speed: 0.34, spawn: 1.1, chase: 0, scoreTick: -1, coinCount: 0,
+      running: false, paused: false, over: false, distance: 0, speed: 0.34, spawn: 1.1, chase: 0, scoreTick: -1, coinCount: 0,
       player: { lane: 0, targetLane: 0, jump: 0, slide: 0 },
       items: [],
     };
@@ -106,7 +106,7 @@ export default function MamahNgamukPage() {
       ctx.setTransform(canvas.width / W, 0, 0, canvas.width / W, 0, 0);
     };
 
-    const laneX = (lane, z) => W / 2 + lane * (36 + z * 130);
+    const laneX = (lane, z) => W / 2 + lane * (38 + z * 148);
     const drawSprite = (row, x, y, width, height, frame = 0) => {
       const s = sheetRef.current;
       if (s?.complete && s.naturalWidth > 0) {
@@ -131,38 +131,38 @@ export default function MamahNgamukPage() {
         const x = i * 78 - (g.distance * 22 % 78);
         const height = 65 + (i * 31 % 95);
         ctx.fillStyle = i % 2 ? "#211d38" : "#29213f";
-        ctx.fillRect(x, 220 - height, 48, height);
+        ctx.fillRect(x, 480 - height, 48, height);
         ctx.fillStyle = "rgba(197,166,255,.22)";
-        for (let wy = 235 - height; wy < 214; wy += 17) ctx.fillRect(x + 10, wy, 4, 5);
+        for (let wy = 495 - height; wy < 474; wy += 17) ctx.fillRect(x + 10, wy, 4, 5);
       }
 
       // Perspective road.
       ctx.fillStyle = "#171321";
       ctx.beginPath();
-      ctx.moveTo(385, 190); ctx.lineTo(515, 190); ctx.lineTo(880, H); ctx.lineTo(20, H); ctx.closePath(); ctx.fill();
+      ctx.moveTo(365, 480); ctx.lineTo(535, 480); ctx.lineTo(890, H); ctx.lineTo(10, H); ctx.closePath(); ctx.fill();
       ctx.fillStyle = "#211b30";
       ctx.beginPath();
-      ctx.moveTo(398, 190); ctx.lineTo(502, 190); ctx.lineTo(820, H); ctx.lineTo(80, H); ctx.closePath(); ctx.fill();
+      ctx.moveTo(390, 480); ctx.lineTo(510, 480); ctx.lineTo(820, H); ctx.lineTo(80, H); ctx.closePath(); ctx.fill();
       ctx.strokeStyle = "rgba(184,145,255,.5)";
       ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.moveTo(385, 190); ctx.lineTo(20, H); ctx.moveTo(515, 190); ctx.lineTo(880, H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(365, 480); ctx.lineTo(10, H); ctx.moveTo(535, 480); ctx.lineTo(890, H); ctx.stroke();
 
       // Lane dashes moving toward the player.
       for (let laneLine = 0; laneLine < 2; laneLine++) {
         for (let i = 0; i < 8; i++) {
           const z = ((i / 8) + (g.distance * 0.65 % 1)) % 1;
-          const y = 190 + z * z * 330;
-          const x = W / 2 + (laneLine ? 1 : -1) * (13 + z * 145);
+          const y = 480 + z * z * 1010;
+          const x = W / 2 + (laneLine ? 1 : -1) * (13 + z * 160);
           ctx.strokeStyle = "rgba(193,163,255,.28)";
           ctx.lineWidth = 1 + z * 3;
-          ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 8 + z * 18); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 12 + z * 34); ctx.stroke();
         }
       }
 
       // Coins and obstacles: smaller at horizon, larger near player.
       [...g.items].sort((a, b) => a.z - b.z).forEach((item) => {
         const x = laneX(item.lane, item.z);
-        const y = 190 + item.z * item.z * 330;
+        const y = 480 + item.z * item.z * 1010;
         const scale = 0.25 + item.z * 0.95;
         if (item.kind === "coin") {
           ctx.save();
@@ -205,13 +205,13 @@ export default function MamahNgamukPage() {
       const px = laneX(player.lane, 1);
       const bounce = g.running && player.jump <= 0 && player.slide <= 0 ? Math.sin(time / 65) * 4 : 0;
       // Mama Veylora stays behind the child; her broom swings while she runs.
-      const mamaY = 458 + Math.sin(time / 95) * 3;
-      const mamaDrawn = drawSprite(2, px - 4, mamaY, 76, 96, Math.floor(time / 130) % 4);
+      const mamaY = 1510 + Math.sin(time / 95) * 4;
+      const mamaDrawn = drawSprite(2, px - 12, mamaY, 110, 138, Math.floor(time / 130) % 4);
       if (!mamaDrawn) {
         ctx.font = "58px system-ui"; ctx.textAlign = "center"; ctx.fillText("👩🏻", px - 4, mamaY - 8);
       }
       ctx.save();
-      ctx.translate(px + 39, mamaY - 48);
+      ctx.translate(px + 48, mamaY - 65);
       ctx.rotate(Math.sin(time / 105) * .32 - .45);
       ctx.strokeStyle = "#9b6a43"; ctx.lineWidth = 7; ctx.lineCap = "round";
       ctx.beginPath(); ctx.moveTo(0, 25); ctx.lineTo(40, -28); ctx.stroke();
@@ -219,10 +219,10 @@ export default function MamahNgamukPage() {
       ctx.beginPath(); ctx.moveTo(40, -28); ctx.lineTo(55, -19); ctx.lineTo(48, -4); ctx.lineTo(34, -12); ctx.closePath(); ctx.fill();
       ctx.restore();
 
-      const childY = 408 - player.jump * 118;
-      const childHeight = player.slide > 0 ? 50 : 86;
-      const childWidth = player.slide > 0 ? 62 : 68;
-      const childDrawn = drawSprite(4, px, childY + bounce, childWidth, childHeight, Math.floor(time / 105) % 4);
+      const childY = 1400 - player.jump * 210;
+      const childHeight = player.slide > 0 ? 62 : 112;
+      const childWidth = player.slide > 0 ? 76 : 82;
+      const childDrawn = drawSprite(4, px, childY + bounce, childWidth * 1.18, childHeight * 1.18, Math.floor(time / 105) % 4);
       if (!childDrawn) {
         ctx.font = "62px system-ui"; ctx.textAlign = "center"; ctx.fillText("🧒", px, childY + bounce);
       }
@@ -231,7 +231,7 @@ export default function MamahNgamukPage() {
       const pressure = Math.min(1, g.chase);
       if (pressure > 0.02) {
         ctx.fillStyle = "rgba(235,83,122," + (pressure * .12) + ")";
-        ctx.fillRect(0, H - 18, W, 18);
+        ctx.fillRect(0, H - 32, W, 32);
       }
       if (!g.running) {
         ctx.fillStyle = "rgba(5,4,12,.25)";
@@ -340,6 +340,19 @@ export default function MamahNgamukPage() {
     if (audioRef.current && audioRef.current.state !== "closed") audioRef.current.close().catch(() => {});
   }, []);
 
+  const pause = () => {
+    const g = gameRef.current;
+    if (!g || !g.running) return;
+    g.paused = true;
+    setStatus("paused");
+  };
+  const resume = () => {
+    const g = gameRef.current;
+    if (!g || !g.paused) return;
+    g.paused = false;
+    setStatus("playing");
+  };
+
   const pointerDown = (event) => { touchRef.current = { x: event.clientX, y: event.clientY }; };
   const pointerUp = (event) => {
     if (!touchRef.current) return;
@@ -352,49 +365,45 @@ export default function MamahNgamukPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#080711] px-3 py-5 text-white sm:px-5 sm:py-8">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 sm:gap-5">
-        <div className="flex items-center justify-between gap-3">
-          <Link href="/mini-game" className="ui-interactive rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-xs font-bold text-purple-200">← MINI GAME</Link>
-          <button type="button" onClick={() => setSoundOn((v) => !v)} aria-pressed={soundOn} className="ui-interactive rounded-xl border border-purple-400/20 bg-purple-500/10 px-3 py-2.5 text-xs font-bold text-purple-100">{soundOn ? "♫ SOUND ON" : "♪ SOUND OFF"}</button>
+    <main className="min-h-[100svh] bg-[#080711] px-3 pb-5 pt-3 text-white sm:px-5">
+      <div className="mx-auto flex w-full max-w-[470px] flex-col gap-3">
+        <div className="flex items-center justify-between gap-2">
+          <Link href="/mini-game" className="ui-interactive rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[10px] font-black tracking-wider text-purple-200">← MINI GAMES</Link>
+          <div className="flex gap-2">
+            {status === "playing" && <button type="button" onClick={pause} className="ui-interactive rounded-xl border border-purple-300/20 bg-purple-500/10 px-3 py-2.5 text-[10px] font-black">Ⅱ PAUSE</button>}
+            {status === "paused" && <button type="button" onClick={resume} className="ui-interactive rounded-xl border border-purple-300/20 bg-purple-500/10 px-3 py-2.5 text-[10px] font-black">▶ RESUME</button>}
+            <button type="button" onClick={() => setSoundOn((v) => !v)} aria-pressed={soundOn} className="ui-interactive rounded-xl border border-purple-400/20 bg-purple-500/10 px-3 py-2.5 text-[10px] font-black text-purple-100">{soundOn ? "♫ SOUND" : "♪ MUTED"}</button>
+          </div>
         </div>
-
         <header className="text-center">
           <p className="ui-eyebrow">DAJJAL FAMILY · MINI GAME</p>
-          <h1 className="ui-title text-center">MAMAH <span className="text-purple-300">CHASE</span></h1>
-          <p className="ui-subtitle mx-auto text-center">Anak Dajjal kabur! Mamah Veylora mengejar sambil membawa sapu. Jangan sampai tertangkap! 😂</p>
+          <h1 className="ui-title text-center">MAMAH <span className="text-purple-300">NGAMUK</span></h1>
+          <p className="ui-subtitle mx-auto text-center text-xs">Anak Dajjal kabur. Mamah Veylora mengejar sambil membawa sapu!</p>
         </header>
-
-        <section className="overflow-hidden rounded-3xl border border-purple-400/20 bg-[#100d1d] p-2.5 shadow-[0_20px_70px_rgba(76,29,149,.16)] sm:p-4">
+        <section className="overflow-hidden rounded-[26px] border border-purple-400/20 bg-[#100d1d] p-2 shadow-[0_16px_55px_rgba(76,29,149,.18)]">
           <div className="mb-2 flex items-center justify-between px-1">
-            <div><p className="text-[9px] font-black tracking-[.2em] text-purple-300">SCORE</p><p className="font-mono text-2xl font-black tabular-nums">{String(score).padStart(6, "0")}</p></div>
-            <div className="text-center"><p className="text-[9px] font-black tracking-[.2em] text-amber-300">COINS</p><p className="font-mono text-xl font-black text-amber-200">🪙 {coins}</p></div>
-            <div className="text-right"><p className="text-[9px] font-black tracking-[.2em] text-gray-500">BEST</p><p className="font-mono text-xl font-bold tabular-nums text-gray-300">{String(best).padStart(6, "0")}</p></div>
+            <div><p className="text-[9px] font-black tracking-[.18em] text-purple-300">SCORE</p><p className="font-mono text-xl font-black tabular-nums">{String(score).padStart(6, "0")}</p></div>
+            <div className="text-center"><p className="text-[9px] font-black tracking-[.18em] text-amber-300">COINS</p><p className="font-mono text-lg font-black text-amber-200">🪙 {coins}</p></div>
+            <div className="text-right"><p className="text-[9px] font-black tracking-[.18em] text-gray-500">BEST</p><p className="font-mono text-lg font-bold tabular-nums text-gray-300">{String(best).padStart(6, "0")}</p></div>
           </div>
-          <div className="relative overflow-hidden rounded-2xl border border-purple-300/15 bg-[#0c0a17]">
-            <canvas ref={canvasRef} className="block aspect-[900/520] w-full touch-none" aria-label="Universe Runner. Geser kiri kanan untuk pindah jalur, ke atas untuk melompat, ke bawah untuk sliding." onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={() => { touchRef.current = null; }} />
-            {status !== "playing" && <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#080711]/50 px-4 text-center backdrop-blur-[2px]">
-              <div className="mb-2 text-4xl" aria-hidden="true">{status === "over" ? "🧹" : "🏃‍♂️"}</div>
-              <p className="text-lg font-black tracking-wide">{status === "over" ? "MAMAH CAUGHT YOU!" : "SIAP KABUR?"}</p>
-              <p className="mt-1 max-w-sm text-xs text-gray-300">{status === "over" ? "Waduh, ketahuan Mamah! Coba lari lebih jauh lagi." : "Kumpulkan koin, hindari rintangan, dan jangan sampai Mama menangkapmu."}</p>
-              <button type="button" onClick={start} className="ui-interactive mt-4 rounded-xl bg-purple-600 px-7 py-3 text-xs font-black tracking-wider shadow-lg shadow-purple-950/40 hover:bg-purple-500">{status === "over" ? "LARI LAGI" : "MULAI LARI"}</button>
+          <div className="relative mx-auto w-full overflow-hidden rounded-2xl border border-purple-300/15 bg-[#0c0a17]">
+            <canvas ref={canvasRef} className="block aspect-[9/16] w-full touch-none" aria-label="Mamah Ngamuk. Geser kiri kanan untuk pindah jalur, ke atas untuk melompat, ke bawah untuk sliding." onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={() => { touchRef.current = null; }} />
+            {status !== "playing" && <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#080711]/65 px-5 text-center backdrop-blur-[3px]">
+              <div className="mb-3 text-5xl" aria-hidden="true">{status === "over" ? "🧹" : status === "paused" ? "⏸️" : "🏃‍♂️"}</div>
+              <p className="text-xl font-black tracking-wide">{status === "over" ? "KETANGKAP MAMAH!" : status === "paused" ? "GAME PAUSED" : "SIAP KABUR?"}</p>
+              <p className="mt-2 max-w-xs text-xs leading-relaxed text-gray-300">{status === "over" ? "Waduh! Mamah berhasil menangkap Anak Dajjal. Coba lagi, jangan sampai kena sapu!" : status === "paused" ? "Istirahat sebentar. Mamah masih mengejar!" : "Kumpulkan koin, hindari rintangan, dan kabur sejauh mungkin."}</p>
+              <button type="button" onClick={status === "paused" ? resume : start} className="ui-interactive mt-5 rounded-xl bg-purple-600 px-8 py-3 text-xs font-black tracking-wider shadow-lg shadow-purple-950/40 hover:bg-purple-500">{status === "over" ? "MAIN LAGI" : status === "paused" ? "LANJUTKAN" : "MULAI LARI"}</button>
             </div>}
           </div>
-          <div className="mt-3 grid grid-cols-4 gap-2 sm:hidden">
-            <button onClick={() => move("left")} className="ui-interactive rounded-xl border border-white/10 bg-white/5 py-3 text-lg font-black">←</button>
-            <button onClick={() => move("jump")} className="ui-interactive rounded-xl border border-purple-400/25 bg-purple-500/10 py-3 text-lg font-black">↑</button>
-            <button onClick={() => move("slide")} className="ui-interactive rounded-xl border border-purple-400/25 bg-purple-500/10 py-3 text-lg font-black">↓</button>
-            <button onClick={() => move("right")} className="ui-interactive rounded-xl border border-white/10 bg-white/5 py-3 text-lg font-black">→</button>
+          <div className="mt-2 grid grid-cols-4 gap-2">
+            <button type="button" onClick={() => move("left")} aria-label="Pindah ke kiri" className="ui-interactive rounded-xl border border-white/10 bg-white/5 py-3 text-xl font-black">←</button>
+            <button type="button" onClick={() => move("jump")} aria-label="Melompat" className="ui-interactive rounded-xl border border-purple-400/25 bg-purple-500/10 py-3 text-xl font-black">↑</button>
+            <button type="button" onClick={() => move("slide")} aria-label="Merunduk" className="ui-interactive rounded-xl border border-purple-400/25 bg-purple-500/10 py-3 text-xl font-black">↓</button>
+            <button type="button" onClick={() => move("right")} aria-label="Pindah ke kanan" className="ui-interactive rounded-xl border border-white/10 bg-white/5 py-3 text-xl font-black">→</button>
           </div>
-          <p className="mt-3 text-center text-[10px] text-gray-500">SWIPE: ← → pindah jalur · ↑ lompat · ↓ sliding</p>
+          <p className="mt-2 text-center text-[9px] tracking-wide text-gray-500">SWIPE / TOMBOL: ← → pindah jalur · ↑ lompat · ↓ merunduk</p>
         </section>
-
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
-          <div className="rounded-xl border border-white/8 bg-white/[.025] p-3 text-center"><p className="text-[9px] font-bold tracking-wider text-gray-500">RUNNER</p><p className="mt-1 text-xs font-bold text-purple-100">ANAK DAJJAL</p></div>
-          <div className="rounded-xl border border-white/8 bg-white/[.025] p-3 text-center"><p className="text-[9px] font-bold tracking-wider text-gray-500">CHASER</p><p className="mt-1 text-xs font-bold text-purple-100">MAMAH VEYLORA</p></div>
-          <div className="rounded-xl border border-white/8 bg-white/[.025] p-3 text-center"><p className="text-[9px] font-bold tracking-wider text-gray-500">SPECIAL ITEM</p><p className="mt-1 text-xs font-bold text-purple-100">🧹 MAMAH BROOM</p></div>
-        </div>
-        <p className="text-center text-[10px] tracking-wider text-gray-600">DAJJAL FAMILY · GAMING UNIVERSE</p>
+        <p className="text-center text-[9px] tracking-[.16em] text-gray-600">DAJJAL FAMILY · GAMING UNIVERSE</p>
       </div>
     </main>
   );
