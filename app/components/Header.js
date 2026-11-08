@@ -218,6 +218,9 @@ export default function Header() {
   const iconButton =
     "w-10 h-10 flex items-center justify-center rounded-xl border transition-all active:scale-95";
 
+  // A running mini-game is a separate immersive experience, not a website page.
+  if (pathname?.startsWith("/mini-game/")) return null;
+
   return (
     <header className="sticky top-0 z-50 [overflow-anchor:none] border-b border-purple-500/20 bg-[#080711]/95 backdrop-blur-lg">
       <div className="max-w-6xl mx-auto px-4">
@@ -333,10 +336,7 @@ export default function Header() {
           {navLinks.map((link) => {
             const active = isActive(link.href);
 
-            // Mini-games use an immersive full-screen layout without the main website chrome.
-  if (pathname?.startsWith("/mini-game")) return null;
-
-  return (
+            return (
               <Link
                 key={link.href}
                 href={link.href}
