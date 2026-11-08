@@ -30,8 +30,10 @@ export default function MamahNgamukPage() {
   const touchRef = useRef(null);
   const catchTimerRef = useRef(null);
   const waveNoticeTimerRef = useRef(null);
+  const confirmResumeRef = useRef(false);
   const [status, setStatus] = useState("loading");
   const [score, setScore] = useState(0);
+  const [distance, setDistance] = useState(0);
   const [coins, setCoins] = useState(0);
   const [wallet, setWallet] = useState(0);
   const [confirmAction, setConfirmAction] = useState("");
@@ -124,6 +126,7 @@ export default function MamahNgamukPage() {
     Object.assign(g.player, { lane: 0, targetLane: 0, jump: 0, slide: 0 });
     g.items = [];
     setScore(0);
+    setDistance(0);
     setCoins(0);
     setDistanceResult(0);
     setStatus("playing");
@@ -503,18 +506,12 @@ export default function MamahNgamukPage() {
         ctx.fillStyle = "rgba(235,83,122," + (pressure * .12) + ")";
         ctx.fillRect(0, H - 32, W, 32);
       }
+      if (g.paused) time = g.pauseStartedAt || time;
       if (!g.running || g.paused) {
         ctx.fillStyle = "rgba(5,4,12,.25)";
         ctx.fillRect(0, 0, W, H);
       }
-      if (!g.running && !g.over) {
-        const heroFrame = Math.floor(time / 190) % 4;
-        const bob = Math.sin(time / 260) * 8;
-        const mamaReady = drawSprite(2, 340, 1030 + bob, 330, 410, heroFrame);
-        const childReady = drawSprite(4, 570, 1110 - bob * .6, 290, 360, heroFrame);
-        if (!mamaReady) { ctx.font = "190px system-ui"; ctx.textAlign = "center"; ctx.fillText("👩🏻‍🦳", 340, 1030 + bob); }
-        if (!childReady) { ctx.font = "170px system-ui"; ctx.textAlign = "center"; ctx.fillText("😭", 570, 1110 - bob * .6); }
-      }
+      // Home hero sprites are rendered from fixed atlas cells in the DOM.
     };
 
     const finish = () => {
@@ -526,6 +523,7 @@ export default function MamahNgamukPage() {
       const finalDistance = Math.floor(g.distance);
       const finalScore = finalDistance * 12 + g.coinCount * 25;
       setDistanceResult(finalDistance);
+      setDistance(finalDistance);
       setScore(finalScore);
       setCoins(g.coinCount);
       setBest((old) => {
@@ -648,6 +646,7 @@ export default function MamahNgamukPage() {
       if (scoreBucket !== g.scoreTick) {
         g.scoreTick = scoreBucket;
         setScore(points);
+        setDistance(Math.floor(g.distance));
       }
     };
 
@@ -690,22 +689,60 @@ export default function MamahNgamukPage() {
 
   const pause = () => {
     const g = gameRef.current;
-    if (!g || !g.running) return;
+    if (!g || !g.running || g.paused) return;
     g.paused = true;
+    g.pauseStartedAt = performance.now();
     stopMusic();
     setStatus("paused");
   };
+
   const resume = () => {
     const g = gameRef.current;
     if (!g || !g.paused) return;
     g.paused = false;
+    g.pauseStartedAt = 0;
+    g.lastTime = performance.now();
     startMusic();
     setStatus("playing");
   };
 
-  const goHome = () => {
+  const openConfirmAction = (action) => {
     const g = gameRef.current;
-    if (g) { g.running = false; g.paused = false; g.over = false; g.caught = false; }
+    confirmResumeRef.current = Boolean(g?.running && !g?.paused);
+    if (confirmResumeRef.current && g) {
+      g.paused = true;
+      g.pauseStartedAt = performance.now();
+      stopMusic();
+    }
+    setConfirmAction(action);
+  };
+
+  const cancelConfirmAction = () => {
+    setConfirmAction("");
+    if (!confirmResumeRef.current) return;
+    confirmResumeRef.current = false;
+    const g = gameRef.current;
+    if (g?.running && g.paused) {
+      g.paused = false;
+      g.pauseStartedAt = 0;
+      g.lastTime = performance.now();
+      setStatus("playing");
+      startMusic();
+    }
+  };
+
+  const confirmCurrentAction = () => {
+    const action = confirmAction;
+    confirmResumeRef.current = false;
+    setConfirmAction("");
+    if (action === "restart") start();
+    else if (action === "home") goHome();
+  };
+
+  const goHome = () => {
+    confirmResumeRef.current = false;
+    const g = gameRef.current;
+    if (g) { g.running = false; g.paused = false; g.pauseStartedAt = 0; g.over = false; g.caught = false; }
     stopMusic();
     setWaveNotice("");
     setStatus("ready");
@@ -736,8 +773,10 @@ export default function MamahNgamukPage() {
           <h1 className="mamah-logo">MAMAH <span>NGAMUK!</span></h1>
           <p className="mamah-tagline">UH-OH... MAMA IS COMING!</p>
         </div>
-        <div className="mamah-home-hero" aria-label="Mamah Veylora mengejar Anak Dajjal">
+        <div className="mamah-home-hero" aria-label="Mama Veylora angry dan Anak Dajjal menangis">
           <div className="mamah-hero-speed mamah-hero-speed--left">✦</div>
+          <div className="mamah-hero-character mamah-hero-character--mama" role="img" aria-label="Mama Veylora marah" />
+          <div className="mamah-hero-character mamah-hero-character--child" role="img" aria-label="Anak Dajjal menangis" />
           <div className="mamah-hero-caption"><b>ANGRY MAMA</b><span>VS</span><b>CRYING BOY</b></div>
           <div className="mamah-hero-speed mamah-hero-speed--right">✦</div>
         </div>
@@ -768,16 +807,16 @@ export default function MamahNgamukPage() {
       </section>}
       {status === "playing" && <>
         {waveNotice && <div className="mamah-wave-alert" role="status" aria-live="polite">{waveNotice}</div>}
-        <div className="mamah-hud mamah-hud--minimal"><div className="mamah-hud__stats"><div><small>DISTANCE</small><strong>{Math.floor(score / 12)} m</strong></div><div><small>COINS</small><strong className="is-gold">🪙 {coins}</strong></div><div><small>BEST</small><strong>{String(best).padStart(6,"0")}</strong></div></div></div>
+        <div className="mamah-hud mamah-hud--minimal"><div className="mamah-hud__stats"><div><small>DISTANCE</small><strong>{distance.toLocaleString("id-ID")} m</strong></div><div><small>COINS</small><strong className="is-gold">🪙 {coins}</strong></div><div><small>BEST</small><strong>{String(best).padStart(6,"0")}</strong></div></div></div>
         <div className="mamah-game-actions" aria-label="Kontrol permainan">
           <button type="button" onPointerDown={e => e.stopPropagation()} onClick={pause} aria-label="Pause" title="Pause">Ⅱ</button>
-          <button type="button" onPointerDown={e => e.stopPropagation()} onClick={() => setConfirmAction("restart")} aria-label="Restart" title="Restart">↻</button>
-          <button type="button" onPointerDown={e => e.stopPropagation()} onClick={() => setConfirmAction("home")} aria-label="Home Mamah Ngamuk" title="Home">⌂</button>
+          <button type="button" onPointerDown={e => e.stopPropagation()} onClick={() => openConfirmAction("restart")} aria-label="Restart" title="Restart">↻</button>
+          <button type="button" onPointerDown={e => e.stopPropagation()} onClick={() => openConfirmAction("home")} aria-label="Home Mamah Ngamuk" title="Home">⌂</button>
         </div>
       </>}
-      {status === "paused" && <section className="mamah-overlay"><div className="mamah-dialog"><span className="mamah-dialog__emoji">Ⅱ</span><p className="mamah-dialog__eyebrow">PERMAINAN DIJEDA</p><h2>ISTIRAHAT DULU?</h2><button className="mamah-button mamah-button--primary" onClick={resume}>▶ LANJUTKAN</button><button className="mamah-button" onClick={() => setConfirmAction("restart")}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setConfirmExit(true)}>↩ KELUAR GAME</button></div></section>}
+      {status === "paused" && <section className="mamah-overlay"><div className="mamah-dialog"><span className="mamah-dialog__emoji">Ⅱ</span><p className="mamah-dialog__eyebrow">PERMAINAN DIJEDA</p><h2>ISTIRAHAT DULU?</h2><button className="mamah-button mamah-button--primary" onClick={resume}>▶ LANJUTKAN</button><button className="mamah-button" onClick={() => openConfirmAction("restart")}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setConfirmExit(true)}>↩ KELUAR GAME</button></div></section>}
       {status === "caught" && <section className="mamah-catch-caption" aria-live="assertive"><strong>PULANG! MANDI!</strong></section>}\n      {status === "over" && <section className="mamah-overlay mamah-overlay--gameover"><div className="mamah-dialog mamah-dialog--result"><span className="mamah-dialog__emoji">🧹</span><p className="mamah-dialog__eyebrow">MAMA BERHASIL MENANGKAP!</p><h2>KETANGKAP MAMAH!</h2><div className="mamah-result mamah-result--primary"><span>JARAK TEMPUH <strong>{distanceResult} m</strong></span><span>TOTAL KOIN <strong>🪙 {coins}</strong></span></div><div className="mamah-result"><span>SKOR AKHIR <strong>{String(score).padStart(6,"0")}</strong></span><span>BEST <strong>{String(best).padStart(6,"0")}</strong></span></div><button className="mamah-button mamah-button--primary" onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={goHome}>⌂ MENU UTAMA</button></div></section>}
-      {confirmAction && <section className="mamah-overlay" onClick={() => setConfirmAction("")}><div className="mamah-dialog" role="alertdialog" aria-modal="true" onClick={e => e.stopPropagation()}><span className="mamah-dialog__emoji">{confirmAction === "restart" ? "↻" : "⌂"}</span><p className="mamah-dialog__eyebrow">KONFIRMASI</p><h2>{confirmAction === "restart" ? "RESTART PERMAINAN?" : "KEMBALI KE HOME?"}</h2><p className="mamah-dialog__note">{confirmAction === "restart" ? "Permainan saat ini akan dimulai ulang." : "Kamu akan meninggalkan sesi permainan dan kembali ke menu utama."}</p><button className="mamah-button mamah-button--primary" onClick={() => { const action = confirmAction; setConfirmAction(""); if (action === "restart") start(); else goHome(); }}>YES</button><button className="mamah-button mamah-button--quiet" onClick={() => setConfirmAction("")}>NO</button></div></section>}
+      {confirmAction && <section className="mamah-overlay" onClick={cancelConfirmAction}><div className="mamah-dialog" role="alertdialog" aria-modal="true" onClick={e => e.stopPropagation()}><span className="mamah-dialog__emoji">{confirmAction === "restart" ? "↻" : "⌂"}</span><p className="mamah-dialog__eyebrow">KONFIRMASI</p><h2>{confirmAction === "restart" ? "RESTART PERMAINAN?" : "KEMBALI KE HOME?"}</h2><p className="mamah-dialog__note">{confirmAction === "restart" ? "Permainan saat ini akan dimulai ulang." : "Kamu akan meninggalkan sesi permainan dan kembali ke menu utama."}</p><button className="mamah-button mamah-button--primary" onClick={confirmCurrentAction}>YES</button><button className="mamah-button mamah-button--quiet" onClick={cancelConfirmAction}>NO</button></div></section>}
       {settingsOpen && <section className="mamah-overlay" onClick={() => setSettingsOpen(false)}><div className="mamah-dialog" onClick={e => e.stopPropagation()}><button className="mamah-dialog__close" onClick={() => setSettingsOpen(false)} aria-label="Tutup">×</button><p className="mamah-dialog__eyebrow">PENGATURAN</p><h2>SUARA GAME</h2><button className="mamah-button" onClick={() => setSoundOn(v => !v)}>{soundOn ? "♫ SUARA: ON" : "♪ SUARA: OFF"}</button><p className="mamah-dialog__note">Atur volume melalui tombol volume perangkat.</p></div></section>}
       {confirmExit && <section className="mamah-overlay" onClick={() => setConfirmExit(false)}><div className="mamah-dialog" role="alertdialog" aria-modal="true" aria-labelledby="mamah-exit-title" onClick={e => e.stopPropagation()}><span className="mamah-dialog__emoji">🚪</span><p className="mamah-dialog__eyebrow">KONFIRMASI</p><h2 id="mamah-exit-title">KELUAR DARI GAME?</h2><p className="mamah-dialog__note">Sesi permainan ini akan diakhiri dan kamu kembali ke Game Library.</p><button className="mamah-button" onClick={() => setConfirmExit(false)}>TETAP MAIN</button><button className="mamah-button mamah-button--danger" onClick={() => { window.location.href = "/mini-game"; }}>YA, KELUAR</button></div></section>}
     </main>
