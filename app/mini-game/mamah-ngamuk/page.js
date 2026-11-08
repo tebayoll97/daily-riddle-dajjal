@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import "./mamah-ngamuk.css";
 
 const W = 900;
 const H = 1600;
@@ -22,6 +22,7 @@ export default function MamahNgamukPage() {
   const [best, setBest] = useState(0);
   const [soundOn, setSoundOn] = useState(true);
   const [confirmExit, setConfirmExit] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const tone = useCallback((frequency = 520, duration = 0.08) => {
     if (!soundRef.current || typeof window === "undefined") return;
@@ -366,60 +367,22 @@ export default function MamahNgamukPage() {
   };
 
   return (
-    <main className="mini-game-screen fixed inset-0 z-[60] h-[100dvh] w-full overflow-hidden overscroll-none bg-[#080711] px-3 pb-[max(8px,env(safe-area-inset-bottom))] pt-[max(8px,env(safe-area-inset-top))] text-white sm:px-5">
-      <div className="mx-auto flex h-full w-full max-w-[470px] flex-col gap-2 overflow-hidden">
-        <div className="flex items-center justify-between gap-2">
-          <button type="button" onClick={() => setConfirmExit(true)} className="ui-interactive rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[10px] font-black tracking-wider text-purple-200">← KELUAR GAME</button>
-          <div className="flex gap-2">
-            {status === "playing" && <button type="button" onClick={pause} className="ui-interactive rounded-xl border border-purple-300/20 bg-purple-500/10 px-3 py-2.5 text-[10px] font-black">Ⅱ PAUSE</button>}
-            {status === "paused" && <button type="button" onClick={resume} className="ui-interactive rounded-xl border border-purple-300/20 bg-purple-500/10 px-3 py-2.5 text-[10px] font-black">▶ RESUME</button>}
-            <button type="button" onClick={() => setSoundOn((v) => !v)} aria-pressed={soundOn} className="ui-interactive rounded-xl border border-purple-400/20 bg-purple-500/10 px-3 py-2.5 text-[10px] font-black text-purple-100">{soundOn ? "♫ SOUND" : "♪ MUTED"}</button>
-          </div>
-        </div>
-        <header className="shrink-0 text-center">
-          <p className="ui-eyebrow">DAJJAL FAMILY · MINI GAME</p>
-          <h1 className="ui-title text-center">MAMAH <span className="text-purple-300">NGAMUK</span></h1>
-          <p className="ui-subtitle mx-auto text-center text-xs">Anak Dajjal kabur. Mamah Veylora mengejar sambil membawa sapu!</p>
-        </header>
-        <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[26px] border border-purple-400/20 bg-[#100d1d] p-2 shadow-[0_16px_55px_rgba(76,29,149,.18)]">
-          <div className="mb-2 flex items-center justify-between px-1">
-            <div><p className="text-[9px] font-black tracking-[.18em] text-purple-300">SCORE</p><p className="font-mono text-xl font-black tabular-nums">{String(score).padStart(6, "0")}</p></div>
-            <div className="text-center"><p className="text-[9px] font-black tracking-[.18em] text-amber-300">COINS</p><p className="font-mono text-lg font-black text-amber-200">🪙 {coins}</p></div>
-            <div className="text-right"><p className="text-[9px] font-black tracking-[.18em] text-gray-500">BEST</p><p className="font-mono text-lg font-bold tabular-nums text-gray-300">{String(best).padStart(6, "0")}</p></div>
-          </div>
-          <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-2xl border border-purple-300/15 bg-[#0c0a17]">
-            <canvas ref={canvasRef} className="block h-full max-h-full w-auto max-w-full aspect-[9/16] touch-none" aria-label="Mamah Ngamuk. Geser kiri kanan untuk pindah jalur, ke atas untuk melompat, ke bawah untuk sliding." onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={() => { touchRef.current = null; }} />
-            {status !== "playing" && <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#080711]/65 px-5 text-center backdrop-blur-[3px]">
-              <div className="mb-3 text-5xl" aria-hidden="true">{status === "over" ? "🧹" : status === "paused" ? "⏸️" : "🏃‍♂️"}</div>
-              <p className="text-xl font-black tracking-wide">{status === "over" ? "KETANGKAP MAMAH!" : status === "paused" ? "GAME PAUSED" : "SIAP KABUR?"}</p>
-              <p className="mt-2 max-w-xs text-xs leading-relaxed text-gray-300">{status === "over" ? "Waduh! Mamah berhasil menangkap Anak Dajjal. Coba lagi, jangan sampai kena sapu!" : status === "paused" ? "Istirahat sebentar. Mamah masih mengejar!" : "Kumpulkan koin, hindari rintangan, dan kabur sejauh mungkin."}</p>
-              <button type="button" onClick={status === "paused" ? resume : start} className="ui-interactive mt-5 rounded-xl bg-purple-600 px-8 py-3 text-xs font-black tracking-wider shadow-lg shadow-purple-950/40 hover:bg-purple-500">{status === "over" ? "MAIN LAGI" : status === "paused" ? "LANJUTKAN" : "MULAI LARI"}</button>
-            </div>}
-          </div>
-          <div className="mt-2 grid shrink-0 grid-cols-4 gap-2">
-            <button type="button" onClick={() => move("left")} aria-label="Pindah ke kiri" className="ui-interactive rounded-xl border border-white/10 bg-white/5 py-3 text-xl font-black">←</button>
-            <button type="button" onClick={() => move("jump")} aria-label="Melompat" className="ui-interactive rounded-xl border border-purple-400/25 bg-purple-500/10 py-3 text-xl font-black">↑</button>
-            <button type="button" onClick={() => move("slide")} aria-label="Merunduk" className="ui-interactive rounded-xl border border-purple-400/25 bg-purple-500/10 py-3 text-xl font-black">↓</button>
-            <button type="button" onClick={() => move("right")} aria-label="Pindah ke kanan" className="ui-interactive rounded-xl border border-white/10 bg-white/5 py-3 text-xl font-black">→</button>
-          </div>
-          <p className="mt-1 shrink-0 text-center text-[9px] tracking-wide text-gray-500">SWIPE / TOMBOL: ← → pindah jalur · ↑ lompat · ↓ merunduk</p>
-        </section>
-        
-      </div>
-      {confirmExit && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/85 p-5 backdrop-blur-md" onClick={() => setConfirmExit(false)}>
-          <section role="alertdialog" aria-modal="true" aria-labelledby="exit-game-title" className="ui-popup w-full max-w-sm rounded-3xl border border-purple-300/25 bg-[#151020] p-6 text-center shadow-2xl" onClick={(event) => event.stopPropagation()}>
-            <div className="mb-3 text-4xl">🚪</div>
-            <p className="ui-eyebrow">LEAVE THIS GAME?</p>
-            <h2 id="exit-game-title" className="text-xl font-black text-white">KELUAR DARI GAME?</h2>
-            <p className="mt-3 text-sm leading-relaxed text-gray-400">Permainan akan ditinggalkan dan sesi yang sedang berjalan akan berakhir. Yakin ingin keluar?</p>
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <button type="button" onClick={() => setConfirmExit(false)} className="ui-interactive rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-black text-gray-300">LANJUT MAIN</button>
-              <button type="button" onClick={() => { window.location.href = "/mini-game"; }} className="ui-interactive rounded-xl bg-purple-600 px-4 py-3 text-xs font-black text-white">YA, KELUAR</button>
-            </div>
-          </section>
-        </div>
-      )}
+    <main className="mamah-game mini-game-screen" aria-label="Mamah Ngamuk game">
+      <canvas ref={canvasRef} className="mamah-game__world" aria-label="Dunia permainan Mamah Ngamuk" onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={() => { touchRef.current = null; }} />
+      <div className="mamah-game__vignette" aria-hidden="true" />
+      {status === "ready" && <section className="mamah-screen mamah-screen--menu">
+        <div className="mamah-brand"><span className="mamah-brand__eyebrow">DAJJAL FAMILY · GAMING UNIVERSE</span><h1 className="mamah-logo">MAMAH <span>NGAMUK!</span></h1><p className="mamah-tagline">ANAK DAJJAL KABUR. MAMAH VEYLORA MENGEJAR!</p></div>
+        <div className="mamah-menu-card"><div className="mamah-menu-card__coin">🪙 <strong>{coins}</strong></div><button type="button" className="mamah-button mamah-button--primary" onClick={start}>▶ MULAI MAIN</button><button type="button" className="mamah-button" onClick={() => setSettingsOpen(true)}>⚙ PENGATURAN</button><button type="button" className="mamah-button mamah-button--quiet" onClick={() => setConfirmExit(true)}>↩ KELUAR KE GAME LIBRARY</button></div>
+        <p className="mamah-menu-hint">SWIPE UNTUK BERGERAK · HINDARI RINTANGAN · KUMPULKAN KOIN</p>
+      </section>}
+      {status === "playing" && <>
+        <div className="mamah-hud"><button type="button" className="mamah-hud__icon" onClick={pause} aria-label="Pause game">Ⅱ</button><div className="mamah-hud__stats"><div><small>SCORE</small><strong>{String(score).padStart(6,"0")}</strong></div><div><small>COINS</small><strong className="is-gold">🪙 {coins}</strong></div><div><small>BEST</small><strong>{String(best).padStart(6,"0")}</strong></div></div><button type="button" className="mamah-hud__icon" onClick={() => setSoundOn(v => !v)} aria-label={soundOn ? "Matikan suara" : "Nyalakan suara"}>{soundOn ? "♫" : "♪"}</button></div>
+        <div className="mamah-controls"><button type="button" onClick={() => move("left")} aria-label="Kiri">←</button><button type="button" onClick={() => move("jump")} aria-label="Lompat">↑</button><button type="button" onClick={() => move("slide")} aria-label="Merunduk">↓</button><button type="button" onClick={() => move("right")} aria-label="Kanan">→</button></div><p className="mamah-controls-hint">GESER LAYAR ATAU GUNAKAN TOMBOL</p>
+      </>}
+      {status === "paused" && <section className="mamah-overlay"><div className="mamah-dialog"><span className="mamah-dialog__emoji">Ⅱ</span><p className="mamah-dialog__eyebrow">PERMAINAN DIJEDA</p><h2>ISTIRAHAT DULU?</h2><button className="mamah-button mamah-button--primary" onClick={resume}>▶ LANJUTKAN</button><button className="mamah-button" onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setConfirmExit(true)}>↩ KELUAR GAME</button></div></section>}
+      {status === "over" && <section className="mamah-overlay"><div className="mamah-dialog"><span className="mamah-dialog__emoji">🧹</span><p className="mamah-dialog__eyebrow">GAME OVER</p><h2>KETANGKAP MAMAH!</h2><div className="mamah-result"><span>SKOR AKHIR <strong>{String(score).padStart(6,"0")}</strong></span><span>KOIN <strong>🪙 {coins}</strong></span><span>BEST <strong>{String(best).padStart(6,"0")}</strong></span></div><button className="mamah-button mamah-button--primary" onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setStatus("ready")}>⌂ MENU UTAMA</button></div></section>}
+      {settingsOpen && <section className="mamah-overlay" onClick={() => setSettingsOpen(false)}><div className="mamah-dialog" onClick={e => e.stopPropagation()}><button className="mamah-dialog__close" onClick={() => setSettingsOpen(false)} aria-label="Tutup">×</button><p className="mamah-dialog__eyebrow">PENGATURAN</p><h2>SUARA GAME</h2><button className="mamah-button" onClick={() => setSoundOn(v => !v)}>{soundOn ? "♫ SUARA: ON" : "♪ SUARA: OFF"}</button><p className="mamah-dialog__note">Atur volume melalui tombol volume perangkat.</p></div></section>}
+      {confirmExit && <section className="mamah-overlay" onClick={() => setConfirmExit(false)}><div className="mamah-dialog" role="alertdialog" aria-modal="true" aria-labelledby="mamah-exit-title" onClick={e => e.stopPropagation()}><span className="mamah-dialog__emoji">🚪</span><p className="mamah-dialog__eyebrow">KONFIRMASI</p><h2 id="mamah-exit-title">KELUAR DARI GAME?</h2><p className="mamah-dialog__note">Sesi permainan ini akan diakhiri dan kamu kembali ke Game Library.</p><button className="mamah-button" onClick={() => setConfirmExit(false)}>TETAP MAIN</button><button className="mamah-button mamah-button--danger" onClick={() => { window.location.href = "/mini-game"; }}>YA, KELUAR</button></div></section>}
     </main>
   );
 }
