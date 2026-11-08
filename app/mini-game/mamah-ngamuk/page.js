@@ -96,7 +96,7 @@ export default function MamahNgamukPage() {
   const start = useCallback(() => {
     const g = gameRef.current;
     if (!g) return;
-    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, speed: 0.29, spawn: 4.8, chase: 0, scoreTick: -1, coinCount: 0 });
+    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, elapsed: 0, speed: 0.29, spawn: 4.8, chase: 0, scoreTick: -1, coinCount: 0 });
     Object.assign(g.player, { lane: 0, targetLane: 0, jump: 0, slide: 0 });
     g.items = [];
     setScore(0);
@@ -233,7 +233,7 @@ export default function MamahNgamukPage() {
 
       // Residential streetscape: repeating houses on both sides, scaled by perspective.
       for (let i = 0; i < 6; i++) {
-        const z = ((i / 6) + (g.distance * 0.000035 % 1)) % 1;
+        const z = ((i / 6) + (g.distance * 0.025 % 1)) % 1;
         const y = 500 + z * z * 930;
         const leftRoadEdge = 365 - z * 355;
         const rightRoadEdge = 535 + z * 355;
@@ -266,7 +266,7 @@ export default function MamahNgamukPage() {
 
       // Streetlights along both sidewalks; warm lamps become larger toward the camera.
       for (let i = 0; i < 4; i++) {
-        const z = ((i / 4) + (g.distance * 0.00005 % 1)) % 1;
+        const z = ((i / 4) + (g.distance * 0.025 % 1)) % 1;
         const y = 500 + z * z * 930;
         const spread = 30 + z * 410;
         const poleH = 36 + z * 118;
@@ -310,7 +310,7 @@ export default function MamahNgamukPage() {
       // Lane dashes moving toward the player.
       for (let laneLine = 0; laneLine < 2; laneLine++) {
         for (let i = 0; i < 8; i++) {
-          const z = ((i / 8) + (g.distance * 0.18 % 1)) % 1;
+          const z = ((i / 8) + (g.distance * 0.025 % 1)) % 1;
           const y = 480 + z * z * 1010;
           const x = W / 2 + (laneLine ? 1 : -1) * (13 + z * 160);
           ctx.strokeStyle = "rgba(240,235,215,.42)";
@@ -398,9 +398,9 @@ export default function MamahNgamukPage() {
       [...g.items].filter((item) => item.kind === "coin" && !item.resolved).sort((a, b) => a.z - b.z).forEach((item) => {
         const x = laneX(item.lane, item.z);
         const y = 480 + item.z * item.z * 1010;
-        const scale = 0.25 + item.z * 0.95;
+        const scale = (0.25 + item.z * 0.95) * 1.55;
         ctx.save();
-        ctx.translate(x, y - 14 * scale);
+        ctx.translate(x, y - 18 * scale);
         ctx.scale(scale, scale);
         ctx.fillStyle = "#ffd76a";
         ctx.strokeStyle = "#fff0ae";
@@ -419,9 +419,9 @@ export default function MamahNgamukPage() {
       const mamaY = (g.caught ? 1435 : 1460) + Math.sin(time / 150) * 3;
       const mamaRow = g.caught ? 5 : 1;
       const mamaFrame = Math.floor(time / (g.caught ? 175 : 115)) % 8;
-      const mamaDrawn = drawVeyloraSprite(mamaRow, mamaX, mamaY, 230, 285, mamaFrame);
+      const mamaDrawn = drawVeyloraSprite(mamaRow, mamaX, mamaY, g.caught ? 370 : 230, g.caught ? 455 : 285, mamaFrame);
       if (!mamaDrawn) {
-        const legacyMamaDrawn = drawSprite(2, mamaX, mamaY, 150, 190, Math.floor(time / 170) % 4);
+        const legacyMamaDrawn = drawSprite(2, mamaX, mamaY, g.caught ? 250 : 150, g.caught ? 310 : 190, Math.floor(time / 170) % 4);
         if (!legacyMamaDrawn) {
           ctx.font = "58px system-ui"; ctx.textAlign = "center"; ctx.fillText("👩🏻", mamaX, mamaY - 8);
         }
@@ -515,6 +515,7 @@ export default function MamahNgamukPage() {
       if (!g.running || g.paused) return;
       const p = g.player;
       g.distance += g.speed * dt;
+      g.elapsed += dt;
       g.speed = Math.min(.39, g.speed + .000002 * dt);
       p.lane += (p.targetLane - p.lane) * Math.min(1, dt * 0.24);
       const wasAirborne = p.jump > 0;
@@ -535,14 +536,26 @@ export default function MamahNgamukPage() {
           [{ lane:0, kind:"roadblock", z:0 }],
           [{ lane:-1, kind:"van", z:0 },{ lane:1, kind:"roadblock", z:-.04 }],
         ];
-        const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+        const intensity = Math.min(1, g.elapsed / 150000);
+        const pattern = patterns[Math.floor(Math.random() * patterns.length)].map((item) => ({ ...item }));
+        // As the run continues, add a second vehicle more often and occasionally a third staggered vehicle,
+        // while always reserving at least one lane as a safe route.
+        if (intensity > .22 && pattern.length === 1 && Math.random() < intensity * .72) {
+          const free = LANES.filter((lane) => !pattern.some((item) => item.lane === lane));
+          const extraLane = free[Math.floor(Math.random() * free.length)];
+          pattern.push({ lane: extraLane, kind: ["sedan", "taxi", "van", "bus"][Math.floor(Math.random() * 4)], z: -.18 });
+        }
+        if (intensity > .58 && pattern.length === 2 && Math.random() < .22) {
+          pattern[1].z = -.22;
+        }
         pattern.forEach((item) => g.items.push({ ...item, resolved:false }));
         const openLane = LANES.find((lane) => !pattern.some((item) => item.lane === lane));
         if (openLane !== undefined && Math.random() < .8) {
           for (let i=0;i<4;i++) g.items.push({ lane:openLane, z:-.12-i*.09, kind:"coin", resolved:false });
         }
-        // Leave enough distance for the complete pattern to pass before the next one.
-        g.spawn = 4.8 + Math.random() * 1.0;
+        // Traffic density rises gradually: spawn gaps shrink from 4.8s to about 2.7s.
+        const spawnGap = Math.max(2.7, 4.8 - intensity * 2.1);
+        g.spawn = spawnGap + Math.random() * .55;
       }
       g.items.forEach((item) => { item.prevZ = item.z; item.z += g.speed * dt * .001; });
       g.items = g.items.filter((item) => item.z < 1.12);
