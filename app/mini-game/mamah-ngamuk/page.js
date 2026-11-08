@@ -161,7 +161,6 @@ export default function MamahNgamukPage() {
     let bootFallback;
     const finishBoot = () => {
       window.clearTimeout(bootFallback);
-      window.clearTimeout(catchTimerRef.current);
       setStatus("ready");
     };
     bootFallback = window.setTimeout(finishBoot, 1400);
@@ -355,7 +354,7 @@ export default function MamahNgamukPage() {
       }
       ctx.save();
       ctx.translate(px + 48, mamaY - 65);
-      ctx.rotate(g.caught ? Math.sin(time / 55) * .95 - .9 : Math.sin(time / 105) * .32 - .45);
+      ctx.rotate(g.caught ? (-1.35 + Math.sin(time / 70) * 1.2) : Math.sin(time / 105) * .32 - .45);
       ctx.strokeStyle = "#9b6a43"; ctx.lineWidth = 7; ctx.lineCap = "round";
       ctx.beginPath(); ctx.moveTo(0, 25); ctx.lineTo(40, -28); ctx.stroke();
       ctx.fillStyle = "#d9b77d";
@@ -424,8 +423,10 @@ export default function MamahNgamukPage() {
         try { localStorage.setItem(BEST_KEY, String(next)); } catch {}
         return next;
       });
-      setStatus("over");
+      setStatus("caught");
       tone(150, .24);
+      window.clearTimeout(catchTimerRef.current);
+      catchTimerRef.current = window.setTimeout(() => setStatus("over"), 1550);
     };
 
     const update = (dt) => {
@@ -534,6 +535,7 @@ export default function MamahNgamukPage() {
     return () => {
       cancelAnimationFrame(rafRef.current);
       window.clearTimeout(bootFallback);
+      window.clearTimeout(catchTimerRef.current);
       observer.disconnect();
       window.removeEventListener("keydown", key);
       gameRef.current = null;
