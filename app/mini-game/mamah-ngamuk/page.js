@@ -104,8 +104,8 @@ export default function MamahNgamukPage() {
       const rect = canvas.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.max(1, Math.round(rect.width * dpr));
-      canvas.height = Math.max(1, Math.round(rect.width * H / W * dpr));
-      ctx.setTransform(canvas.width / W, 0, 0, canvas.width / W, 0, 0);
+      canvas.height = Math.max(1, Math.round(rect.height * dpr));
+      ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
     };
 
     const laneX = (lane, z) => W / 2 + lane * (38 + z * 148);
