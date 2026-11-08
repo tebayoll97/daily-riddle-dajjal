@@ -13,6 +13,7 @@ export default function MamahNgamukPage() {
   const gameRef = useRef(null);
   const rafRef = useRef(0);
   const sheetRef = useRef(null);
+  const obstacleSheetRef = useRef(null);
   const soundRef = useRef(true);
   const audioRef = useRef(null);
   const touchRef = useRef(null);
@@ -103,6 +104,12 @@ export default function MamahNgamukPage() {
     sheet.onerror = () => { sheetRef.current = null; finishBoot(); };
     sheet.src = "/universe-characters.png";
 
+    // Dedicated 6-column × 4-row obstacle atlas (1536 × 1024, 256px cells).
+    const obstacleSheet = new Image();
+    obstacleSheet.onload = () => { obstacleSheetRef.current = obstacleSheet; };
+    obstacleSheet.onerror = () => { obstacleSheetRef.current = null; };
+    obstacleSheet.src = "/mini-game/mamah-ngamuk/sprite/obstacles.png";
+
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -184,7 +191,28 @@ export default function MamahNgamukPage() {
         ctx.translate(x, y);
         ctx.fillStyle = "rgba(0,0,0,.35)";
         ctx.beginPath(); ctx.ellipse(0, 3*scale, w*.72, h*.18, 0, 0, Math.PI*2); ctx.fill();
-        if (item.kind === "sedan" || item.kind === "taxi" || item.kind === "van" || item.kind === "truck" || item.kind === "bus") {
+        const obstacleAtlas = obstacleSheetRef.current;
+        const atlasCells = {
+          taxi: [0, 0],
+          sedan: [1, 0],
+          van: [3, 0],
+          bus: [4, 0],
+          truck: [0, 1],
+          roadblock: [2, 2],
+        };
+        const atlasCell = atlasCells[item.kind];
+        const atlasReady = obstacleAtlas?.complete && obstacleAtlas.naturalWidth >= 1536 && obstacleAtlas.naturalHeight >= 1024;
+        if (atlasReady && atlasCell) {
+          const cellW = obstacleAtlas.naturalWidth / 6;
+          const cellH = obstacleAtlas.naturalHeight / 4;
+          const [col, row] = atlasCell;
+          const spriteSize = (item.kind === "roadblock" ? 176 : 190) * scale;
+          ctx.drawImage(
+            obstacleAtlas,
+            col * cellW, row * cellH, cellW, cellH,
+            -spriteSize / 2, -spriteSize * 0.92, spriteSize, spriteSize
+          );
+        } else if (item.kind === "sedan" || item.kind === "taxi" || item.kind === "van" || item.kind === "truck" || item.kind === "bus") {
           const truck = item.kind === "truck" || item.kind === "bus";
           const van = item.kind === "van";
           const cw = w * (truck ? 1.72 : van ? 1.55 : 1.42);
