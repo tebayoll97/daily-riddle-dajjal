@@ -457,16 +457,7 @@ export default function MamahNgamukPage() {
           ctx.font = "58px system-ui"; ctx.textAlign = "center"; ctx.fillText("👩🏻", mamaX, mamaY - 8);
         }
       }
-      ctx.save();
-      ctx.translate(mamaX + 40, mamaY - 55);
-      ctx.rotate(g.caught ? (-1.35 + Math.sin(time / 70) * 1.2) : Math.sin(time / 105) * .32 - .45);
-      ctx.strokeStyle = "#9b6a43"; ctx.lineWidth = 7; ctx.lineCap = "round";
-      ctx.beginPath(); ctx.moveTo(0, 25); ctx.lineTo(40, -28); ctx.stroke();
-      ctx.fillStyle = "#d9b77d";
-      ctx.beginPath(); ctx.moveTo(40, -28); ctx.lineTo(55, -19); ctx.lineTo(48, -4); ctx.lineTo(34, -12); ctx.closePath(); ctx.fill();
-      ctx.restore();
-
-      // The Veylora CAUGHT row already contains both characters in one authored capture composition.
+      // Broom is already part of Veylora's sprite atlas; do not draw a duplicate prop.\n\n      // The Veylora CAUGHT row already contains both characters in one authored capture composition.
       // Draw the child separately only during normal gameplay to avoid duplicating him in the catch scene.
       if (!g.caught) {
         const childY = 1300;
@@ -548,7 +539,7 @@ export default function MamahNgamukPage() {
       g.distance += g.speed * dt;
       g.elapsed += dt;
       const difficulty = Math.min(1, g.distance / 100000);
-      g.speed = Math.min(.47, .29 + difficulty * .18);
+      g.speed = Math.min(.68, .30 + difficulty * .38);
       const reachedWave = WAVE_STAGES[g.waveIndex + 1];
       if (reachedWave && g.distance >= reachedWave.at) {
         g.waveIndex += 1;
@@ -566,37 +557,40 @@ export default function MamahNgamukPage() {
       g.spawn -= dt * 0.001;
       if (g.spawn <= 0) {
         // Traffic patterns: cars occupy lanes, always leaving a clear route.
-        const patterns = [
-          [{ lane:-1, kind:"sedan", z:0 },{ lane:0, kind:"taxi", z:-.04 }],
-          [{ lane:0, kind:"van", z:0 },{ lane:1, kind:"sedan", z:-.05 }],
-          [{ lane:-1, kind:"truck", z:0 },{ lane:1, kind:"taxi", z:-.06 }],
-          [{ lane:1, kind:"bus", z:0 },{ lane:0, kind:"sedan", z:-.05 }],
-          [{ lane:-1, kind:"taxi", z:0 },{ lane:0, kind:"van", z:-.05 }],
-          [{ lane:0, kind:"truck", z:0 }],
-          [{ lane:-1, kind:"sedan", z:0 },{ lane:1, kind:"van", z:-.04 }],
-          [{ lane:0, kind:"roadblock", z:0 }],
-          [{ lane:-1, kind:"van", z:0 },{ lane:1, kind:"roadblock", z:-.04 }],
-        ];
         const intensity = difficulty;
-        const pattern = patterns[Math.floor(Math.random() * patterns.length)].map((item) => ({ ...item }));
-        // As the run continues, add a second vehicle more often and occasionally a third staggered vehicle,
-        // while always reserving at least one lane as a safe route.
-        if (intensity > .16 && pattern.length === 1 && Math.random() < intensity * .88) {
-          const free = LANES.filter((lane) => !pattern.some((item) => item.lane === lane));
-          const extraLane = free[Math.floor(Math.random() * free.length)];
-          pattern.push({ lane: extraLane, kind: ["sedan", "taxi", "van", "bus"][Math.floor(Math.random() * 4)], z: -.18 });
-        }
-        if (intensity > .48 && pattern.length === 2 && Math.random() < .35) {
-          pattern[1].z = -.22;
+        // Each wave creates multi-car traffic bursts. Every depth row leaves at least
+        // one lane open, while staggered rows can occupy all three lanes over time.
+        const safeLane = LANES[Math.floor(Math.random() * LANES.length)];
+        const vehicleKinds = ["sedan", "taxi", "van", "truck", "bus"];
+        const burstRows = intensity < .2 ? 1 : intensity < .42 ? 2 : intensity < .68 ? 3 : 4;
+        const rowSpacing = .16 + intensity * .035;
+        const pattern = [];
+        for (let row = 0; row < burstRows; row++) {
+          const rowSafeLane = row === 0 ? safeLane : LANES[Math.floor(Math.random() * LANES.length)];
+          const rowLanes = LANES.filter((lane) => lane !== rowSafeLane);
+          // Early waves usually use one vehicle per row; later waves fill both blocked lanes.
+          const fillBoth = intensity > .24 && Math.random() < (.28 + intensity * .62);
+          const selectedLanes = fillBoth ? rowLanes : [rowLanes[Math.floor(Math.random() * rowLanes.length)]];
+          selectedLanes.forEach((lane) => {
+            pattern.push({
+              lane,
+              kind: vehicleKinds[Math.floor(Math.random() * vehicleKinds.length)],
+              z: -row * rowSpacing - (Math.random() * .035),
+            });
+          });
         }
         pattern.forEach((item) => g.items.push({ ...item, resolved:false }));
-        const openLane = LANES.find((lane) => !pattern.some((item) => item.lane === lane));
-        if (openLane !== undefined && Math.random() < .8) {
-          for (let i=0;i<4;i++) g.items.push({ lane:openLane, z:-.12-i*.09, kind:"coin", resolved:false });
+        // Reward scales with wave: 4, 6, 8, 10, then 12 coins.
+        const coinCount = 4 + g.waveIndex * 2;
+        const coinLane = safeLane;
+        if (Math.random() < .9) {
+          for (let i = 0; i < coinCount; i++) {
+            g.items.push({ lane:coinLane, z:-.10-i*.075, kind:"coin", resolved:false });
+          }
         }
-        // Traffic density rises gradually: spawn gaps shrink from 4.8s to about 2.7s.
-        const spawnGap = Math.max(1.75, 4.2 - intensity * 2.45);
-        g.spawn = spawnGap + Math.random() * .55;
+        // More traffic waves per minute and higher approach speed in later stages.
+        const spawnGap = Math.max(1.15, 3.65 - intensity * 2.5);
+        g.spawn = spawnGap + Math.random() * (.32 - intensity * .12);
       }
       g.items.forEach((item) => { item.prevZ = item.z; item.z += g.speed * dt * .00105; });
       g.items = g.items.filter((item) => item.z < 1.12);
