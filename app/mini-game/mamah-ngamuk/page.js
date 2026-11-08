@@ -119,7 +119,7 @@ export default function MamahNgamukPage() {
     enterGameFullscreen();
     const g = gameRef.current;
     if (!g) return;
-    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, environmentDistance: 0, elapsed: 0, carSpeed: 0.30, spawn: 3.8, chase: 0, scoreTick: -1, coinCount: 0, waveIndex: 0 });
+    Object.assign(g, { running: true, paused: false, pauseStartedAt: 0, over: false, caught: false, distance: 0, environmentDistance: 0, elapsed: 0, carSpeed: 0.30, spawn: 3.8, chase: 0, scoreTick: -1, coinCount: 0, waveIndex: 0 });
     window.clearTimeout(waveNoticeTimerRef.current);
     setWaveNotice(WAVE_STAGES[0].alert);
     waveNoticeTimerRef.current = window.setTimeout(() => setWaveNotice(""), 4000);
@@ -252,6 +252,7 @@ export default function MamahNgamukPage() {
     };
 
     const draw = (time) => {
+      if (g.paused) time = g.pauseStartedAt || time;
       const sky = ctx.createLinearGradient(0, 0, 0, H);
       sky.addColorStop(0, "#17132d");
       sky.addColorStop(0.58, "#46556a");
@@ -506,7 +507,6 @@ export default function MamahNgamukPage() {
         ctx.fillStyle = "rgba(235,83,122," + (pressure * .12) + ")";
         ctx.fillRect(0, H - 32, W, 32);
       }
-      if (g.paused) time = g.pauseStartedAt || time;
       if (!g.running || g.paused) {
         ctx.fillStyle = "rgba(5,4,12,.25)";
         ctx.fillRect(0, 0, W, H);
