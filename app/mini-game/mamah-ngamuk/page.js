@@ -50,7 +50,7 @@ export default function MamahNgamukPage() {
   const start = useCallback(() => {
     const g = gameRef.current;
     if (!g) return;
-    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, speed: 0.22, spawn: 1.8, chase: 0, scoreTick: -1, coinCount: 0 });
+    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, speed: 0.22, spawn: 5.2, chase: 0, scoreTick: -1, coinCount: 0 });
     Object.assign(g.player, { lane: 0, targetLane: 0, jump: 0, slide: 0 });
     g.items = [];
     setScore(0);
@@ -255,6 +255,10 @@ export default function MamahNgamukPage() {
           ctx.fillStyle="#d66c6a"; ctx.fillRect(-w*.68,-h*.82,w*1.36,h*.7);
           ctx.fillStyle="#f3b49e"; ctx.fillRect(-w*.68,-h*.82,w*1.36,h*.13);
           ctx.fillStyle="#493044"; ctx.fillRect(-w*.53,-h*.12,w*.14,h*.42); ctx.fillRect(w*.39,-h*.12,w*.14,h*.42);
+        } else if (item.kind === "roadblock") {
+          ctx.fillStyle="#f0a64b"; ctx.beginPath(); ctx.moveTo(0,-h*1.2); ctx.lineTo(w*.28,0); ctx.lineTo(-w*.28,0); ctx.closePath(); ctx.fill();
+          ctx.fillStyle="#f6e7c9"; ctx.fillRect(-w*.19,-h*.48,w*.38,h*.12);
+          ctx.fillStyle="#29303a"; ctx.fillRect(-w*.36,-h*.05,w*.72,h*.12);
         } else {
           ctx.fillStyle="#8d4d61"; ctx.fillRect(-w*.65,-h*.78,w*1.3,h*.78);
           ctx.fillStyle="#bd766e"; ctx.fillRect(-w*.65,-h*.78,w*1.3,h*.66);
@@ -383,6 +387,8 @@ export default function MamahNgamukPage() {
           [{ lane:-1, kind:"taxi", z:0 },{ lane:0, kind:"van", z:-.05 }],
           [{ lane:0, kind:"truck", z:0 }],
           [{ lane:-1, kind:"sedan", z:0 },{ lane:1, kind:"van", z:-.04 }],
+          [{ lane:0, kind:"roadblock", z:0 }],
+          [{ lane:-1, kind:"van", z:0 },{ lane:1, kind:"roadblock", z:-.04 }],
         ];
         const pattern = patterns[Math.floor(Math.random() * patterns.length)];
         pattern.forEach((item) => g.items.push({ ...item, resolved:false }));
@@ -391,7 +397,7 @@ export default function MamahNgamukPage() {
           for (let i=0;i<4;i++) g.items.push({ lane:openLane, z:-.12-i*.09, kind:"coin", resolved:false });
         }
         // Leave enough distance for the complete pattern to pass before the next one.
-        g.spawn = 3.8 + Math.random() * 1.1;
+        g.spawn = 5.2 + Math.random() * 1.2;
       }
       g.items.forEach((item) => { item.z += g.speed * dt * .001; });
       g.items = g.items.filter((item) => item.z < 1.12);
@@ -411,7 +417,8 @@ export default function MamahNgamukPage() {
         const depthOverlap = Math.abs(item.z - PLAYER_Z) <= vehicleHalfDepth + .018;
         const laneOverlap = Math.abs(item.lane - p.lane) <= PLAYER_HALF_LANE + .12;
         if (!depthOverlap || !laneOverlap) return false;
-        // Cars are solid and cannot be jumped over; jumping is reserved for low road hazards.
+        // Vehicles are solid; only low roadblocks can be cleared with a well-timed jump.
+        if (item.kind === "roadblock") return p.jump < .24;
         return true;
       });
       if (obstacleHit) {
@@ -488,8 +495,8 @@ export default function MamahNgamukPage() {
   };
 
   return (
-    <main className="mamah-game mini-game-screen" aria-label="Mamah Ngamuk game">
-      <canvas ref={canvasRef} className="mamah-game__world" aria-label="Dunia permainan Mamah Ngamuk" onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={() => { touchRef.current = null; }} />
+    <main className="mamah-game mini-game-screen" aria-label="Mamah Ngamuk game" onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={() => { touchRef.current = null; }}>
+      <canvas ref={canvasRef} className="mamah-game__world" aria-label="Dunia permainan Mamah Ngamuk" />
       <div className="mamah-game__vignette" aria-hidden="true" />
       {status === "loading" && <section className="mamah-screen mamah-screen--loading"><div className="mamah-loader"><span>DF</span></div><p className="mamah-brand__eyebrow">DAJJAL FAMILY · GAMING UNIVERSE</p><h1 className="mamah-logo">MAMAH <span>NGAMUK!</span></h1><p className="mamah-loading-label">MENYIAPKAN DUNIA GAME...</p></section>}
       {status === "ready" && <section className="mamah-screen mamah-screen--menu">
