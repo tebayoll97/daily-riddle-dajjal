@@ -17,6 +17,7 @@ export default function MamahNgamukPage() {
   const childSheetRef = useRef(null);
   const soundRef = useRef(true);
   const audioRef = useRef(null);
+  const musicRef = useRef({ timer: null, oscillators: [] });
   const touchRef = useRef(null);
   const catchTimerRef = useRef(null);
   const [status, setStatus] = useState("loading");
@@ -49,6 +50,48 @@ export default function MamahNgamukPage() {
     } catch {}
   }, []);
 
+  const stopMusic = useCallback(() => {
+    const music = musicRef.current;
+    if (music.timer) window.clearInterval(music.timer);
+    music.timer = null;
+    music.oscillators.forEach((osc) => { try { osc.stop(); } catch {} });
+    music.oscillators = [];
+  }, []);
+
+  const startMusic = useCallback(() => {
+    if (!soundRef.current || musicRef.current.timer) return;
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      const ctx = audioRef.current || new AudioContextClass();
+      audioRef.current = ctx;
+      if (ctx.state === "suspended") ctx.resume();
+      const notes = [392, 440, 523.25, 440, 349.23, 392, 466.16, 392, 329.63, 392, 440, 523.25, 466.16, 440, 392, 349.23];
+      let step = 0;
+      const playNote = () => {
+        if (!soundRef.current || ctx.state !== "running") return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(notes[step % notes.length], now);
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(1500, now);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.012, now + 0.025);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.27);
+        osc.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+        osc.start(now); osc.stop(now + 0.29);
+        musicRef.current.oscillators.push(osc);
+        musicRef.current.oscillators = musicRef.current.oscillators.filter((item) => item !== osc);
+        step += 1;
+      };
+      playNote();
+      musicRef.current.timer = window.setInterval(playNote, 310);
+    } catch {}
+  }, []);
+
   const start = useCallback(() => {
     const g = gameRef.current;
     if (!g) return;
@@ -60,7 +103,8 @@ export default function MamahNgamukPage() {
     setDistanceResult(0);
     setStatus("playing");
     tone(660);
-  }, [tone]);
+    startMusic();
+  }, [tone, startMusic]);
 
   const move = useCallback((direction) => {
     const g = gameRef.current;
@@ -77,7 +121,11 @@ export default function MamahNgamukPage() {
     }
   }, [start, tone]);
 
-  useEffect(() => { soundRef.current = soundOn; }, [soundOn]);
+  useEffect(() => {
+    soundRef.current = soundOn;
+    if (!soundOn) stopMusic();
+    else if (gameRef.current?.running && !gameRef.current?.paused) startMusic();
+  }, [soundOn, startMusic, stopMusic]);
 
   useEffect(() => {
     try { setBest(Number(localStorage.getItem(BEST_KEY)) || 0); } catch {}
@@ -186,7 +234,7 @@ export default function MamahNgamukPage() {
       // Lane dashes moving toward the player.
       for (let laneLine = 0; laneLine < 2; laneLine++) {
         for (let i = 0; i < 8; i++) {
-          const z = ((i / 8) + (g.distance * 0.65 % 1)) % 1;
+          const z = ((i / 8) + (g.distance * 0.18 % 1)) % 1;
           const y = 480 + z * z * 1010;
           const x = W / 2 + (laneLine ? 1 : -1) * (13 + z * 160);
           ctx.strokeStyle = "rgba(240,235,215,.42)";
@@ -271,7 +319,7 @@ export default function MamahNgamukPage() {
         }
         ctx.restore();
       });
-      [...g.items].filter((item) => item.kind === "coin").sort((a, b) => a.z - b.z).forEach((item) => {
+      [...g.items].filter((item) => item.kind === "coin" && !item.resolved).sort((a, b) => a.z - b.z).forEach((item) => {
         const x = laneX(item.lane, item.z);
         const y = 480 + item.z * item.z * 1010;
         const scale = 0.25 + item.z * 0.95;
@@ -287,16 +335,16 @@ export default function MamahNgamukPage() {
       });
 
             const player = g.player;
-      const px = laneX(player.lane, 1);
+      const px = laneX(player.lane, 1); // Lane 0 is the exact road center at game start.
       const bounce = g.running && player.jump <= 0 && player.slide <= 0 ? Math.sin(time / 65) * 4 : 0;
       // Mama Veylora stays behind the child; her broom swings while she runs.
-      const mamaY = (g.caught ? 1280 : 1420) + Math.sin(time / 95) * 4;
-      const mamaDrawn = drawSprite(2, px - 12, mamaY, 110, 138, Math.floor(time / 130) % 4);
+      const mamaY = (g.caught ? 1240 : 1165) + Math.sin(time / 150) * 3;
+      const mamaDrawn = drawSprite(2, W / 2, mamaY, 82, 104, Math.floor(time / 170) % 4);
       if (!mamaDrawn) {
         ctx.font = "58px system-ui"; ctx.textAlign = "center"; ctx.fillText("👩🏻", px - 4, mamaY - 8);
       }
       ctx.save();
-      ctx.translate(px + 48, mamaY - 65);
+      ctx.translate(W / 2 + 36, mamaY - 48);
       ctx.rotate(g.caught ? (-1.35 + Math.sin(time / 70) * 1.2) : Math.sin(time / 105) * .32 - .45);
       ctx.strokeStyle = "#9b6a43"; ctx.lineWidth = 7; ctx.lineCap = "round";
       ctx.beginPath(); ctx.moveTo(0, 25); ctx.lineTo(40, -28); ctx.stroke();
@@ -388,6 +436,7 @@ export default function MamahNgamukPage() {
         return next;
       });
       setStatus("caught");
+      stopMusic();
       tone(150, .24);
       window.clearTimeout(catchTimerRef.current);
       catchTimerRef.current = window.setTimeout(() => setStatus("over"), 1550);
@@ -496,9 +545,11 @@ export default function MamahNgamukPage() {
       gameRef.current = null;
       sheetRef.current = null;
     };
-  }, [move, tone]);
+  }, [move, tone, stopMusic]);
 
   useEffect(() => () => {
+    if (musicRef.current.timer) window.clearInterval(musicRef.current.timer);
+    musicRef.current.oscillators.forEach((osc) => { try { osc.stop(); } catch {} });
     if (audioRef.current && audioRef.current.state !== "closed") audioRef.current.close().catch(() => {});
   }, []);
 
@@ -506,12 +557,14 @@ export default function MamahNgamukPage() {
     const g = gameRef.current;
     if (!g || !g.running) return;
     g.paused = true;
+    stopMusic();
     setStatus("paused");
   };
   const resume = () => {
     const g = gameRef.current;
     if (!g || !g.paused) return;
     g.paused = false;
+    startMusic();
     setStatus("playing");
   };
 
