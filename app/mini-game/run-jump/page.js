@@ -329,12 +329,7 @@ export default function MiniGamePage() {
     <main className="mini-game-screen fixed inset-0 z-[60] h-[100dvh] w-full overflow-hidden overscroll-none bg-[#080711] px-3 pb-[max(8px,env(safe-area-inset-bottom))] pt-[max(8px,env(safe-area-inset-top))] text-white sm:px-5">
       <div className="mx-auto flex h-full w-full max-w-[620px] flex-col gap-2 overflow-hidden">
         <div className="flex items-center justify-between gap-3">
-          <Link
-            href="/games"
-            className="ui-interactive rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold text-purple-200"
-          >
-            ← GAME LIBRARY
-          </Link>
+          <button type="button" onClick={() => setConfirmExit(true)} className="ui-interactive rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[10px] font-black tracking-wider text-purple-200">← KELUAR GAME</button>
           <button
             type="button"
             onClick={toggleSound}
