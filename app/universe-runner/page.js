@@ -276,26 +276,29 @@ export default function UniverseRunnerPage() {
       }
       g.items.forEach((item) => { item.z += g.speed * dt * .0012; });
       g.items = g.items.filter((item) => item.z < 1.12);
-      const hit = g.items.find((item) => item.kind !== "coin" && item.z > .88 && item.z < 1.04 && Math.abs(item.lane - p.lane) < .42);
-      const coinHits = g.items.filter((item) => item.kind === "coin" && item.z > .91 && item.z < 1.04 && Math.abs(item.lane - p.lane) < .42);
+      const coinHits = g.items.filter((item) => item.kind === "coin" && !item.resolved && item.z > .91 && item.z < 1.04 && Math.abs(item.lane - p.lane) < .42);
       if (coinHits.length) {
         g.coinCount += coinHits.length;
-        g.items = g.items.filter((item) => !coinHits.includes(item));
+        coinHits.forEach((item) => { item.resolved = true; });
         setCoins(g.coinCount);
         tone(880, .045);
       }
-      const obstacleHit = hit && (
-        (hit.kind === "barrier" && p.jump < .22) ||
-        (hit.kind === "arch" && p.slide < .18) ||
-        (hit.kind === "crate" && p.jump < .2)
-      );
-      if (obstacleHit) { g.chase = Math.min(1, g.chase + .36); tone(190, .12); }
-      else g.chase = Math.max(0, g.chase - .00035 * dt);
+      g.items.forEach((item) => {
+        if (item.kind === "coin" || item.resolved || item.z <= .91 || item.z >= 1.04 || Math.abs(item.lane - p.lane) >= .42) return;
+        item.resolved = true;
+        const failedMove =
+          (item.kind === "barrier" && p.jump < .22) ||
+          (item.kind === "arch" && p.slide < .18) ||
+          (item.kind === "crate" && p.jump < .2);
+        if (failedMove) {
+          g.chase = Math.min(1, g.chase + .36);
+          tone(190, .12);
+        } else {
+          g.chase = Math.max(0, g.chase - .12);
+        }
+      });
+      g.chase = Math.max(0, g.chase - .00012 * dt);
       if (g.chase >= 1) { finish(); return; }
-      if (hit && hit.z > 1.035) {
-        // A clean pass creates a little breathing room from Mama.
-        g.chase = Math.max(0, g.chase - .12);
-      }
       const points = Math.floor(g.distance * 12) + g.coinCount * 25;
       if (Math.floor(g.distance * 12 / 10) !== g.scoreTick) {
         g.scoreTick = Math.floor(g.distance * 12 / 10) * 10;
