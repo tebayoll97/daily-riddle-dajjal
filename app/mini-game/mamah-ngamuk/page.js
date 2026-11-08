@@ -85,47 +85,6 @@ export default function MamahNgamukPage() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    const threeCanvas = threeCanvasRef.current;
-    if (!ctx || !threeCanvas) return;
-
-    // Lightweight real-time 3D layer for prototype obstacles.
-    const renderer = new THREE.WebGLRenderer({ canvas: threeCanvas, alpha: true, antialias: true, powerPreference: "low-power" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-    renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    const scene3d = new THREE.Scene();
-    const camera3d = new THREE.OrthographicCamera(0, W, H, 0, 0.1, 3000);
-    camera3d.position.set(W / 2, H / 2, 1800);
-    camera3d.lookAt(W / 2, H / 2, 0);
-    scene3d.add(new THREE.HemisphereLight(0xe8d9ff, 0x24172f, 2.1));
-    const keyLight = new THREE.DirectionalLight(0xffd6b0, 2.4);
-    keyLight.position.set(-350, 1250, 900);
-    keyLight.castShadow = true;
-    scene3d.add(keyLight);
-    const obstacleMeshes = new Map();
-    const makeMaterial = (color, roughness = 0.78, metalness = 0.04) => new THREE.MeshStandardMaterial({ color, roughness, metalness });
-    const makeObstacle = (kind) => {
-      const group = new THREE.Group();
-      const material = (color) => new THREE.MeshStandardMaterial({color,roughness:.72,metalness:.06});
-      const box = (w,h,d,x,y,z,color) => { const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material(color)); m.position.set(x,y,z); m.castShadow=true; group.add(m); return m; };
-      if (["sedan","taxi","van","bus","truck"].includes(kind)) {
-        const dims = kind==="bus"?[150,112,78]:kind==="truck"?[142,105,82]:kind==="van"?[132,96,76]:kind==="taxi"?[124,78,70]:[124,78,70];
-        const [w,h,d]=dims, body=kind==="taxi"?0xe5b83f:kind==="van"?0x6c80b5:kind==="bus"?0x4d7595:kind==="truck"?0x9c6555:0x9b536c;
-        box(w,h*.56,d,0,-h*.13,0,body); box(w*.76,h*.43,d*.78,0,h*.31,-d*.04,kind==="taxi"?0xf3d477:0x3b3d58);
-        box(w*.82,7,d*.84,0,-h*.02,d*.52,0xd8d5d0);
-        [-.32,.32].forEach(x=>{ const wheel=new THREE.Mesh(new THREE.CylinderGeometry(11,11,8,16),material(0x17151c)); wheel.rotation.z=Math.PI/2; wheel.position.set(x*w,-h*.45,d*.22); group.add(wheel); });
-        [-1,0,1].forEach(i=>box(w*.18,h*.2,4,i*w*.25,h*.31,d*.39,0xaac4d8));
-        box(w*.2,10,5,-w*.34,-h*.12,d*.53,0xffe4a0); box(w*.2,10,5,w*.34,-h*.12,d*.53,0xffe4a0);
-        if(kind==="taxi") box(w*.25,7,d*.2,0,h*.55,0,0xfff0b0);
-      } else if(kind==="tire") {
-        const tire=new THREE.Mesh(new THREE.TorusGeometry(23,9,10,20),material(0x26242d)); tire.rotation.x=Math.PI/2; tire.position.y=-6; group.add(tire);
-      } else {
-        const cone=new THREE.Mesh(new THREE.ConeGeometry(22,58,8),material(0xff873e)); cone.position.y=15; group.add(cone); box(52,7,28,0,-16,0,0xf4e7cf);
-      }
-      return group;
-    };
     const g = {
       running: false, paused: false, over: false, distance: 0, speed: 0.22, spawn: 1.8, chase: 0, scoreTick: -1, coinCount: 0,
       player: { lane: 0, targetLane: 0, jump: 0, slide: 0 },
