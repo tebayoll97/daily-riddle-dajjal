@@ -18,6 +18,7 @@ export default function MamahNgamukPage() {
   const soundRef = useRef(true);
   const audioRef = useRef(null);
   const touchRef = useRef(null);
+  const catchTimerRef = useRef(null);
   const [status, setStatus] = useState("loading");
   const [score, setScore] = useState(0);
   const [coins, setCoins] = useState(0);
@@ -51,7 +52,7 @@ export default function MamahNgamukPage() {
   const start = useCallback(() => {
     const g = gameRef.current;
     if (!g) return;
-    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, speed: 0.34, spawn: 4.6, chase: 0, scoreTick: -1, coinCount: 0 });
+    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, speed: 0.22, spawn: 2.6, chase: 0, scoreTick: -1, coinCount: 0 });
     Object.assign(g.player, { lane: 0, targetLane: 0, jump: 0, slide: 0 });
     g.items = [];
     setScore(0);
@@ -160,6 +161,7 @@ export default function MamahNgamukPage() {
     let bootFallback;
     const finishBoot = () => {
       window.clearTimeout(bootFallback);
+      window.clearTimeout(catchTimerRef.current);
       setStatus("ready");
     };
     bootFallback = window.setTimeout(finishBoot, 1400);
@@ -346,21 +348,21 @@ export default function MamahNgamukPage() {
       const px = laneX(player.lane, 1);
       const bounce = g.running && player.jump <= 0 && player.slide <= 0 ? Math.sin(time / 65) * 4 : 0;
       // Mama Veylora stays behind the child; her broom swings while she runs.
-      const mamaY = (g.caught ? 1450 : 1510) + Math.sin(time / 95) * 4;
+      const mamaY = (g.caught ? 1280 : 1420) + Math.sin(time / 95) * 4;
       const mamaDrawn = drawSprite(2, px - 12, mamaY, 110, 138, Math.floor(time / 130) % 4);
       if (!mamaDrawn) {
         ctx.font = "58px system-ui"; ctx.textAlign = "center"; ctx.fillText("👩🏻", px - 4, mamaY - 8);
       }
       ctx.save();
       ctx.translate(px + 48, mamaY - 65);
-      ctx.rotate(Math.sin(time / 105) * .32 - .45);
+      ctx.rotate(g.caught ? Math.sin(time / 55) * .95 - .9 : Math.sin(time / 105) * .32 - .45);
       ctx.strokeStyle = "#9b6a43"; ctx.lineWidth = 7; ctx.lineCap = "round";
       ctx.beginPath(); ctx.moveTo(0, 25); ctx.lineTo(40, -28); ctx.stroke();
       ctx.fillStyle = "#d9b77d";
       ctx.beginPath(); ctx.moveTo(40, -28); ctx.lineTo(55, -19); ctx.lineTo(48, -4); ctx.lineTo(34, -12); ctx.closePath(); ctx.fill();
       ctx.restore();
 
-      const childY = (g.caught ? 1450 : 1400) - player.jump * 210;
+      const childY = (g.caught ? 1330 : 1300) - player.jump * 210;
       const childHeight = player.slide > 0 ? 62 : 112;
       const childWidth = player.slide > 0 ? 76 : 82;
       const childDrawn = drawSprite(4, px, childY + bounce, childWidth * 1.18, childHeight * 1.18, Math.floor(time / 105) % 4);
@@ -375,6 +377,23 @@ export default function MamahNgamukPage() {
         ctx.shadowBlur = 18;
         ctx.fillText("✦", px - 68, 1330);
         ctx.fillText("✦", px + 72, 1360);
+        ctx.restore();
+      }
+
+      if (g.caught) {
+        const pulse = 1 + Math.sin(time / 75) * .045;
+        ctx.save();
+        ctx.translate(W / 2, 1135);
+        ctx.scale(pulse, pulse);
+        ctx.fillStyle = "rgba(19,10,30,.88)";
+        ctx.strokeStyle = "#ffd48b";
+        ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.roundRect(-230,-58,460,116,28); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#fff2cf";
+        ctx.font = "1000 42px system-ui";
+        ctx.textAlign = "center";
+        ctx.shadowColor = "#ff8b4b"; ctx.shadowBlur = 18;
+        ctx.fillText("PULANG! MANDI!",0,14);
         ctx.restore();
       }
 
@@ -413,11 +432,11 @@ export default function MamahNgamukPage() {
       if (!g.running || g.paused) return;
       const p = g.player;
       g.distance += g.speed * dt;
-      g.speed = Math.min(.72, g.speed + .000025 * dt);
+      g.speed = Math.min(.34, g.speed + .000008 * dt);
       p.lane += (p.targetLane - p.lane) * Math.min(1, dt * 0.24);
       p.jump = Math.max(0, p.jump - dt * .0015);
       p.slide = Math.max(0, p.slide - dt * .0017);
-      g.spawn -= dt;
+      g.spawn -= dt * 0.001;
       if (g.spawn <= 0) {
         // Subway Surfers-inspired readable obstacle cadence: long gaps and open lanes.
         const lane = LANES[Math.floor(Math.random() * 3)];
@@ -435,9 +454,9 @@ export default function MamahNgamukPage() {
             for (let i = 0; i < 3; i++) g.items.push({ lane: safeLane, z: -.12 - i * .13, kind: "coin" });
           }
         }
-        g.spawn = 4.6 + Math.random() * 1.8;
+        g.spawn = 3.6 + Math.random() * 1.4;
       }
-      g.items.forEach((item) => { item.z += g.speed * dt * .0012; });
+      g.items.forEach((item) => { item.z += g.speed * dt * .00072; });
       g.items = g.items.filter((item) => item.z < 1.12);
       const coinHits = g.items.filter((item) => item.kind === "coin" && !item.resolved && item.z > .91 && item.z < 1.04 && Math.abs(item.lane - p.lane) < .42);
       if (coinHits.length) {
@@ -486,7 +505,7 @@ export default function MamahNgamukPage() {
         }
         activeMeshes.add(item);
         const z = Math.max(0, item.z);
-        const scale = 0.25 + z * 0.95;
+        const scale = 0.34 + z * 1.2;
         const screenX = laneX(item.lane, z);
         const screenY = 480 + z * z * 1010;
         mesh.position.set(screenX, H - screenY, 70 + z * 80);
@@ -568,7 +587,7 @@ export default function MamahNgamukPage() {
         <div className="mamah-controls"><button type="button" onClick={() => move("left")} aria-label="Kiri">←</button><button type="button" onClick={() => move("jump")} aria-label="Lompat">↑</button><button type="button" onClick={() => move("slide")} aria-label="Merunduk">↓</button><button type="button" onClick={() => move("right")} aria-label="Kanan">→</button></div><p className="mamah-controls-hint">GESER LAYAR ATAU GUNAKAN TOMBOL</p>
       </>}
       {status === "paused" && <section className="mamah-overlay"><div className="mamah-dialog"><span className="mamah-dialog__emoji">Ⅱ</span><p className="mamah-dialog__eyebrow">PERMAINAN DIJEDA</p><h2>ISTIRAHAT DULU?</h2><button className="mamah-button mamah-button--primary" onClick={resume}>▶ LANJUTKAN</button><button className="mamah-button" onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setConfirmExit(true)}>↩ KELUAR GAME</button></div></section>}
-      {status === "over" && <section className="mamah-overlay"><div className="mamah-dialog mamah-dialog--result"><span className="mamah-dialog__emoji">🧹</span><p className="mamah-dialog__eyebrow">MAMA BERHASIL MENANGKAP!</p><h2>KETANGKAP MAMAH!</h2><div className="mamah-result mamah-result--primary"><span>JARAK TEMPUH <strong>{distanceResult} m</strong></span><span>TOTAL KOIN <strong>🪙 {coins}</strong></span></div><div className="mamah-result"><span>SKOR AKHIR <strong>{String(score).padStart(6,"0")}</strong></span><span>BEST <strong>{String(best).padStart(6,"0")}</strong></span></div><button className="mamah-button mamah-button--primary" onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setStatus("ready")}>⌂ MENU UTAMA</button></div></section>}
+      {status === "caught" && <section className="mamah-catch-caption" aria-live="assertive"><strong>PULANG! MANDI!</strong></section>}\n      {status === "over" && <section className="mamah-overlay"><div className="mamah-dialog mamah-dialog--result"><span className="mamah-dialog__emoji">🧹</span><p className="mamah-dialog__eyebrow">MAMA BERHASIL MENANGKAP!</p><h2>KETANGKAP MAMAH!</h2><div className="mamah-result mamah-result--primary"><span>JARAK TEMPUH <strong>{distanceResult} m</strong></span><span>TOTAL KOIN <strong>🪙 {coins}</strong></span></div><div className="mamah-result"><span>SKOR AKHIR <strong>{String(score).padStart(6,"0")}</strong></span><span>BEST <strong>{String(best).padStart(6,"0")}</strong></span></div><button className="mamah-button mamah-button--primary" onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setStatus("ready")}>⌂ MENU UTAMA</button></div></section>}
       {settingsOpen && <section className="mamah-overlay" onClick={() => setSettingsOpen(false)}><div className="mamah-dialog" onClick={e => e.stopPropagation()}><button className="mamah-dialog__close" onClick={() => setSettingsOpen(false)} aria-label="Tutup">×</button><p className="mamah-dialog__eyebrow">PENGATURAN</p><h2>SUARA GAME</h2><button className="mamah-button" onClick={() => setSoundOn(v => !v)}>{soundOn ? "♫ SUARA: ON" : "♪ SUARA: OFF"}</button><p className="mamah-dialog__note">Atur volume melalui tombol volume perangkat.</p></div></section>}
       {confirmExit && <section className="mamah-overlay" onClick={() => setConfirmExit(false)}><div className="mamah-dialog" role="alertdialog" aria-modal="true" aria-labelledby="mamah-exit-title" onClick={e => e.stopPropagation()}><span className="mamah-dialog__emoji">🚪</span><p className="mamah-dialog__eyebrow">KONFIRMASI</p><h2 id="mamah-exit-title">KELUAR DARI GAME?</h2><p className="mamah-dialog__note">Sesi permainan ini akan diakhiri dan kamu kembali ke Game Library.</p><button className="mamah-button" onClick={() => setConfirmExit(false)}>TETAP MAIN</button><button className="mamah-button mamah-button--danger" onClick={() => { window.location.href = "/mini-game"; }}>YA, KELUAR</button></div></section>}
     </main>
