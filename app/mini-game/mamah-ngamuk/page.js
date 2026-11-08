@@ -544,7 +544,8 @@ export default function MamahNgamukPage() {
       g.elapsed += dt;
       const difficulty = Math.min(1, g.distance / 100000);
       // Vehicle movement speed rises linearly: Wave 1 = 1x, Wave 2 = 2x, Wave 3 = 3x...
-      g.carSpeed = baseRunSpeed * (g.waveIndex + 1);
+      const waveSpeedMultipliers = [1, 2, 2.5, 3, 3.5];
+      g.carSpeed = baseRunSpeed * (waveSpeedMultipliers[Math.min(g.waveIndex, 4)] || 3.5);
       const reachedWave = WAVE_STAGES[g.waveIndex + 1];
       if (reachedWave && g.distance >= reachedWave.at) {
         g.waveIndex += 1;
@@ -685,6 +686,14 @@ export default function MamahNgamukPage() {
     setStatus("playing");
   };
 
+  const goHome = () => {
+    const g = gameRef.current;
+    if (g) { g.running = false; g.paused = false; }
+    stopMusic();
+    setWaveNotice("");
+    setStatus("ready");
+  };
+
   const pointerDown = (event) => { touchRef.current = { x: event.clientX, y: event.clientY }; };
   const pointerUp = (event) => {
     if (!touchRef.current) return;
@@ -709,6 +718,11 @@ export default function MamahNgamukPage() {
       {status === "playing" && <>
         {waveNotice && <div className="mamah-wave-alert" role="status" aria-live="polite">{waveNotice}</div>}
         <div className="mamah-hud mamah-hud--minimal"><div className="mamah-hud__stats"><div><small>DISTANCE</small><strong>{Math.floor(score / 12)} m</strong></div><div><small>COINS</small><strong className="is-gold">🪙 {coins}</strong></div><div><small>BEST</small><strong>{String(best).padStart(6,"0")}</strong></div></div></div>
+        <div className="mamah-game-actions" aria-label="Kontrol permainan">
+          <button type="button" onPointerDown={e => e.stopPropagation()} onClick={pause} aria-label="Pause" title="Pause">Ⅱ</button>
+          <button type="button" onPointerDown={e => e.stopPropagation()} onClick={start} aria-label="Restart" title="Restart">↻</button>
+          <button type="button" onPointerDown={e => e.stopPropagation()} onClick={goHome} aria-label="Home Mamah Ngamuk" title="Home">⌂</button>
+        </div>
       </>}
       {status === "paused" && <section className="mamah-overlay"><div className="mamah-dialog"><span className="mamah-dialog__emoji">Ⅱ</span><p className="mamah-dialog__eyebrow">PERMAINAN DIJEDA</p><h2>ISTIRAHAT DULU?</h2><button className="mamah-button mamah-button--primary" onClick={resume}>▶ LANJUTKAN</button><button className="mamah-button" onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setConfirmExit(true)}>↩ KELUAR GAME</button></div></section>}
       {status === "caught" && <section className="mamah-catch-caption" aria-live="assertive"><strong>PULANG! MANDI!</strong></section>}\n      {status === "over" && <section className="mamah-overlay mamah-overlay--gameover"><div className="mamah-dialog mamah-dialog--result"><span className="mamah-dialog__emoji">🧹</span><p className="mamah-dialog__eyebrow">MAMA BERHASIL MENANGKAP!</p><h2>KETANGKAP MAMAH!</h2><div className="mamah-result mamah-result--primary"><span>JARAK TEMPUH <strong>{distanceResult} m</strong></span><span>TOTAL KOIN <strong>🪙 {coins}</strong></span></div><div className="mamah-result"><span>SKOR AKHIR <strong>{String(score).padStart(6,"0")}</strong></span><span>BEST <strong>{String(best).padStart(6,"0")}</strong></span></div><button className="mamah-button mamah-button--primary" onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setStatus("ready")}>⌂ MENU UTAMA</button></div></section>}
