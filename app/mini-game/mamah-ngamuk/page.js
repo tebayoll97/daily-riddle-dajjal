@@ -38,6 +38,7 @@ export default function MamahNgamukPage() {
   const [confirmExit, setConfirmExit] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [waveNotice, setWaveNotice] = useState("");
+  const [menuPanel, setMenuPanel] = useState("");
 
   const tone = useCallback((frequency = 520, duration = 0.08) => {
     if (!soundRef.current || typeof window === "undefined") return;
@@ -711,9 +712,44 @@ export default function MamahNgamukPage() {
       <div className="mamah-game__vignette" aria-hidden="true" />
       {status === "loading" && <section className="mamah-screen mamah-screen--loading"><div className="mamah-loader"><span>DF</span></div><p className="mamah-brand__eyebrow">DAJJAL FAMILY · GAMING UNIVERSE</p><h1 className="mamah-logo">MAMAH <span>NGAMUK!</span></h1><p className="mamah-loading-label">MENYIAPKAN DUNIA GAME...</p></section>}
       {status === "ready" && <section className="mamah-screen mamah-screen--menu">
-        <div className="mamah-brand"><span className="mamah-brand__eyebrow">DAJJAL FAMILY · GAMING UNIVERSE</span><h1 className="mamah-logo">MAMAH <span>NGAMUK!</span></h1><p className="mamah-tagline">ANAK DAJJAL KABUR. MAMAH VEYLORA MENGEJAR!</p></div>
-        <div className="mamah-menu-card"><div className="mamah-menu-card__coin">🪙 <strong>{coins}</strong></div><button type="button" className="mamah-button mamah-button--primary" onClick={start}>▶ MULAI MAIN</button><button type="button" className="mamah-button" onClick={() => setSettingsOpen(true)}>⚙ PENGATURAN</button><button type="button" className="mamah-button mamah-button--quiet" onClick={() => setConfirmExit(true)}>↩ KELUAR KE GAME LIBRARY</button></div>
-        <p className="mamah-menu-hint">SWIPE UNTUK BERGERAK · HINDARI RINTANGAN · KUMPULKAN KOIN</p>
+        <header className="mamah-home-header">
+          <span className="mamah-brand__eyebrow">DAJJAL FAMILY · GAMING UNIVERSE</span>
+          <button type="button" className="mamah-sound-toggle" onClick={() => setSoundOn(v => !v)} aria-label={soundOn ? "Matikan suara" : "Nyalakan suara"}>{soundOn ? "♫ SOUND ON" : "♪ SOUND OFF"}</button>
+        </header>
+        <div className="mamah-home-title">
+          <h1 className="mamah-logo">MAMAH <span>NGAMUK!</span></h1>
+          <p className="mamah-tagline">UH-OH... MAMA IS COMING!</p>
+        </div>
+        <div className="mamah-home-hero" aria-label="Mamah Veylora mengejar Anak Dajjal">
+          <div className="mamah-hero-speed mamah-hero-speed--left">✦</div>
+          <div className="mamah-hero-mama"><span className="mamah-hero-broom">🧹</span><span className="mamah-hero-face">👩🏻‍🦳</span><small>MAMAH VEYLORA</small></div>
+          <div className="mamah-hero-child"><span className="mamah-hero-face">😱</span><small>ANAK DAJJAL</small></div>
+          <div className="mamah-hero-speed mamah-hero-speed--right">✦</div>
+        </div>
+        <div className="mamah-home-bottom">
+          <div className="mamah-home-record">
+            <div><small>BEST DISTANCE</small><strong>{best.toLocaleString("id-ID")} <i>m</i></strong></div>
+            <div><small>COINS THIS RUN</small><strong>🪙 {coins}</strong></div>
+          </div>
+          <button type="button" className="mamah-button mamah-button--primary mamah-play-button" onClick={start}>▶ PLAY GAME</button>
+          <div className="mamah-home-grid">
+            <button type="button" onClick={() => setMenuPanel("leaderboard")}><span>🏆</span>LEADERBOARD</button>
+            <button type="button" onClick={() => setMenuPanel("howto")}><span>📖</span>HOW TO PLAY</button>
+            <button type="button" onClick={() => setSettingsOpen(true)}><span>⚙️</span>SETTINGS</button>
+            <button type="button" onClick={() => setMenuPanel("achievements")}><span>🏅</span>ACHIEVEMENTS</button>
+          </div>
+          <p className="mamah-menu-hint">SWIPE LEFT · SWIPE RIGHT  —  AVOID CARS & COLLECT COINS</p>
+          <button type="button" className="mamah-exit-link" onClick={() => setConfirmExit(true)}>BACK TO GAME LIBRARY</button>
+        </div>
+      </section>}
+      {menuPanel && <section className="mamah-overlay" onClick={() => setMenuPanel("")}>
+        <div className="mamah-dialog mamah-menu-panel" onClick={e => e.stopPropagation()}>
+          <button className="mamah-dialog__close" onClick={() => setMenuPanel("")} aria-label="Tutup">×</button>
+          <p className="mamah-dialog__eyebrow">MAMAH NGAMUK!</p>
+          {menuPanel === "leaderboard" && <><h2>🏆 LEADERBOARD</h2><div className="mamah-panel-stat"><span>PERSONAL BEST</span><strong>{best.toLocaleString("id-ID")} m</strong></div><p className="mamah-dialog__note">Peringkat global akan tersedia saat sistem leaderboard online diaktifkan.</p></>}
+          {menuPanel === "howto" && <><h2>HOW TO PLAY</h2><div className="mamah-howto-row"><b>←</b><span>SWIPE LEFT<br/><small>Pindah ke jalur kiri</small></span></div><div className="mamah-howto-row"><b>→</b><span>SWIPE RIGHT<br/><small>Pindah ke jalur kanan</small></span></div><div className="mamah-howto-row"><b>🪙</b><span>COLLECT COINS<br/><small>Kumpulkan koin sebanyak mungkin</small></span></div><div className="mamah-howto-row"><b>🚗</b><span>AVOID VEHICLES<br/><small>Jangan sampai tertabrak!</small></span></div></>}
+          {menuPanel === "achievements" && <><h2>🏅 ACHIEVEMENTS</h2><div className="mamah-achievement"><span>{best >= 1000 ? "🏆" : "🔒"}</span><div><b>FIRST ESCAPE</b><small>Capai jarak 1.000 meter</small></div><strong>{best >= 1000 ? "UNLOCKED" : "LOCKED"}</strong></div><div className="mamah-achievement"><span>{best >= 10000 ? "🥇" : "🔒"}</span><div><b>MASTER RUNNER</b><small>Capai jarak 10.000 meter</small></div><strong>{best >= 10000 ? "UNLOCKED" : "LOCKED"}</strong></div></>}
+        </div>
       </section>}
       {status === "playing" && <>
         {waveNotice && <div className="mamah-wave-alert" role="status" aria-live="polite">{waveNotice}</div>}
