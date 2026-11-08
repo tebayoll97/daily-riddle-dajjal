@@ -243,7 +243,7 @@ export default function MamahNgamukPage() {
       const px = laneX(player.lane, 1);
       const bounce = g.running && player.jump <= 0 && player.slide <= 0 ? Math.sin(time / 65) * 4 : 0;
       // Mama Veylora stays behind the child; her broom swings while she runs.
-      const mamaY = 1510 + Math.sin(time / 95) * 4;
+      const mamaY = (g.caught ? 1450 : 1510) + Math.sin(time / 95) * 4;
       const mamaDrawn = drawSprite(2, px - 12, mamaY, 110, 138, Math.floor(time / 130) % 4);
       if (!mamaDrawn) {
         ctx.font = "58px system-ui"; ctx.textAlign = "center"; ctx.fillText("👩🏻", px - 4, mamaY - 8);
@@ -257,12 +257,22 @@ export default function MamahNgamukPage() {
       ctx.beginPath(); ctx.moveTo(40, -28); ctx.lineTo(55, -19); ctx.lineTo(48, -4); ctx.lineTo(34, -12); ctx.closePath(); ctx.fill();
       ctx.restore();
 
-      const childY = 1400 - player.jump * 210;
+      const childY = (g.caught ? 1450 : 1400) - player.jump * 210;
       const childHeight = player.slide > 0 ? 62 : 112;
       const childWidth = player.slide > 0 ? 76 : 82;
       const childDrawn = drawSprite(4, px, childY + bounce, childWidth * 1.18, childHeight * 1.18, Math.floor(time / 105) % 4);
       if (!childDrawn) {
         ctx.font = "62px system-ui"; ctx.textAlign = "center"; ctx.fillText("🧒", px, childY + bounce);
+      }
+      if (g.caught) {
+        ctx.save();
+        ctx.font = "bold 58px system-ui";
+        ctx.textAlign = "center";
+        ctx.shadowColor = "rgba(255,196,96,.8)";
+        ctx.shadowBlur = 18;
+        ctx.fillText("✦", px - 68, 1330);
+        ctx.fillText("✦", px + 72, 1360);
+        ctx.restore();
       }
 
       // Chase pressure glow at the lower edge.
