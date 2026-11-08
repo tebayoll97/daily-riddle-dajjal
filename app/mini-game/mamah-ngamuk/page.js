@@ -50,7 +50,7 @@ export default function MamahNgamukPage() {
   const start = useCallback(() => {
     const g = gameRef.current;
     if (!g) return;
-    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, speed: 0.265, spawn: 4.6, chase: 0, scoreTick: -1, coinCount: 0 });
+    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, speed: 0.29, spawn: 4.8, chase: 0, scoreTick: -1, coinCount: 0 });
     Object.assign(g.player, { lane: 0, targetLane: 0, jump: 0, slide: 0 });
     g.items = [];
     setScore(0);
@@ -86,7 +86,7 @@ export default function MamahNgamukPage() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     const g = {
-      running: false, paused: false, over: false, distance: 0, speed: 0.22, spawn: 1.8, chase: 0, scoreTick: -1, coinCount: 0,
+      running: false, paused: false, over: false, distance: 0, speed: 0.29, spawn: 4.8, chase: 0, scoreTick: -1, coinCount: 0,
       player: { lane: 0, targetLane: 0, jump: 0, slide: 0 },
       items: [],
     };
@@ -331,7 +331,7 @@ export default function MamahNgamukPage() {
       if (!g.running || g.paused) return;
       const p = g.player;
       g.distance += g.speed * dt;
-      g.speed = Math.min(.36, g.speed + .0000025 * dt);
+      g.speed = Math.min(.39, g.speed + .000002 * dt);
       p.lane += (p.targetLane - p.lane) * Math.min(1, dt * 0.24);
       p.jump = Math.max(0, p.jump - dt * .00135);
       p.slide = 0;
@@ -356,7 +356,7 @@ export default function MamahNgamukPage() {
           for (let i=0;i<4;i++) g.items.push({ lane:openLane, z:-.12-i*.09, kind:"coin", resolved:false });
         }
         // Leave enough distance for the complete pattern to pass before the next one.
-        g.spawn = 4.6 + Math.random() * 1.0;
+        g.spawn = 4.8 + Math.random() * 1.0;
       }
       g.items.forEach((item) => { item.prevZ = item.z; item.z += g.speed * dt * .001; });
       g.items = g.items.filter((item) => item.z < 1.12);
@@ -370,10 +370,10 @@ export default function MamahNgamukPage() {
       // Swept collision: test the obstacle's full depth crossing the player's actual ground plane.
       // This avoids misses between frames and avoids late hits after the vehicle has passed.
       const PLAYER_Z = .90;
-      const PLAYER_LANE_RADIUS = .39;
+      const PLAYER_LANE_RADIUS = .52;
       const obstacleHit = g.items.find((item) => {
         if (item.kind === "coin" || item.resolved) return false;
-        const halfDepth = item.kind === "truck" || item.kind === "bus" ? .085 : .065;
+        const halfDepth = item.kind === "truck" || item.kind === "bus" ? .105 : .078;
         const previousZ = Number.isFinite(item.prevZ) ? item.prevZ : item.z;
         const nearestZ = Math.min(previousZ, item.z) - halfDepth;
         const farthestZ = Math.max(previousZ, item.z) + halfDepth;
