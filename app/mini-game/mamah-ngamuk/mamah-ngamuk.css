@@ -187,3 +187,32 @@
   border-color:rgba(255,211,155,.48);
   box-shadow:0 8px 24px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.12);
 }
+
+
+/* Distance-wave announcement: brief, blinking banner above the gameplay HUD. */
+.mamah-wave-alert {
+  position:absolute;
+  z-index:18;
+  top:calc(env(safe-area-inset-top) + 72px);
+  left:50%;
+  transform:translateX(-50%);
+  width:max-content;
+  max-width:calc(100% - 28px);
+  padding:10px 18px;
+  border:1px solid rgba(255,215,145,.82);
+  border-radius:14px;
+  color:#fff4d8;
+  background:rgba(25,12,28,.82);
+  box-shadow:0 0 22px rgba(255,164,82,.28),inset 0 1px rgba(255,255,255,.12);
+  font-size:clamp(12px,3.4vw,17px);
+  font-weight:1000;
+  letter-spacing:.075em;
+  text-align:center;
+  text-shadow:0 1px 0 #8b482d,0 0 12px rgba(255,177,94,.62);
+  pointer-events:none;
+  animation:mamah-wave-blink .34s steps(2,end) infinite;
+}
+@keyframes mamah-wave-blink {
+  0%,100% { opacity:1; }
+  50% { opacity:.34; }
+}
