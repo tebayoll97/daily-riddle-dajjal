@@ -566,7 +566,7 @@ export default function MamahNgamukPage() {
         const rowSpacing = .16 + intensity * .035;
         const pattern = [];
         for (let row = 0; row < burstRows; row++) {
-          const rowSafeLane = row === 0 ? safeLane : LANES[Math.floor(Math.random() * LANES.length)];
+          const rowSafeLane = safeLane;
           const rowLanes = LANES.filter((lane) => lane !== rowSafeLane);
           // Early waves usually use one vehicle per row; later waves fill both blocked lanes.
           const fillBoth = intensity > .24 && Math.random() < (.28 + intensity * .62);
