@@ -435,25 +435,30 @@ export default function MamahNgamukPage() {
       ctx.beginPath(); ctx.moveTo(40, -28); ctx.lineTo(55, -19); ctx.lineTo(48, -4); ctx.lineTo(34, -12); ctx.closePath(); ctx.fill();
       ctx.restore();
 
-      const childY = (g.caught ? 1330 : 1300) - player.jump * 210;
-      const childHeight = 230;
-      const childWidth = 184;
-      let childRow = 1; // RUN
-      let childFrame = Math.floor(time / 95) % 8;
-      if (g.caught) {
-        // The atlas CAUGHT row is a two-character composition, not a single-child cell.
-        // Keep the child on the full-body SCARED row until a dedicated capture pose is authored.
-        childRow = 5; // CAUGHT — child restrained after Mama catches him
-        childFrame = Math.min(7, Math.floor((time - (g.caughtAt || time)) / 350));
-      }
-      if (g.scaredUntil && time < g.scaredUntil && !g.caught) {
-        childRow = 4; // SCARED
-        childFrame = Math.floor(time / 105) % 8;
-      }
-      const childDrawn = drawChildSprite(childRow, px, childY + bounce, childWidth, childHeight, childFrame);
-      if (!childDrawn) {
-        const legacyDrawn = drawSprite(4, px, childY + bounce, childWidth * .9, childHeight * .9, Math.floor(time / 130) % 4);
-        if (!legacyDrawn) { ctx.font = "62px system-ui"; ctx.textAlign = "center"; ctx.fillText("🧒", px, childY + bounce); }
+      // The Veylora CAUGHT row already contains both characters in one authored capture composition.
+      // Draw the child separately only during normal gameplay to avoid duplicating him in the catch scene.
+      if (!g.caught) {
+        const childY = 1300;
+        const childHeight = 230;
+        const childWidth = 184;
+        let childRow = 1; // RUN
+        let childFrame = Math.floor(time / 95) % 8;
+        if (g.caught) {
+          // The atlas CAUGHT row is a two-character composition, not a single-child cell.
+          // Keep the child on the full-body SCARED row until a dedicated capture pose is authored.
+          childRow = 5; // CAUGHT — child restrained after Mama catches him
+          childFrame = Math.min(7, Math.floor((time - (g.caughtAt || time)) / 350));
+        }
+        if (g.scaredUntil && time < g.scaredUntil && !g.caught) {
+          childRow = 4; // SCARED
+          childFrame = Math.floor(time / 105) % 8;
+        }
+        const childDrawn = drawChildSprite(childRow, px, childY + bounce, childWidth, childHeight, childFrame);
+        if (!childDrawn) {
+          const legacyDrawn = drawSprite(4, px, childY + bounce, childWidth * .9, childHeight * .9, Math.floor(time / 130) % 4);
+          if (!legacyDrawn) { ctx.font = "62px system-ui"; ctx.textAlign = "center"; ctx.fillText("🧒", px, childY + bounce); }
+        }
+  
       }
       if (g.caught) {
         ctx.save();
