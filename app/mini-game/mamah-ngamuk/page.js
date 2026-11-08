@@ -113,10 +113,10 @@ export default function MamahNgamukPage() {
     enterGameFullscreen();
     const g = gameRef.current;
     if (!g) return;
-    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, elapsed: 0, speed: 0.29, spawn: 3.8, chase: 0, scoreTick: -1, coinCount: 0, waveIndex: 0 });
+    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, environmentDistance: 0, elapsed: 0, carSpeed: 0.30, spawn: 3.8, chase: 0, scoreTick: -1, coinCount: 0, waveIndex: 0 });
     window.clearTimeout(waveNoticeTimerRef.current);
     setWaveNotice(WAVE_STAGES[0].alert);
-    waveNoticeTimerRef.current = window.setTimeout(() => setWaveNotice(""), 2000);
+    waveNoticeTimerRef.current = window.setTimeout(() => setWaveNotice(""), 4000);
     Object.assign(g.player, { lane: 0, targetLane: 0, jump: 0, slide: 0 });
     g.items = [];
     setScore(0);
@@ -165,7 +165,7 @@ export default function MamahNgamukPage() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     const g = {
-      running: false, paused: false, over: false, distance: 0, elapsed: 0, speed: 0.29, spawn: 3.8, chase: 0, scoreTick: -1, coinCount: 0, waveIndex: 0,
+      running: false, paused: false, over: false, distance: 0, environmentDistance: 0, elapsed: 0, carSpeed: 0.30, spawn: 3.8, chase: 0, scoreTick: -1, coinCount: 0, waveIndex: 0,
       player: { lane: 0, targetLane: 0, jump: 0, slide: 0 },
       items: [],
     };
@@ -254,7 +254,7 @@ export default function MamahNgamukPage() {
 
       // Urban roadside skyline, streetlights and shopfront silhouettes.
       for (let i = 0; i < 13; i++) {
-        const x = i * 78 - (g.distance * 1.4 % 78);
+        const x = i * 78 - (g.environmentDistance * 1.4 % 78);
         const height = 65 + (i * 31 % 95);
         ctx.fillStyle = i % 2 ? "#211d38" : "#29213f";
         ctx.fillRect(x, 480 - height, 48, height);
@@ -264,7 +264,7 @@ export default function MamahNgamukPage() {
 
       // Residential streetscape: repeating houses on both sides, scaled by perspective.
       for (let i = 0; i < 6; i++) {
-        const z = ((i / 6) + (g.distance * 0.0012 % 1)) % 1;
+        const z = ((i / 6) + (g.environmentDistance * 0.0012 % 1)) % 1;
         const y = 500 + z * z * 930;
         const leftRoadEdge = 365 - z * 355;
         const rightRoadEdge = 535 + z * 355;
@@ -297,7 +297,7 @@ export default function MamahNgamukPage() {
 
       // Streetlights along both sidewalks; warm lamps become larger toward the camera.
       for (let i = 0; i < 4; i++) {
-        const z = ((i / 4) + (g.distance * 0.0012 % 1)) % 1;
+        const z = ((i / 4) + (g.environmentDistance * 0.0012 % 1)) % 1;
         const y = 500 + z * z * 930;
         const spread = 30 + z * 410;
         const poleH = 36 + z * 118;
@@ -341,7 +341,7 @@ export default function MamahNgamukPage() {
       // Lane dashes moving toward the player.
       for (let laneLine = 0; laneLine < 2; laneLine++) {
         for (let i = 0; i < 8; i++) {
-          const z = ((i / 8) + (g.distance * 0.0012 % 1)) % 1;
+          const z = ((i / 8) + (g.environmentDistance * 0.0012 % 1)) % 1;
           const y = 480 + z * z * 1010;
           const x = W / 2 + (laneLine ? 1 : -1) * (13 + z * 160);
           ctx.strokeStyle = "rgba(240,235,215,.42)";
@@ -536,10 +536,15 @@ export default function MamahNgamukPage() {
     const update = (dt) => {
       if (!g.running || g.paused) return;
       const p = g.player;
-      g.distance += g.speed * dt;
+      // Keep distance and roadside scenery at their normal pace.
+      // Only approaching vehicles receive the exponential per-wave speed multiplier.
+      const baseRunSpeed = .30;
+      g.distance += baseRunSpeed * dt;
+      g.environmentDistance += baseRunSpeed * dt;
       g.elapsed += dt;
       const difficulty = Math.min(1, g.distance / 100000);
-      g.speed = Math.min(.68, .30 + difficulty * .38);
+      const waveCarSpeed = baseRunSpeed * Math.pow(2, g.waveIndex);
+      g.carSpeed = waveCarSpeed;
       const reachedWave = WAVE_STAGES[g.waveIndex + 1];
       if (reachedWave && g.distance >= reachedWave.at) {
         g.waveIndex += 1;
@@ -566,7 +571,9 @@ export default function MamahNgamukPage() {
         const rowSpacing = .16 + intensity * .035;
         const pattern = [];
         for (let row = 0; row < burstRows; row++) {
-          const rowSafeLane = safeLane;
+          const safeLaneIndex = LANES.indexOf(safeLane);
+          // Move the safe gap between left, center and right on consecutive rows.
+          const rowSafeLane = LANES[(safeLaneIndex + row) % LANES.length];
           const rowLanes = LANES.filter((lane) => lane !== rowSafeLane);
           // Early waves usually use one vehicle per row; later waves fill both blocked lanes.
           const fillBoth = intensity > .24 && Math.random() < (.28 + intensity * .62);
@@ -592,7 +599,7 @@ export default function MamahNgamukPage() {
         const spawnGap = Math.max(1.15, 3.65 - intensity * 2.5);
         g.spawn = spawnGap + Math.random() * (.32 - intensity * .12);
       }
-      g.items.forEach((item) => { item.prevZ = item.z; item.z += g.speed * dt * .00105; });
+      g.items.forEach((item) => { item.prevZ = item.z; item.z += g.carSpeed * dt * .00105; });
       g.items = g.items.filter((item) => item.z < 1.12);
       const coinHits = g.items.filter((item) => item.kind === "coin" && !item.resolved && item.z > .91 && item.z < 1.04 && Math.abs(item.lane - p.lane) < .42);
       if (coinHits.length) {
