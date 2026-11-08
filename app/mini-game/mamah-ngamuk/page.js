@@ -114,42 +114,24 @@ export default function MamahNgamukPage() {
     const makeMaterial = (color, roughness = 0.78, metalness = 0.04) => new THREE.MeshStandardMaterial({ color, roughness, metalness });
     const makeObstacle = (kind) => {
       const group = new THREE.Group();
-      const addBox = (w,h,d,x,y,z,color) => {
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), makeMaterial(color));
-        mesh.position.set(x,y,z); mesh.castShadow = true; mesh.receiveShadow = true; group.add(mesh);
-        return mesh;
-      };
-      if (kind === "train") {
-        addBox(154, 104, 70, 0, 8, 0, 0x4d4568);
-        addBox(158, 18, 74, 0, 48, 2, 0xb85e70);
-        addBox(164, 12, 78, 0, 62, 0, 0x9184b5);
-        [-48,0,48].forEach((x) => {
-          addBox(35,38,5,x,12,39,0xb7c9d9);
-          addBox(25,5,3,x,12,43,0x5d6b82);
-        });
-        [-52,52].forEach((x) => {
-          const wheel = new THREE.Mesh(new THREE.CylinderGeometry(10,10,8,16),makeMaterial(0x17131f));
-          wheel.rotation.z=Math.PI/2; wheel.position.set(x,-48,20); wheel.castShadow=true; group.add(wheel);
-        });
-        addBox(132,8,8,0,-47,40,0xe6b66f);
-      } else if (kind === "log") {
-        const log = new THREE.Mesh(new THREE.CylinderGeometry(18,18,120,20),makeMaterial(0xa96d42));
-        log.rotation.z=Math.PI/2; log.position.y=-2; log.castShadow=true; log.receiveShadow=true; group.add(log);
-        [-59,59].forEach((x) => {
-          const end = new THREE.Mesh(new THREE.CylinderGeometry(18,18,4,20),makeMaterial(0xd0a06b));
-          end.rotation.z=Math.PI/2; end.position.set(x,-2,1); group.add(end);
-        });
-        const stripe = addBox(78,4,3,0,9,18,0xe0b47c);
-      } else if (kind === "arch") {
-        addBox(20,110,22,-48,0,0,0x9c87c8); addBox(20,110,22,48,0,0,0x9c87c8); addBox(116,20,24,0,55,0,0x7561a6);
-      } else if (kind === "barrier") {
-        addBox(124,64,28,0,0,0,0xd66c6a); addBox(132,12,34,0,34,0,0xf0b6a0); addBox(14,34,18,-42,-49,0,0x4b3045); addBox(14,34,18,42,-49,0,0x4b3045);
+      const material = (color) => new THREE.MeshStandardMaterial({color,roughness:.72,metalness:.06});
+      const box = (w,h,d,x,y,z,color) => { const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material(color)); m.position.set(x,y,z); m.castShadow=true; group.add(m); return m; };
+      if (["sedan","taxi","van","bus","truck"].includes(kind)) {
+        const dims = kind==="bus"?[150,112,78]:kind==="truck"?[142,105,82]:kind==="van"?[132,96,76]:kind==="taxi"?[124,78,70]:[124,78,70];
+        const [w,h,d]=dims, body=kind==="taxi"?0xe5b83f:kind==="van"?0x6c80b5:kind==="bus"?0x4d7595:kind==="truck"?0x9c6555:0x9b536c;
+        box(w,h*.56,d,0,-h*.13,0,body); box(w*.76,h*.43,d*.78,0,h*.31,-d*.04,kind==="taxi"?0xf3d477:0x3b3d58);
+        box(w*.82,7,d*.84,0,-h*.02,d*.52,0xd8d5d0);
+        [-.32,.32].forEach(x=>{ const wheel=new THREE.Mesh(new THREE.CylinderGeometry(11,11,8,16),material(0x17151c)); wheel.rotation.z=Math.PI/2; wheel.position.set(x*w,-h*.45,d*.22); group.add(wheel); });
+        [-1,0,1].forEach(i=>box(w*.18,h*.2,4,i*w*.25,h*.31,d*.39,0xaac4d8));
+        box(w*.2,10,5,-w*.34,-h*.12,d*.53,0xffe4a0); box(w*.2,10,5,w*.34,-h*.12,d*.53,0xffe4a0);
+        if(kind==="taxi") box(w*.25,7,d*.2,0,h*.55,0,0xfff0b0);
+      } else if(kind==="tire") {
+        const tire=new THREE.Mesh(new THREE.TorusGeometry(23,9,10,20),material(0x26242d)); tire.rotation.x=Math.PI/2; tire.position.y=-6; group.add(tire);
       } else {
-        addBox(104,76,72,0,0,0,0xb96a69); addBox(112,12,80,0,42,0,0xe2aa8c); addBox(12,72,6,0,0,38,0x8d4d61);
+        const cone=new THREE.Mesh(new THREE.ConeGeometry(22,58,8),material(0xff873e)); cone.position.y=15; group.add(cone); box(52,7,28,0,-16,0,0xf4e7cf);
       }
       return group;
     };
-
     const g = {
       running: false, paused: false, over: false, distance: 0, speed: 0.18, spawn: 3.4, chase: 0, scoreTick: -1, coinCount: 0,
       player: { lane: 0, targetLane: 0, jump: 0, slide: 0 },
