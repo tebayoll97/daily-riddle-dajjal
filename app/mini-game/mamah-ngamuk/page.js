@@ -52,7 +52,7 @@ export default function MamahNgamukPage() {
   const start = useCallback(() => {
     const g = gameRef.current;
     if (!g) return;
-    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, speed: 0.18, spawn: 3.4, chase: 0, scoreTick: -1, coinCount: 0 });
+    Object.assign(g, { running: true, paused: false, over: false, caught: false, distance: 0, speed: 0.105, spawn: 2.8, chase: 0, scoreTick: -1, coinCount: 0 });
     Object.assign(g.player, { lane: 0, targetLane: 0, jump: 0, slide: 0 });
     g.items = [];
     setScore(0);
@@ -244,7 +244,50 @@ export default function MamahNgamukPage() {
       }
 
       // Coins and obstacles: smaller at horizon, larger near player.
-      // Coins remain in the 2D layer; solid obstacles are rendered only by Three.js.
+      // Reliable 2.5D obstacle fallback remains visible while WebGL assets are being tuned.
+      [...g.items].filter((item) => item.kind !== "coin").sort((a,b) => a.z-b.z).forEach((item) => {
+        const z = Math.max(0, item.z);
+        const x = laneX(item.lane, z);
+        const y = 480 + z * z * 1010;
+        const scale = 0.25 + z * 0.95;
+        const w = 62 * scale;
+        const h = 48 * scale;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.fillStyle = "rgba(0,0,0,.35)";
+        ctx.beginPath(); ctx.ellipse(0, 3*scale, w*.72, h*.18, 0, 0, Math.PI*2); ctx.fill();
+        if (item.kind === "train") {
+          const tw=w*1.42, th=h*1.65;
+          ctx.fillStyle="#302943"; ctx.fillRect(-tw/2,-th,tw,th);
+          ctx.fillStyle="#4e456a"; ctx.fillRect(-tw/2,-th,tw,th*.2);
+          ctx.fillStyle="#b85e70"; ctx.fillRect(-tw/2,-th*.78,tw,th*.17);
+          for(let wi=-1;wi<=1;wi++) {
+            ctx.fillStyle="#b8c9d9"; ctx.fillRect(wi*tw*.29-tw*.085,-th*.65,tw*.17,th*.32);
+            ctx.fillStyle="#e8c47a"; ctx.fillRect(wi*tw*.29-tw*.018,-th*.25,tw*.036,th*.05);
+          }
+          ctx.fillStyle="#171321"; ctx.fillRect(-tw*.36,-th*.08,tw*.72,th*.1);
+          ctx.fillStyle="#c38a55"; ctx.fillRect(-tw*.44,-th*.02,tw*.88,th*.06);
+        } else if (item.kind === "log") {
+          ctx.fillStyle="#75472f"; ctx.fillRect(-w*.7,-h*.62,w*1.4,h*.55);
+          ctx.fillStyle="#b77a49"; ctx.beginPath(); ctx.ellipse(-w*.7,-h*.35,h*.27,h*.27,0,0,Math.PI*2); ctx.fill();
+          ctx.fillStyle="#d4a16b"; ctx.beginPath(); ctx.ellipse(w*.7,-h*.35,h*.27,h*.27,0,0,Math.PI*2); ctx.fill();
+          ctx.fillStyle="#e3b77f"; ctx.fillRect(-w*.48,-h*.58,w*.96,h*.08);
+        } else if (item.kind === "arch") {
+          ctx.fillStyle="#7663a7"; ctx.fillRect(-w*.65,-h*1.65,w*.2,h*1.65); ctx.fillRect(w*.45,-h*1.65,w*.2,h*1.65); ctx.fillRect(-w*.65,-h*1.65,w*1.3,h*.25);
+          ctx.fillStyle="rgba(255,255,255,.22)"; ctx.fillRect(-w*.6,-h*1.58,w*1.2,h*.06);
+        } else if (item.kind === "barrier") {
+          ctx.fillStyle="#713c58"; ctx.fillRect(-w*.68,-h*.12,w*1.36,h*.2);
+          ctx.fillStyle="#d66c6a"; ctx.fillRect(-w*.68,-h*.82,w*1.36,h*.7);
+          ctx.fillStyle="#f3b49e"; ctx.fillRect(-w*.68,-h*.82,w*1.36,h*.13);
+          ctx.fillStyle="#493044"; ctx.fillRect(-w*.53,-h*.12,w*.14,h*.42); ctx.fillRect(w*.39,-h*.12,w*.14,h*.42);
+        } else {
+          ctx.fillStyle="#8d4d61"; ctx.fillRect(-w*.65,-h*.78,w*1.3,h*.78);
+          ctx.fillStyle="#bd766e"; ctx.fillRect(-w*.65,-h*.78,w*1.3,h*.66);
+          ctx.fillStyle="#e3aa8b"; ctx.beginPath(); ctx.moveTo(-w*.65,-h*.78); ctx.lineTo(-w*.45,-h); ctx.lineTo(w*.78,-h*.78); ctx.closePath(); ctx.fill();
+          ctx.fillStyle="rgba(255,255,255,.25)"; ctx.strokeRect(-w*.52,-h*.68,w*1.04,h*.48);
+        }
+        ctx.restore();
+      });
       [...g.items].filter((item) => item.kind === "coin").sort((a, b) => a.z - b.z).forEach((item) => {
         const x = laneX(item.lane, item.z);
         const y = 480 + item.z * item.z * 1010;
@@ -350,29 +393,30 @@ export default function MamahNgamukPage() {
       if (!g.running || g.paused) return;
       const p = g.player;
       g.distance += g.speed * dt;
-      g.speed = Math.min(.29, g.speed + .000004 * dt);
+      g.speed = Math.min(.235, g.speed + .0000015 * dt);
       p.lane += (p.targetLane - p.lane) * Math.min(1, dt * 0.24);
       p.jump = Math.max(0, p.jump - dt * .0015);
       p.slide = Math.max(0, p.slide - dt * .0017);
       g.spawn -= dt * 0.001;
       if (g.spawn <= 0) {
-        // Subway Surfers-inspired readable obstacle cadence: long gaps and open lanes.
-        const lane = LANES[Math.floor(Math.random() * 3)];
-        const roll = Math.random();
-        if (roll < .20) {
-          // Coin trail in an otherwise clear lane.
-          for (let i = 0; i < 5; i++) g.items.push({ lane, z: -i * .12, kind: "coin" });
-        } else {
-          // Each obstacle tests one clear action: jump, slide, or lane change.
-          const kind = roll < .39 ? "log" : roll < .56 ? "barrier" : roll < .73 ? "arch" : roll < .91 ? "train" : "crate";
-          g.items.push({ lane, z: 0, kind });
-          // Optional reward trail in one of the two safe lanes.
-          if (Math.random() < .52) {
-            const safeLane = LANES.filter((value) => value !== lane)[Math.floor(Math.random() * 2)];
-            for (let i = 0; i < 3; i++) g.items.push({ lane: safeLane, z: -.12 - i * .13, kind: "coin" });
+        // Pattern-based endless-runner generator: each row leaves at least one safe lane.
+        const patterns = [
+          [{ row: 0, blocks: [[-1,"train"],[0,"log"]] }, { row: .28, blocks: [[0,"barrier"],[1,"arch"]] }],
+          [{ row: 0, blocks: [[0,"train"],[1,"log"]] }, { row: .3, blocks: [[-1,"arch"],[1,"barrier"]] }],
+          [{ row: 0, blocks: [[-1,"log"],[1,"train"]] }, { row: .3, blocks: [[-1,"barrier"],[0,"arch"]] }],
+          [{ row: 0, blocks: [[-1,"train"]] }, { row: .24, blocks: [[0,"log"],[1,"barrier"]] }],
+          [{ row: 0, blocks: [[1,"train"]] }, { row: .26, blocks: [[-1,"arch"],[0,"log"]] }],
+        ];
+        const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+        pattern.forEach((row) => {
+          row.blocks.forEach(([lane,kind]) => g.items.push({ lane, z: -row.row, kind }));
+          const openLane = LANES.find((lane) => !row.blocks.some(([blocked]) => blocked === lane));
+          if (openLane !== undefined) {
+            for (let i=0;i<3;i++) g.items.push({ lane:openLane, z:-row.row-i*.075, kind:"coin" });
           }
-        }
-        g.spawn = 5.3 + Math.random() * 1.5;
+        });
+        // Leave enough distance for the complete pattern to pass before the next one.
+        g.spawn = 6.2 + Math.random() * 1.4;
       }
       g.items.forEach((item) => { item.z += g.speed * dt * .001; });
       g.items = g.items.filter((item) => item.z < 1.12);
