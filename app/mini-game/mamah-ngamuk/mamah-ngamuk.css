@@ -370,3 +370,94 @@
   text-shadow:0 0 10px #f7a83b;
 }
 .mamah-home-record>div:last-child strong { color:#ffe18a; }
+
+
+/* FINAL LAYOUT FIX — controls below the BEST stat; wave notice below controls. */
+.mamah-game-actions {
+  top: calc(env(safe-area-inset-top) + 62px);
+  right: max(12px, env(safe-area-inset-right));
+  left: auto;
+  transform: none;
+  display: flex;
+  gap: 6px;
+}
+.mamah-game-actions button {
+  width: clamp(32px, 9vw, 38px);
+  height: clamp(32px, 9vw, 38px);
+  border-radius: 11px;
+  font-size: clamp(17px, 4.5vw, 20px);
+}
+.mamah-wave-alert {
+  top: calc(env(safe-area-inset-top) + 108px);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(86vw, 520px);
+  padding: 8px 13px;
+  font-size: clamp(10px, 3vw, 15px);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.mamah-hud__stats { min-height: 42px; }
+
+/* Fixed atlas cells: Veylora stays ANGRY and Anak Dajjal stays CRYING.
+   Only gentle CSS motion loops; the sprite frame itself never changes. */
+.mamah-home-hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(4px, 3vw, 22px);
+  width: min(100%, 440px);
+  min-height: clamp(164px, 27vh, 270px);
+  max-height: 310px;
+  padding: 10px 8px 28px;
+  overflow: hidden;
+}
+.mamah-hero-character {
+  position: relative;
+  z-index: 2;
+  display: block;
+  flex: 0 1 auto;
+  width: clamp(94px, 32vw, 174px);
+  aspect-ratio: 1 / 1;
+  background-image: url('/universe-characters.png');
+  background-repeat: no-repeat;
+  background-size: 400% 600%;
+  filter: drop-shadow(0 10px 9px rgba(0,0,0,.48));
+  transform-origin: center bottom;
+}
+.mamah-hero-character--mama {
+  background-position: 100% 40%;
+  animation: mamah-mama-loop 1.35s ease-in-out infinite;
+}
+.mamah-hero-character--child {
+  background-position: 66.6667% 80%;
+  animation: mamah-child-cry-loop 1.65s ease-in-out infinite;
+}
+@keyframes mamah-mama-loop {
+  0%, 100% { transform: translateY(2px) rotate(-3deg) scale(1); }
+  50% { transform: translateY(-3px) rotate(2deg) scale(1.025); }
+}
+@keyframes mamah-child-cry-loop {
+  0%, 100% { transform: translateY(3px) rotate(3deg); }
+  35% { transform: translateY(-2px) rotate(-2deg); }
+  70% { transform: translateY(4px) rotate(2deg); }
+}
+.mamah-hero-caption { bottom: 3px; }
+@media (max-width: 360px) {
+  .mamah-game-actions { right: 9px; gap: 4px; }
+  .mamah-game-actions button { width: 32px; height: 32px; }
+  .mamah-wave-alert { max-width: 82vw; padding: 7px 9px; letter-spacing: .045em; }
+  .mamah-home-hero { min-height: 148px; gap: 0; }
+  .mamah-hero-character { width: clamp(88px, 31vw, 112px); }
+  .mamah-hero-caption b { padding: 4px 6px; font-size: 7px; }
+}
+@media (max-height: 700px) {
+  .mamah-home-hero { min-height: 126px; max-height: 170px; padding-bottom: 24px; }
+  .mamah-hero-character { width: clamp(88px, 24vh, 126px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mamah-hero-character--mama,
+  .mamah-hero-character--child { animation: none !important; }
+}
