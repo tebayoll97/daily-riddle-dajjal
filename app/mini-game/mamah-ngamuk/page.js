@@ -544,7 +544,7 @@ export default function MamahNgamukPage() {
       g.elapsed += dt;
       const difficulty = Math.min(1, g.distance / 100000);
       // Vehicle movement speed rises linearly: Wave 1 = 1x, Wave 2 = 2x, Wave 3 = 3x...
-      const waveSpeedMultipliers = [1, 2, 2.5, 3, 3.5];
+      const waveSpeedMultipliers = [1, 1, 2.5, 3, 3.5];
       g.carSpeed = baseRunSpeed * (waveSpeedMultipliers[Math.min(g.waveIndex, 4)] || 3.5);
       const reachedWave = WAVE_STAGES[g.waveIndex + 1];
       if (reachedWave && g.distance >= reachedWave.at) {
