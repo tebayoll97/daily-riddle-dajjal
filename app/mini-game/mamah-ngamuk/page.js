@@ -310,7 +310,9 @@ export default function MamahNgamukPage() {
       let childRow = 1; // RUN
       let childFrame = Math.floor(time / 95) % 8;
       if (g.caught) {
-        childRow = 5; // CAUGHT
+        // The atlas CAUGHT row is a two-character composition, not a single-child cell.
+        // Keep the child on the full-body SCARED row until a dedicated capture pose is authored.
+        childRow = 4; // SCARED — full-body child only
         childFrame = Math.min(7, Math.floor((time - (g.caughtAt || time)) / 150));
       } else if (player.jump > 0) {
         childRow = 2; // JUMP
