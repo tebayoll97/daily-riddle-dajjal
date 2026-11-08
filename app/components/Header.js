@@ -44,8 +44,6 @@ export default function Header() {
 
   const t = translations[language] || translations.en;
 
-  // Mini-games use an immersive full-screen layout without the main website chrome.
-  if (pathname?.startsWith("/mini-game")) return null;
 
   useEffect(() => {
     let frame = 0;
@@ -335,7 +333,10 @@ export default function Header() {
           {navLinks.map((link) => {
             const active = isActive(link.href);
 
-            return (
+            // Mini-games use an immersive full-screen layout without the main website chrome.
+  if (pathname?.startsWith("/mini-game")) return null;
+
+  return (
               <Link
                 key={link.href}
                 href={link.href}
