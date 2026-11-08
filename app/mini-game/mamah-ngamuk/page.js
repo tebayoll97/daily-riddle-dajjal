@@ -197,11 +197,11 @@ export default function MamahNgamukPage() {
     sheet.onerror = () => { sheetRef.current = null; finishBoot(); };
     sheet.src = "/universe-characters.png";
 
-    // Dedicated 6-column × 4-row obstacle atlas (1536 × 1024, 256px cells).
+    // OBSTACLE-V2 atlas: 3 columns × 2 rows, 512px cells with 32px gutters (1600 × 1056).
     const obstacleSheet = new Image();
     obstacleSheet.onload = () => { obstacleSheetRef.current = obstacleSheet; };
     obstacleSheet.onerror = () => { obstacleSheetRef.current = null; };
-    obstacleSheet.src = "/mini-game/mamah-ngamuk/sprite/obstacles.png";
+    obstacleSheet.src = "/mini-game/mamah-ngamuk/sprite/obstacle-v2.png";
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -373,31 +373,34 @@ export default function MamahNgamukPage() {
         ctx.beginPath(); ctx.ellipse(0, 3*scale, w*.72, h*.18, 0, 0, Math.PI*2); ctx.fill();
         const obstacleAtlas = obstacleSheetRef.current;
         const atlasCells = {
-          taxi: [0, 0],
-          sedan: [1, 0],
-          van: [3, 0],
-          bus: [4, 0],
-          truck: [0, 1],
-          roadblock: [2, 2],
+          mbg: [0, 0],
+          kopdes: [1, 0],
+          sedotwc: [2, 0],
+          jenazah: [0, 1],
+          sawit: [1, 1],
+          lpg: [2, 1],
         };
         const atlasCell = atlasCells[item.kind];
-        const atlasReady = obstacleAtlas?.complete && obstacleAtlas.naturalWidth >= 1536 && obstacleAtlas.naturalHeight >= 1024;
+        const atlasReady = obstacleAtlas?.complete
+          && obstacleAtlas.naturalWidth >= 1600
+          && obstacleAtlas.naturalHeight >= 1056;
         if (atlasReady && atlasCell) {
-          const cellW = obstacleAtlas.naturalWidth / 6;
-          const cellH = obstacleAtlas.naturalHeight / 4;
+          // Each cell is 512×512px; cells are separated by a fixed 32px gutter.
+          const cellSize = 512;
+          const cellStep = 544;
           const [col, row] = atlasCell;
-          const spriteSize = (item.kind === "roadblock" ? 176 : 190) * scale;
+          const spriteSize = 190 * scale;
           ctx.drawImage(
             obstacleAtlas,
-            col * cellW, row * cellH, cellW, cellH,
+            col * cellStep, row * cellStep, cellSize, cellSize,
             -spriteSize / 2, -spriteSize * 0.92, spriteSize, spriteSize
           );
-        } else if (item.kind === "sedan" || item.kind === "taxi" || item.kind === "van" || item.kind === "truck" || item.kind === "bus") {
-          const truck = item.kind === "truck" || item.kind === "bus";
-          const van = item.kind === "van";
+        } else if (["mbg", "kopdes", "sedotwc", "jenazah", "sawit", "lpg"].includes(item.kind)) {
+          const truck = ["kopdes", "sedotwc", "sawit", "lpg"].includes(item.kind);
+          const van = item.kind === "mbg" || item.kind === "jenazah";
           const cw = w * (truck ? 1.72 : van ? 1.55 : 1.42);
           const ch = h * (truck ? 2.05 : van ? 1.9 : 1.72);
-          const body = item.kind === "taxi" ? "#e8bb42" : item.kind === "van" ? "#547f9e" : item.kind === "truck" ? "#477d72" : item.kind === "bus" ? "#d36e55" : "#c85d61";
+          const body = item.kind === "mbg" ? "#4b9b54" : item.kind === "kopdes" ? "#d94b43" : item.kind === "sedotwc" ? "#e2b83f" : item.kind === "jenazah" ? "#20232b" : item.kind === "sawit" ? "#d99c2b" : "#4b9c43";
           ctx.fillStyle="#11151c"; ctx.beginPath(); ctx.ellipse(0,3*scale,cw*.62,ch*.12,0,0,Math.PI*2); ctx.fill();
           ctx.fillStyle="#171c25"; ctx.fillRect(-cw*.46,-ch*.16,cw*.18,ch*.46); ctx.fillRect(cw*.28,-ch*.16,cw*.18,ch*.46);
           ctx.fillStyle=body; ctx.fillRect(-cw*.5,-ch*.72,cw,ch*.62);
@@ -407,7 +410,7 @@ export default function MamahNgamukPage() {
           ctx.fillStyle="#f9e8b1"; ctx.fillRect(-cw*.43,-ch*.28,cw*.12,ch*.08); ctx.fillRect(cw*.31,-ch*.28,cw*.12,ch*.08);
           ctx.fillStyle="#a93e49"; ctx.fillRect(-cw*.42,-ch*.08,cw*.13,ch*.08); ctx.fillRect(cw*.29,-ch*.08,cw*.13,ch*.08);
           ctx.fillStyle="rgba(255,255,255,.2)"; ctx.fillRect(-cw*.46,-ch*.7,cw*.92,ch*.06);
-          if(item.kind==="taxi"){ctx.fillStyle="#fff0a8";ctx.fillRect(-cw*.12,-ch*1.04,cw*.24,ch*.08);}
+          if(item.kind==="mbg" || item.kind==="sedotwc" || item.kind==="lpg"){ctx.fillStyle="#fff0a8";ctx.fillRect(-cw*.12,-ch*1.04,cw*.24,ch*.08);}
           if(truck){ctx.fillStyle="#c3cbd0";ctx.fillRect(-cw*.42,-ch*.7,cw*.84,ch*.44);ctx.strokeStyle="#72828b";ctx.lineWidth=2;ctx.strokeRect(-cw*.42,-ch*.7,cw*.84,ch*.44);}
         } else if (item.kind === "log") {
           ctx.fillStyle="#75472f"; ctx.fillRect(-w*.7,-h*.62,w*1.4,h*.55);
@@ -580,7 +583,7 @@ export default function MamahNgamukPage() {
         // Exact vehicle count rises by one each wave: 2, 3, 4, 5, 6...
         // One vehicle is placed per staggered row; the safe gap zigzags across lanes.
         const safeLane = LANES[Math.floor(Math.random() * LANES.length)];
-        const vehicleKinds = ["sedan", "taxi", "van", "truck", "bus"];
+        const vehicleKinds = ["mbg", "kopdes", "sedotwc", "jenazah", "sawit", "lpg"];
         const vehicleCount = 2 + g.waveIndex;
         const rowSpacing = Math.max(.25, (.18 - g.waveIndex * .008) * 2);
         const pattern = [];
@@ -624,7 +627,7 @@ export default function MamahNgamukPage() {
       const PLAYER_LANE_RADIUS = .52;
       const obstacleHit = g.items.find((item) => {
         if (item.kind === "coin" || item.resolved) return false;
-        const halfDepth = item.kind === "truck" || item.kind === "bus" ? .105 : .078;
+        const halfDepth = ["kopdes", "sedotwc", "sawit", "lpg"].includes(item.kind) ? .105 : .078;
         const previousZ = Number.isFinite(item.prevZ) ? item.prevZ : item.z;
         const nearestZ = Math.min(previousZ, item.z) - halfDepth;
         const farthestZ = Math.max(previousZ, item.z) + halfDepth;
