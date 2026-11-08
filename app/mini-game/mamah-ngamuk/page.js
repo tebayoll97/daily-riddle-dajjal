@@ -116,10 +116,7 @@ export default function MamahNgamukPage() {
     }
     if (direction === "left") g.player.targetLane = Math.max(-1, g.player.targetLane - 1);
     if (direction === "right") g.player.targetLane = Math.min(1, g.player.targetLane + 1);
-    if (direction === "jump" && g.player.jump <= 0 && g.player.slide <= 0) {
-      g.player.jump = 0.72;
-      tone(570, 0.1);
-    }
+    
   }, [start, tone]);
 
   useEffect(() => {
@@ -232,6 +229,67 @@ export default function MamahNgamukPage() {
         ctx.fillRect(x, 480 - height, 48, height);
         ctx.fillStyle = "rgba(197,166,255,.22)";
         for (let wy = 495 - height; wy < 474; wy += 17) ctx.fillRect(x + 10, wy, 4, 5);
+      }
+
+      // Residential streetscape: repeating houses on both sides, scaled by perspective.
+      for (let i = 0; i < 6; i++) {
+        const z = ((i / 6) + (g.distance * 0.000035 % 1)) % 1;
+        const y = 500 + z * z * 930;
+        const leftRoadEdge = 365 - z * 355;
+        const rightRoadEdge = 535 + z * 355;
+        const houseW = 48 + z * 62;
+        const houseH = 54 + z * 82;
+        const sideOffset = 36 + z * 58;
+        [-1, 1].forEach((side) => {
+          const centerX = side < 0 ? leftRoadEdge - sideOffset - houseW / 2 : rightRoadEdge + sideOffset + houseW / 2;
+          ctx.save();
+          ctx.translate(centerX, y);
+          ctx.fillStyle = "rgba(8,10,20,.34)";
+          ctx.fillRect(-houseW * .56, -houseH * .08, houseW * 1.12, houseH * .16);
+          ctx.fillStyle = i % 2 ? "#353248" : "#40374a";
+          ctx.fillRect(-houseW / 2, -houseH, houseW, houseH);
+          ctx.fillStyle = i % 2 ? "#584354" : "#5b4651";
+          ctx.beginPath();
+          ctx.moveTo(-houseW * .62, -houseH);
+          ctx.lineTo(0, -houseH * 1.42);
+          ctx.lineTo(houseW * .62, -houseH);
+          ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = "rgba(255,211,139,.62)";
+          ctx.fillRect(-houseW * .28, -houseH * .72, houseW * .18, houseH * .2);
+          ctx.fillRect(houseW * .1, -houseH * .72, houseW * .18, houseH * .2);
+          ctx.fillStyle = "#292638";
+          ctx.fillRect(-houseW * .1, -houseH * .38, houseW * .22, houseH * .38);
+          ctx.restore();
+        });
+      }
+
+      // Streetlights along both sidewalks; warm lamps become larger toward the camera.
+      for (let i = 0; i < 4; i++) {
+        const z = ((i / 4) + (g.distance * 0.00005 % 1)) % 1;
+        const y = 500 + z * z * 930;
+        const spread = 30 + z * 410;
+        const poleH = 36 + z * 118;
+        [-1, 1].forEach((side) => {
+          const x = W / 2 + side * spread;
+          ctx.save();
+          ctx.strokeStyle = "#34313b";
+          ctx.lineWidth = 2 + z * 4;
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x, y - poleH);
+          ctx.lineTo(x - side * (9 + z * 12), y - poleH - 4);
+          ctx.stroke();
+          ctx.fillStyle = "rgba(255,218,145,.16)";
+          ctx.beginPath();
+          ctx.arc(x - side * (9 + z * 12), y - poleH - 4, 5 + z * 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#ffe2a1";
+          ctx.beginPath();
+          ctx.arc(x - side * (9 + z * 12), y - poleH - 4, 2 + z * 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
       }
 
       // Asphalt highway with shoulder lanes and road markings.
@@ -358,10 +416,12 @@ export default function MamahNgamukPage() {
       // Mama Veylora stays behind the child; her broom swings while she runs.
       // Mama follows the player's lane and stays visibly behind the child on screen.
       const mamaX = laneX(player.lane, 1);
-      const mamaY = (g.caught ? 1325 : 1460) + Math.sin(time / 150) * 3;
-      const mamaDrawn = drawVeyloraSprite(1, mamaX, mamaY, 112, 150, Math.floor(time / 115) % 8);
+      const mamaY = (g.caught ? 1435 : 1460) + Math.sin(time / 150) * 3;
+      const mamaRow = g.caught ? 5 : 1;
+      const mamaFrame = Math.floor(time / (g.caught ? 175 : 115)) % 8;
+      const mamaDrawn = drawVeyloraSprite(mamaRow, mamaX, mamaY, 230, 285, mamaFrame);
       if (!mamaDrawn) {
-        const legacyMamaDrawn = drawSprite(2, mamaX, mamaY, 96, 122, Math.floor(time / 170) % 4);
+        const legacyMamaDrawn = drawSprite(2, mamaX, mamaY, 150, 190, Math.floor(time / 170) % 4);
         if (!legacyMamaDrawn) {
           ctx.font = "58px system-ui"; ctx.textAlign = "center"; ctx.fillText("👩🏻", mamaX, mamaY - 8);
         }
@@ -376,22 +436,15 @@ export default function MamahNgamukPage() {
       ctx.restore();
 
       const childY = (g.caught ? 1330 : 1300) - player.jump * 210;
-      const childHeight = player.slide > 0 ? 112 : 190;
-      const childWidth = player.slide > 0 ? 92 : 148;
+      const childHeight = 230;
+      const childWidth = 184;
       let childRow = 1; // RUN
       let childFrame = Math.floor(time / 95) % 8;
       if (g.caught) {
         // The atlas CAUGHT row is a two-character composition, not a single-child cell.
         // Keep the child on the full-body SCARED row until a dedicated capture pose is authored.
-        childRow = 4; // SCARED — full-body child only
-        childFrame = Math.min(7, Math.floor((time - (g.caughtAt || time)) / 150));
-      } else if (player.jump > 0) {
-        childRow = 2; // JUMP
-        childFrame = Math.min(7, Math.max(0, Math.floor((1 - player.jump / 0.72) * 8)));
-      } else if (g.wasJumping) {
-        childRow = 3; // LAND
-        childFrame = Math.min(7, Math.floor((time - g.landedAt) / 90));
-        if (childFrame >= 7) g.wasJumping = false;
+        childRow = 5; // CAUGHT — child restrained after Mama catches him
+        childFrame = Math.min(7, Math.floor((time - (g.caughtAt || time)) / 350));
       }
       if (g.scaredUntil && time < g.scaredUntil && !g.caught) {
         childRow = 4; // SCARED
@@ -416,12 +469,12 @@ export default function MamahNgamukPage() {
       if (g.caught) {
         const pulse = 1 + Math.sin(time / 75) * .045;
         ctx.save();
-        ctx.translate(W / 2, 1135);
+        ctx.translate(W / 2, 255);
         ctx.scale(pulse, pulse);
         ctx.fillStyle = "rgba(19,10,30,.88)";
         ctx.strokeStyle = "#ffd48b";
         ctx.lineWidth = 6;
-        ctx.beginPath(); ctx.roundRect(-230,-58,460,116,28); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.roundRect(-230,-48,460,96,28); ctx.fill(); ctx.stroke();
         ctx.fillStyle = "#fff2cf";
         ctx.font = "1000 42px system-ui";
         ctx.textAlign = "center";
@@ -462,7 +515,12 @@ export default function MamahNgamukPage() {
       stopMusic();
       tone(150, .24);
       window.clearTimeout(catchTimerRef.current);
-      catchTimerRef.current = window.setTimeout(() => setStatus("over"), 1550);
+      catchTimerRef.current = window.setTimeout(() => {
+        tone(330, .12);
+        window.setTimeout(() => tone(220, .18), 130);
+        window.setTimeout(() => tone(110, .42), 330);
+        setStatus("over");
+      }, 3000);
     };
 
     const update = (dt) => {
@@ -521,7 +579,6 @@ export default function MamahNgamukPage() {
         const laneOverlap = Math.abs(item.lane - p.lane) <= PLAYER_LANE_RADIUS;
         if (!depthOverlap || !laneOverlap) return false;
         // Cars are solid lane blockers. Only low road debris can be cleared by jumping.
-        if (item.kind === "roadblock") return p.jump < .30;
         return true;
       });
       if (obstacleHit) {
@@ -553,10 +610,9 @@ export default function MamahNgamukPage() {
     rafRef.current = requestAnimationFrame(frame);
 
     const key = (event) => {
-      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Space"].includes(event.code)) event.preventDefault();
+      if (["ArrowLeft", "ArrowRight"].includes(event.code)) event.preventDefault();
       if (event.code === "ArrowLeft" || event.code === "KeyA") move("left");
       if (event.code === "ArrowRight" || event.code === "KeyD") move("right");
-      if (event.code === "ArrowUp" || event.code === "Space" || event.code === "KeyW") move("jump");
     };
     window.addEventListener("keydown", key);
     return () => {
@@ -599,7 +655,7 @@ export default function MamahNgamukPage() {
     touchRef.current = null;
     if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
     if (Math.abs(dx) > Math.abs(dy)) move(dx < 0 ? "left" : "right");
-    else if (dy < -24) move("jump");
+
   };
 
   return (
@@ -616,7 +672,7 @@ export default function MamahNgamukPage() {
         <div className="mamah-hud mamah-hud--minimal"><div className="mamah-hud__stats"><div><small>DISTANCE</small><strong>{Math.floor(score / 12)} m</strong></div><div><small>COINS</small><strong className="is-gold">🪙 {coins}</strong></div><div><small>BEST</small><strong>{String(best).padStart(6,"0")}</strong></div></div></div>
       </>}
       {status === "paused" && <section className="mamah-overlay"><div className="mamah-dialog"><span className="mamah-dialog__emoji">Ⅱ</span><p className="mamah-dialog__eyebrow">PERMAINAN DIJEDA</p><h2>ISTIRAHAT DULU?</h2><button className="mamah-button mamah-button--primary" onClick={resume}>▶ LANJUTKAN</button><button className="mamah-button" onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setConfirmExit(true)}>↩ KELUAR GAME</button></div></section>}
-      {status === "caught" && <section className="mamah-catch-caption" aria-live="assertive"><strong>PULANG! MANDI!</strong></section>}\n      {status === "over" && <section className="mamah-overlay"><div className="mamah-dialog mamah-dialog--result"><span className="mamah-dialog__emoji">🧹</span><p className="mamah-dialog__eyebrow">MAMA BERHASIL MENANGKAP!</p><h2>KETANGKAP MAMAH!</h2><div className="mamah-result mamah-result--primary"><span>JARAK TEMPUH <strong>{distanceResult} m</strong></span><span>TOTAL KOIN <strong>🪙 {coins}</strong></span></div><div className="mamah-result"><span>SKOR AKHIR <strong>{String(score).padStart(6,"0")}</strong></span><span>BEST <strong>{String(best).padStart(6,"0")}</strong></span></div><button className="mamah-button mamah-button--primary" onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setStatus("ready")}>⌂ MENU UTAMA</button></div></section>}
+      {status === "caught" && <section className="mamah-catch-caption" aria-live="assertive"><strong>PULANG! MANDI!</strong></section>}\n      {status === "over" && <section className="mamah-overlay mamah-overlay--gameover"><div className="mamah-dialog mamah-dialog--result"><span className="mamah-dialog__emoji">🧹</span><p className="mamah-dialog__eyebrow">MAMA BERHASIL MENANGKAP!</p><h2>KETANGKAP MAMAH!</h2><div className="mamah-result mamah-result--primary"><span>JARAK TEMPUH <strong>{distanceResult} m</strong></span><span>TOTAL KOIN <strong>🪙 {coins}</strong></span></div><div className="mamah-result"><span>SKOR AKHIR <strong>{String(score).padStart(6,"0")}</strong></span><span>BEST <strong>{String(best).padStart(6,"0")}</strong></span></div><button className="mamah-button mamah-button--primary" onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setStatus("ready")}>⌂ MENU UTAMA</button></div></section>}
       {settingsOpen && <section className="mamah-overlay" onClick={() => setSettingsOpen(false)}><div className="mamah-dialog" onClick={e => e.stopPropagation()}><button className="mamah-dialog__close" onClick={() => setSettingsOpen(false)} aria-label="Tutup">×</button><p className="mamah-dialog__eyebrow">PENGATURAN</p><h2>SUARA GAME</h2><button className="mamah-button" onClick={() => setSoundOn(v => !v)}>{soundOn ? "♫ SUARA: ON" : "♪ SUARA: OFF"}</button><p className="mamah-dialog__note">Atur volume melalui tombol volume perangkat.</p></div></section>}
       {confirmExit && <section className="mamah-overlay" onClick={() => setConfirmExit(false)}><div className="mamah-dialog" role="alertdialog" aria-modal="true" aria-labelledby="mamah-exit-title" onClick={e => e.stopPropagation()}><span className="mamah-dialog__emoji">🚪</span><p className="mamah-dialog__eyebrow">KONFIRMASI</p><h2 id="mamah-exit-title">KELUAR DARI GAME?</h2><p className="mamah-dialog__note">Sesi permainan ini akan diakhiri dan kamu kembali ke Game Library.</p><button className="mamah-button" onClick={() => setConfirmExit(false)}>TETAP MAIN</button><button className="mamah-button mamah-button--danger" onClick={() => { window.location.href = "/mini-game"; }}>YA, KELUAR</button></div></section>}
     </main>
