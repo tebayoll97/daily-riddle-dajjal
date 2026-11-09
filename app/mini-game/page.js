@@ -45,7 +45,7 @@ export default function MiniGameDirectoryPage() {
             <p className="mt-3 text-sm leading-relaxed text-gray-400">{selectedGame.description}</p>
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button type="button" onClick={() => setSelectedGame(null)} className="ui-interactive rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-black text-gray-300">NANTI</button>
-              <Link href={selectedGame.href} className="ui-interactive rounded-xl bg-purple-600 px-4 py-3 text-xs font-black text-white hover:bg-purple-500">YA, MAINKAN →</Link>
+              <Link href={selectedGame.href === "/mini-game/mamah-ngamuk" ? `${selectedGame.href}?splash=1` : selectedGame.href} className="ui-interactive rounded-xl bg-purple-600 px-4 py-3 text-xs font-black text-white hover:bg-purple-500">YA, MAINKAN →</Link>
             </div>
           </section>
         </div>
