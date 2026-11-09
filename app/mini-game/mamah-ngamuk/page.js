@@ -88,11 +88,15 @@ export default function MamahNgamukPage() {
         bgm.volume = 0.48;
         bgmRef.current = bgm;
       }
-      const playAttempt = bgmRef.current.play();
+      const bgm = bgmRef.current;
+      bgm.loop = true;
+      // Idempotent: never restart a track that is already playing.
+      if (!bgm.paused && !bgm.ended) return;
+      const playAttempt = bgm.play();
       if (playAttempt && typeof playAttempt.catch === "function") {
         playAttempt.catch(() => {
-          // Mobile browsers may block playback until a fresh user gesture.
-          // The next PLAY / sound-toggle interaction will retry playback.
+          // Mobile browsers may block autoplay until a user gesture.
+          // The watchdog and next user interaction retry without resetting position.
         });
       }
     } catch {}
@@ -120,6 +124,7 @@ export default function MamahNgamukPage() {
     setCoins(0);
     setDistanceResult(0);
     setStatus("playing");
+    bgmSessionRef.current = true;
     tone(660);
     startMusic();
   }, [tone, startMusic, enterGameFullscreen]);
@@ -139,8 +144,25 @@ export default function MamahNgamukPage() {
   useEffect(() => {
     soundRef.current = soundOn;
     if (!soundOn) stopMusic();
-    else if (bgmSessionRef.current || (gameRef.current?.running && !gameRef.current?.paused)) startMusic();
+    else if (bgmSessionRef.current) startMusic();
   }, [soundOn, startMusic, stopMusic]);
+
+  // Keep the soundtrack alive across Home, gameplay, pause, dialogs and Game Over.
+  // This only resumes a paused/ended element; it never seeks or duplicates playback.
+  useEffect(() => {
+    bgmSessionRef.current = true;
+    const ensureMusic = () => {
+      if (bgmSessionRef.current && soundRef.current) startMusic();
+    };
+    const timer = window.setInterval(ensureMusic, 1500);
+    document.addEventListener("visibilitychange", ensureMusic);
+    window.addEventListener("pageshow", ensureMusic);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", ensureMusic);
+      window.removeEventListener("pageshow", ensureMusic);
+    };
+  }, [startMusic]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -570,7 +592,7 @@ export default function MamahNgamukPage() {
         return next;
       });
       setStatus("caught");
-      stopMusic();
+      // Being caught ends the run, not the music session.
       tone(150, .24);
       window.clearTimeout(catchTimerRef.current);
       catchTimerRef.current = window.setTimeout(() => {
@@ -728,7 +750,6 @@ export default function MamahNgamukPage() {
     if (!g || !g.running || g.paused) return;
     g.paused = true;
     g.pauseStartedAt = performance.now();
-    stopMusic();
     setStatus("paused");
   };
 
@@ -748,7 +769,6 @@ export default function MamahNgamukPage() {
     if (confirmResumeRef.current && g) {
       g.paused = true;
       g.pauseStartedAt = performance.now();
-      stopMusic();
     }
     setConfirmAction(action);
   };
@@ -779,8 +799,9 @@ export default function MamahNgamukPage() {
     confirmResumeRef.current = false;
     const g = gameRef.current;
     if (g) { g.running = false; g.paused = false; g.pauseStartedAt = 0; g.over = false; g.caught = false; }
-    bgmSessionRef.current = false;
-    stopMusic(true);
+    // In-game Home remains part of the same audio session.
+    bgmSessionRef.current = true;
+    startMusic();
     setWaveNotice("");
     setStatus("ready");
   };
