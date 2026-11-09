@@ -462,19 +462,16 @@
   .mamah-hero-character--child { animation: none !important; }
 }
 
-/* Three-second entry splash, shown only when launched from the Game Library. */
+/* Five-second entry splash, shown only when launched from the Game Library. */
 .mamah-splash-screen {
   position:absolute; inset:0; z-index:20; display:flex; flex-direction:column;
   align-items:center; justify-content:flex-end; gap:22px;
   padding:0 28px max(14vh,env(safe-area-inset-bottom));
-  background:#090612 url("/mini-game/mamah-ngamuk/splash.png") center/cover no-repeat;
-}
-.mamah-splash-child {
-  width:min(42vw,210px); height:min(42vw,210px); flex:0 0 auto;
-  background-image:url("/universe-characters.png"); background-repeat:no-repeat;
-  background-size:400% 600%; background-position:66.6667% 80%;
-  image-rendering:auto; filter:drop-shadow(0 12px 18px rgba(0,0,0,.5));
-  animation:mamah-splash-bounce .72s ease-in-out infinite alternate;
+  background-color:#090612;
+  background-image:url("/mini-game/mamah-ngamuk/splash.png");
+  background-position:center;
+  background-size:cover;
+  background-repeat:no-repeat;
 }
 .mamah-splash-progress { width:min(100%,360px); display:flex; flex-direction:column; align-items:center; gap:9px; }
 .mamah-splash-progress__track {
@@ -490,5 +487,3 @@
   color:#fff; font:900 14px ui-monospace,monospace; letter-spacing:.08em;
   text-shadow:0 2px 8px #000;
 }
-@keyframes mamah-splash-bounce { from { transform:translateY(0) rotate(-2deg); } to { transform:translateY(-13px) rotate(2deg); } }
-@media (prefers-reduced-motion:reduce) { .mamah-splash-child { animation:none; } }
