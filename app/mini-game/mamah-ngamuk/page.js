@@ -152,7 +152,12 @@ export default function MamahNgamukPage() {
   useEffect(() => {
     bgmSessionRef.current = true;
     const ensureMusic = () => {
-      if (bgmSessionRef.current && soundRef.current) startMusic();
+      if (!bgmSessionRef.current || !soundRef.current) return;
+      if (document.visibilityState === "hidden") {
+        stopMusic();
+        return;
+      }
+      startMusic();
     };
     const timer = window.setInterval(ensureMusic, 1500);
     document.addEventListener("visibilitychange", ensureMusic);
@@ -162,7 +167,7 @@ export default function MamahNgamukPage() {
       document.removeEventListener("visibilitychange", ensureMusic);
       window.removeEventListener("pageshow", ensureMusic);
     };
-  }, [startMusic]);
+  }, [startMusic, stopMusic]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -806,7 +811,14 @@ export default function MamahNgamukPage() {
     setStatus("ready");
   };
 
-  const pointerDown = (event) => { touchRef.current = { x: event.clientX, y: event.clientY }; };
+  const pointerDown = (event) => {
+    touchRef.current = { x: event.clientX, y: event.clientY };
+    // Browser chrome can only be hidden after a real user gesture.
+    const root = document.querySelector(".mamah-game");
+    if (root && !document.fullscreenElement && root.requestFullscreen) {
+      root.requestFullscreen().catch(() => {});
+    }
+  };
   const pointerUp = (event) => {
     if (!touchRef.current) return;
     const dx = event.clientX - touchRef.current.x;
