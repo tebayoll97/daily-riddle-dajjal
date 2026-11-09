@@ -158,22 +158,34 @@ export default function MamahNgamukPage() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("splash") !== "1") return;
     splashActiveRef.current = true;
-    setStatus("splash");
     window.history.replaceState({}, "", window.location.pathname);
-    const startedAt = performance.now();
+    const splashImage = new Image();
     let frame = 0;
-    const tick = (now) => {
-      const progress = Math.min(100, ((now - startedAt) / 3000) * 100);
-      setSplashProgress(Math.floor(progress));
-      if (progress < 100) frame = requestAnimationFrame(tick);
+    let timer = 0;
+    let cancelled = false;
+    const beginSplash = () => {
+      if (cancelled) return;
+      setSplashProgress(0);
+      setStatus("splash");
+      const startedAt = performance.now();
+      const tick = (now) => {
+        const progress = Math.min(100, ((now - startedAt) / 5000) * 100);
+        setSplashProgress(Math.floor(progress));
+        if (progress < 100) frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+      timer = window.setTimeout(() => {
+        splashActiveRef.current = false;
+        setSplashProgress(100);
+        setStatus("ready");
+      }, 5000);
     };
-    frame = requestAnimationFrame(tick);
-    const timer = window.setTimeout(() => {
-      splashActiveRef.current = false;
-      setSplashProgress(100);
-      setStatus("ready");
-    }, 3000);
+    splashImage.onload = beginSplash;
+    splashImage.onerror = beginSplash;
+    splashImage.src = "/mini-game/mamah-ngamuk/splash.png";
+    if (splashImage.complete) beginSplash();
     return () => {
+      cancelled = true;
       cancelAnimationFrame(frame);
       window.clearTimeout(timer);
       splashActiveRef.current = false;
@@ -795,7 +807,7 @@ export default function MamahNgamukPage() {
       <canvas ref={canvasRef} className="mamah-game__world" aria-label="Dunia permainan Mamah Ngamuk" />
       <div className="mamah-game__vignette" aria-hidden="true" />
       {status === "splash" && <section className="mamah-splash-screen" aria-label="Memuat Mamah Ngamuk">
-        <div className="mamah-splash-child" role="img" aria-label="Anak Dajjal" />
+  
         <div className="mamah-splash-progress">
           <div className="mamah-splash-progress__track"><span style={{ width: `${splashProgress}%` }} /></div>
           <strong>{splashProgress}%</strong>
