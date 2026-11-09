@@ -31,6 +31,8 @@ export default function MamahNgamukPage() {
   const catchTimerRef = useRef(null);
   const waveNoticeTimerRef = useRef(null);
   const confirmResumeRef = useRef(false);
+  const splashActiveRef = useRef(false);
+  const [splashProgress, setSplashProgress] = useState(0);
   const [status, setStatus] = useState("loading");
   const [score, setScore] = useState(0);
   const [distance, setDistance] = useState(0);
@@ -153,6 +155,32 @@ export default function MamahNgamukPage() {
   }, [soundOn, startMusic, stopMusic]);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("splash") !== "1") return;
+    splashActiveRef.current = true;
+    setStatus("splash");
+    window.history.replaceState({}, "", window.location.pathname);
+    const startedAt = performance.now();
+    let frame = 0;
+    const tick = (now) => {
+      const progress = Math.min(100, ((now - startedAt) / 3000) * 100);
+      setSplashProgress(Math.floor(progress));
+      if (progress < 100) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    const timer = window.setTimeout(() => {
+      splashActiveRef.current = false;
+      setSplashProgress(100);
+      setStatus("ready");
+    }, 3000);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+      splashActiveRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
     const trapBack = () => {
       window.history.pushState({ mamahGame: true }, "", window.location.href);
@@ -190,7 +218,7 @@ export default function MamahNgamukPage() {
     let bootFallback;
     const finishBoot = () => {
       window.clearTimeout(bootFallback);
-      setStatus("ready");
+      if (!splashActiveRef.current) setStatus("ready");
     };
     bootFallback = window.setTimeout(finishBoot, 1400);
     sheet.onload = () => { sheetRef.current = sheet; finishBoot(); };
@@ -766,6 +794,13 @@ export default function MamahNgamukPage() {
     <main className="mamah-game mini-game-screen" aria-label="Mamah Ngamuk game" onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={() => { touchRef.current = null; }}>
       <canvas ref={canvasRef} className="mamah-game__world" aria-label="Dunia permainan Mamah Ngamuk" />
       <div className="mamah-game__vignette" aria-hidden="true" />
+      {status === "splash" && <section className="mamah-splash-screen" aria-label="Memuat Mamah Ngamuk">
+        <div className="mamah-splash-child" role="img" aria-label="Anak Dajjal" />
+        <div className="mamah-splash-progress">
+          <div className="mamah-splash-progress__track"><span style={{ width: `${splashProgress}%` }} /></div>
+          <strong>{splashProgress}%</strong>
+        </div>
+      </section>}
       {status === "loading" && <section className="mamah-screen mamah-screen--loading"><div className="mamah-loader"><span>DF</span></div><p className="mamah-brand__eyebrow">DAJJAL FAMILY · GAMING UNIVERSE</p><h1 className="mamah-logo">MAMAH <span>NGAMUK!</span></h1><p className="mamah-loading-label">MENYIAPKAN DUNIA GAME...</p></section>}
       {status === "ready" && <section className="mamah-screen mamah-screen--menu">
         <header className="mamah-home-header">
