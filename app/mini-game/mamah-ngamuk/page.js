@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import "./mamah-ngamuk.css";
+import { supabase } from "@/lib/supabase";
 
 const W = 900;
 const H = 1600;
@@ -113,7 +114,7 @@ export default function MamahNgamukPage() {
     enterGameFullscreen();
     const g = gameRef.current;
     if (!g) return;
-    Object.assign(g, { running: true, paused: false, pauseStartedAt: 0, over: false, caught: false, distance: 0, environmentDistance: 0, elapsed: 0, carSpeed: 0.30, spawn: 3.8, chase: 0, scoreTick: -1, coinCount: 0, waveIndex: 0 });
+    Object.assign(g, { running: true, paused: false, pauseStartedAt: 0, over: false, caught: false, distance: 0, environmentDistance: 0, elapsed: 0, carSpeed: 0.30, spawn: 3.8, chase: 0, scoreTick: -1, coinCount: 0, waveIndex: 0, sessionId: window.crypto.randomUUID() });
     window.clearTimeout(waveNoticeTimerRef.current);
     setWaveNotice(WAVE_STAGES[0].alert);
     waveNoticeTimerRef.current = window.setTimeout(() => setWaveNotice(""), 4000);
@@ -591,11 +592,38 @@ export default function MamahNgamukPage() {
         try { localStorage.setItem(BEST_KEY, String(next)); } catch {}
         return next;
       });
-      setWallet((old) => {
-        const next = old + g.coinCount;
-        try { localStorage.setItem(WALLET_KEY, String(next)); } catch {}
-        return next;
-      });
+      const sessionId = g.sessionId;
+      const collectedCoins = g.coinCount;
+      const finalResultScore = finalScore;
+      const saveResult = async () => {
+        try {
+          const { data: authData, error: authError } = await supabase.auth.getSession();
+          if (authError) throw authError;
+          const token = authData?.session?.access_token;
+          if (!token) throw new Error("Login diperlukan untuk menyimpan koin.");
+          const response = await fetch("/api/mamah-ngamuk/result", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              sessionId,
+              distance: finalDistance,
+              coins: collectedCoins,
+              score: finalResultScore,
+            }),
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || "Gagal menyimpan hasil permainan.");
+          setWallet(Number(result.balance || 0));
+        } catch (error) {
+          console.error("Mamah Ngamuk result sync failed:", error);
+          setWaveNotice("KOIN BELUM TERSIMPAN · PERIKSA KONEKSI");
+          waveNoticeTimerRef.current = window.setTimeout(() => setWaveNotice(""), 5000);
+        }
+      };
+      saveResult();
       setStatus("caught");
       // Being caught ends the run, not the music session.
       tone(150, .24);
