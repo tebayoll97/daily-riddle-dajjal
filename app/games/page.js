@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { getPlayerContext } from "@/lib/playerAccount";
 import { useLanguage } from "../components/LanguageProvider";
@@ -59,7 +60,6 @@ export default function GamesPage() {
   const [showError, setShowError] = useState(false);
   const [catalogGames, setCatalogGames] = useState([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
-  const [selectedMiniGame, setSelectedMiniGame] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -153,23 +153,15 @@ export default function GamesPage() {
         <section className="mb-8">
           <div className="mb-3 flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-purple-400 shadow-[0_0_10px_rgba(168,85,247,.7)]" />
-            <h2 className="text-[10px] font-bold tracking-[0.25em] text-purple-200 ui-section-title">ARCADE MINI GAME</h2>
+            <h2 className="text-[10px] font-bold tracking-[0.25em] text-purple-200 ui-section-title">ARCADE MINI GAMES</h2>
           </div>
           <article className="flex flex-col items-start gap-4 rounded-2xl border border-purple-400/25 bg-gradient-to-r from-[#211532] to-[#11101e] p-5 sm:flex-row sm:items-center sm:justify-between ui-card">
             <div>
-              <p className="mb-1 text-[9px] font-black tracking-[.2em] text-purple-300">NEW · PLAYABLE NOW</p>
-              <h3 className="text-xl font-black text-white">RUN & JUMP</h3>
-              <p className="mt-1 max-w-xl text-xs leading-relaxed text-gray-400">Lari tanpa henti bersama karakter universe kita. Lompat, hindari rintangan, dan pecahkan rekor jarakmu.</p>
+              <p className="mb-1 text-[9px] font-black tracking-[.2em] text-purple-300">EXPLORE THE ARCADE</p>
+              <h3 className="text-xl font-black text-white">MINI GAME COLLECTION</h3>
+              <p className="mt-1 max-w-xl text-xs leading-relaxed text-gray-400">Jelajahi MAMAH NGAMUK, RUN & JUMP, dan berbagai mini-game lainnya dalam satu katalog arcade.</p>
             </div>
-            <button type="button" onClick={() => setSelectedMiniGame({ name: "RUN & JUMP", href: "/mini-game/run-jump", description: "Lari sejauh mungkin, lompat melewati rintangan, dan pecahkan rekor jarak." })} className="w-full shrink-0 rounded-xl bg-purple-600 px-6 py-3 text-xs font-black tracking-wider text-white transition hover:bg-purple-500 active:scale-[.98] sm:w-auto">PLAY MINI GAME →</button>
-          </article>
-          <article className="mt-3 flex flex-col items-start gap-4 rounded-2xl border border-amber-300/20 bg-gradient-to-r from-[#2a2119] to-[#14101d] p-5 sm:flex-row sm:items-center sm:justify-between ui-card">
-            <div>
-              <p className="mb-1 text-[9px] font-black tracking-[.2em] text-amber-300">NEW · 2.5D ENDLESS RUNNER</p>
-              <h3 className="text-xl font-black text-white">MAMAH NGAMUK</h3>
-              <p className="mt-1 max-w-xl text-xs leading-relaxed text-gray-400">Anak Dajjal berlari menghindari rintangan dan mengumpulkan koin, sementara Mamah Veylora mengejar sambil membawa sapu!</p>
-            </div>
-            <button type="button" onClick={() => setSelectedMiniGame({ name: "MAMAH NGAMUK", href: "/mini-game/mamah-ngamuk", description: "Anak Dajjal berlari menghindari rintangan dan mengumpulkan koin, sementara Mamah Veylora mengejar sambil membawa sapu!" })} className="ui-interactive w-full shrink-0 rounded-xl bg-amber-600 px-6 py-3 text-xs font-black tracking-wider text-white transition hover:bg-amber-500 active:scale-[.98] sm:w-auto">PLAY MAMAH NGAMUK →</button>
+            <Link href="/mini-game" className="w-full shrink-0 rounded-xl bg-purple-600 px-6 py-3 text-center text-xs font-black tracking-wider text-white transition hover:bg-purple-500 active:scale-[.98] sm:w-auto">BROWSE MINI GAMES →</Link>
           </article>
         </section>
 
@@ -203,21 +195,6 @@ export default function GamesPage() {
         </section>
       </div>
 
-      {selectedMiniGame && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-5 backdrop-blur-md" onClick={() => setSelectedMiniGame(null)}>
-          <section role="alertdialog" aria-modal="true" aria-labelledby="library-play-title" className="ui-popup ui-card w-full max-w-sm rounded-3xl border border-purple-300/25 bg-[#151020] p-6 text-center shadow-2xl" onClick={(event) => event.stopPropagation()}>
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-purple-300/20 bg-purple-500/10 text-3xl">🎮</div>
-            <p className="ui-eyebrow">READY PLAYER?</p>
-            <h2 id="library-play-title" className="text-xl font-black text-white">MAU MEMAINKAN</h2>
-            <p className="mt-1 text-lg font-black text-purple-300">{selectedMiniGame.name}?</p>
-            <p className="mt-3 text-sm leading-relaxed text-gray-400">{selectedMiniGame.description}</p>
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <button type="button" onClick={() => setSelectedMiniGame(null)} className="ui-interactive rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-black text-gray-300">NANTI</button>
-              <button type="button" onClick={() => router.push(selectedMiniGame.href)} className="ui-interactive rounded-xl bg-purple-600 px-4 py-3 text-xs font-black text-white hover:bg-purple-500">YA, MAINKAN →</button>
-            </div>
-          </section>
-        </div>
-      )}
       {showError && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-5 backdrop-blur-sm" onClick={() => setShowError(false)}>
           <div role="alertdialog" aria-modal="true" aria-labelledby="games-error-title" className="w-full max-w-sm rounded-2xl border border-purple-500/30 bg-[#151020] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.6)] ui-popup ui-gradient-frame ui-card" onClick={(event) => event.stopPropagation()}>
