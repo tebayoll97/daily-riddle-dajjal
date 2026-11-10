@@ -73,7 +73,7 @@ export default function AccountLogout() {
       if (userError) throw userError;
 
       if (!user) {
-        router.replace("/register");
+        router.replace("/login");
         return;
       }
 
@@ -102,7 +102,7 @@ export default function AccountLogout() {
 
       if (signOutError) throw signOutError;
 
-      router.replace("/register");
+      router.replace("/login");
       router.refresh();
     } catch (err) {
       console.error("Logout error:", err);
