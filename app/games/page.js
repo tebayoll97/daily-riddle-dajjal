@@ -16,6 +16,8 @@ const translations = {
     available: "AVAILABLE NOW",
     daily: "THE DAILY RIDDLE",
     dailyDesc: "A fresh mystery. Test your knowledge, solve the clues, and compete for points.",
+    mamah: "MAMAH NGAMUK",
+    mamahDesc: "Escape angry Mamah Veylora, dodge traffic, collect coins, and build your personal record.",
     play: "PLAY NOW",
     soon: "COMING SOON",
     rune: "RUNE PUZZLE",
@@ -37,6 +39,8 @@ const translations = {
     available: "SUDAH TERSEDIA",
     daily: "THE DAILY RIDDLE",
     dailyDesc: "Misteri baru setiap hari. Uji pengetahuan, pecahkan petunjuk, dan kumpulkan poin.",
+    mamah: "MAMAH NGAMUK",
+    mamahDesc: "Kabur dari Mamah Veylora, hindari kendaraan, kumpulkan koin, dan pecahkan rekor pribadimu.",
     play: "MAIN SEKARANG",
     soon: "SEGERA HADIR",
     rune: "RUNE PUZZLE",
@@ -82,6 +86,20 @@ export default function GamesPage() {
     return () => { active = false; };
   }, []);
 
+  async function handlePlayMamah() {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const context = await getPlayerContext();
+      router.push(context.status === "ready" && context.accountType === "google" ? "/mini-game/mamah-ngamuk?splash=1" : "/login?next=%2Fmini-game%2Fmamah-ngamuk%3Fsplash%3D1");
+    } catch (error) {
+      console.error("Mamah Ngamuk launch error:", error);
+      setShowError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handlePlayDailyRiddle() {
     if (loading) return;
     setLoading(true);
@@ -102,7 +120,7 @@ export default function GamesPage() {
     "logic-battle": { icon: "✧", image: "https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=900&q=85", alt: "Strategy board game pieces" },
   };
   const games = catalogGames
-    .filter((game) => game.slug !== "daily-riddle" && game.status !== "archived")
+    .filter((game) => game.slug !== "daily-riddle" && game.slug !== "mamah-ngamuk" && game.status === "coming_soon")
     .map((game) => ({
       ...game,
       name: game.slug === "rune-puzzle" ? t.rune : game.slug === "memory-challenge" ? t.memory : game.slug === "logic-battle" ? t.logic : game.name,
@@ -148,6 +166,25 @@ export default function GamesPage() {
               </div>
             </div>
           </article>
+          <article className="relative mt-4 overflow-hidden rounded-3xl border border-amber-400/25 bg-gradient-to-br from-[#281a25] via-[#171024] to-[#100d19] ui-card">
+            <div className="relative flex flex-col items-stretch sm:flex-row sm:items-center">
+              <div className="relative h-44 w-full overflow-hidden bg-gradient-to-br from-amber-950/80 via-rose-950/60 to-purple-950/80 sm:h-64 sm:w-[42%]">
+                <div className="absolute inset-0 flex items-center justify-center text-7xl">🧹</div>
+                <div className="absolute bottom-4 left-5 rounded-full border border-amber-200/20 bg-black/40 px-3 py-1 text-[9px] font-bold tracking-[0.2em] text-amber-100">FULL SCREEN ACTION</div>
+              </div>
+              <div className="flex flex-1 flex-col items-start gap-4 p-6 sm:p-8">
+                <div className="max-w-xl">
+                  <p className="mb-3 text-[10px] font-bold tracking-[0.3em] text-amber-300">02 · ACCOUNT GAME</p>
+                  <h2 className="text-2xl font-black sm:text-3xl ui-section-title">{t.mamah}</h2>
+                  <p className="mt-3 text-sm leading-relaxed text-gray-300">{t.mamahDesc}</p>
+                  <p className="mt-2 text-[10px] font-bold tracking-wider text-amber-200/80">GOOGLE LOGIN REQUIRED</p>
+                </div>
+                <button onClick={handlePlayMamah} disabled={loading} className="w-full shrink-0 rounded-xl bg-amber-600 px-7 py-4 text-sm font-black tracking-wider sm:w-auto">
+                  {loading ? t.wait : t.play}
+                </button>
+              </div>
+            </div>
+          </article>
         </section>
 
         <section className="mb-8">
@@ -159,7 +196,7 @@ export default function GamesPage() {
             <div>
               <p className="mb-1 text-[9px] font-black tracking-[.2em] text-purple-300">EXPLORE THE ARCADE</p>
               <h3 className="text-xl font-black text-white">MINI GAME COLLECTION</h3>
-              <p className="mt-1 max-w-xl text-xs leading-relaxed text-gray-400">Jelajahi MAMAH NGAMUK, RUN & JUMP, dan berbagai mini-game lainnya dalam satu katalog arcade.</p>
+              <p className="mt-1 max-w-xl text-xs leading-relaxed text-gray-400">Nikmati RUN & JUMP dan berbagai permainan arcade ringan lainnya yang bisa langsung dimainkan tanpa login.</p>
             </div>
             <Link href="/mini-game" className="w-full shrink-0 rounded-xl bg-purple-600 px-6 py-3 text-center text-xs font-black tracking-wider text-white transition hover:bg-purple-500 active:scale-[.98] sm:w-auto">BROWSE MINI GAMES →</Link>
           </article>
