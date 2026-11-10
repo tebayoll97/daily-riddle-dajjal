@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import "./mamah-ngamuk.css";
 import { supabase } from "@/lib/supabase";
+import Link from "next/link";
 
 const W = 900;
 const H = 1600;
@@ -40,6 +41,10 @@ export default function MamahNgamukPage() {
   const [distance, setDistance] = useState(0);
   const [coins, setCoins] = useState(0);
   const [wallet, setWallet] = useState(0);
+  const [player, setPlayer] = useState(null);
+  const [gameStats, setGameStats] = useState({ gamesPlayed: 0, totalPoints: 0, bestScore: 0 });
+  const [accountLoading, setAccountLoading] = useState(true);
+  const [walletSyncError, setWalletSyncError] = useState("");
   const [confirmAction, setConfirmAction] = useState("");
   const [distanceResult, setDistanceResult] = useState(0);
   const [best, setBest] = useState(0);
@@ -222,7 +227,34 @@ export default function MamahNgamukPage() {
   }, []);
 
   useEffect(() => {
-    try { setBest(Number(localStorage.getItem(BEST_KEY)) || 0); setWallet(Number(localStorage.getItem(WALLET_KEY)) || 0); } catch {}
+    try { setBest(Number(localStorage.getItem(BEST_KEY)) || 0); } catch {}
+  }, []);
+
+  // The server wallet is the only source of truth; never hydrate it from localStorage.
+  useEffect(() => {
+    let active = true;
+    const loadAccount = async () => {
+      setAccountLoading(true);
+      setWalletSyncError("");
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        const token = data?.session?.access_token;
+        if (!token) {
+          if (active) { setPlayer(null); setWallet(0); setGameStats({ gamesPlayed: 0, totalPoints: 0, bestScore: 0 }); }
+          return;
+        }
+        const response = await fetch("/api/mamah-ngamuk/result", { headers: { Authorization: "Bearer " + token }, cache: "no-store" });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Gagal memuat akun.");
+        if (active) { setPlayer(result.player || null); setWallet(Number(result.balance || 0)); setGameStats(result.stats || { gamesPlayed: 0, totalPoints: 0, bestScore: 0 }); }
+      } catch (error) {
+        console.error("Mamah Ngamuk account load failed:", error);
+        if (active) setWalletSyncError("AKUN / SALDO BELUM TERSINKRON");
+      } finally { if (active) setAccountLoading(false); }
+    };
+    loadAccount();
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
@@ -617,8 +649,11 @@ export default function MamahNgamukPage() {
           const result = await response.json();
           if (!response.ok) throw new Error(result.error || "Gagal menyimpan hasil permainan.");
           setWallet(Number(result.balance || 0));
+          setWalletSyncError("");
+          setGameStats((old) => ({ ...old, gamesPlayed: old.gamesPlayed + (result.duplicate ? 0 : 1), totalPoints: old.totalPoints + (result.duplicate ? 0 : finalResultScore), bestScore: Math.max(old.bestScore || 0, finalResultScore) }));
         } catch (error) {
           console.error("Mamah Ngamuk result sync failed:", error);
+          setWalletSyncError("KOIN BELUM TERSIMPAN · PERIKSA KONEKSI");
           setWaveNotice("KOIN BELUM TERSIMPAN · PERIKSA KONEKSI");
           waveNoticeTimerRef.current = window.setTimeout(() => setWaveNotice(""), 5000);
         }
@@ -872,7 +907,8 @@ export default function MamahNgamukPage() {
       {status === "ready" && <section className="mamah-screen mamah-screen--menu">
         <header className="mamah-home-header">
           <span className="mamah-brand__eyebrow">DAJJAL FAMILY · GAMING UNIVERSE</span>
-          <button type="button" className="mamah-sound-toggle" onClick={() => setSoundOn(v => !v)} aria-label={soundOn ? "Matikan suara" : "Nyalakan suara"}>{soundOn ? "♫ SOUND ON" : "♪ SOUND OFF"}</button>
+          <div className="mamah-header-actions"><Link href={player ? "/profile" : "/register"} className="mamah-account-button">👤 {player?.nickname || "LOGIN / AKUN"}</Link>
+          <button type="button" className="mamah-sound-toggle" onClick={() => setSoundOn(v => !v)} aria-label={soundOn ? "Matikan suara" : "Nyalakan suara"}>{soundOn ? "♫ SOUND ON" : "♪ SOUND OFF"}</button></div>
         </header>
         <div className="mamah-home-title">
           <h1 className="mamah-logo">MAMAH <span>NGAMUK!</span></h1>
@@ -888,8 +924,9 @@ export default function MamahNgamukPage() {
         <div className="mamah-home-bottom">
           <div className="mamah-home-record">
             <div><small>BEST DISTANCE</small><strong>{best.toLocaleString("id-ID")} <i>m</i></strong></div>
-            <div><small>COINS THIS RUN</small><strong>🪙 {wallet.toLocaleString("id-ID")}</strong></div>
+            <div><small>MY COINS · MAMAH NGAMUK</small><strong>🪙 {accountLoading ? "..." : wallet.toLocaleString("id-ID")}</strong></div>
           </div>
+          <div className="mamah-player-summary"><div className="mamah-player-summary__identity"><span className="mamah-player-avatar">👤</span><div><small>PLAYER</small><strong>{player?.nickname || (accountLoading ? "MEMUAT AKUN..." : "BELUM LOGIN")}</strong></div></div><div className="mamah-player-summary__stats"><span><small>SESI</small><b>{gameStats.gamesPlayed.toLocaleString("id-ID")}</b></span><span><small>TOTAL POIN</small><b>{gameStats.totalPoints.toLocaleString("id-ID")}</b></span><span><small>BEST SCORE</small><b>{gameStats.bestScore.toLocaleString("id-ID")}</b></span></div>{walletSyncError && <small className="mamah-account-warning">{walletSyncError}</small>}{!player && !accountLoading && <Link href="/register" className="mamah-account-cta">LOGIN / BUAT AKUN</Link>}</div>
           <button type="button" className="mamah-button mamah-button--primary mamah-play-button" onClick={start}>▶ PLAY GAME</button>
           <div className="mamah-home-grid">
             <button type="button" onClick={() => setMenuPanel("leaderboard")}><span>🏆</span>LEADERBOARD</button>
