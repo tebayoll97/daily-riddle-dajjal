@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { getPlayerContext } from "@/lib/playerAccount";
 import { useLanguage } from "../components/LanguageProvider";
 
 const translations = {
@@ -85,20 +85,8 @@ export default function GamesPage() {
     if (loading) return;
     setLoading(true);
     try {
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) throw sessionError;
-      const user = sessionData.session?.user;
-      if (user) {
-        const { data: player, error: playerError } = await supabase
-          .from("players")
-          .select("id")
-          .eq("auth_user_id", user.id)
-          .maybeSingle();
-        if (playerError) throw playerError;
-        router.push(player ? "/game" : "/register");
-      } else {
-        router.push("/register");
-      }
+      const context = await getPlayerContext();
+      router.push(context.status === "ready" ? "/game" : "/register");
     } catch (error) {
       console.error("Daily Riddle launch error:", error);
       setShowError(true);
