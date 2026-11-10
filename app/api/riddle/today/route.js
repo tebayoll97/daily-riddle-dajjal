@@ -1,44 +1,19 @@
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { resolveAuthenticatedPlayer } from "@/lib/serverPlayerAccount";
 
 export async function GET(request) {
   try {
-    const authorization = request.headers.get("authorization");
+    const auth = await resolveAuthenticatedPlayer(
+      request,
+      "id, nickname, server_number"
+    );
 
-    if (!authorization?.startsWith("Bearer ")) {
-      return Response.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    if (!auth.ok) {
+      return Response.json({ error: auth.error }, { status: auth.status });
     }
 
-    const token = authorization.slice(7);
-
-    const { data: authData, error: authError } =
-      await supabaseAdmin.auth.getUser(token);
-
-    if (authError || !authData.user) {
-      return Response.json(
-        { error: "Invalid session" },
-        { status: 401 }
-      );
-    }
-
-    const { data: player, error: playerError } =
-      await supabaseAdmin
-        .from("players")
-        .select("id, nickname, server_number")
-        .eq("auth_user_id", authData.user.id)
-        .maybeSingle();
-
-    if (playerError) throw playerError;
-
-    if (!player) {
-      return Response.json(
-        { error: "Player profile not found" },
-        { status: 404 }
-      );
-    }
+    const player = auth.player;
 
     const dateParts = new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Jakarta",
