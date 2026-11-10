@@ -87,7 +87,7 @@ export default function GamesPage() {
     setLoading(true);
     try {
       const context = await getPlayerContext();
-      router.push(context.status === "ready" ? "/game" : "/register");
+      router.push(context.status === "ready" ? "/game" : "/login?next=%2Fgame");
     } catch (error) {
       console.error("Daily Riddle launch error:", error);
       setShowError(true);
