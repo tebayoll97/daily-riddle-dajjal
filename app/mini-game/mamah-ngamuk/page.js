@@ -58,16 +58,43 @@ export default function MamahNgamukPage() {
   const [menuPanel, setMenuPanel] = useState("");
 
   const connectGoogleFromGame = async () => {
+    if (googleLinkLoading) return;
     setGoogleLinkLoading(true);
     setWalletSyncError("");
     try {
       const { data, error } = await supabase.auth.getSession();
       if (error) throw error;
-      if (!data?.session?.user) throw new Error("Silakan login terlebih dahulu.");
-      if (!data.session.user.is_anonymous) { setAccountType("google"); setWalletSyncError("Akun ini sudah terdaftar, bukan akun tamu."); setGoogleLinkLoading(false); return; }
-      const { error: linkError } = await supabase.auth.linkIdentity({ provider: "google", options: { redirectTo: window.location.origin + window.location.pathname, queryParams: { access_type: "offline", prompt: "consent" } } });
-      if (linkError) throw linkError;
-    } catch (error) { console.error("Google link from Mamah Ngamuk failed:", error); setWalletSyncError(error.message || "Gagal menghubungkan Google."); setGoogleLinkLoading(false); }
+
+      // Always return to this game route after Google OAuth.
+      const returnToGame = window.location.origin + "/mini-game/mamah-ngamuk";
+
+      if (data?.session?.user?.is_anonymous) {
+        // Preserve the Guest Player ID and pending Game Over result.
+        const { error: linkError } = await supabase.auth.linkIdentity({
+          provider: "google",
+          options: {
+            redirectTo: returnToGame,
+            queryParams: { access_type: "offline", prompt: "select_account" },
+          },
+        });
+        if (linkError) throw linkError;
+        return;
+      }
+
+      // Signed-out visitors use Google sign-in, not the registration page.
+      const { error: loginError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: returnToGame,
+          queryParams: { access_type: "offline", prompt: "select_account" },
+        },
+      });
+      if (loginError) throw loginError;
+    } catch (error) {
+      console.error("Google login from Mamah Ngamuk failed:", error);
+      setWalletSyncError(error.message || "Gagal membuka login Google.");
+      setGoogleLinkLoading(false);
+    }
   };
   const tone = useCallback((frequency = 520, duration = 0.08) => {
     if (!soundRef.current || typeof window === "undefined") return;
@@ -968,7 +995,7 @@ export default function MamahNgamukPage() {
             <div><small>BEST DISTANCE</small><strong>{best.toLocaleString("id-ID")} <i>m</i></strong></div>
             <div><small>MY COINS · MAMAH NGAMUK</small><strong>🪙 {accountLoading ? "..." : wallet.toLocaleString("id-ID")}</strong></div>
           </div>
-          <div className="mamah-player-summary"><div className="mamah-player-summary__identity"><span className="mamah-player-avatar">👤</span><div><small>PLAYER</small><strong>{player?.nickname || (accountLoading ? "MEMUAT AKUN..." : "BELUM LOGIN")}</strong></div></div><div className="mamah-player-summary__stats"><span><small>SESI</small><b>{gameStats.gamesPlayed.toLocaleString("id-ID")}</b></span><span><small>TOTAL POIN</small><b>{gameStats.totalPoints.toLocaleString("id-ID")}</b></span><span><small>BEST SCORE</small><b>{gameStats.bestScore.toLocaleString("id-ID")}</b></span></div>{walletSyncError && <small className="mamah-account-warning">{walletSyncError}</small>}{!player && !accountLoading && <Link href="/register" className="mamah-account-cta">LOGIN / BUAT AKUN</Link>}</div>
+          <div className="mamah-player-summary"><div className="mamah-player-summary__identity"><span className="mamah-player-avatar">👤</span><div><small>PLAYER</small><strong>{player?.nickname || (accountLoading ? "MEMUAT AKUN..." : "BELUM LOGIN")}</strong></div></div><div className="mamah-player-summary__stats"><span><small>SESI</small><b>{gameStats.gamesPlayed.toLocaleString("id-ID")}</b></span><span><small>TOTAL POIN</small><b>{gameStats.totalPoints.toLocaleString("id-ID")}</b></span><span><small>BEST SCORE</small><b>{gameStats.bestScore.toLocaleString("id-ID")}</b></span></div>{walletSyncError && <small className="mamah-account-warning">{walletSyncError}</small>}{!player && !accountLoading && <button type="button" className="mamah-account-cta" disabled={googleLinkLoading} onClick={connectGoogleFromGame}>{googleLinkLoading ? "MEMBUKA GOOGLE..." : "LOGIN DENGAN GOOGLE"}</button>}</div>
           <button type="button" className="mamah-button mamah-button--primary mamah-play-button" onClick={start}>▶ PLAY GAME</button>
           <div className="mamah-home-grid">
             <button type="button" onClick={() => setMenuPanel("leaderboard")}><span>🏆</span>LEADERBOARD</button>
@@ -988,7 +1015,7 @@ export default function MamahNgamukPage() {
             <div className="mamah-profile-identity"><span className="mamah-profile-avatar">👤</span><div><b>{player?.nickname || "BELUM LOGIN"}</b><small>{accountType === "google" ? "GOOGLE ACCOUNT" : accountType === "guest" ? "GUEST ACCOUNT" : accountType === "signed_out" ? "SIGNED OUT" : "PLAYER ACCOUNT"}</small></div></div>
             <div className="mamah-profile-stats"><div><small>MY COINS</small><strong>🪙 {wallet.toLocaleString("id-ID")}</strong></div><div><small>BEST DISTANCE</small><strong>{best.toLocaleString("id-ID")} m</strong></div><div><small>BEST SCORE</small><strong>{gameStats.bestScore.toLocaleString("id-ID")}</strong></div><div><small>TOTAL POINTS</small><strong>{gameStats.totalPoints.toLocaleString("id-ID")}</strong></div><div><small>SESSIONS</small><strong>{gameStats.gamesPlayed.toLocaleString("id-ID")}</strong></div></div>
             {accountType === "guest" && <button className="mamah-button mamah-button--primary" disabled={googleLinkLoading} onClick={connectGoogleFromGame}>{googleLinkLoading ? "CONNECTING..." : "🔗 LINK GOOGLE ACCOUNT"}</button>}
-            {accountType === "signed_out" && <button className="mamah-button mamah-button--primary" onClick={() => { window.location.href = "/register"; }}>LOGIN / CREATE ACCOUNT</button>}
+            {accountType === "signed_out" && <button className="mamah-button mamah-button--primary" disabled={googleLinkLoading} onClick={connectGoogleFromGame}>{googleLinkLoading ? "OPENING GOOGLE..." : "LOGIN WITH GOOGLE"}</button>}
             {walletSyncError && <p className="mamah-account-warning">{walletSyncError}</p>}
             <p className="mamah-dialog__note">Total poin, best score, dan saldo berasal dari database akun. Best Distance, Best Score, poin, dan koin tersimpan permanen hanya untuk akun Google.</p>
             <button className="mamah-button mamah-button--quiet" onClick={() => setMenuPanel("")}>TUTUP</button></>}
