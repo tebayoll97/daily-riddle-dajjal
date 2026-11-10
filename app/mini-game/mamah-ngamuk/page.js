@@ -67,7 +67,9 @@ export default function MamahNgamukPage() {
       if (error) throw error;
 
       // Always return to this game route after Google OAuth.
-      const returnToGame = window.location.origin + "/mini-game/mamah-ngamuk";
+      const returnToGame = window.location.origin + (data?.session?.user?.is_anonymous
+        ? "/mini-game/mamah-ngamuk"
+        : "/login?next=%2Fmini-game%2Fmamah-ngamuk");
 
       if (data?.session?.user?.is_anonymous) {
         // Preserve the Guest Player ID and pending Game Over result.
@@ -159,6 +161,10 @@ export default function MamahNgamukPage() {
   }, []);
 
   const start = useCallback(() => {
+    if (accountType !== "google") {
+      setGoogleLoginPrompt(true);
+      return;
+    }
     enterGameFullscreen();
     const g = gameRef.current;
     if (!g) return;
@@ -176,7 +182,7 @@ export default function MamahNgamukPage() {
     bgmSessionRef.current = true;
     tone(660);
     startMusic();
-  }, [tone, startMusic, enterGameFullscreen]);
+  }, [accountType, tone, startMusic, enterGameFullscreen]);
 
   const move = useCallback((direction) => {
     const g = gameRef.current;
