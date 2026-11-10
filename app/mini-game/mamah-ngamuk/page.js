@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import "./mamah-ngamuk.css";
 import { supabase } from "@/lib/supabase";
-import Link from "next/link";
 
 const W = 900;
 const H = 1600;
@@ -45,6 +44,8 @@ export default function MamahNgamukPage() {
   const [gameStats, setGameStats] = useState({ gamesPlayed: 0, totalPoints: 0, bestScore: 0 });
   const [accountLoading, setAccountLoading] = useState(true);
   const [walletSyncError, setWalletSyncError] = useState("");
+  const [accountType, setAccountType] = useState("signed_out");
+  const [googleLinkLoading, setGoogleLinkLoading] = useState(false);
   const [confirmAction, setConfirmAction] = useState("");
   const [distanceResult, setDistanceResult] = useState(0);
   const [best, setBest] = useState(0);
@@ -54,6 +55,18 @@ export default function MamahNgamukPage() {
   const [waveNotice, setWaveNotice] = useState("");
   const [menuPanel, setMenuPanel] = useState("");
 
+  const connectGoogleFromGame = async () => {
+    setGoogleLinkLoading(true);
+    setWalletSyncError("");
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      if (!data?.session?.user) throw new Error("Silakan login terlebih dahulu.");
+      if (!data.session.user.is_anonymous) { setAccountType("google"); setWalletSyncError("Akun ini sudah terdaftar, bukan akun tamu."); setGoogleLinkLoading(false); return; }
+      const { error: linkError } = await supabase.auth.linkIdentity({ provider: "google", options: { redirectTo: window.location.origin + window.location.pathname, queryParams: { access_type: "offline", prompt: "consent" } } });
+      if (linkError) throw linkError;
+    } catch (error) { console.error("Google link from Mamah Ngamuk failed:", error); setWalletSyncError(error.message || "Gagal menghubungkan Google."); setGoogleLinkLoading(false); }
+  };
   const tone = useCallback((frequency = 520, duration = 0.08) => {
     if (!soundRef.current || typeof window === "undefined") return;
     try {
@@ -241,13 +254,13 @@ export default function MamahNgamukPage() {
         if (error) throw error;
         const token = data?.session?.access_token;
         if (!token) {
-          if (active) { setPlayer(null); setWallet(0); setGameStats({ gamesPlayed: 0, totalPoints: 0, bestScore: 0 }); }
+          if (active) { setPlayer(null); setWallet(0); setAccountType("signed_out"); setGameStats({ gamesPlayed: 0, totalPoints: 0, bestScore: 0 }); }
           return;
         }
         const response = await fetch("/api/mamah-ngamuk/result", { headers: { Authorization: "Bearer " + token }, cache: "no-store" });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "Gagal memuat akun.");
-        if (active) { setPlayer(result.player || null); setWallet(Number(result.balance || 0)); setGameStats(result.stats || { gamesPlayed: 0, totalPoints: 0, bestScore: 0 }); }
+        if (active) { setPlayer(result.player || null); setAccountType(result.accountType || "registered"); setWallet(Number(result.balance || 0)); setGameStats(result.stats || { gamesPlayed: 0, totalPoints: 0, bestScore: 0 }); }
       } catch (error) {
         console.error("Mamah Ngamuk account load failed:", error);
         if (active) setWalletSyncError("AKUN / SALDO BELUM TERSINKRON");
@@ -907,7 +920,7 @@ export default function MamahNgamukPage() {
       {status === "ready" && <section className="mamah-screen mamah-screen--menu">
         <header className="mamah-home-header">
           <span className="mamah-brand__eyebrow">DAJJAL FAMILY · GAMING UNIVERSE</span>
-          <div className="mamah-header-actions"><Link href={player ? "/profile" : "/register"} className="mamah-account-button">👤 {player?.nickname || "LOGIN / AKUN"}</Link>
+          <div className="mamah-header-actions"><button type="button" className="mamah-account-button" onClick={() => setMenuPanel("profile")}>👤 {player?.nickname || "PROFIL / AKUN"}</button>
           <button type="button" className="mamah-sound-toggle" onClick={() => setSoundOn(v => !v)} aria-label={soundOn ? "Matikan suara" : "Nyalakan suara"}>{soundOn ? "♫ SOUND ON" : "♪ SOUND OFF"}</button></div>
         </header>
         <div className="mamah-home-title">
@@ -942,6 +955,14 @@ export default function MamahNgamukPage() {
         <div className="mamah-dialog mamah-menu-panel" onClick={e => e.stopPropagation()}>
           <button className="mamah-dialog__close" onClick={() => setMenuPanel("")} aria-label="Tutup">×</button>
           <p className="mamah-dialog__eyebrow">MAMAH NGAMUK!</p>
+          {menuPanel === "profile" && <><h2>👤 PROFIL PEMAIN</h2>
+            <div className="mamah-profile-identity"><span className="mamah-profile-avatar">👤</span><div><b>{player?.nickname || "BELUM LOGIN"}</b><small>{accountType === "google" ? "GOOGLE ACCOUNT" : accountType === "guest" ? "GUEST ACCOUNT" : accountType === "signed_out" ? "SIGNED OUT" : "PLAYER ACCOUNT"}</small></div></div>
+            <div className="mamah-profile-stats"><div><small>MY COINS</small><strong>🪙 {wallet.toLocaleString("id-ID")}</strong></div><div><small>BEST DISTANCE</small><strong>{best.toLocaleString("id-ID")} m</strong></div><div><small>BEST SCORE</small><strong>{gameStats.bestScore.toLocaleString("id-ID")}</strong></div><div><small>TOTAL POINTS</small><strong>{gameStats.totalPoints.toLocaleString("id-ID")}</strong></div><div><small>SESSIONS</small><strong>{gameStats.gamesPlayed.toLocaleString("id-ID")}</strong></div></div>
+            {accountType === "guest" && <button className="mamah-button mamah-button--primary" disabled={googleLinkLoading} onClick={connectGoogleFromGame}>{googleLinkLoading ? "CONNECTING..." : "🔗 LINK GOOGLE ACCOUNT"}</button>}
+            {accountType === "signed_out" && <button className="mamah-button mamah-button--primary" onClick={() => { window.location.href = "/register"; }}>LOGIN / CREATE ACCOUNT</button>}
+            {walletSyncError && <p className="mamah-account-warning">{walletSyncError}</p>}
+            <p className="mamah-dialog__note">Total poin, best score, dan saldo berasal dari database akun. Best Distance saat ini masih tersimpan di perangkat ini.</p>
+            <button className="mamah-button mamah-button--quiet" onClick={() => setMenuPanel("")}>TUTUP</button></>}
           {menuPanel === "leaderboard" && <><h2>🏆 LEADERBOARD</h2><div className="mamah-panel-stat"><span>PERSONAL BEST</span><strong>{best.toLocaleString("id-ID")} m</strong></div><p className="mamah-dialog__note">Peringkat global akan tersedia saat sistem leaderboard online diaktifkan.</p></>}
           {menuPanel === "howto" && <><h2>HOW TO PLAY</h2><div className="mamah-howto-row"><b>←</b><span>SWIPE LEFT<br/><small>Pindah ke jalur kiri</small></span></div><div className="mamah-howto-row"><b>→</b><span>SWIPE RIGHT<br/><small>Pindah ke jalur kanan</small></span></div><div className="mamah-howto-row"><b>🪙</b><span>COLLECT COINS<br/><small>Kumpulkan koin sebanyak mungkin</small></span></div><div className="mamah-howto-row"><b>🚗</b><span>AVOID VEHICLES<br/><small>Jangan sampai tertabrak!</small></span></div></>}
           {menuPanel === "achievements" && <><h2>🏅 ACHIEVEMENTS</h2><div className="mamah-achievement"><span>{best >= 1000 ? "🏆" : "🔒"}</span><div><b>FIRST ESCAPE</b><small>Capai jarak 1.000 meter</small></div><strong>{best >= 1000 ? "UNLOCKED" : "LOCKED"}</strong></div><div className="mamah-achievement"><span>{best >= 10000 ? "🥇" : "🔒"}</span><div><b>MASTER RUNNER</b><small>Capai jarak 10.000 meter</small></div><strong>{best >= 10000 ? "UNLOCKED" : "LOCKED"}</strong></div></>}
