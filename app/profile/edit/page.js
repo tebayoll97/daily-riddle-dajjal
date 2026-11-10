@@ -158,18 +158,17 @@ export default function EditProfilePage() {
     const cleanNickname = nickname.trim();
     const cleanServer = Number(serverNumber);
 
-    if (!cleanNickname || cleanNickname.length > 30) {
+    if (cleanNickname.length > 30) {
       setError(
         isID
-          ? "Nickname wajib diisi dan maksimal 30 karakter."
-          : "Nickname is required and must be at most 30 characters."
+          ? "Nickname maksimal 30 karakter."
+          : "Nickname must be at most 30 characters."
       );
       return;
     }
 
     if (
-      !Number.isInteger(cleanServer) ||
-      cleanServer <= 0
+      serverNumber.trim() !== "" && (!Number.isInteger(cleanServer) || cleanServer <= 0)
     ) {
       setError(
         isID
@@ -240,7 +239,7 @@ export default function EditProfilePage() {
         .from("players")
         .update({
           nickname: cleanNickname,
-          server_number: cleanServer,
+          server_number: serverNumber.trim() ? cleanServer : null,
           avatar_url: newAvatarUrl,
           avatar_path: newAvatarPath,
         })
@@ -271,7 +270,7 @@ export default function EditProfilePage() {
       setAvatarUrl(newAvatarUrl || "");
       setAvatarPath(newAvatarPath || "");
       setNickname(cleanNickname);
-      setServerNumber(String(cleanServer));
+      setServerNumber(serverNumber.trim() ? String(cleanServer) : "");
 
       clearPreview();
       setRemoveAvatar(false);
@@ -416,13 +415,12 @@ export default function EditProfilePage() {
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500"
-                required
               />
             </div>
 
             <div>
               <label className="block text-sm text-gray-300 mb-2">
-                {isID ? "Nomor Server" : "Server Number"}
+                {isID ? "Nomor Server (Opsional)" : "Server Number (Optional)"}
               </label>
 
               <input
@@ -431,7 +429,6 @@ export default function EditProfilePage() {
                 value={serverNumber}
                 onChange={(e) => setServerNumber(e.target.value)}
                 className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500"
-                required
               />
             </div>
 
