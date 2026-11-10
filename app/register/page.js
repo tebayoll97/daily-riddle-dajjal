@@ -19,6 +19,7 @@ const translations = {
     registering: "REGISTERING...",
     submit: "CREATE PLAYER PROFILE",
     missing: "Please enter your nickname and server.",
+    nicknameTaken: "This nickname is already in use. Please choose another one.",
     invalidServer: "Please enter a valid server number.",
     failed: "Registration failed. Please try again.",
     checking: "Checking your account...",
@@ -55,6 +56,7 @@ const translations = {
     registering: "MENDAFTARKAN...",
     submit: "BUAT PROFIL PEMAIN",
     missing: "Silakan masukkan nickname dan server.",
+    nicknameTaken: "Nickname ini sudah digunakan. Silakan pilih nickname lain.",
     invalidServer: "Silakan masukkan nomor server yang valid.",
     failed: "Pendaftaran gagal. Silakan coba lagi.",
     checking: "Memeriksa akun...",
@@ -366,6 +368,10 @@ export default function RegisterPage() {
         if (duplicatePlayer) {
           router.replace("/profile");
           return;
+        }
+
+        if (insertError.code === "23505") {
+          throw new Error(t.nicknameTaken);
         }
 
         throw insertError;
