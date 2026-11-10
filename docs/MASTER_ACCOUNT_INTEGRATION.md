@@ -66,3 +66,16 @@ Use the universal Player ID together with a game identifier, such as `player_id`
 - `game_result_events`: per-game result history.
 
 The current shared resolver is an additive foundation. Existing game routes should be migrated to it gradually and tested one at a time; do not perform a broad rewrite of authentication or database policies in one deployment.
+
+
+## Per-game wallet foundation
+
+The central database now includes:
+
+- `player_game_wallets`: one balance per `player_id + game_id + currency_code`.
+- `player_game_wallet_transactions`: immutable signed ledger entries with an idempotency key and post-transaction balance.
+- `adjust_player_game_wallet(...)`: atomic server-only adjustment function. It serializes updates per wallet, prevents negative balances, and ignores duplicate idempotency keys.
+
+Wallet balances and ledger history are readable only by the owning authenticated player through RLS. Browser clients cannot insert, update, or delete wallet records. The adjustment function is executable only by `service_role`; call it from a trusted server route after resolving the caller with `resolveAuthenticatedPlayer()`. Never accept a client-provided player ID as proof of ownership.
+
+Use a distinct `game_id` for each mini-game. A coin earned in one game must not alter another game's wallet. The initial currency code is `coin`, but the schema supports additional game-specific currency codes.
