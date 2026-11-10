@@ -22,6 +22,7 @@ const translations = {
     connecting: "CONNECTING...",
     alreadyConnected: "Your account is already registered.",
     failed: "Unable to connect your Google account.",
+    close: "CLOSE",
     expired:
       "Your session has expired. Please register or log in again.",
   },
@@ -40,6 +41,7 @@ const translations = {
     connecting: "MENGHUBUNGKAN...",
     alreadyConnected: "Akunmu sudah terdaftar.",
     failed: "Tidak dapat menghubungkan akun Google.",
+    close: "TUTUP",
     expired:
       "Sesi akunmu sudah berakhir. Silakan daftar atau login kembali.",
   },
