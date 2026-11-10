@@ -113,8 +113,26 @@ export async function POST(request) {
       isCorrect = submittedHash === riddle.answer_hash;
     }
 
-    // Persist the attempt atomically in PostgreSQL.
-    // The database function serializes concurrent submissions per player/riddle.
+    const hasGoogle = Boolean(auth.user && !auth.user.is_anonymous && (
+      auth.user.app_metadata?.provider === "google" ||
+      auth.user.app_metadata?.providers?.includes("google") ||
+      auth.user.identities?.some((identity) => identity.provider === "google")
+    ));
+    if (!hasGoogle) {
+      const attemptNumber = Math.min(3, Math.max(1, Number(body?.attemptNumber) || 1));
+      return Response.json({
+        correct: isCorrect,
+        attempts: attemptNumber,
+        attemptsLeft: isCorrect ? 0 : Math.max(0, 3 - attemptNumber),
+        score: isCorrect ? Number(riddle.points || 0) : 0,
+        completed: isCorrect,
+        finished: isCorrect || attemptNumber >= 3,
+        saved: false,
+        guest: true,
+      });
+    }
+
+    // Google accounts persist the attempt atomically in PostgreSQL.
     const { data: result, error: submitError } = await supabaseAdmin.rpc(
       "submit_riddle_attempt",
       {
