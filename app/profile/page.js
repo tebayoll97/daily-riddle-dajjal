@@ -89,7 +89,7 @@ export default function ProfilePage() {
         const session = sessionData.session;
 
         if (!session) {
-          router.replace("/register");
+          router.replace("/login");
           return;
         }
 
@@ -102,7 +102,7 @@ export default function ProfilePage() {
         if (playerError) throw playerError;
 
         if (!data) {
-          router.replace("/register");
+          router.replace("/login");
           return;
         }
 
