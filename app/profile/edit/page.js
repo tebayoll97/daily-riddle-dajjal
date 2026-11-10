@@ -155,7 +155,7 @@ export default function EditProfilePage() {
 
     setError("");
 
-    const cleanNickname = nickname.trim();
+    const cleanNickname = nickname.trim() || player.nickname || "";
     const cleanServer = Number(serverNumber);
 
     if (cleanNickname.length > 30) {
