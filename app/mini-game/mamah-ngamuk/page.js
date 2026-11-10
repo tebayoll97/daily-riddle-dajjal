@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import "./mamah-ngamuk.css";
 import { supabase } from "@/lib/supabase";
 
 const W = 900;
 const H = 1600;
-const BEST_KEY = "mamah-ngamuk-best-distance-v1";
-const WALLET_KEY = "mamah-ngamuk-wallet-v1";
+const PENDING_RESULT_KEY = "mamah-ngamuk-pending-result-v1";
 const LANES = [-1, 0, 1];
 const WAVE_STAGES = [
   { at: 0, alert: "WAVE 1  ·  AWAL PELARIAN" },
@@ -46,6 +46,8 @@ export default function MamahNgamukPage() {
   const [walletSyncError, setWalletSyncError] = useState("");
   const [accountType, setAccountType] = useState("signed_out");
   const [googleLinkLoading, setGoogleLinkLoading] = useState(false);
+  const [pendingGuestResult, setPendingGuestResult] = useState(false);
+  const [resultSaveStatus, setResultSaveStatus] = useState("");
   const [confirmAction, setConfirmAction] = useState("");
   const [distanceResult, setDistanceResult] = useState(0);
   const [best, setBest] = useState(0);
@@ -239,10 +241,6 @@ export default function MamahNgamukPage() {
     return () => window.removeEventListener("popstate", trapBack);
   }, []);
 
-  useEffect(() => {
-    try { setBest(Number(localStorage.getItem(BEST_KEY)) || 0); } catch {}
-  }, []);
-
   // The server wallet is the only source of truth; never hydrate it from localStorage.
   useEffect(() => {
     let active = true;
@@ -260,7 +258,36 @@ export default function MamahNgamukPage() {
         const response = await fetch("/api/mamah-ngamuk/result", { headers: { Authorization: "Bearer " + token }, cache: "no-store" });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "Gagal memuat akun.");
-        if (active) { setPlayer(result.player || null); setAccountType(result.accountType || "registered"); setWallet(Number(result.balance || 0)); setGameStats(result.stats || { gamesPlayed: 0, totalPoints: 0, bestScore: 0 }); }
+        if (active) {
+          setPlayer(result.player || null);
+          setAccountType(result.accountType || "registered");
+          setWallet(Number(result.balance || 0));
+          setGameStats(result.stats || { gamesPlayed: 0, totalPoints: 0, bestScore: 0 });
+          setBest(Number(result.stats?.bestDistance || 0));
+          if (result.accountType === "google") {
+            const pendingRaw = sessionStorage.getItem(PENDING_RESULT_KEY);
+            if (pendingRaw) {
+              const pending = JSON.parse(pendingRaw);
+              const saveResponse = await fetch("/api/mamah-ngamuk/result", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+                body: JSON.stringify(pending),
+              });
+              const saved = await saveResponse.json();
+              if (!saveResponse.ok) throw new Error(saved.error || "Hasil sesi belum berhasil disimpan.");
+              sessionStorage.removeItem(PENDING_RESULT_KEY);
+              setPendingGuestResult(false);
+              setWallet(Number(saved.balance || 0));
+              setBest(Number(saved.bestDistance || 0));
+              setGameStats((old) => ({ ...old, gamesPlayed: old.gamesPlayed + (saved.duplicate ? 0 : 1), totalPoints: old.totalPoints + (saved.duplicate ? 0 : Number(pending.score || 0)), bestScore: Math.max(old.bestScore || 0, Number(pending.score || 0)) }));
+              setResultSaveStatus("HASIL SESI GUEST BERHASIL DISIMPAN");
+            }
+          } else {
+            setWallet(0);
+            setGameStats({ gamesPlayed: 0, totalPoints: 0, bestScore: 0 });
+            setBest(0);
+          }
+        }
       } catch (error) {
         console.error("Mamah Ngamuk account load failed:", error);
         if (active) setWalletSyncError("AKUN / SALDO BELUM TERSINKRON");
@@ -632,43 +659,40 @@ export default function MamahNgamukPage() {
       setDistance(finalDistance);
       setScore(finalScore);
       setCoins(g.coinCount);
-      setBest((old) => {
-        const next = Math.max(old, finalDistance);
-        try { localStorage.setItem(BEST_KEY, String(next)); } catch {}
-        return next;
-      });
-      const sessionId = g.sessionId;
-      const collectedCoins = g.coinCount;
-      const finalResultScore = finalScore;
+      setBest((old) => Math.max(old, finalDistance));
+      const sessionResult = { sessionId: g.sessionId, distance: finalDistance, coins: g.coinCount, score: finalScore };
       const saveResult = async () => {
         try {
           const { data: authData, error: authError } = await supabase.auth.getSession();
           if (authError) throw authError;
-          const token = authData?.session?.access_token;
-          if (!token) throw new Error("Login diperlukan untuk menyimpan koin.");
+          const user = authData?.session?.user;
+          const isGoogle = Boolean(user && !user.is_anonymous && (
+            user.app_metadata?.provider === "google" ||
+            user.app_metadata?.providers?.includes("google") ||
+            user.identities?.some((identity) => identity.provider === "google")
+          ));
+          if (!isGoogle) {
+            sessionStorage.setItem(PENDING_RESULT_KEY, JSON.stringify(sessionResult));
+            setPendingGuestResult(true);
+            setResultSaveStatus("HASIL INI SEMENTARA. LOGIN GOOGLE UNTUK MENYIMPANNYA.");
+            return;
+          }
+          const token = authData.session.access_token;
           const response = await fetch("/api/mamah-ngamuk/result", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              sessionId,
-              distance: finalDistance,
-              coins: collectedCoins,
-              score: finalResultScore,
-            }),
+            headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+            body: JSON.stringify(sessionResult),
           });
           const result = await response.json();
           if (!response.ok) throw new Error(result.error || "Gagal menyimpan hasil permainan.");
           setWallet(Number(result.balance || 0));
+          setBest(Number(result.bestDistance || finalDistance));
           setWalletSyncError("");
-          setGameStats((old) => ({ ...old, gamesPlayed: old.gamesPlayed + (result.duplicate ? 0 : 1), totalPoints: old.totalPoints + (result.duplicate ? 0 : finalResultScore), bestScore: Math.max(old.bestScore || 0, finalResultScore) }));
+          setGameStats((old) => ({ ...old, gamesPlayed: old.gamesPlayed + (result.duplicate ? 0 : 1), totalPoints: old.totalPoints + (result.duplicate ? 0 : finalScore), bestScore: Math.max(old.bestScore || 0, finalScore) }));
+          setResultSaveStatus("HASIL BERHASIL DISIMPAN");
         } catch (error) {
           console.error("Mamah Ngamuk result sync failed:", error);
-          setWalletSyncError("KOIN BELUM TERSIMPAN · PERIKSA KONEKSI");
-          setWaveNotice("KOIN BELUM TERSIMPAN · PERIKSA KONEKSI");
-          waveNoticeTimerRef.current = window.setTimeout(() => setWaveNotice(""), 5000);
+          setWalletSyncError(error.message || "HASIL BELUM TERSIMPAN · PERIKSA KONEKSI");
         }
       };
       saveResult();
@@ -878,6 +902,9 @@ export default function MamahNgamukPage() {
 
   const goHome = () => {
     confirmResumeRef.current = false;
+    try { sessionStorage.removeItem(PENDING_RESULT_KEY); } catch {}
+    setPendingGuestResult(false);
+    setResultSaveStatus("");
     const g = gameRef.current;
     if (g) { g.running = false; g.paused = false; g.pauseStartedAt = 0; g.over = false; g.caught = false; }
     // In-game Home remains part of the same audio session.
@@ -963,7 +990,7 @@ export default function MamahNgamukPage() {
             {walletSyncError && <p className="mamah-account-warning">{walletSyncError}</p>}
             <p className="mamah-dialog__note">Total poin, best score, dan saldo berasal dari database akun. Best Distance saat ini masih tersimpan di perangkat ini.</p>
             <button className="mamah-button mamah-button--quiet" onClick={() => setMenuPanel("")}>TUTUP</button></>}
-          {menuPanel === "leaderboard" && <><h2>🏆 LEADERBOARD</h2><div className="mamah-panel-stat"><span>PERSONAL BEST</span><strong>{best.toLocaleString("id-ID")} m</strong></div><p className="mamah-dialog__note">Peringkat global akan tersedia saat sistem leaderboard online diaktifkan.</p></>}
+          {menuPanel === "leaderboard" && <><h2>🏆 LEADERBOARD</h2>{accountType !== "google" ? <><p className="mamah-dialog__note">LOGIN MENGGUNAKAN AKUN GOOGLE UNTUK MELIHAT DAN MASUK KE LEADERBOARD.</p><button className="mamah-button mamah-button--primary" onClick={() => setMenuPanel("profile")}>LOGIN GOOGLE</button></> : <><div className="mamah-panel-stat"><span>PERSONAL BEST</span><strong>{best.toLocaleString("id-ID")} m</strong></div><p className="mamah-dialog__note">Leaderboard game akan ditampilkan di sini setelah papan peringkat game diaktifkan.</p></>}</>}
           {menuPanel === "howto" && <><h2>HOW TO PLAY</h2><div className="mamah-howto-row"><b>←</b><span>SWIPE LEFT<br/><small>Pindah ke jalur kiri</small></span></div><div className="mamah-howto-row"><b>→</b><span>SWIPE RIGHT<br/><small>Pindah ke jalur kanan</small></span></div><div className="mamah-howto-row"><b>🪙</b><span>COLLECT COINS<br/><small>Kumpulkan koin sebanyak mungkin</small></span></div><div className="mamah-howto-row"><b>🚗</b><span>AVOID VEHICLES<br/><small>Jangan sampai tertabrak!</small></span></div></>}
           {menuPanel === "achievements" && <><h2>🏅 ACHIEVEMENTS</h2><div className="mamah-achievement"><span>{best >= 1000 ? "🏆" : "🔒"}</span><div><b>FIRST ESCAPE</b><small>Capai jarak 1.000 meter</small></div><strong>{best >= 1000 ? "UNLOCKED" : "LOCKED"}</strong></div><div className="mamah-achievement"><span>{best >= 10000 ? "🥇" : "🔒"}</span><div><b>MASTER RUNNER</b><small>Capai jarak 10.000 meter</small></div><strong>{best >= 10000 ? "UNLOCKED" : "LOCKED"}</strong></div></>}
         </div>
@@ -978,7 +1005,7 @@ export default function MamahNgamukPage() {
         </div>
       </>}
       {status === "paused" && <section className="mamah-overlay"><div className="mamah-dialog"><span className="mamah-dialog__emoji">Ⅱ</span><p className="mamah-dialog__eyebrow">PERMAINAN DIJEDA</p><h2>ISTIRAHAT DULU?</h2><button className="mamah-button mamah-button--primary" onClick={resume}>▶ LANJUTKAN</button><button className="mamah-button" onClick={() => openConfirmAction("restart")}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setConfirmExit(true)}>↩ KELUAR GAME</button></div></section>}
-      {status === "caught" && <section className="mamah-catch-caption" aria-live="assertive"><strong>PULANG! MANDI!</strong></section>}\n      {status === "over" && <section className="mamah-overlay mamah-overlay--gameover"><div className="mamah-dialog mamah-dialog--result"><span className="mamah-dialog__emoji">🧹</span><p className="mamah-dialog__eyebrow">MAMA BERHASIL MENANGKAP!</p><h2>KETANGKAP MAMAH!</h2><div className="mamah-result mamah-result--primary"><span>JARAK TEMPUH <strong>{distanceResult} m</strong></span><span>TOTAL KOIN <strong>🪙 {coins}</strong></span></div><div className="mamah-result"><span>SKOR AKHIR <strong>{String(score).padStart(6,"0")}</strong></span><span>BEST <strong>{String(best).padStart(6,"0")}</strong></span></div><button className="mamah-button mamah-button--primary" onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={goHome}>⌂ MENU UTAMA</button></div></section>}
+      {status === "caught" && <section className="mamah-catch-caption" aria-live="assertive"><strong>PULANG! MANDI!</strong></section>}\n      {status === "over" && <section className="mamah-overlay mamah-overlay--gameover"><div className="mamah-dialog mamah-dialog--result"><span className="mamah-dialog__emoji">🧹</span><p className="mamah-dialog__eyebrow">MAMA BERHASIL MENANGKAP!</p><h2>KETANGKAP MAMAH!</h2><div className="mamah-result mamah-result--primary"><span>JARAK TEMPUH <strong>{distanceResult} m</strong></span><span>TOTAL KOIN <strong>🪙 {coins}</strong></span></div><div className="mamah-result"><span>SKOR AKHIR <strong>{String(score).padStart(6,"0")}</strong></span><span>BEST <strong>{String(best).padStart(6,"0")}</strong></span></div>{pendingGuestResult && <><p className="mamah-dialog__note">GUEST: HASIL INI BELUM TERSIMPAN. LOGIN GOOGLE SEKARANG UNTUK MENYIMPAN SKOR DAN KOIN.</p><button className="mamah-button mamah-button--primary" disabled={googleLinkLoading} onClick={connectGoogleFromGame}>{googleLinkLoading ? "MENGHUBUNGKAN..." : "🔐 LOGIN GOOGLE & SIMPAN HASIL"}</button><button className="mamah-button mamah-button--quiet" onClick={() => { try { sessionStorage.removeItem(PENDING_RESULT_KEY); } catch {} setPendingGuestResult(false); setResultSaveStatus("HASIL GUEST DIHAPUS"); }}>TIDAK, HAPUS HASIL</button></>}{resultSaveStatus && <p className="mamah-dialog__note">{resultSaveStatus}</p>}<button className="mamah-button mamah-button--primary" onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={goHome}>⌂ MENU UTAMA</button></div></section>}
       {confirmAction && <section className="mamah-overlay" onClick={cancelConfirmAction}><div className="mamah-dialog" role="alertdialog" aria-modal="true" onClick={e => e.stopPropagation()}><span className="mamah-dialog__emoji">{confirmAction === "restart" ? "↻" : "⌂"}</span><p className="mamah-dialog__eyebrow">KONFIRMASI</p><h2>{confirmAction === "restart" ? "RESTART PERMAINAN?" : "KEMBALI KE HOME?"}</h2><p className="mamah-dialog__note">{confirmAction === "restart" ? "Permainan saat ini akan dimulai ulang." : "Kamu akan meninggalkan sesi permainan dan kembali ke menu utama."}</p><button className="mamah-button mamah-button--primary" onClick={confirmCurrentAction}>YES</button><button className="mamah-button mamah-button--quiet" onClick={cancelConfirmAction}>NO</button></div></section>}
       {settingsOpen && <section className="mamah-overlay" onClick={() => setSettingsOpen(false)}><div className="mamah-dialog" onClick={e => e.stopPropagation()}><button className="mamah-dialog__close" onClick={() => setSettingsOpen(false)} aria-label="Tutup">×</button><p className="mamah-dialog__eyebrow">PENGATURAN</p><h2>SUARA GAME</h2><button className="mamah-button" onClick={() => setSoundOn(v => !v)}>{soundOn ? "♫ SUARA: ON" : "♪ SUARA: OFF"}</button><p className="mamah-dialog__note">Atur volume melalui tombol volume perangkat.</p></div></section>}
       {confirmExit && <section className="mamah-overlay" onClick={() => setConfirmExit(false)}><div className="mamah-dialog" role="alertdialog" aria-modal="true" aria-labelledby="mamah-exit-title" onClick={e => e.stopPropagation()}><span className="mamah-dialog__emoji">🚪</span><p className="mamah-dialog__eyebrow">KONFIRMASI</p><h2 id="mamah-exit-title">KELUAR DARI GAME?</h2><p className="mamah-dialog__note">Sesi permainan ini akan diakhiri dan kamu kembali ke Game Library.</p><button className="mamah-button" onClick={() => setConfirmExit(false)}>TETAP MAIN</button><button className="mamah-button mamah-button--danger" onClick={() => { window.location.href = "/mini-game"; }}>YA, KELUAR</button></div></section>}
