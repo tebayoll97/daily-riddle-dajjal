@@ -60,7 +60,7 @@ const translations = {
     registered: "REGISTERED ACCOUNT",
     checking: "Checking account...",
     noSession: "No active account session.",
-    register: "REGISTER / LOGIN",
+    register: "LOGIN WITH GOOGLE",
     saved: "Settings saved",
     back: "BACK TO GAMES",
     volume: "Volume",
@@ -100,7 +100,7 @@ const translations = {
     registered: "AKUN TERDAFTAR",
     checking: "Memeriksa akun...",
     noSession: "Tidak ada sesi akun yang aktif.",
-    register: "DAFTAR / LOGIN",
+    register: "LOGIN GOOGLE",
     saved: "Pengaturan tersimpan",
     back: "KEMBALI KE GAME",
     volume: "Volume",
@@ -590,7 +590,7 @@ export default function SettingsPage() {
 
             {accountStatus === "none" ? (
               <Link
-                href="/register"
+                href="/login"
                 className="block text-center rounded-xl bg-purple-600 hover:bg-purple-500 py-3 font-bold transition"
               >
                 {t.register}
