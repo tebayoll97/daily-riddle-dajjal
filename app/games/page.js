@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import { getPlayerContext } from "@/lib/playerAccount";
 import { useLanguage } from "../components/LanguageProvider";
 
