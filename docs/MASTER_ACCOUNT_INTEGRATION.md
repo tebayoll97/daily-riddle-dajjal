@@ -4,7 +4,7 @@ This project is the central identity provider for Dajjal Family Gaming Universe.
 
 ## Identity shared by every game
 
-- Supabase Auth user (Google identity or anonymous Guest identity)
+- Supabase Auth user with a verified Google identity
 - `players.id` — the stable universal Player ID
 - `players.nickname` — one globally unique nickname
 - `players.avatar_url` — the shared player avatar
@@ -19,22 +19,14 @@ import { getPlayerContext } from "@/lib/playerAccount";
 const context = await getPlayerContext();
 
 if (context.status === "signed_out") {
-  // Ask the player to enter the shared registration/login flow.
+  // Ask the player to sign in with Google.
 } else if (context.status === "profile_required") {
-  // Continue the shared profile setup flow; do not create a game-local account.
+  // Provision the shared player profile after Google authentication.
 } else {
   // context.player.id is the universal Player ID.
-  // context.accountType is "guest", "google", or "registered".
+  // context.accountType must be "google" for account-based games.
 }
 ```
-
-To explicitly create a Guest Auth identity when the game flow requires it:
-
-```js
-const context = await getPlayerContext({ createGuest: true });
-```
-
-This option creates only the Supabase Auth Guest identity. It does not create a player profile or game data.
 
 ## Data that must remain game-specific
 
@@ -81,13 +73,18 @@ Wallet balances and ledger history are readable only by the owning authenticated
 Use a distinct `game_id` for each mini-game. A coin earned in one game must not alter another game's wallet. The initial currency code is `coin`, but the schema supports additional game-specific currency codes.
 
 
-## Guest vs Google access policy (November 2026)
+## Account access policy (November 2026)
 
-- Guest accounts may play games, but game results, coins, wallet transactions, and leaderboard scores are session-only and must never be persisted.
-- A Guest may save the current MAMAH NGAMUK result after Game Over by linking Google to the same anonymous Auth user with `linkIdentity({ provider: "google" })`. The pending session payload is held in sessionStorage only during this explicit save flow and submitted once after the OAuth redirect.
-- If the Google identity is already linked to another Auth user, stop. Never sign into or merge the other account automatically.
-- Only users with a verified Google identity may read global leaderboard data or persist game results.
+- Mini Games are instant-play experiences and do not require authentication. They must not write permanent player records, game scores, wallet balances, or leaderboard results.
+- Games are account-based experiences. A verified Google login is required before gameplay begins.
+- The Game Library remains publicly viewable. Authentication is required only when the player chooses to launch an account-based game.
+- Google login automatically provisions one players row on first successful login. The initial nickname is derived from the email local-part (the text before @); if occupied, a short unique suffix is added.
+- Nickname is editable but never required to be changed. A blank nickname field means keep the current nickname.
+- Server number is optional and may remain NULL until the player chooses to set it in Edit Profile.
+- Profile photo defaults to the Google avatar when available and can be changed in Edit Profile.
+- The trusted provisioning endpoint validates the Supabase access token and Google identity before creating a player.
+- Existing Player IDs and game progress must remain unchanged when this policy is introduced.
+- Do not merge anonymous Guest identities into a different Google account. Existing Guest linking must retain the same Auth user and Player ID if the player explicitly links Google.
 - Enforce Google identity checks in server routes; never rely on client-side hiding alone.
-- Direct browser SELECT access to leaderboard/statistics/wallet/result tables and the global leaderboard view is revoked. Server APIs use the service role after verifying the bearer token and Google identity.
-- Daily Riddle Guest attempts are checked but not written to the scores table. Guest progress is temporary in the browser.
-- MAMAH NGAMUK best distance is stored in `player_game_stats.best_distance`, scoped to the player and game. It is not stored in localStorage.
+- Direct browser SELECT access to leaderboard/statistics/wallet/result tables and the global leaderboard view remains revoked. Server APIs use service-role access only after verifying the bearer token and Google identity.
+- MAMAH NGAMUK best distance remains in player_game_stats.best_distance, scoped to the player and game. It is not stored in localStorage.
