@@ -55,15 +55,22 @@ export async function GET(request) {
       );
     }
 
-    const { data: previousScore, error: scoreError } =
-      await supabaseAdmin
+    const hasGoogle = Boolean(auth.user && !auth.user.is_anonymous && (
+      auth.user.app_metadata?.provider === "google" ||
+      auth.user.app_metadata?.providers?.includes("google") ||
+      auth.user.identities?.some((identity) => identity.provider === "google")
+    ));
+    let previousScore = null;
+    if (hasGoogle) {
+      const { data, error: scoreError } = await supabaseAdmin
         .from("scores")
         .select("attempts, score, completed_at")
         .eq("player_id", player.id)
         .eq("riddle_id", riddle.id)
         .maybeSingle();
-
-    if (scoreError) throw scoreError;
+      if (scoreError) throw scoreError;
+      previousScore = data;
+    }
 
     const attempts = previousScore?.attempts || 0;
     const solved = Boolean(previousScore?.completed_at);
