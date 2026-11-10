@@ -33,6 +33,16 @@ export async function POST(request) {
       return Response.json({ error: "A verified Google account is required." }, { status: 403 });
     }
 
+    const { data: adminRecord, error: adminError } = await supabaseAdmin
+      .from("admin_users")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (adminError) throw adminError;
+    if (adminRecord) {
+      return Response.json({ error: "Administrator accounts do not need a player profile." }, { status: 403 });
+    }
+
     const { data: existing, error: lookupError } = await supabaseAdmin
       .from("players")
       .select("id, nickname, server_number, avatar_url")
