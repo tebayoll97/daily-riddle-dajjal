@@ -287,7 +287,13 @@ export default function EditProfilePage() {
           .remove([uploadedPath]);
       }
 
-      setError(err.message);
+      setError(
+        err.code === "23505"
+          ? isID
+            ? "Nickname ini sudah digunakan. Silakan pilih nickname lain."
+            : "This nickname is already in use. Please choose another one."
+          : err.message
+      );
     } finally {
       setSaving(false);
     }
