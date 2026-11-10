@@ -436,7 +436,7 @@ export default function GamePage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ answer: answer.trim() }),
+        body: JSON.stringify({ answer: answer.trim(), attemptNumber: attemptsUsed + 1 }),
       });
 
       const result = await response.json();
