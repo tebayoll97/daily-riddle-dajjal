@@ -120,24 +120,9 @@ export default function ProfilePage() {
           throw new Error(t.error);
         }
 
-        // Read recent activity with the authenticated client.
-        // Row-level security limits this query to the signed-in player's records.
-        const { data: activityRows, error: activityError } = await supabase
-          .from("game_result_events")
-          .select("id, score, won, created_at, games(name, slug)")
-          .eq("player_id", data.id)
-          .order("created_at", { ascending: false })
-          .limit(15);
-
-        if (activityError) throw activityError;
-
-        const activity = (activityRows || []).map((item) => ({
-          id: item.id,
-          gameName: item.games?.name || "Unknown Game",
-          score: Number(item.score || 0),
-          won: Boolean(item.won),
-          createdAt: item.created_at,
-        }));
+        // Activity is returned by the server-side profile API using service-role access.
+        // The browser must not query game_result_events directly.
+        const activity = profileResult.stats?.activity || [];
 
         if (active) {
           setPlayer(profileResult.player);
