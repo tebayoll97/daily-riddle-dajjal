@@ -1,7 +1,21 @@
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-export async function GET() {
+export async function GET(request) {
+  const authorization = request.headers.get("authorization");
+  if (!authorization?.startsWith("Bearer ")) {
+    return Response.json({ error: "Login menggunakan akun Google untuk melihat leaderboard." }, { status: 401 });
+  }
+  const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(authorization.slice(7));
+  const user = authData?.user;
+  const hasGoogle = Boolean(user && !user.is_anonymous && (
+    user.app_metadata?.provider === "google" ||
+    user.app_metadata?.providers?.includes("google") ||
+    user.identities?.some((identity) => identity.provider === "google")
+  ));
+  if (authError || !hasGoogle) {
+    return Response.json({ error: "Login menggunakan akun Google untuk melihat leaderboard." }, { status: 403 });
+  }
   try {
     const { data, error } = await supabaseAdmin
       .from("global_leaderboard")
