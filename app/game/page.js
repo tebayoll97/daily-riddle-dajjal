@@ -338,7 +338,17 @@ export default function GamePage() {
         const session = data.session;
 
         if (!session) {
-          router.replace("/register");
+          router.replace("/login?next=%2Fgame");
+          return;
+        }
+
+        const providers = [
+          session.user?.app_metadata?.provider,
+          ...(session.user?.app_metadata?.providers || []),
+          ...(session.user?.identities || []).map((identity) => identity.provider),
+        ].filter(Boolean);
+        if (session.user?.is_anonymous || !providers.includes("google")) {
+          router.replace("/login?next=%2Fgame");
           return;
         }
 
@@ -356,7 +366,7 @@ export default function GamePage() {
           (response.status === 404 &&
             result.error === "Player profile not found")
         ) {
-          router.replace("/register");
+          router.replace("/login?next=%2Fgame");
           return;
         }
 
