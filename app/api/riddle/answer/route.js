@@ -1,47 +1,21 @@
 
 import { createHash } from "crypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { resolveAuthenticatedPlayer } from "@/lib/serverPlayerAccount";
 
 export async function POST(request) {
   try {
-    // Authenticate player
-    const authorization = request.headers.get("authorization");
+    // Resolve the verified session to the universal player identity.
+    const auth = await resolveAuthenticatedPlayer(request, "id");
 
-    if (!authorization?.startsWith("Bearer ")) {
+    if (!auth.ok) {
       return Response.json(
-        { error: "Unauthorized" },
-        { status: 401 }
+        { error: auth.error },
+        { status: auth.status }
       );
     }
 
-    const token = authorization.slice(7);
-
-    const { data: authData, error: authError } =
-      await supabaseAdmin.auth.getUser(token);
-
-    if (authError || !authData.user) {
-      return Response.json(
-        { error: "Invalid session" },
-        { status: 401 }
-      );
-    }
-
-    // Get player profile
-    const { data: player, error: playerError } =
-      await supabaseAdmin
-        .from("players")
-        .select("id")
-        .eq("auth_user_id", authData.user.id)
-        .maybeSingle();
-
-    if (playerError) throw playerError;
-
-    if (!player) {
-      return Response.json(
-        { error: "Player profile not found." },
-        { status: 404 }
-      );
-    }
+    const player = auth.player;
 
     // Read and validate submitted answer
     let body;
