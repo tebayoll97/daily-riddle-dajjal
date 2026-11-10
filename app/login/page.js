@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import GameCharacter from "@/lib/GameCharacter";
@@ -15,17 +15,16 @@ function isGoogleUser(user) {
 
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { language } = useLanguage();
   const isID = language === "id";
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const nextPath = useMemo(() => {
-    const value = searchParams.get("next") || "/games";
+  function getNextPath() {
+    const value = new URLSearchParams(window.location.search).get("next") || "/games";
     return value.startsWith("/") && !value.startsWith("//") ? value : "/games";
-  }, [searchParams]);
+  }
 
   useEffect(() => {
     let active = true;
@@ -57,7 +56,7 @@ export default function LoginPage() {
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "Unable to prepare player profile.");
 
-        if (active) router.replace(nextPath);
+        if (active) router.replace(getNextPath());
       } catch (err) {
         console.error("Login completion error:", err);
         if (active) {
@@ -69,7 +68,7 @@ export default function LoginPage() {
 
     finishLogin();
     return () => { active = false; };
-  }, [router, nextPath, isID]);
+  }, [router, isID]);
 
   async function handleGoogleLogin() {
     if (busy) return;
@@ -87,7 +86,7 @@ export default function LoginPage() {
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/login?next=${encodeURIComponent(nextPath)}`,
+          redirectTo: `${window.location.origin}/login?next=${encodeURIComponent(getNextPath())}`,
           queryParams: { prompt: "select_account" },
         },
       });
