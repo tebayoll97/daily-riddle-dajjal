@@ -17,7 +17,7 @@ async function getGame() {
 
 export async function GET(request) {
   try {
-    const auth = await resolveAuthenticatedPlayer(request, "id");
+    const auth = await resolveAuthenticatedPlayer(request, "id, nickname, server_number, avatar_url");
     if (!auth.ok) return Response.json({ error: auth.error }, { status: auth.status });
     const game = await getGame();
     const { data, error } = await supabaseAdmin
@@ -28,7 +28,9 @@ export async function GET(request) {
       .eq("currency_code", "coin")
       .maybeSingle();
     if (error) throw error;
-    return Response.json({ balance: Number(data?.balance || 0), currency: "coin" });
+    const { data: stats, error: statsError } = await supabaseAdmin.from("player_game_stats").select("games_played, total_points, best_score").eq("player_id", auth.player.id).eq("game_id", game.id).maybeSingle();
+    if (statsError) throw statsError;
+    return Response.json({ player: { id: auth.player.id, nickname: auth.player.nickname, serverNumber: auth.player.server_number, avatarUrl: auth.player.avatar_url }, balance: Number(data?.balance || 0), currency: "coin", stats: { gamesPlayed: Number(stats?.games_played || 0), totalPoints: Number(stats?.total_points || 0), bestScore: Number(stats?.best_score || 0) } });
   } catch (error) {
     console.error("Mamah Ngamuk wallet GET error:", error);
     return Response.json({ error: "Unable to load game wallet." }, { status: 500 });
