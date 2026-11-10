@@ -243,6 +243,7 @@ export default function MamahNgamukPage() {
 
   // The server wallet is the only source of truth; never hydrate it from localStorage.
   useEffect(() => {
+    try { setPendingGuestResult(Boolean(sessionStorage.getItem(PENDING_RESULT_KEY))); } catch {}
     let active = true;
     const loadAccount = async () => {
       setAccountLoading(true);
