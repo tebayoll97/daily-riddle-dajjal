@@ -77,18 +77,23 @@ export default function LoginPage() {
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw sessionError;
+      const options = {
+        redirectTo: `${window.location.origin}/login?next=${encodeURIComponent(getNextPath())}`,
+        queryParams: { prompt: "select_account" },
+      };
+
       if (session?.user?.is_anonymous) {
-        throw new Error(isID
-          ? "Selesaikan atau keluar dari sesi Guest terlebih dahulu."
-          : "Please finish or sign out of the Guest session first.");
+        const { error: linkError } = await supabase.auth.linkIdentity({
+          provider: "google",
+          options,
+        });
+        if (linkError) throw linkError;
+        return;
       }
 
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/login?next=${encodeURIComponent(getNextPath())}`,
-          queryParams: { prompt: "select_account" },
-        },
+        options,
       });
       if (oauthError) throw oauthError;
     } catch (err) {
