@@ -554,3 +554,14 @@
  .mamah-home-hero { transform:scale(.88); margin-top:-8px; margin-bottom:-8px; }
  .mamah-player-summary { padding:8px 11px; }
 }
+
+.mamah-profile-identity { display:flex; align-items:center; gap:12px; padding:12px; margin:0 0 12px; border:1px solid #ffffff22; border-radius:14px; background:#08061270; text-align:left; }
+.mamah-profile-avatar { display:grid; width:44px; height:44px; flex:0 0 44px; place-items:center; border:1px solid #cda8fa88; border-radius:50%; background:#8b5cf622; font-size:22px; }
+.mamah-profile-identity div { display:flex; min-width:0; flex-direction:column; gap:4px; }
+.mamah-profile-identity b { overflow:hidden; color:#fff; font-size:15px; text-overflow:ellipsis; }
+.mamah-profile-identity small { color:#cda8fa; font-size:9px; font-weight:900; letter-spacing:.12em; }
+.mamah-profile-stats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:0 0 12px; }
+.mamah-profile-stats div { display:flex; min-width:0; flex-direction:column; gap:5px; padding:11px; border:1px solid #ffffff20; border-radius:12px; background:#08061270; text-align:left; }
+.mamah-profile-stats small { color:#cda8fa; font-size:8px; font-weight:950; letter-spacing:.12em; }
+.mamah-profile-stats strong { overflow-wrap:anywhere; color:#ffe18a; font:900 14px ui-monospace,monospace; }
+.mamah-dialog .mamah-profile-stats + .mamah-button { margin-top:8px; }
