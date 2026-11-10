@@ -159,7 +159,7 @@ export default function LeaderboardPage() {
             <div className="text-4xl">🔒</div>
             <h2 className="text-xl font-black mt-4">LEADERBOARD LOCKED</h2>
             <p className="text-gray-300 text-sm mt-3">Login menggunakan akun Google untuk melihat dan masuk ke leaderboard.</p>
-            <Link href="/register" className="inline-flex mt-6 rounded-xl bg-purple-600 px-6 py-3 font-bold">LOGIN WITH GOOGLE</Link>
+            <Link href="/login" className="inline-flex mt-6 rounded-xl bg-purple-600 px-6 py-3 font-bold">LOGIN WITH GOOGLE</Link>
           </div>
         ) : error ? (
           <div className="text-center py-16">
