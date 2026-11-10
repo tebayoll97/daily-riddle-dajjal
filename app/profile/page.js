@@ -222,7 +222,7 @@ export default function ProfilePage() {
           </h2>
 
           <p className="text-purple-300 text-sm text-center mt-1">
-            Server {player.server_number}
+            Server {player.server_number || "—"}
           </p>
 
           <Link
@@ -248,7 +248,7 @@ export default function ProfilePage() {
                 {t.server}
               </span>
               <span className="font-semibold">
-                {player.server_number}
+                {player.server_number || "—"}
               </span>
             </div>
 
