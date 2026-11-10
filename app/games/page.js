@@ -91,7 +91,7 @@ export default function GamesPage() {
     setLoading(true);
     try {
       const context = await getPlayerContext();
-      router.push(context.status === "ready" && context.accountType === "google" ? "/mini-game/mamah-ngamuk?splash=1" : "/login?next=%2Fmini-game%2Fmamah-ngamuk%3Fsplash%3D1");
+      router.push(context.status === "ready" && context.accountType === "google" ? "/games/mamah-ngamuk?splash=1" : "/login?next=%2Fmini-game%2Fmamah-ngamuk%3Fsplash%3D1");
     } catch (error) {
       console.error("Mamah Ngamuk launch error:", error);
       setShowError(true);
