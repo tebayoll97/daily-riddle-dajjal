@@ -79,3 +79,15 @@ The central database now includes:
 Wallet balances and ledger history are readable only by the owning authenticated player through RLS. Browser clients cannot insert, update, or delete wallet records. The adjustment function is executable only by `service_role`; call it from a trusted server route after resolving the caller with `resolveAuthenticatedPlayer()`. Never accept a client-provided player ID as proof of ownership.
 
 Use a distinct `game_id` for each mini-game. A coin earned in one game must not alter another game's wallet. The initial currency code is `coin`, but the schema supports additional game-specific currency codes.
+
+
+## Guest vs Google access policy (November 2026)
+
+- Guest accounts may play games, but game results, coins, wallet transactions, and leaderboard scores are session-only and must never be persisted.
+- A Guest may save the current MAMAH NGAMUK result after Game Over by linking Google to the same anonymous Auth user with `linkIdentity({ provider: "google" })`. The pending session payload is held in sessionStorage only during this explicit save flow and submitted once after the OAuth redirect.
+- If the Google identity is already linked to another Auth user, stop. Never sign into or merge the other account automatically.
+- Only users with a verified Google identity may read global leaderboard data or persist game results.
+- Enforce Google identity checks in server routes; never rely on client-side hiding alone.
+- Direct browser SELECT access to leaderboard/statistics/wallet/result tables and the global leaderboard view is revoked. Server APIs use the service role after verifying the bearer token and Google identity.
+- Daily Riddle Guest attempts are checked but not written to the scores table. Guest progress is temporary in the browser.
+- MAMAH NGAMUK best distance is stored in `player_game_stats.best_distance`, scoped to the player and game. It is not stored in localStorage.
