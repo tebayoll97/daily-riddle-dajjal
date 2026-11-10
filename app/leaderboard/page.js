@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "../components/LanguageProvider";
 import GameCharacter from "@/lib/GameCharacter";
+import { supabase } from "@/lib/supabase";
 
 const translations = {
   en: {
@@ -79,19 +80,33 @@ export default function LeaderboardPage() {
   const [ranking, setRanking] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [locked, setLocked] = useState(false);
 
   const loadRanking = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
-
+      setLocked(false);
+      const { data: authData } = await supabase.auth.getSession();
+      const token = authData?.session?.access_token;
+      if (!token) {
+        setLocked(true);
+        setRanking([]);
+        return;
+      }
       const response = await fetch("/api/leaderboard", {
         cache: "no-store",
+        headers: { Authorization: "Bearer " + token },
       });
 
       const result = await response.json();
 
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          setLocked(true);
+          setRanking([]);
+          return;
+        }
         throw new Error(result.error || t.error);
       }
 
@@ -138,6 +153,13 @@ export default function LeaderboardPage() {
           <div className="flex flex-col items-center justify-center gap-2 py-16 text-purple-300">
             <GameCharacter character="dajjal" expression="thinking" animation="float" size={72} />
             <p className="text-xs animate-pulse">{t.loading}</p>
+          </div>
+        ) : locked ? (
+          <div className="mt-12 border border-yellow-500/30 bg-[#17131e] rounded-2xl p-8 text-center ui-card">
+            <div className="text-4xl">🔒</div>
+            <h2 className="text-xl font-black mt-4">LEADERBOARD LOCKED</h2>
+            <p className="text-gray-300 text-sm mt-3">Login menggunakan akun Google untuk melihat dan masuk ke leaderboard.</p>
+            <Link href="/register" className="inline-flex mt-6 rounded-xl bg-purple-600 px-6 py-3 font-bold">LOGIN WITH GOOGLE</Link>
           </div>
         ) : error ? (
           <div className="text-center py-16">
