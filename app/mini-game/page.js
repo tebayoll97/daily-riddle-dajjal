@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 
 const miniGames = [
-  { href: "/mini-game/mamah-ngamuk", title: "MAMAH NGAMUK", description: "Anak Dajjal kabur! Hindari rintangan, kumpulkan koin, dan jangan sampai tertangkap Mamah.", tag: "2.5D ENDLESS RUNNER", symbol: "🧹", tone: "from-amber-500/20 to-rose-500/5" },
   { href: "/mini-game/run-jump", title: "RUN & JUMP", description: "Lari sejauh mungkin, lompat melewati rintangan, dan pecahkan rekor jarak.", tag: "ARCADE RUNNER", symbol: "🦖", tone: "from-violet-500/20 to-cyan-500/5" },
 ];
 
@@ -45,7 +44,7 @@ export default function MiniGameDirectoryPage() {
             <p className="mt-3 text-sm leading-relaxed text-gray-400">{selectedGame.description}</p>
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button type="button" onClick={() => setSelectedGame(null)} className="ui-interactive rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-black text-gray-300">NANTI</button>
-              <Link href={selectedGame.href === "/mini-game/mamah-ngamuk" ? `${selectedGame.href}?splash=1` : selectedGame.href} className="ui-interactive rounded-xl bg-purple-600 px-4 py-3 text-xs font-black text-white hover:bg-purple-500">YA, MAINKAN →</Link>
+              <Link href={selectedGame.href} className="ui-interactive rounded-xl bg-purple-600 px-4 py-3 text-xs font-black text-white hover:bg-purple-500">YA, MAINKAN →</Link>
             </div>
           </section>
         </div>
