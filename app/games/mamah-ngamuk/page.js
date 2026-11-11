@@ -1011,7 +1011,7 @@ export default function MamahNgamukPage() {
           <div className="mamah-player-summary"><div className="mamah-player-summary__identity"><span className="mamah-player-avatar">👤</span><div><small>PLAYER</small><strong>{player?.nickname || (accountLoading ? "MEMUAT AKUN..." : "BELUM LOGIN")}</strong></div></div><div className="mamah-player-summary__stats"><span><small>MY COINS</small><b>🪙 {wallet.toLocaleString("id-ID")}</b></span><span><small>BEST DISTANCE</small><b>{best.toLocaleString("id-ID")} m</b></span></div>{walletSyncError && <small className="mamah-account-warning">{walletSyncError}</small>}{!player && !accountLoading && <button type="button" className="mamah-account-cta" disabled={googleLinkLoading} onClick={() => setGoogleLoginPrompt(true)}>{googleLinkLoading ? "MEMBUKA GOOGLE..." : "LOGIN DENGAN GOOGLE"}</button>}</div>
           <button type="button" className="mamah-button mamah-button--primary mamah-play-button" onClick={start}>▶ PLAY GAME</button>
           <div className="mamah-home-grid">
-            <button type="button" onClick={() => setMenuPanel("leaderboard")}><span>🏆</span>LEADERBOARD</button>
+            <button type="button" onClick={() => { setMenuPanel("leaderboard"); if (accountType === "google") loadMamahRanking(); }}><span>🏆</span>LEADERBOARD</button>
             <button type="button" onClick={() => setMenuPanel("howto")}><span>📖</span>HOW TO PLAY</button>
             <button type="button" onClick={() => setSettingsOpen(true)}><span>⚙️</span>SETTINGS</button>
             <button type="button" onClick={() => setMenuPanel("achievements")}><span>🏅</span>ACHIEVEMENTS</button>
