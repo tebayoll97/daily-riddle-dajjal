@@ -186,7 +186,7 @@ export default function MamahNgamukPage() {
     enterGameFullscreen();
     const g = gameRef.current;
     if (!g) return;
-    Object.assign(g, { running: true, paused: false, pauseStartedAt: 0, over: false, caught: false, distance: 0, environmentDistance: 0, elapsed: 0, carSpeed: 0.30, spawn: 3.8, chase: 0, scoreTick: -1, coinCount: 0, waveIndex: 0, sessionId: window.crypto.randomUUID() });
+    Object.assign(g, { running: true, paused: false, pauseStartedAt: 0, over: false, caught: false, distance: 0, environmentDistance: 0, elapsed: 0, carSpeed: 0.30, spawn: 3.8, chase: 0, distanceTick: -1, coinCount: 0, waveIndex: 0, sessionId: window.crypto.randomUUID() });
     window.clearTimeout(waveNoticeTimerRef.current);
     setWaveNotice(WAVE_STAGES[0].alert);
     waveNoticeTimerRef.current = window.setTimeout(() => setWaveNotice(""), 4000);
@@ -350,7 +350,7 @@ export default function MamahNgamukPage() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     const g = {
-      running: false, paused: false, over: false, distance: 0, environmentDistance: 0, elapsed: 0, carSpeed: 0.30, spawn: 3.8, chase: 0, scoreTick: -1, coinCount: 0, waveIndex: 0,
+      running: false, paused: false, over: false, distance: 0, environmentDistance: 0, elapsed: 0, carSpeed: 0.30, spawn: 3.8, chase: 0, distanceTick: -1, coinCount: 0, waveIndex: 0,
       player: { lane: 0, targetLane: 0, jump: 0, slide: 0 },
       items: [],
     };
@@ -844,9 +844,9 @@ export default function MamahNgamukPage() {
         finish();
         return;
       }
-      const scoreBucket = Math.floor(g.distance / 10);
-      if (scoreBucket !== g.scoreTick) {
-        g.scoreTick = scoreBucket;
+      const distanceBucket = Math.floor(g.distance / 10);
+      if (distanceBucket !== g.distanceTick) {
+        g.distanceTick = distanceBucket;
         setDistance(Math.floor(g.distance));
       }
     };
