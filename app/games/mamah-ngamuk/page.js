@@ -57,6 +57,27 @@ export default function MamahNgamukPage() {
   const [mamahRanking, setMamahRanking] = useState([]);
   const [rankingLoading, setRankingLoading] = useState(false);
 
+  const loadMamahRanking = async () => {
+    setRankingLoading(true);
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data?.session?.access_token;
+      if (!token) throw new Error("Login Google diperlukan.");
+      const response = await fetch("/api/mamah-ngamuk/leaderboard", {
+        headers: { Authorization: "Bearer " + token },
+        cache: "no-store",
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Gagal memuat ranking.");
+      setMamahRanking(result.ranking || []);
+    } catch (error) {
+      console.error("Mamah ranking load failed:", error);
+      setWalletSyncError(error.message || "Gagal memuat ranking.");
+    } finally {
+      setRankingLoading(false);
+    }
+  };
+
   const connectGoogleFromGame = async () => {
     if (googleLinkLoading) return;
     setGoogleLinkLoading(true);
@@ -1011,7 +1032,7 @@ export default function MamahNgamukPage() {
             {walletSyncError && <p className="mamah-account-warning">{walletSyncError}</p>}
             <p className="mamah-dialog__note">Koin dan Best Distance tersimpan permanen untuk akun Google.</p>
             <button className="mamah-button mamah-button--quiet" onClick={() => setMenuPanel("")}>TUTUP</button></>}
-          {menuPanel === "leaderboard" && <><h2>🏆 LEADERBOARD</h2>{accountType !== "google" ? <><p className="mamah-dialog__note">LOGIN MENGGUNAKAN AKUN GOOGLE UNTUK MELIHAT DAN MASUK KE LEADERBOARD.</p><button className="mamah-button mamah-button--primary" onClick={() => setMenuPanel("profile")}>LOGIN GOOGLE</button></> : <><div className="mamah-panel-stat"><span>PERSONAL BEST</span><strong>{best.toLocaleString("id-ID")} m</strong></div><p className="mamah-dialog__note">Leaderboard game akan ditampilkan di sini setelah papan peringkat game diaktifkan.</p></>}</>}
+          {menuPanel === "leaderboard" && <><h2>🏆 LEADERBOARD</h2>{accountType !== "google" ? <><p className="mamah-dialog__note">LOGIN MENGGUNAKAN AKUN GOOGLE UNTUK MELIHAT RANKING.</p><button className="mamah-button mamah-button--primary" onClick={() => setMenuPanel("profile")}>LOGIN GOOGLE</button></> : <><div className="mamah-panel-stat"><span>PERSONAL BEST DISTANCE</span><strong>{best.toLocaleString("id-ID")} m</strong></div><button className="mamah-button mamah-button--quiet" onClick={loadMamahRanking} disabled={rankingLoading}>{rankingLoading ? "MEMUAT..." : "↻ REFRESH RANKING"}</button><div className="mamah-ranking-list">{mamahRanking.length ? mamahRanking.map((entry) => <div className="mamah-ranking-row" key={entry.player_id}><b>#{entry.rank}</b><span>{entry.nickname}<small>SERVER {entry.server_number || "—"}</small></span><strong>{entry.best_distance.toLocaleString("id-ID")} m</strong></div>) : <p className="mamah-dialog__note">Belum ada data ranking. Tekan refresh untuk memuat ranking.</p>}</div></>}</>}
           {menuPanel === "howto" && <><h2>HOW TO PLAY</h2><div className="mamah-howto-row"><b>←</b><span>SWIPE LEFT<br/><small>Pindah ke jalur kiri</small></span></div><div className="mamah-howto-row"><b>→</b><span>SWIPE RIGHT<br/><small>Pindah ke jalur kanan</small></span></div><div className="mamah-howto-row"><b>🪙</b><span>COLLECT COINS<br/><small>Kumpulkan koin sebanyak mungkin</small></span></div><div className="mamah-howto-row"><b>🚗</b><span>AVOID VEHICLES<br/><small>Jangan sampai tertabrak!</small></span></div></>}
           {menuPanel === "achievements" && <><h2>🏅 ACHIEVEMENTS</h2><div className="mamah-achievement"><span>{best >= 1000 ? "🏆" : "🔒"}</span><div><b>FIRST ESCAPE</b><small>Capai jarak 1.000 meter</small></div><strong>{best >= 1000 ? "UNLOCKED" : "LOCKED"}</strong></div><div className="mamah-achievement"><span>{best >= 10000 ? "🥇" : "🔒"}</span><div><b>MASTER RUNNER</b><small>Capai jarak 10.000 meter</small></div><strong>{best >= 10000 ? "UNLOCKED" : "LOCKED"}</strong></div></>}
         </div>
