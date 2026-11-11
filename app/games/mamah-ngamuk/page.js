@@ -991,6 +991,9 @@ export default function MamahNgamukPage() {
     <main className="mamah-game mini-game-screen" aria-label="Mamah Ngamuk game" onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={() => { touchRef.current = null; }}>
       <canvas ref={canvasRef} className="mamah-game__world" aria-label="Dunia permainan Mamah Ngamuk" />
       <div className="mamah-game__vignette" aria-hidden="true" />
+      {status === "playing" && <div className="mamah-family-marquee" aria-hidden="true">
+        <img src="/mini-game/mamah-ngamuk/bg-play.png" alt="" />
+      </div>}
       {status === "splash" && <section className="mamah-splash-screen" aria-label="Memuat Mamah Ngamuk">
   
         <div className="mamah-splash-progress">
