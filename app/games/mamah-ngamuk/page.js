@@ -131,7 +131,7 @@ export default function MamahNgamukPage() {
     if (!soundRef.current || typeof window === "undefined") return;
     try {
       if (!bgmRef.current) {
-        const bgm = new Audio("/games/mamah-ngamuk/bgm-mamah.mp3");
+        const bgm = new Audio("/mini-game/mamah-ngamuk/bgm-mamah.mp3");
         bgm.loop = true;
         bgm.preload = "auto";
         bgm.volume = 0.48;
@@ -252,7 +252,7 @@ export default function MamahNgamukPage() {
     };
     splashImage.onload = beginSplash;
     splashImage.onerror = beginSplash;
-    splashImage.src = "/games/mamah-ngamuk/splash.png";
+    splashImage.src = "/mini-game/mamah-ngamuk/splash.png";
     if (splashImage.complete) beginSplash();
     return () => {
       cancelled = true;
@@ -345,11 +345,11 @@ export default function MamahNgamukPage() {
     const childSheet = new Image();
     childSheet.onload = () => { childSheetRef.current = childSheet; };
     childSheet.onerror = () => { childSheetRef.current = null; };
-    childSheet.src = "/games/mamah-ngamuk/sprite/anak_dajjal_back.png";
+    childSheet.src = "/mini-game/mamah-ngamuk/sprite/anak_dajjal_back.png";
     const veyloraSheet = new Image();
     veyloraSheet.onload = () => { veyloraSheetRef.current = veyloraSheet; };
     veyloraSheet.onerror = () => { veyloraSheetRef.current = null; };
-    veyloraSheet.src = "/games/mamah-ngamuk/sprite/veylora_back.png";
+    veyloraSheet.src = "/mini-game/mamah-ngamuk/sprite/veylora_back.png";
     let bootFallback;
     const finishBoot = () => {
       window.clearTimeout(bootFallback);
@@ -364,7 +364,7 @@ export default function MamahNgamukPage() {
     const obstacleSheet = new Image();
     obstacleSheet.onload = () => { obstacleSheetRef.current = obstacleSheet; };
     obstacleSheet.onerror = () => { obstacleSheetRef.current = null; };
-    obstacleSheet.src = "/games/mamah-ngamuk/sprite/obstacle-v2.png";
+    obstacleSheet.src = "/mini-game/mamah-ngamuk/sprite/obstacle-v2.png";
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
