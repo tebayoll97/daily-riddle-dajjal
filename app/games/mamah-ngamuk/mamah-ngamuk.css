@@ -574,3 +574,18 @@
 .mamah-ranking-row > span { display:flex; min-width:0; flex-direction:column; gap:3px; color:#fff; font-size:12px; font-weight:900; overflow-wrap:anywhere; }
 .mamah-ranking-row small { color:#a99ab8; font-size:8px; letter-spacing:.1em; }
 .mamah-ranking-row > strong { color:#ffe18a; font:900 12px ui-monospace,monospace; white-space:nowrap; }
+
+
+/* Home header exit icon and circular player photos. */
+.mamah-home-header { gap:8px; }
+.mamah-header-actions { gap:6px; }
+.mamah-icon-exit { display:grid; width:36px; height:36px; flex:0 0 36px; place-items:center; border:1px solid rgba(231,205,255,.52); border-radius:50%; color:#fff; background:linear-gradient(145deg,#49315f,#1b132b); box-shadow:inset 0 1px rgba(255,255,255,.18),0 3px 10px #0006; }
+.mamah-icon-exit svg { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.mamah-icon-exit:active { transform:translateY(1px) scale(.96); }
+.mamah-player-avatar,.mamah-profile-avatar { overflow:hidden; object-fit:cover; border-radius:50%; }
+.mamah-ranking-player { display:flex; min-width:0; align-items:center; gap:8px; }
+.mamah-ranking-avatar { display:grid; width:30px; height:30px; flex:0 0 30px; place-items:center; overflow:hidden; border:1px solid rgba(224,190,255,.48); border-radius:50%; object-fit:cover; background:#8b5cf622; }
+.mamah-ranking-avatar--default { color:#e9d5ff; font-size:16px; }
+.mamah-ranking-player > span { display:flex; min-width:0; flex-direction:column; gap:3px; color:#fff; font-size:12px; font-weight:900; overflow-wrap:anywhere; }
+.mamah-ranking-player small { color:#a99ab8; font-size:8px; letter-spacing:.1em; }
+@media (max-width:360px) { .mamah-icon-exit { width:32px; height:32px; flex-basis:32px; } }
