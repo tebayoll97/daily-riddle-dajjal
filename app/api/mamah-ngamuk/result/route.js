@@ -24,7 +24,7 @@ export async function GET(request) {
     const auth = await resolveAuthenticatedPlayer(request, "id, nickname, server_number, avatar_url");
     if (!auth.ok) return Response.json({ error: auth.error }, { status: auth.status });
     if (!hasGoogleIdentity(auth.user)) {
-      return Response.json({ accountType: auth.user?.is_anonymous ? "guest" : "registered", player: { id: auth.player.id, nickname: auth.player.nickname, serverNumber: auth.player.server_number, avatarUrl: auth.player.avatar_url }, balance: 0, currency: "coin", stats: { gamesPlayed: 0, totalPoints: 0, bestScore: 0, bestDistance: 0 } });
+      return Response.json({ accountType: auth.user?.is_anonymous ? "guest" : "registered", player: { id: auth.player.id, nickname: auth.player.nickname, serverNumber: auth.player.server_number, avatarUrl: auth.player.avatar_url }, balance: 0, currency: "coin", stats: { bestDistance: 0 } });
     }
     const game = await getGame();
     const { data, error } = await supabaseAdmin
@@ -35,10 +35,10 @@ export async function GET(request) {
       .eq("currency_code", "coin")
       .maybeSingle();
     if (error) throw error;
-    const { data: stats, error: statsError } = await supabaseAdmin.from("player_game_stats").select("games_played, total_points, best_score, best_distance").eq("player_id", auth.player.id).eq("game_id", game.id).maybeSingle();
+    const { data: stats, error: statsError } = await supabaseAdmin.from("player_game_stats").select("best_distance").eq("player_id", auth.player.id).eq("game_id", game.id).maybeSingle();
     if (statsError) throw statsError;
     const accountType = "google";
-    return Response.json({ accountType, player: { id: auth.player.id, nickname: auth.player.nickname, serverNumber: auth.player.server_number, avatarUrl: auth.player.avatar_url }, balance: Number(data?.balance || 0), currency: "coin", stats: { gamesPlayed: Number(stats?.games_played || 0), totalPoints: Number(stats?.total_points || 0), bestScore: Number(stats?.best_score || 0), bestDistance: Number(stats?.best_distance || 0) } });
+    return Response.json({ accountType, player: { id: auth.player.id, nickname: auth.player.nickname, serverNumber: auth.player.server_number, avatarUrl: auth.player.avatar_url }, balance: Number(data?.balance || 0), currency: "coin", stats: { bestDistance: Number(stats?.best_distance || 0) } });
   } catch (error) {
     console.error("Mamah Ngamuk wallet GET error:", error);
     return Response.json({ error: "Unable to load game wallet." }, { status: 500 });
@@ -56,12 +56,11 @@ export async function POST(request) {
     const sessionId = typeof body?.sessionId === "string" ? body.sessionId : "";
     const distance = Number(body?.distance);
     const coins = Number(body?.coins);
-    const score = Number(body?.score);
 
     if (!UUID.test(sessionId)
       || !Number.isSafeInteger(distance) || distance < 0 || distance > 10000000
       || !Number.isSafeInteger(coins) || coins < 0 || coins > 100000
-      || !Number.isSafeInteger(score) || score !== distance * 12 + coins * 25) {
+      ) {
       return Response.json({ error: "Invalid game result." }, { status: 400 });
     }
 
@@ -71,7 +70,7 @@ export async function POST(request) {
       p_session_id: sessionId,
       p_distance: distance,
       p_coins: coins,
-      p_score: score,
+      p_score: 0,
     });
     if (error) throw error;
 
