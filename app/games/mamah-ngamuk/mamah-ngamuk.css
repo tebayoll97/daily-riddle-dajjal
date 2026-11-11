@@ -589,3 +589,65 @@
 .mamah-ranking-player > span { display:flex; min-width:0; flex-direction:column; gap:3px; color:#fff; font-size:12px; font-weight:900; overflow-wrap:anywhere; }
 .mamah-ranking-player small { color:#a99ab8; font-size:8px; letter-spacing:.1em; }
 @media (max-width:360px) { .mamah-icon-exit { width:32px; height:32px; flex-basis:32px; } }
+
+
+/* Responsive home header: keep the exit control compact and inside the viewport. */
+.mamah-screen--menu .mamah-home-header {
+  width: min(100%, 470px);
+  min-width: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px 10px;
+}
+.mamah-screen--menu .mamah-home-header > .mamah-brand__eyebrow {
+  flex: 1 1 100%;
+  min-width: 0;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.mamah-screen--menu .mamah-header-actions {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: flex-end;
+  gap: clamp(5px, 1.8vw, 8px);
+}
+.mamah-screen--menu .mamah-account-button {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+  padding-inline: clamp(6px, 2.2vw, 10px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mamah-screen--menu .mamah-sound-toggle {
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 7px clamp(7px, 2vw, 10px);
+  white-space: nowrap;
+  font-size: clamp(8px, 2.1vw, 9px);
+}
+.mamah-screen--menu .mamah-icon-exit {
+  flex: 0 0 clamp(32px, 9vw, 36px);
+  width: clamp(32px, 9vw, 36px);
+  height: clamp(32px, 9vw, 36px);
+  padding: 0;
+  box-sizing: border-box;
+}
+.mamah-screen--menu .mamah-icon-exit svg {
+  display: block;
+  width: 17px;
+  height: 17px;
+}
+@media (max-width: 380px) {
+  .mamah-screen--menu .mamah-home-header { gap: 6px; }
+  .mamah-screen--menu .mamah-header-actions { gap: 5px; }
+  .mamah-screen--menu .mamah-account-button { font-size: 9px; }
+  .mamah-screen--menu .mamah-sound-toggle { letter-spacing: .04em; }
+}
