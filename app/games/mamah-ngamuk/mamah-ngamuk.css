@@ -730,3 +730,53 @@
     animation-duration: 10s, .8s;
   }
 }
+
+
+/* Responsive tuning for narrow phones, tablets, desktop and landscape screens. */
+.mamah-family-marquee {
+  box-sizing: border-box;
+  right: 0;
+  width: 100%;
+  max-width: 100vw;
+}
+.mamah-family-marquee img {
+  max-height: 100%;
+  object-fit: contain;
+}
+@media (max-width: 360px) {
+  .mamah-family-marquee {
+    top: clamp(104px, 11.5vh, 142px);
+    height: clamp(76px, 10vh, 112px);
+  }
+  .mamah-family-marquee img {
+    width: 72vw;
+    min-width: 0;
+  }
+}
+@media (min-width: 481px) and (max-width: 900px) {
+  .mamah-family-marquee {
+    top: clamp(124px, 13vh, 190px);
+    height: clamp(112px, 14vh, 180px);
+  }
+  .mamah-family-marquee img {
+    width: clamp(320px, 58vw, 560px);
+  }
+}
+@media (min-width: 901px) {
+  .mamah-family-marquee {
+    top: clamp(142px, 15vh, 220px);
+    height: clamp(130px, 16vh, 210px);
+  }
+  .mamah-family-marquee img {
+    width: min(42vw, 620px);
+  }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  .mamah-family-marquee {
+    top: max(78px, 17vh);
+    height: min(24vh, 108px);
+  }
+  .mamah-family-marquee img {
+    width: min(54vw, 390px);
+  }
+}
