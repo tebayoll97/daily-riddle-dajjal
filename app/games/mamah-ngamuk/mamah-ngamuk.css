@@ -949,3 +949,60 @@
   .mamah-catch-speech strong+strong { font-size:clamp(12px,3.8vw,15px); }
 }
 @media (prefers-reduced-motion:reduce) { .mamah-catch-comic { animation:none; } }
+
+
+/* Catch dialogue layout refinement: Veylora is attached to the bubble's upper-right corner. */
+.mamah-catch-comic {
+  display:grid;
+  place-items:center;
+  padding: max(18px,env(safe-area-inset-top)) 12px max(18px,env(safe-area-inset-bottom));
+}
+.mamah-catch-speech {
+  width:min(92vw,620px);
+  max-width:620px;
+  flex:none;
+  box-sizing:border-box;
+  padding:clamp(25px,5vw,42px) clamp(24px,5.5vw,48px);
+  gap:clamp(9px,2vh,16px);
+}
+.mamah-catch-mama-sprite {
+  position:absolute;
+  z-index:2;
+  top:calc(50% - clamp(145px,22vh,205px));
+  right:max(4vw,calc((100vw - 620px)/2 + 4px));
+  align-self:auto;
+  flex:none;
+  width:clamp(88px,21vw,148px);
+  aspect-ratio:1;
+  margin:0;
+  background-image:url('/universe-characters.png');
+  background-repeat:no-repeat;
+  background-size:400% 600%;
+  background-position:100% 40%;
+  filter:drop-shadow(0 5px 7px #000b);
+  transform:rotate(5deg);
+  animation:mamah-mama-loop 1.35s ease-in-out infinite;
+}
+.mamah-catch-speech strong {
+  width:100%;
+  padding-inline:4px;
+  line-height:1.16;
+  overflow-wrap:normal;
+  word-break:normal;
+}
+@media (max-width:480px) {
+  .mamah-catch-comic { padding-inline:10px; }
+  .mamah-catch-speech {
+    width:min(94vw,620px);
+    padding:clamp(28px,7vw,36px) clamp(20px,6vw,30px);
+    gap:10px;
+  }
+  .mamah-catch-mama-sprite {
+    top:calc(50% - clamp(130px,20vh,170px));
+    right:7vw;
+    width:clamp(82px,22vw,108px);
+  }
+}
+@media (max-width:350px) {
+  .mamah-catch-speech { padding:27px 17px; }
+}
