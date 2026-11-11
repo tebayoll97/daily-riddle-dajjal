@@ -780,3 +780,35 @@
     width: min(54vw, 390px);
   }
 }
+
+
+/* Motion refinement: enter from off-screen left, slower travel, soft blink fade. */
+.mamah-family-marquee img {
+  left: 0;
+  transform: translate3d(-110%, -50%, 0);
+  animation:
+    mamah-family-marquee-travel 15.4s linear infinite,
+    mamah-family-marquee-blink 1.6s ease-in-out infinite;
+}
+@keyframes mamah-family-marquee-travel {
+  0% { transform: translate3d(-110%, -50%, 0); }
+  88% { transform: translate3d(105vw, -50%, 0); }
+  88.01% { transform: translate3d(-110%, -50%, 0); }
+  100% { transform: translate3d(-110%, -50%, 0); }
+}
+@keyframes mamah-family-marquee-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .35; }
+}
+@media (max-width: 480px) {
+  .mamah-family-marquee img {
+    animation-duration: 15.4s, 1.6s;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mamah-family-marquee img {
+    animation: none;
+    opacity: 1;
+    transform: translate3d(10vw, -50%, 0);
+  }
+}
