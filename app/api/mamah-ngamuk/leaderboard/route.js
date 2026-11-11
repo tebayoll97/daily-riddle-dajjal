@@ -25,6 +25,7 @@ export async function GET(request) {
       .eq("game_id", game.id)
       .gt("best_distance", 0)
       .order("best_distance", { ascending: false })
+      .order("player_id", { ascending: true })
       .limit(100);
     if (statsError) throw statsError;
 
