@@ -695,3 +695,38 @@
 @media (prefers-reduced-motion: reduce) {
   .mamah-family-marquee img { animation: none; transform: translate3d(10vw, -50%, 0); }
 }
+
+
+/* Revised family banner: compact, starts centered, then travels right; blink every 0.4s. */
+.mamah-family-marquee {
+  top: clamp(112px, 12.5vh, 190px);
+  height: clamp(92px, 12vh, 150px);
+}
+.mamah-family-marquee img {
+  left: 50%;
+  width: clamp(250px, 62vw, 570px);
+  transform: translate3d(-50%, -50%, 0);
+  animation:
+    mamah-family-marquee-travel 10s linear infinite,
+    mamah-family-marquee-blink .8s steps(1, end) infinite;
+}
+@keyframes mamah-family-marquee-travel {
+  0% { transform: translate3d(-50%, -50%, 0); }
+  88% { transform: translate3d(100vw, -50%, 0); }
+  88.01% { transform: translate3d(-160%, -50%, 0); }
+  100% { transform: translate3d(-50%, -50%, 0); }
+}
+@keyframes mamah-family-marquee-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: .18; }
+}
+@media (max-width: 480px) {
+  .mamah-family-marquee {
+    top: clamp(108px, 12vh, 160px);
+    height: clamp(88px, 11vh, 128px);
+  }
+  .mamah-family-marquee img {
+    width: 64vw;
+    animation-duration: 10s, .8s;
+  }
+}
