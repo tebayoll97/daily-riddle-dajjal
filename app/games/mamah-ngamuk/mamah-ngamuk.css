@@ -565,3 +565,12 @@
 .mamah-profile-stats small { color:#cda8fa; font-size:8px; font-weight:950; letter-spacing:.12em; }
 .mamah-profile-stats strong { overflow-wrap:anywhere; color:#ffe18a; font:900 14px ui-monospace,monospace; }
 .mamah-dialog .mamah-profile-stats + .mamah-button { margin-top:8px; }
+
+
+/* Compact Mamah Ngamuk distance leaderboard */
+.mamah-ranking-list { display:flex; flex-direction:column; gap:7px; max-height:min(42dvh,360px); overflow:auto; margin-top:12px; text-align:left; }
+.mamah-ranking-row { display:grid; grid-template-columns:34px minmax(0,1fr) auto; align-items:center; gap:9px; padding:10px 11px; border:1px solid rgba(224,190,255,.2); border-radius:12px; background:rgba(8,6,18,.62); }
+.mamah-ranking-row > b { color:#d8b4fe; font:900 13px ui-monospace,monospace; }
+.mamah-ranking-row > span { display:flex; min-width:0; flex-direction:column; gap:3px; color:#fff; font-size:12px; font-weight:900; overflow-wrap:anywhere; }
+.mamah-ranking-row small { color:#a99ab8; font-size:8px; letter-spacing:.1em; }
+.mamah-ranking-row > strong { color:#ffe18a; font:900 12px ui-monospace,monospace; white-space:nowrap; }
