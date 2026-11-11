@@ -95,7 +95,9 @@ export default function GamesPage() {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw sessionError;
 
-      const destination = "/games/mamah-ngamuk?splash=1";
+      // After Google login, let the player review/complete their profile
+      // before entering Mamah Ngamuk. This avoids loading the game too early.
+      const destination = "/profile";
       if (!session?.user) {
         router.push(`/login?next=${encodeURIComponent(destination)}`);
         return;
