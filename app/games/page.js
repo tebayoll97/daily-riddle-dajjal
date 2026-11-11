@@ -62,6 +62,8 @@ export default function GamesPage() {
   const t = translations[language] || translations.en;
   const [loading, setLoading] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [showGooglePrompt, setShowGooglePrompt] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
   const [catalogGames, setCatalogGames] = useState([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
 
@@ -90,30 +92,18 @@ export default function GamesPage() {
     if (loading) return;
     setLoading(true);
     try {
-      const destination = "/games/mamah-ngamuk?splash=1";
-      const profileDestination = "/profile";
-
-      // A visitor without a Google session must authenticate first.
-      // Login completion will send this first-time login to the profile page.
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw sessionError;
-
-      if (!session?.user) {
-        router.push(`/login?next=${encodeURIComponent(profileDestination)}`);
+      if (!session?.user || session.user.is_anonymous) {
+        setShowGooglePrompt(true);
         return;
       }
-
       const context = await getPlayerContext();
-
-      // Existing Google players can launch the game immediately.
       if (context.status === "ready" && context.accountType === "google") {
-        router.push(destination);
+        router.push("/games/mamah-ngamuk?splash=1");
         return;
       }
-
-      // A non-Google identity must sign in with Google; a Google identity
-      // whose profile is not ready should complete/review the profile first.
-      router.push(`/login?next=${encodeURIComponent(profileDestination)}`);
+      setShowGooglePrompt(true);
     } catch (error) {
       console.error("Mamah Ngamuk launch error:", error);
       setShowError(true);
@@ -121,6 +111,29 @@ export default function GamesPage() {
       setLoading(false);
     }
   }
+
+  async function handleGoogleLoginFromPrompt() {
+    if (googleBusy) return;
+    setGoogleBusy(true);
+    try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      const redirectTo = `${window.location.origin}/login?next=${encodeURIComponent("/games/mamah-ngamuk?splash=1")}`;
+      const options = { redirectTo, queryParams: { access_type: "offline", prompt: "select_account" } };
+      if (session?.user?.is_anonymous) {
+        const { error } = await supabase.auth.linkIdentity({ provider: "google", options });
+        if (error) throw error;
+        return;
+      }
+      const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options });
+      if (error) throw error;
+    } catch (error) {
+      console.error("Google login from Game Library failed:", error);
+      setGoogleBusy(false);
+      setShowError(true);
+    }
+  }
+
   async function handlePlayDailyRiddle() {
     if (loading) return;
     setLoading(true);
@@ -252,6 +265,24 @@ export default function GamesPage() {
           )}
         </section>
       </div>
+
+
+      {showGooglePrompt && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 p-5 backdrop-blur-md" onClick={() => setShowGooglePrompt(false)}>
+          <section role="alertdialog" aria-modal="true" aria-labelledby="mamah-google-title" className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-amber-300/30 bg-gradient-to-b from-[#261a2b] to-[#100d19] p-6 text-center shadow-[0_25px_90px_rgba(0,0,0,.75)] ui-popup ui-card" onClick={(event) => event.stopPropagation()}>
+            <div className="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-amber-500/15 blur-3xl" />
+            <div className="relative mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-amber-300/25 bg-amber-400/10 text-3xl">🔐</div>
+            <p className="relative text-[9px] font-black tracking-[.3em] text-amber-300">ACCOUNT REQUIRED</p>
+            <h2 id="mamah-google-title" className="relative mt-2 text-xl font-black text-white ui-section-title">{language === "id" ? "LOGIN GOOGLE DIPERLUKAN" : "GOOGLE LOGIN REQUIRED"}</h2>
+            <p className="relative mt-3 text-sm leading-relaxed text-gray-300">{language === "id" ? "MAMAH NGAMUK membutuhkan akun Google agar koin dan Best Distance kamu tersimpan dengan aman." : "MAMAH NGAMUK requires a Google account so your coins and Best Distance can be saved securely."}</p>
+            <button type="button" onClick={handleGoogleLoginFromPrompt} disabled={googleBusy} className="relative mt-6 flex w-full items-center justify-center gap-3 rounded-xl bg-white px-5 py-4 text-sm font-black text-gray-900 transition hover:bg-gray-100 disabled:opacity-60">
+              <svg viewBox="0 0 48 48" className="h-5 w-5" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.06 13.22l7.98 6.19C11.93 13.72 17.45 9.5 24 9.5z" transform="translate(0 4)"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.74 7.18l7.73 6C44.43 37.95 46.98 31.75 46.98 24.55z"/><path fill="#FBBC05" d="M10.04 28.59A14.4 14.4 0 0 1 9.27 24c0-1.59.27-3.13.77-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.86.92 7.51 2.56 10.78l7.48-6.19z" transform="translate(0 4)"/><path fill="#34A853" d="M24 48c6.47 0 11.9-2.13 15.93-5.8l-7.73-6c-2.14 1.45-4.87 2.3-8.2 2.3-6.55 0-12.07-4.22-14.04-10.09l-7.98 6.19C6.51 42.62 14.62 48 24 48z" transform="translate(0 -4)"/></svg>
+              {googleBusy ? (language === "id" ? "MEMBUKA GOOGLE..." : "OPENING GOOGLE...") : (language === "id" ? "LOGIN DENGAN GOOGLE" : "SIGN IN WITH GOOGLE")}
+            </button>
+            <button type="button" onClick={() => setShowGooglePrompt(false)} disabled={googleBusy} className="relative mt-3 w-full rounded-xl border border-white/10 bg-white/5 py-3 text-xs font-bold tracking-wider text-gray-300 transition hover:bg-white/10 disabled:opacity-50">{language === "id" ? "BATAL" : "CANCEL"}</button>
+          </section>
+        </div>
+      )}
 
       {showError && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-5 backdrop-blur-sm" onClick={() => setShowError(false)}>
