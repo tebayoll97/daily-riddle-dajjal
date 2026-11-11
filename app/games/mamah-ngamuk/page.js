@@ -36,19 +36,16 @@ export default function MamahNgamukPage() {
   const splashActiveRef = useRef(false);
   const [splashProgress, setSplashProgress] = useState(0);
   const [status, setStatus] = useState("loading");
-  const [score, setScore] = useState(0);
   const [distance, setDistance] = useState(0);
   const [coins, setCoins] = useState(0);
   const [wallet, setWallet] = useState(0);
   const [player, setPlayer] = useState(null);
-  const [gameStats, setGameStats] = useState({ gamesPlayed: 0, totalPoints: 0, bestScore: 0 });
   const [accountLoading, setAccountLoading] = useState(true);
   const [walletSyncError, setWalletSyncError] = useState("");
   const [accountType, setAccountType] = useState("signed_out");
   const [googleLinkLoading, setGoogleLinkLoading] = useState(false);
   const [googleLoginPrompt, setGoogleLoginPrompt] = useState(false);
   const [pendingGuestResult, setPendingGuestResult] = useState(false);
-  const [resultSaveStatus, setResultSaveStatus] = useState("");
   const [confirmAction, setConfirmAction] = useState("");
   const [distanceResult, setDistanceResult] = useState(0);
   const [best, setBest] = useState(0);
@@ -57,6 +54,8 @@ export default function MamahNgamukPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [waveNotice, setWaveNotice] = useState("");
   const [menuPanel, setMenuPanel] = useState("");
+  const [mamahRanking, setMamahRanking] = useState([]);
+  const [rankingLoading, setRankingLoading] = useState(false);
 
   const connectGoogleFromGame = async () => {
     if (googleLinkLoading) return;
@@ -172,7 +171,6 @@ export default function MamahNgamukPage() {
     waveNoticeTimerRef.current = window.setTimeout(() => setWaveNotice(""), 4000);
     Object.assign(g.player, { lane: 0, targetLane: 0, jump: 0, slide: 0 });
     g.items = [];
-    setScore(0);
     setDistance(0);
     setCoins(0);
     setDistanceResult(0);
@@ -285,7 +283,7 @@ export default function MamahNgamukPage() {
         if (error) throw error;
         const token = data?.session?.access_token;
         if (!token) {
-          if (active) { setPlayer(null); setWallet(0); setAccountType("signed_out"); setGameStats({ gamesPlayed: 0, totalPoints: 0, bestScore: 0 }); }
+          if (active) { setPlayer(null); setWallet(0); setAccountType("signed_out");  }
           return;
         }
         const response = await fetch("/api/mamah-ngamuk/result", { headers: { Authorization: "Bearer " + token }, cache: "no-store" });
@@ -295,7 +293,6 @@ export default function MamahNgamukPage() {
           setPlayer(result.player || null);
           setAccountType(result.accountType || "registered");
           setWallet(Number(result.balance || 0));
-          setGameStats(result.stats || { gamesPlayed: 0, totalPoints: 0, bestScore: 0 });
           setBest(Number(result.stats?.bestDistance || 0));
           if (result.accountType === "google") {
             const pendingRaw = sessionStorage.getItem(PENDING_RESULT_KEY);
@@ -312,12 +309,9 @@ export default function MamahNgamukPage() {
               setPendingGuestResult(false);
               setWallet(Number(saved.balance || 0));
               setBest(Number(saved.bestDistance || 0));
-              setGameStats((old) => ({ ...old, gamesPlayed: old.gamesPlayed + (saved.duplicate ? 0 : 1), totalPoints: old.totalPoints + (saved.duplicate ? 0 : Number(pending.score || 0)), bestScore: Math.max(old.bestScore || 0, Number(pending.score || 0)) }));
-              setResultSaveStatus("HASIL SESI GUEST BERHASIL DISIMPAN");
             }
           } else {
             setWallet(0);
-            setGameStats({ gamesPlayed: 0, totalPoints: 0, bestScore: 0 });
             setBest(0);
           }
         }
@@ -687,13 +681,11 @@ export default function MamahNgamukPage() {
       g.caught = true;
       g.caughtAt = performance.now();
       const finalDistance = Math.floor(g.distance);
-      const finalScore = finalDistance * 12 + g.coinCount * 25;
       setDistanceResult(finalDistance);
       setDistance(finalDistance);
-      setScore(finalScore);
       setCoins(g.coinCount);
       setBest((old) => Math.max(old, finalDistance));
-      const sessionResult = { sessionId: g.sessionId, distance: finalDistance, coins: g.coinCount, score: finalScore };
+      const sessionResult = { sessionId: g.sessionId, distance: finalDistance, coins: g.coinCount };
       const saveResult = async () => {
         try {
           const { data: authData, error: authError } = await supabase.auth.getSession();
@@ -707,7 +699,6 @@ export default function MamahNgamukPage() {
           if (!isGoogle) {
             sessionStorage.setItem(PENDING_RESULT_KEY, JSON.stringify(sessionResult));
             setPendingGuestResult(true);
-            setResultSaveStatus("HASIL INI SEMENTARA. LOGIN GOOGLE UNTUK MENYIMPANNYA.");
             return;
           }
           const token = authData.session.access_token;
@@ -721,8 +712,6 @@ export default function MamahNgamukPage() {
           setWallet(Number(result.balance || 0));
           setBest(Number(result.bestDistance || finalDistance));
           setWalletSyncError("");
-          setGameStats((old) => ({ ...old, gamesPlayed: old.gamesPlayed + (result.duplicate ? 0 : 1), totalPoints: old.totalPoints + (result.duplicate ? 0 : finalScore), bestScore: Math.max(old.bestScore || 0, finalScore) }));
-          setResultSaveStatus("HASIL BERHASIL DISIMPAN");
         } catch (error) {
           console.error("Mamah Ngamuk result sync failed:", error);
           setWalletSyncError(error.message || "HASIL BELUM TERSIMPAN · PERIKSA KONEKSI");
@@ -834,11 +823,9 @@ export default function MamahNgamukPage() {
         finish();
         return;
       }
-      const points = Math.floor(g.distance * 12) + g.coinCount * 25;
-      const scoreBucket = Math.floor(g.distance * 12 / 10);
+      const scoreBucket = Math.floor(g.distance / 10);
       if (scoreBucket !== g.scoreTick) {
         g.scoreTick = scoreBucket;
-        setScore(points);
         setDistance(Math.floor(g.distance));
       }
     };
@@ -937,8 +924,8 @@ export default function MamahNgamukPage() {
     confirmResumeRef.current = false;
     try { sessionStorage.removeItem(PENDING_RESULT_KEY); } catch {}
     setPendingGuestResult(false);
-    setResultSaveStatus("");
-    if (accountType !== "google") { setBest(0); setWallet(0); setGameStats({ gamesPlayed: 0, totalPoints: 0, bestScore: 0 }); }
+    
+    if (accountType !== "google") { setBest(0); setWallet(0);  }
     const g = gameRef.current;
     if (g) { g.running = false; g.paused = false; g.pauseStartedAt = 0; g.over = false; g.caught = false; }
     // In-game Home remains part of the same audio session.
@@ -1000,7 +987,7 @@ export default function MamahNgamukPage() {
             <div><small>BEST DISTANCE</small><strong>{best.toLocaleString("id-ID")} <i>m</i></strong></div>
             <div><small>MY COINS · MAMAH NGAMUK</small><strong>🪙 {accountLoading ? "..." : wallet.toLocaleString("id-ID")}</strong></div>
           </div>
-          <div className="mamah-player-summary"><div className="mamah-player-summary__identity"><span className="mamah-player-avatar">👤</span><div><small>PLAYER</small><strong>{player?.nickname || (accountLoading ? "MEMUAT AKUN..." : "BELUM LOGIN")}</strong></div></div><div className="mamah-player-summary__stats"><span><small>SESI</small><b>{gameStats.gamesPlayed.toLocaleString("id-ID")}</b></span><span><small>TOTAL POIN</small><b>{gameStats.totalPoints.toLocaleString("id-ID")}</b></span><span><small>BEST SCORE</small><b>{gameStats.bestScore.toLocaleString("id-ID")}</b></span></div>{walletSyncError && <small className="mamah-account-warning">{walletSyncError}</small>}{!player && !accountLoading && <button type="button" className="mamah-account-cta" disabled={googleLinkLoading} onClick={() => setGoogleLoginPrompt(true)}>{googleLinkLoading ? "MEMBUKA GOOGLE..." : "LOGIN DENGAN GOOGLE"}</button>}</div>
+          <div className="mamah-player-summary"><div className="mamah-player-summary__identity"><span className="mamah-player-avatar">👤</span><div><small>PLAYER</small><strong>{player?.nickname || (accountLoading ? "MEMUAT AKUN..." : "BELUM LOGIN")}</strong></div></div><div className="mamah-player-summary__stats"><span><small>MY COINS</small><b>🪙 {wallet.toLocaleString("id-ID")}</b></span><span><small>BEST DISTANCE</small><b>{best.toLocaleString("id-ID")} m</b></span></div>{walletSyncError && <small className="mamah-account-warning">{walletSyncError}</small>}{!player && !accountLoading && <button type="button" className="mamah-account-cta" disabled={googleLinkLoading} onClick={() => setGoogleLoginPrompt(true)}>{googleLinkLoading ? "MEMBUKA GOOGLE..." : "LOGIN DENGAN GOOGLE"}</button>}</div>
           <button type="button" className="mamah-button mamah-button--primary mamah-play-button" onClick={start}>▶ PLAY GAME</button>
           <div className="mamah-home-grid">
             <button type="button" onClick={() => setMenuPanel("leaderboard")}><span>🏆</span>LEADERBOARD</button>
@@ -1009,7 +996,7 @@ export default function MamahNgamukPage() {
             <button type="button" onClick={() => setMenuPanel("achievements")}><span>🏅</span>ACHIEVEMENTS</button>
           </div>
           <p className="mamah-menu-hint">SWIPE LEFT · SWIPE RIGHT  —  AVOID CARS & COLLECT COINS</p>
-          <button type="button" className="mamah-exit-link" onClick={() => setConfirmExit(true)}>BACK TO GAME LIBRARY</button>
+          <button type="button" className="mamah-exit-link" onClick={() => setConfirmExit(true)}>⏻ EXIT GAME</button>
         </div>
       </section>}
       {menuPanel && <section className="mamah-overlay" onClick={() => setMenuPanel("")}>
@@ -1018,11 +1005,11 @@ export default function MamahNgamukPage() {
           <p className="mamah-dialog__eyebrow">MAMAH NGAMUK!</p>
           {menuPanel === "profile" && <><h2>👤 PROFIL PEMAIN</h2>
             <div className="mamah-profile-identity"><span className="mamah-profile-avatar">👤</span><div><b>{player?.nickname || "BELUM LOGIN"}</b><small>{accountType === "google" ? "GOOGLE ACCOUNT" : accountType === "guest" ? "GUEST ACCOUNT" : accountType === "signed_out" ? "SIGNED OUT" : "PLAYER ACCOUNT"}</small></div></div>
-            <div className="mamah-profile-stats"><div><small>MY COINS</small><strong>🪙 {wallet.toLocaleString("id-ID")}</strong></div><div><small>BEST DISTANCE</small><strong>{best.toLocaleString("id-ID")} m</strong></div><div><small>BEST SCORE</small><strong>{gameStats.bestScore.toLocaleString("id-ID")}</strong></div><div><small>TOTAL POINTS</small><strong>{gameStats.totalPoints.toLocaleString("id-ID")}</strong></div><div><small>SESSIONS</small><strong>{gameStats.gamesPlayed.toLocaleString("id-ID")}</strong></div></div>
+            <div className="mamah-profile-stats"><div><small>MY COINS</small><strong>🪙 {wallet.toLocaleString("id-ID")}</strong></div><div><small>BEST DISTANCE</small><strong>{best.toLocaleString("id-ID")} m</strong></div></div>
             {accountType === "guest" && <button className="mamah-button mamah-button--primary" disabled={googleLinkLoading} onClick={() => setGoogleLoginPrompt(true)}>{googleLinkLoading ? "CONNECTING..." : "🔗 LINK GOOGLE ACCOUNT"}</button>}
             {accountType === "signed_out" && <button className="mamah-button mamah-button--primary" disabled={googleLinkLoading} onClick={() => setGoogleLoginPrompt(true)}>{googleLinkLoading ? "OPENING GOOGLE..." : "LOGIN WITH GOOGLE"}</button>}
             {walletSyncError && <p className="mamah-account-warning">{walletSyncError}</p>}
-            <p className="mamah-dialog__note">Total poin, best score, dan saldo berasal dari database akun. Best Distance, Best Score, poin, dan koin tersimpan permanen hanya untuk akun Google.</p>
+            <p className="mamah-dialog__note">Koin dan Best Distance tersimpan permanen untuk akun Google.</p>
             <button className="mamah-button mamah-button--quiet" onClick={() => setMenuPanel("")}>TUTUP</button></>}
           {menuPanel === "leaderboard" && <><h2>🏆 LEADERBOARD</h2>{accountType !== "google" ? <><p className="mamah-dialog__note">LOGIN MENGGUNAKAN AKUN GOOGLE UNTUK MELIHAT DAN MASUK KE LEADERBOARD.</p><button className="mamah-button mamah-button--primary" onClick={() => setMenuPanel("profile")}>LOGIN GOOGLE</button></> : <><div className="mamah-panel-stat"><span>PERSONAL BEST</span><strong>{best.toLocaleString("id-ID")} m</strong></div><p className="mamah-dialog__note">Leaderboard game akan ditampilkan di sini setelah papan peringkat game diaktifkan.</p></>}</>}
           {menuPanel === "howto" && <><h2>HOW TO PLAY</h2><div className="mamah-howto-row"><b>←</b><span>SWIPE LEFT<br/><small>Pindah ke jalur kiri</small></span></div><div className="mamah-howto-row"><b>→</b><span>SWIPE RIGHT<br/><small>Pindah ke jalur kanan</small></span></div><div className="mamah-howto-row"><b>🪙</b><span>COLLECT COINS<br/><small>Kumpulkan koin sebanyak mungkin</small></span></div><div className="mamah-howto-row"><b>🚗</b><span>AVOID VEHICLES<br/><small>Jangan sampai tertabrak!</small></span></div></>}
@@ -1040,10 +1027,10 @@ export default function MamahNgamukPage() {
       </>}
       {status === "paused" && <section className="mamah-overlay"><div className="mamah-dialog"><span className="mamah-dialog__emoji">Ⅱ</span><p className="mamah-dialog__eyebrow">PERMAINAN DIJEDA</p><h2>ISTIRAHAT DULU?</h2><button className="mamah-button mamah-button--primary" onClick={resume}>▶ LANJUTKAN</button><button className="mamah-button" onClick={() => openConfirmAction("restart")}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={() => setConfirmExit(true)}>↩ KELUAR GAME</button></div></section>}
       {status === "caught" && <section className="mamah-catch-caption" aria-live="assertive"><strong>PULANG! MANDI!</strong></section>}\n      {googleLoginPrompt && <section className="mamah-overlay" style={{ zIndex: 140 }} onClick={() => setGoogleLoginPrompt(false)}><div className="mamah-dialog" role="alertdialog" aria-modal="true" onClick={e => e.stopPropagation()}><span className="mamah-dialog__emoji">🔐</span><p className="mamah-dialog__eyebrow">DAJJAL FAMILY ACCOUNT</p><h2>LOGIN DENGAN GOOGLE?</h2><p className="mamah-dialog__note">{pendingGuestResult ? "Hasil permainan Guest ini akan disimpan setelah akun Google berhasil dihubungkan." : "Kamu akan diarahkan ke Google untuk login, lalu otomatis kembali ke Home MAMAH NGAMUK."}</p>{walletSyncError && <p className="mamah-account-warning">{walletSyncError}</p>}<button className="mamah-button mamah-button--primary" disabled={googleLinkLoading} onClick={connectGoogleFromGame}>{googleLinkLoading ? "MEMBUKA GOOGLE..." : "LANJUTKAN DENGAN GOOGLE"}</button><button className="mamah-button mamah-button--quiet" disabled={googleLinkLoading} onClick={() => setGoogleLoginPrompt(false)}>BATAL</button></div></section>}
-      {status === "over" && <section className="mamah-overlay mamah-overlay--gameover"><div className="mamah-dialog mamah-dialog--result"><span className="mamah-dialog__emoji">🧹</span><p className="mamah-dialog__eyebrow">MAMA BERHASIL MENANGKAP!</p><h2>KETANGKAP MAMAH!</h2><div className="mamah-result mamah-result--primary"><span>JARAK TEMPUH <strong>{distanceResult} m</strong></span><span>TOTAL KOIN <strong>🪙 {coins}</strong></span></div><div className="mamah-result"><span>SKOR AKHIR <strong>{String(score).padStart(6,"0")}</strong></span><span>BEST <strong>{String(best).padStart(6,"0")}</strong></span></div>{pendingGuestResult && <><p className="mamah-dialog__note">GUEST: HASIL INI BELUM TERSIMPAN. LOGIN GOOGLE SEKARANG UNTUK MENYIMPAN SKOR DAN KOIN.</p><button className="mamah-button mamah-button--primary" disabled={googleLinkLoading} onClick={() => setGoogleLoginPrompt(true)}>{googleLinkLoading ? "MENGHUBUNGKAN..." : "🔐 LOGIN GOOGLE & SIMPAN HASIL"}</button><button className="mamah-button mamah-button--quiet" onClick={() => { try { sessionStorage.removeItem(PENDING_RESULT_KEY); } catch {} setPendingGuestResult(false); setBest(0); setResultSaveStatus("HASIL GUEST DIHAPUS"); }}>TIDAK, HAPUS HASIL</button></>}{resultSaveStatus && <p className="mamah-dialog__note">{resultSaveStatus}</p>}<button className="mamah-button mamah-button--primary" disabled={pendingGuestResult} onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={goHome}>⌂ MENU UTAMA</button></div></section>}
+      {status === "over" && <section className="mamah-overlay mamah-overlay--gameover"><div className="mamah-dialog mamah-dialog--result"><span className="mamah-dialog__emoji">🧹</span><p className="mamah-dialog__eyebrow">MAMA BERHASIL MENANGKAP!</p><h2>KETANGKAP MAMAH!</h2><div className="mamah-result mamah-result--primary"><span>JARAK TEMPUH <strong>{distanceResult} m</strong></span><span>TOTAL KOIN <strong>🪙 {coins}</strong></span></div><div className="mamah-result"><span>SKOR AKHIR <strong>{String(score).padStart(6,"0")}</strong></span><span>BEST <strong>{String(best).padStart(6,"0")}</strong></span></div>{pendingGuestResult && <><p className="mamah-dialog__note">GUEST: HASIL INI BELUM TERSIMPAN. LOGIN GOOGLE SEKARANG UNTUK MENYIMPAN SKOR DAN KOIN.</p><button className="mamah-button mamah-button--primary" disabled={googleLinkLoading} onClick={() => setGoogleLoginPrompt(true)}>{googleLinkLoading ? "MENGHUBUNGKAN..." : "🔐 LOGIN GOOGLE & SIMPAN HASIL"}</button><button className="mamah-button mamah-button--quiet" onClick={() => { try { sessionStorage.removeItem(PENDING_RESULT_KEY); } catch {} setPendingGuestResult(false); setBest(0);  }}>TIDAK, HAPUS HASIL</button></>}<button className="mamah-button mamah-button--primary" disabled={pendingGuestResult} onClick={start}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={goHome}>⌂ MENU UTAMA</button></div></section>}
       {confirmAction && <section className="mamah-overlay" onClick={cancelConfirmAction}><div className="mamah-dialog" role="alertdialog" aria-modal="true" onClick={e => e.stopPropagation()}><span className="mamah-dialog__emoji">{confirmAction === "restart" ? "↻" : "⌂"}</span><p className="mamah-dialog__eyebrow">KONFIRMASI</p><h2>{confirmAction === "restart" ? "RESTART PERMAINAN?" : "KEMBALI KE HOME?"}</h2><p className="mamah-dialog__note">{confirmAction === "restart" ? "Permainan saat ini akan dimulai ulang." : "Kamu akan meninggalkan sesi permainan dan kembali ke menu utama."}</p><button className="mamah-button mamah-button--primary" onClick={confirmCurrentAction}>YES</button><button className="mamah-button mamah-button--quiet" onClick={cancelConfirmAction}>NO</button></div></section>}
       {settingsOpen && <section className="mamah-overlay" onClick={() => setSettingsOpen(false)}><div className="mamah-dialog" onClick={e => e.stopPropagation()}><button className="mamah-dialog__close" onClick={() => setSettingsOpen(false)} aria-label="Tutup">×</button><p className="mamah-dialog__eyebrow">PENGATURAN</p><h2>SUARA GAME</h2><button className="mamah-button" onClick={() => setSoundOn(v => !v)}>{soundOn ? "♫ SUARA: ON" : "♪ SUARA: OFF"}</button><p className="mamah-dialog__note">Atur volume melalui tombol volume perangkat.</p></div></section>}
-      {confirmExit && <section className="mamah-overlay" onClick={() => setConfirmExit(false)}><div className="mamah-dialog" role="alertdialog" aria-modal="true" aria-labelledby="mamah-exit-title" onClick={e => e.stopPropagation()}><span className="mamah-dialog__emoji">🚪</span><p className="mamah-dialog__eyebrow">KONFIRMASI</p><h2 id="mamah-exit-title">KELUAR DARI GAME?</h2><p className="mamah-dialog__note">Sesi permainan ini akan diakhiri dan kamu kembali ke Game Library.</p><button className="mamah-button" onClick={() => setConfirmExit(false)}>TETAP MAIN</button><button className="mamah-button mamah-button--danger" onClick={() => { try { sessionStorage.removeItem(PENDING_RESULT_KEY); } catch {} window.location.href = "/mini-game"; }}>YA, KELUAR</button></div></section>}
+      {confirmExit && <section className="mamah-overlay" onClick={() => setConfirmExit(false)}><div className="mamah-dialog" role="alertdialog" aria-modal="true" aria-labelledby="mamah-exit-title" onClick={e => e.stopPropagation()}><span className="mamah-dialog__emoji">🚪</span><p className="mamah-dialog__eyebrow">KONFIRMASI</p><h2 id="mamah-exit-title">KELUAR DARI GAME?</h2><p className="mamah-dialog__note">Sesi permainan ini akan diakhiri dan kamu kembali ke Game Library.</p><button className="mamah-button" onClick={() => setConfirmExit(false)}>TETAP MAIN</button><button className="mamah-button mamah-button--danger" onClick={() => { try { sessionStorage.removeItem(PENDING_RESULT_KEY); } catch {} window.location.href = "/games"; }}>YA, KELUAR</button></div></section>}
     </main>
   );
 }
