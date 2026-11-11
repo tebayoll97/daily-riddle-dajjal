@@ -90,26 +90,30 @@ export default function GamesPage() {
     if (loading) return;
     setLoading(true);
     try {
-      // Check the auth session first. Signed-out visitors must go straight
-      // to Google login without attempting a protected player-profile query.
+      const destination = "/games/mamah-ngamuk?splash=1";
+      const profileDestination = "/profile";
+
+      // A visitor without a Google session must authenticate first.
+      // Login completion will send this first-time login to the profile page.
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw sessionError;
 
-      // After Google login, let the player review/complete their profile
-      // before entering Mamah Ngamuk. This avoids loading the game too early.
-      const destination = "/profile";
       if (!session?.user) {
-        router.push(`/login?next=${encodeURIComponent(destination)}`);
+        router.push(`/login?next=${encodeURIComponent(profileDestination)}`);
         return;
       }
 
       const context = await getPlayerContext();
+
+      // Existing Google players can launch the game immediately.
       if (context.status === "ready" && context.accountType === "google") {
         router.push(destination);
         return;
       }
 
-      router.push(`/login?next=${encodeURIComponent(destination)}`);
+      // A non-Google identity must sign in with Google; a Google identity
+      // whose profile is not ready should complete/review the profile first.
+      router.push(`/login?next=${encodeURIComponent(profileDestination)}`);
     } catch (error) {
       console.error("Mamah Ngamuk launch error:", error);
       setShowError(true);
@@ -117,7 +121,6 @@ export default function GamesPage() {
       setLoading(false);
     }
   }
-
   async function handlePlayDailyRiddle() {
     if (loading) return;
     setLoading(true);
