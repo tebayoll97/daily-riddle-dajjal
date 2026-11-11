@@ -90,8 +90,24 @@ export default function GamesPage() {
     if (loading) return;
     setLoading(true);
     try {
+      // Check the auth session first. Signed-out visitors must go straight
+      // to Google login without attempting a protected player-profile query.
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+
+      const destination = "/games/mamah-ngamuk?splash=1";
+      if (!session?.user) {
+        router.push(`/login?next=${encodeURIComponent(destination)}`);
+        return;
+      }
+
       const context = await getPlayerContext();
-      router.push(context.status === "ready" && context.accountType === "google" ? "/games/mamah-ngamuk?splash=1" : "/login?next=%2Fmini-game%2Fmamah-ngamuk%3Fsplash%3D1");
+      if (context.status === "ready" && context.accountType === "google") {
+        router.push(destination);
+        return;
+      }
+
+      router.push(`/login?next=${encodeURIComponent(destination)}`);
     } catch (error) {
       console.error("Mamah Ngamuk launch error:", error);
       setShowError(true);
