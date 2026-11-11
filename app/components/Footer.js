@@ -29,7 +29,7 @@ const translations = {
 export default function Footer() {
   const pathname = usePathname();
   const { language } = useLanguage();
-  if (pathname?.startsWith("/mini-game") || pathname === "/games/mamah-ngamuk") return null;
+  if (pathname?.startsWith("/mini-game") || pathname?.startsWith("/games/mamah-ngamuk")) return null;
   const t = translations[language] || translations.en;
 
   const navLinks = [
