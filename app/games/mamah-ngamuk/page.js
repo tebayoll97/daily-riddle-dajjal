@@ -205,10 +205,8 @@ export default function MamahNgamukPage() {
   const move = useCallback((direction) => {
     const g = gameRef.current;
     if (!g) return;
-    if (!g.running || g.paused) {
-      if (!g.over && !g.paused) start();
-      return;
-    }
+    // Touch/keyboard movement must never start a run; only PLAY GAME does that.
+    if (!g.running || g.paused || g.over) return;
     if (direction === "left") g.player.targetLane = Math.max(-1, g.player.targetLane - 1);
     if (direction === "right") g.player.targetLane = Math.min(1, g.player.targetLane + 1);
     
@@ -976,15 +974,11 @@ export default function MamahNgamukPage() {
   };
 
   const pointerDown = (event) => {
+    if (status !== "playing") { touchRef.current = null; return; }
     touchRef.current = { x: event.clientX, y: event.clientY };
-    // Browser chrome can only be hidden after a real user gesture.
-    const root = document.querySelector(".mamah-game");
-    if (root && !document.fullscreenElement && root.requestFullscreen) {
-      root.requestFullscreen().catch(() => {});
-    }
   };
   const pointerUp = (event) => {
-    if (!touchRef.current) return;
+    if (status !== "playing" || !touchRef.current) { touchRef.current = null; return; }
     const dx = event.clientX - touchRef.current.x;
     const dy = event.clientY - touchRef.current.y;
     touchRef.current = null;
@@ -1062,7 +1056,7 @@ export default function MamahNgamukPage() {
         <div className="mamah-game-actions" aria-label="Kontrol permainan">
           <button type="button" onPointerDown={e => e.stopPropagation()} onClick={pause} aria-label="Pause" title="Pause">Ⅱ</button>
           <button type="button" onPointerDown={e => e.stopPropagation()} onClick={() => openConfirmAction("restart")} aria-label="Restart" title="Restart">↻</button>
-          <button type="button" onPointerDown={e => e.stopPropagation()} onClick={() => openConfirmAction("home")} aria-label="Home Mamah Ngamuk" title="Home">⌂</button><button type="button" onPointerDown={e => e.stopPropagation()} onClick={openExitConfirmation} aria-label="Exit game" title="Exit game">⇥</button>
+          <button type="button" onPointerDown={e => e.stopPropagation()} onClick={() => openConfirmAction("home")} aria-label="Home Mamah Ngamuk" title="Home">⌂</button>
         </div>
       </>}
       {status === "paused" && <section className="mamah-overlay"><div className="mamah-dialog"><span className="mamah-dialog__emoji">Ⅱ</span><p className="mamah-dialog__eyebrow">PERMAINAN DIJEDA</p><h2>ISTIRAHAT DULU?</h2><button className="mamah-button mamah-button--primary" onClick={resume}>▶ LANJUTKAN</button><button className="mamah-button" onClick={() => openConfirmAction("restart")}>↻ MAIN LAGI</button><button className="mamah-button mamah-button--quiet" onClick={openExitConfirmation}>↩ KELUAR GAME</button></div></section>}
