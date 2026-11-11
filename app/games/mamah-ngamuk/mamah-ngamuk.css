@@ -651,3 +651,47 @@
   .mamah-screen--menu .mamah-account-button { font-size: 9px; }
   .mamah-screen--menu .mamah-sound-toggle { letter-spacing: .04em; }
 }
+
+
+/* Dajjal Family marquee: enters from the left and exits to the right during active play. */
+.mamah-family-marquee {
+  position: absolute;
+  z-index: 4;
+  top: clamp(132px, 15.5vh, 258px);
+  left: 0;
+  width: 100%;
+  height: clamp(104px, 17vh, 250px);
+  overflow: hidden;
+  pointer-events: none;
+  contain: paint;
+}
+.mamah-family-marquee img {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  display: block;
+  width: clamp(290px, 76vw, 720px);
+  max-width: none;
+  height: auto;
+  transform: translate3d(-105%, -50%, 0);
+  animation: mamah-family-marquee-travel 24s linear infinite;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+@keyframes mamah-family-marquee-travel {
+  from { transform: translate3d(-105%, -50%, 0); }
+  to { transform: translate3d(105vw, -50%, 0); }
+}
+@media (max-width: 480px) {
+  .mamah-family-marquee {
+    top: clamp(132px, 15vh, 205px);
+    height: clamp(100px, 15vh, 170px);
+  }
+  .mamah-family-marquee img {
+    width: 78vw;
+    animation-duration: 27s;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mamah-family-marquee img { animation: none; transform: translate3d(10vw, -50%, 0); }
+}
