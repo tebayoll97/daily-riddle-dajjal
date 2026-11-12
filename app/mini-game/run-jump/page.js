@@ -200,6 +200,9 @@ export default function MiniGamePage() {
     };
 
     const draw = (time) => {
+      // Reset the transform every frame so offsets can never accumulate.
+      const logicalScale = canvas.width / WORLD_WIDTH;
+      context.setTransform(logicalScale, 0, 0, logicalScale, 0, 0);
       context.clearRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
       context.save();
       context.translate(0, 100);
@@ -315,6 +318,9 @@ export default function MiniGamePage() {
 
       // Decorative dinosaur silhouettes were removed; distant scenery stays uncluttered.
 
+      // Close the world-space offset before drawing the ground, HUD and gameplay objects.
+      context.restore();
+
       // Foreground grass and soil are part of the same canvas, aligned to collision.
       context.fillStyle = "#8b5a37";
       context.fillRect(0, GROUND_Y, WORLD_WIDTH, WORLD_HEIGHT - GROUND_Y);
@@ -367,7 +373,7 @@ export default function MiniGamePage() {
 
       if (tintAlpha > 0.001) {
         const atmosphere = context.createLinearGradient(0, 0, 0, GROUND_Y + 20);
-        atmosphere.addColorStop(0, `rgba(${tintColor.match(/\\d+/g).join(",")},${tintAlpha})`);
+        atmosphere.addColorStop(0, `rgba(${tintColor.match(/\d+/g).join(",")},${tintAlpha})`);
         atmosphere.addColorStop(1, `rgba(35,30,28,${tintAlpha * 0.42})`);
         context.fillStyle = atmosphere;
         context.fillRect(0, 0, WORLD_WIDTH, GROUND_Y + 20);
