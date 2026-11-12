@@ -219,7 +219,7 @@ export default function Header() {
     "w-10 h-10 flex items-center justify-center rounded-xl border transition-all active:scale-95";
 
   // A running mini-game is a separate immersive experience, not a website page.
-  if (pathname?.startsWith("/mini-game") || pathname === "/games/mamah-ngamuk") return null;
+  if (pathname?.startsWith("/mini-game/") || pathname === "/games/mamah-ngamuk") return null;
 
   return (
     <header className="sticky top-0 z-50 [overflow-anchor:none] border-b border-purple-500/20 bg-[#080711]/95 backdrop-blur-lg">
