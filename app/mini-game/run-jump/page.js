@@ -9,6 +9,14 @@ const WORLD_WIDTH = 900;
 const WORLD_HEIGHT = 420;
 const GROUND_Y = 326;
 const BEST_SCORE_KEY = "dajjal-run-jump-best";
+const WAVE_TITLES = [
+  "Awal Mula Era Dinosaurus",
+  "Kebangkitan Para Raksasa",
+  "Guncangan Zaman Purba",
+  "Badai Kepunahan",
+  "Amukan Langit dan Bumi",
+  "ERA METEOR CHAOS",
+];
 
 export default function MiniGamePage() {
   const canvasRef = useRef(null);
@@ -61,7 +69,8 @@ export default function MiniGamePage() {
       speed: 6,
       distance: 0,
       wave: 1,
-      waveNoticeUntil: performance.now() + 3000,
+      waveChangedAt: performance.now(),
+      lastUiUpdate: 0,
       spawn: 90,
       lastTime: 0,
       lastScore: -1,
@@ -137,7 +146,8 @@ export default function MiniGamePage() {
       speed: 6,
       distance: 0,
       wave: 1,
-      waveNoticeUntil: 0,
+      waveChangedAt: 0,
+      lastUiUpdate: 0,
       spawn: 72,
       lastTime: 0,
       lastScore: -1,
@@ -154,11 +164,13 @@ export default function MiniGamePage() {
 
     const resizeCanvas = () => {
       const rect = canvas.getBoundingClientRect();
-      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.35 : 1.5);
       const width = Math.max(1, Math.round(rect.width * pixelRatio));
       const height = Math.max(1, Math.round((rect.width * WORLD_HEIGHT / WORLD_WIDTH) * pixelRatio));
-      canvas.width = width;
-      canvas.height = height;
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
       context.setTransform(width / WORLD_WIDTH, 0, 0, width / WORLD_WIDTH, 0, 0);
     };
 
@@ -277,7 +289,7 @@ export default function MiniGamePage() {
       context.restore();
 
       // Three distinct dinosaur species animate quietly in the distant valley.
-      const dinoShift = (time * 0.035) % 1120;
+      const dinoTrack = (offset, speed) => WORLD_WIDTH - ((time * speed / 1000 + offset) % (WORLD_WIDTH + 120));
       const drawDino = (x, y, scale, species, color, phase) => {
         context.save();
         context.translate(x, y + Math.sin(time / 480 + phase) * 2);
@@ -305,9 +317,10 @@ export default function MiniGamePage() {
         context.fillStyle="#fff2bd"; context.fillRect(species==="longneck"?42:29,-55,2,2);
         context.restore();
       };
-      drawDino(((185-dinoShift+1200)%1200)-45,180,.72,"longneck","#d99b54",0);
-      drawDino(((515-dinoShift+1200)%1200)-45,181,.62,"triceratops","#76a95c",1.3);
-      drawDino(((835-dinoShift+1200)%1200)-45,180,.68,"stego","#d28b4e",2.6);
+      // Each dinosaur moves continuously from right to left, then re-enters from the right.
+      drawDino(dinoTrack(760, 34) - 45,180,.72,"longneck","#d99b54",0);
+      drawDino(dinoTrack(430, 31) - 45,181,.62,"triceratops","#76a95c",1.3);
+      drawDino(dinoTrack(100, 37) - 45,180,.68,"stego","#d28b4e",2.6);
       context.restore();
 
       // Foreground grass and soil are part of the same canvas, aligned to collision.
@@ -374,25 +387,22 @@ export default function MiniGamePage() {
       context.fillText(String(bestRef.current).padStart(5,"0"), WORLD_WIDTH - 17, 31);
       context.restore();
 
-      if (game.running && game.waveNoticeUntil > time) {
-        context.save();
-        context.globalAlpha = Math.min(1, (game.waveNoticeUntil - time) / 450);
-        context.textAlign = "center";
-        context.textBaseline = "middle";
-        context.fillStyle = "rgba(24,62,39,.96)";
-        context.strokeStyle = "#f4d36f";
-        context.lineWidth = 3;
-        context.beginPath();
-        context.roundRect(WORLD_WIDTH / 2 - 112, 75, 224, 54, 14);
-        context.fill(); context.stroke();
-        context.fillStyle = "#ffe58a";
-        context.font = "900 24px system-ui, sans-serif";
-        context.fillText("WAVE " + game.wave, WORLD_WIDTH / 2, 94);
-        context.fillStyle = "#ffffff";
-        context.font = "800 11px system-ui, sans-serif";
-        context.fillText("GET READY!", WORLD_WIDTH / 2, 115);
-        context.restore();
-      }
+      // Permanent, background-free wave title. Blink three times after each transition.
+      context.save();
+      const waveElapsed = Math.max(0, time - game.waveChangedAt);
+      const waveBlink = waveElapsed < 1500 ? (Math.floor(waveElapsed / 250) % 2 === 0 ? 1 : 0.28) : 1;
+      context.globalAlpha = waveBlink;
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.shadowColor = "rgba(22,62,35,.72)";
+      context.shadowBlur = 5;
+      context.fillStyle = "#fff2a8";
+      context.font = "900 22px system-ui, sans-serif";
+      context.fillText("WAVE " + game.wave + "  ·  " + WAVE_TITLES[game.wave - 1], WORLD_WIDTH / 2, 76);
+      context.fillStyle = "#ffffff";
+      context.font = "800 13px system-ui, sans-serif";
+      context.fillText("SPEED  " + (1 + (game.wave - 1) * 0.4).toFixed(1) + "×", WORLD_WIDTH / 2, 99);
+      context.restore();
 
       const player = game.player;
       const runningBob = game.running && !player.jumping ? Math.sin(time / 75) * 2 : 0;
@@ -455,10 +465,10 @@ export default function MiniGamePage() {
       const nextWave = Math.min(6, Math.floor(points / 1000) + 1);
       if (nextWave !== game.wave) {
         game.wave = nextWave;
-        game.waveNoticeUntil = time + 3000;
+        game.waveChangedAt = time;
         playTone(760, 0.12);
       }
-      game.speed = 6 * (1 + (game.wave - 1) * 0.2);
+      game.speed = 6 * (1 + (game.wave - 1) * 0.4);
 
       const player = game.player;
       player.velocityY += 0.72 * delta;
@@ -501,7 +511,10 @@ export default function MiniGamePage() {
 
       if (points !== game.lastScore) {
         game.lastScore = points;
-        setScore(points);
+        if (time - game.lastUiUpdate >= 100) {
+          game.lastUiUpdate = time;
+          setScore(points);
+        }
       }
 
       if (collided) {
