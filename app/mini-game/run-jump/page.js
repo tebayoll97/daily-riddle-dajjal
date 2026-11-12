@@ -344,7 +344,7 @@ export default function MiniGamePage() {
             </div>
           </div>
 
-          <div className="mg-game-world-frame w-full overflow-hidden rounded-2xl border border-purple-300/15">
+          <div className="mg-game-world-frame mg-jungle-world w-full overflow-hidden rounded-2xl border border-purple-300/15">
             <div className="mg-game-canvas-frame relative w-full overflow-hidden">
               <div className="mg-parallax-layer mg-parallax-sky" aria-hidden="true" />
               <div className="mg-parallax-layer mg-parallax-mountains" aria-hidden="true" />
