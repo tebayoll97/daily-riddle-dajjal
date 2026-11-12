@@ -45,6 +45,7 @@ const paletteColor = (palette, level) => {
 
 export default function MiniGamePage() {
   const canvasRef = useRef(null);
+  const arenaRef = useRef(null);
   const gameRef = useRef(null);
   const frameRef = useRef(0);
   const spriteRef = useRef(null);
@@ -57,6 +58,7 @@ export default function MiniGamePage() {
   const [best, setBest] = useState(0);
   const [soundOn, setSoundOn] = useState(true);
   const [confirmExit, setConfirmExit] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const playTone = useCallback((frequency, duration = 0.08) => {
     if (!soundRef.current || typeof window === "undefined") return;
@@ -135,6 +137,49 @@ export default function MiniGamePage() {
       playTone(500);
     }
   }, [playTone, startGame]);
+
+  const handleCanvasPointer = useCallback((event) => {
+    const canvas = canvasRef.current;
+    const game = gameRef.current;
+    if (!canvas || !game) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * WORLD_WIDTH;
+    const y = ((event.clientY - rect.top) / rect.height) * WORLD_HEIGHT;
+    if (!game.running) {
+      const button = { left: 350, right: 550, top: 232, bottom: 284 };
+      if (x >= button.left && x <= button.right && y >= button.top && y <= button.bottom) {
+        startGame();
+      }
+      return;
+    }
+    jump();
+  }, [jump, startGame]);
+
+  const toggleFullscreen = useCallback(async () => {
+    const target = arenaRef.current;
+    if (!target) return;
+    try {
+      if (!document.fullscreenElement) {
+        await target.requestFullscreen?.();
+        try {
+          await screen.orientation?.lock?.("landscape");
+        } catch {
+          // Orientation lock is optional; fullscreen can still be used in landscape manually.
+        }
+      } else {
+        await document.exitFullscreen?.();
+        try { screen.orientation?.unlock?.(); } catch {}
+      }
+    } catch {
+      // Some mobile browsers block fullscreen/orientation APIs; keep the normal game usable.
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
 
   useEffect(() => {
     soundRef.current = soundOn;
@@ -565,8 +610,44 @@ export default function MiniGamePage() {
       });
 
       if (!game.running) {
-        context.fillStyle = game.over ? "rgba(5,4,12,.58)" : "rgba(6,5,15,.22)";
+        context.fillStyle = game.over ? "rgba(5,12,15,.48)" : "rgba(5,15,19,.22)";
         context.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+        context.save();
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.shadowColor = "rgba(0,0,0,.65)";
+        context.shadowBlur = 8;
+        context.fillStyle = "#fff5cf";
+        context.font = "900 34px system-ui, sans-serif";
+        context.fillText(game.over ? "GAME OVER" : "READY TO RUN?", WORLD_WIDTH / 2, game.over ? 151 : 157);
+        context.shadowBlur = 3;
+        context.fillStyle = "#ffffff";
+        context.font = "700 17px system-ui, sans-serif";
+        context.fillText(game.over ? `DISTANCE  ${Math.floor(game.distance / 8)}` : "LARI SEJAUH MUNGKIN · HINDARI RINTANGAN", WORLD_WIDTH / 2, 190);
+        if (game.over) {
+          context.fillStyle = "#fff0a5";
+          context.font = "800 15px system-ui, sans-serif";
+          context.fillText(`BEST DISTANCE  ${bestRef.current}`, WORLD_WIDTH / 2, 214);
+        }
+        const buttonTop = 238;
+        const buttonHeight = 48;
+        const buttonGradient = context.createLinearGradient(0, buttonTop, 0, buttonTop + buttonHeight);
+        buttonGradient.addColorStop(0, "#ffe18a");
+        buttonGradient.addColorStop(1, "#d98a35");
+        context.shadowColor = "rgba(0,0,0,.35)";
+        context.shadowBlur = 8;
+        context.fillStyle = buttonGradient;
+        context.strokeStyle = "#fff0b6";
+        context.lineWidth = 2;
+        context.beginPath();
+        context.roundRect(350, buttonTop, 200, buttonHeight, 14);
+        context.fill();
+        context.stroke();
+        context.shadowBlur = 0;
+        context.fillStyle = "#382515";
+        context.font = "900 17px system-ui, sans-serif";
+        context.fillText(game.over ? "TRY AGAIN" : "PLAY GAME", WORLD_WIDTH / 2, buttonTop + buttonHeight / 2 + 1);
+        context.restore();
       }
     };
 
@@ -706,8 +787,12 @@ export default function MiniGamePage() {
   return (
     <main className="mini-game-screen mg-page relative z-[60] min-h-[100svh] w-full overflow-x-hidden overflow-y-auto overscroll-y-contain bg-[#080711] px-3 pb-[max(18px,env(safe-area-inset-bottom))] pt-[max(10px,env(safe-area-inset-top))] text-white sm:px-5">
       <div className="mg-game-layout mx-auto flex min-h-[calc(100svh-24px)] w-full max-w-[720px] flex-col gap-3 overflow-visible">
-        <div className="mg-game-topbar flex items-center justify-between gap-3">
+        <div className={`mg-game-topbar flex items-center justify-between gap-3 ${isFullscreen ? "is-hidden" : ""}`}>
           <button type="button" onClick={() => setConfirmExit(true)} className="ui-interactive rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[10px] font-black tracking-wider text-purple-200">← KELUAR GAME</button>
+          <div className="flex items-center gap-2">
+          <button type="button" onClick={toggleFullscreen} className="ui-interactive rounded-xl border border-emerald-300/20 bg-emerald-500/10 px-3 py-2.5 text-[10px] font-black text-emerald-100">
+            {isFullscreen ? "↙ EXIT FULL" : "⛶ LANDSCAPE"}
+          </button>
           <button
             type="button"
             onClick={toggleSound}
@@ -716,9 +801,10 @@ export default function MiniGamePage() {
           >
             {soundOn ? "♫ SOUND ON" : "♪ SOUND OFF"}
           </button>
+          </div>
         </div>
 
-        <header className="mg-game-header shrink-0 space-y-1 text-center">
+        <header className={`mg-game-header shrink-0 space-y-1 text-center ${isFullscreen ? "is-hidden" : ""}`}>
           <p className="mg-eyebrow">DAJJAL FAMILY · ARCADE</p>
           <h1 className="mg-game-title ui-title mx-auto w-full max-w-full px-2 py-2 text-center">
             DAJJAL FAMILY <span className="text-purple-300">JUMP</span>
@@ -728,41 +814,21 @@ export default function MiniGamePage() {
           </p>
         </header>
 
-        <section className="mg-arena mg-game-arena flex w-full flex-none flex-col justify-start overflow-hidden p-2.5 sm:p-4">
+        <section ref={arenaRef} className={`mg-arena mg-game-arena mg-fullscreen-arena flex w-full flex-none flex-col justify-start overflow-hidden p-2.5 sm:p-4 ${isFullscreen ? "is-fullscreen" : ""}`}>
           <div className="mg-game-world-frame mg-jungle-world w-full overflow-hidden rounded-2xl border border-purple-300/15">
             <div className="mg-game-canvas-frame relative w-full overflow-hidden">
               <canvas
                 ref={canvasRef}
                 className="mg-game-canvas block w-full touch-none"
                 aria-label="Permainan lari dan melompat. Ketuk area permainan atau tekan Space untuk melompat."
-                onPointerDown={jump}
+                onPointerDown={handleCanvasPointer}
               />
             </div>
-            {status !== "playing" && (
-              <div className="mg-game-state-overlay">
-                <div className="mg-game-state-card">
-                  <div className="mg-dino-badge" aria-hidden="true">{status === "over" ? "🦖💫" : "🦕"}</div>
-                  <p className="text-lg font-black tracking-wide sm:text-xl">
-                    {status === "over" ? "GAME OVER" : "READY TO RUN?"}
-                  </p>
-                  <p className="mt-1 text-xs leading-relaxed text-gray-200 sm:text-sm">
-                    {status === "over"
-                      ? `Jarak kamu: ${score} poin`
-                      : "Tekan tombol untuk memulai permainan"}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={startGame}
-                    className="mg-dino-action ui-interactive mt-2 min-h-10 w-full max-w-[210px] rounded-xl px-5 py-2 text-xs font-black tracking-wider sm:mt-3 sm:text-sm"
-                  >
-                    {status === "over" ? "PLAY AGAIN" : "START GAME"}
-                  </button>
-                </div>
-              </div>
-            )}
+
           </div>
 
-          <div className="mg-game-controls mt-2 flex shrink-0 flex-col items-center gap-2 sm:mt-3">
+          {isFullscreen && <button type="button" onClick={toggleFullscreen} className="mg-fullscreen-exit">EXIT FULLSCREEN ✕</button>}
+          <div className={`mg-game-controls mt-2 flex shrink-0 flex-col items-center gap-2 sm:mt-3 ${isFullscreen ? "is-hidden" : ""}`}>
             <p className="text-center text-[10px] leading-relaxed text-gray-500 sm:text-[11px]">
               TAP layar untuk melompat · SPACE / ↑ di desktop
             </p>
