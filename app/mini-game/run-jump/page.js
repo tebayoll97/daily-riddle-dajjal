@@ -343,7 +343,7 @@ export default function MiniGamePage() {
         <header className="shrink-0 text-center">
           <p className="ui-eyebrow">DAJJAL FAMILY · ARCADE</p>
           <h1 className="ui-title text-center">
-            RUN &amp; <span className="text-purple-300">JUMP</span>
+            DAJJAL FAMILY <span className="text-purple-300">JUMP</span>
           </h1>
           <p className="ui-subtitle mx-auto text-center">
             Lari sejauh mungkin. Hindari rintangan. Pecahkan rekor jarakmu!
