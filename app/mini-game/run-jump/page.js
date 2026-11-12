@@ -6,8 +6,8 @@ import "../mini-game-master.css";
 import "./run-jump.css";
 
 const WORLD_WIDTH = 900;
-const WORLD_HEIGHT = 480;
-const GROUND_Y = 408;
+const WORLD_HEIGHT = 320;
+const GROUND_Y = 258;
 const BEST_SCORE_KEY = "dajjal-run-jump-best";
 
 export default function MiniGamePage() {
@@ -151,10 +151,10 @@ export default function MiniGamePage() {
       const rect = canvas.getBoundingClientRect();
       const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
       const width = Math.max(1, Math.round(rect.width * pixelRatio));
-      const height = Math.max(1, Math.round(rect.height * pixelRatio));
+      const height = Math.max(1, Math.round((rect.width * WORLD_HEIGHT / WORLD_WIDTH) * pixelRatio));
       canvas.width = width;
       canvas.height = height;
-      context.setTransform(width / WORLD_WIDTH, 0, 0, height / WORLD_HEIGHT, 0, 0);
+      context.setTransform(width / WORLD_WIDTH, 0, 0, width / WORLD_WIDTH, 0, 0);
     };
 
     const draw = (time) => {
@@ -380,35 +380,46 @@ export default function MiniGamePage() {
             </div>
           </div>
 
-          <div className="mg-game-canvas-frame relative flex w-full shrink-0 items-center overflow-hidden rounded-2xl border border-purple-300/15 bg-[#0c0a17]">
-            <canvas
-              ref={canvasRef}
-              className="mg-game-canvas block w-full touch-none"
-              aria-label="Permainan lari dan melompat. Ketuk area permainan atau tekan Space untuk melompat."
-              onPointerDown={jump}
-            />
-            {status !== "playing" && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[#080711]/55 px-3 py-2 text-center backdrop-blur-[2px]">
-                <div className="mb-0.5 text-2xl sm:text-4xl" aria-hidden="true">
-                  {status === "over" ? "💥" : "🏃"}
+          <div className="mg-game-world-frame w-full overflow-hidden rounded-2xl border border-purple-300/15">
+            <div className="mg-extended-sky" aria-hidden="true">
+              <span className="mg-sky-star mg-sky-star--one" />
+              <span className="mg-sky-star mg-sky-star--two" />
+              <span className="mg-sky-star mg-sky-star--three" />
+              <span className="mg-sky-cloud mg-sky-cloud--one" />
+              <span className="mg-sky-cloud mg-sky-cloud--two" />
+              <span className="mg-sky-cloud mg-sky-cloud--three" />
+              <span className="mg-sky-glow" />
+            </div>
+            <div className="mg-game-canvas-frame relative w-full overflow-hidden bg-[#0c0a17]">
+              <canvas
+                ref={canvasRef}
+                className="mg-game-canvas block w-full touch-none"
+                aria-label="Permainan lari dan melompat. Ketuk area permainan atau tekan Space untuk melompat."
+                onPointerDown={jump}
+              />
+              {status !== "playing" && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[#080711]/55 px-3 py-2 text-center backdrop-blur-[2px]">
+                  <div className="mb-0.5 text-2xl sm:text-4xl" aria-hidden="true">
+                    {status === "over" ? "💥" : "🏃"}
+                  </div>
+                  <p className="text-base font-black tracking-wide sm:text-lg">
+                    {status === "over" ? "GAME OVER" : "READY TO RUN?"}
+                  </p>
+                  <p className="mt-0.5 text-[10px] leading-tight text-gray-300 sm:text-xs">
+                    {status === "over"
+                      ? `Jarak kamu: ${score} poin`
+                      : "Tekan tombol untuk memulai permainan"}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={startGame}
+                    className="ui-interactive mt-2 min-h-10 rounded-xl bg-purple-600 px-6 py-2 text-[10px] font-black tracking-wider shadow-lg shadow-purple-950/40 hover:bg-purple-500 sm:mt-4 sm:px-7 sm:py-3 sm:text-xs"
+                  >
+                    {status === "over" ? "PLAY AGAIN" : "START GAME"}
+                  </button>
                 </div>
-                <p className="text-base font-black tracking-wide sm:text-lg">
-                  {status === "over" ? "GAME OVER" : "READY TO RUN?"}
-                </p>
-                <p className="mt-0.5 text-[10px] leading-tight text-gray-300 sm:text-xs">
-                  {status === "over"
-                    ? `Jarak kamu: ${score} poin`
-                    : "Tekan tombol untuk memulai permainan"}
-                </p>
-                <button
-                  type="button"
-                  onClick={startGame}
-                  className="ui-interactive mt-2 min-h-10 rounded-xl bg-purple-600 px-6 py-2 text-[10px] font-black tracking-wider shadow-lg shadow-purple-950/40 hover:bg-purple-500 sm:mt-4 sm:px-7 sm:py-3 sm:text-xs"
-                >
-                  {status === "over" ? "PLAY AGAIN" : "START GAME"}
-                </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           <div className="mg-game-controls mt-2 flex shrink-0 flex-col items-center gap-2 sm:mt-3">
