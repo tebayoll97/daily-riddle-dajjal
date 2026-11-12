@@ -270,7 +270,7 @@ export default function MiniGamePage() {
       context.restore();
 
       // Three distinct dinosaur species animate quietly in the distant valley.
-      const dinoShift = (travel * 0.12) % 1120;
+      const dinoShift = (time * 0.035) % 1120;
       const drawDino = (x, y, scale, species, color, phase) => {
         context.save();
         context.translate(x, y + Math.sin(time / 480 + phase) * 2);
@@ -340,6 +340,25 @@ export default function MiniGamePage() {
         context.quadraticCurveTo(x + 22, GROUND_Y - 17, x + 32, GROUND_Y - 19);
         context.stroke();
       }
+
+      // Arcade-style score HUD is rendered inside the playfield canvas.
+      context.save();
+      context.textBaseline = "top";
+      context.font = "900 17px system-ui, sans-serif";
+      context.textAlign = "left";
+      context.fillStyle = "rgba(20,55,36,.82)";
+      context.fillText("DISTANCE", 17, 13);
+      context.font = "900 25px ui-monospace, monospace";
+      context.fillStyle = "#fff6cf";
+      context.shadowColor = "rgba(19,48,31,.8)";
+      context.shadowBlur = 5;
+      context.fillText(String(Math.floor(game.distance)).padStart(5,"0"), 16, 31);
+      context.textAlign = "right";
+      context.shadowBlur = 0;
+      context.font = "800 11px system-ui, sans-serif";
+      context.fillStyle = "rgba(24,60,39,.88)";
+      context.fillText("BEST " + String(best).padStart(5,"0"), WORLD_WIDTH - 17, 17);
+      context.restore();
 
       const player = game.player;
       const runningBob = game.running && !player.jumping ? Math.sin(time / 75) * 2 : 0;
@@ -526,21 +545,6 @@ export default function MiniGamePage() {
         </header>
 
         <section className="mg-arena mg-game-arena flex w-full flex-none flex-col justify-start overflow-hidden p-2.5 sm:p-4">
-          <div className="mg-game-stats mb-2 flex shrink-0 items-center justify-between px-1 sm:mb-3">
-            <div>
-              <p className="text-[9px] font-black tracking-[.22em] text-purple-300">DISTANCE</p>
-              <p className="font-mono text-2xl font-black tabular-nums sm:text-3xl">
-                {String(score).padStart(5, "0")}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-[9px] font-black tracking-[.22em] text-gray-500">PERSONAL BEST</p>
-              <p className="font-mono text-lg font-bold tabular-nums text-gray-300 sm:text-xl">
-                {String(best).padStart(5, "0")}
-              </p>
-            </div>
-          </div>
-
           <div className="mg-game-world-frame mg-jungle-world w-full overflow-hidden rounded-2xl border border-purple-300/15">
             <div className="mg-game-canvas-frame relative w-full overflow-hidden">
               <canvas
