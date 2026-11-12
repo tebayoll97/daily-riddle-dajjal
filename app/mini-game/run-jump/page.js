@@ -346,6 +346,10 @@ export default function MiniGamePage() {
 
           <div className="mg-game-world-frame w-full overflow-hidden rounded-2xl border border-purple-300/15">
             <div className="mg-game-canvas-frame relative w-full overflow-hidden">
+              <div className="mg-parallax-layer mg-parallax-sky" aria-hidden="true" />
+              <div className="mg-parallax-layer mg-parallax-mountains" aria-hidden="true" />
+              <div className="mg-parallax-layer mg-parallax-forest" aria-hidden="true" />
+              <div className="mg-parallax-layer mg-parallax-ground" aria-hidden="true" />
               <canvas
                 ref={canvasRef}
                 className="mg-game-canvas block w-full touch-none"
