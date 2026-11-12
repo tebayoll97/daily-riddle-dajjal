@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import "../mini-game-master.css";
+import "./run-jump.css";
 
 const WORLD_WIDTH = 900;
 const WORLD_HEIGHT = 480;
@@ -341,7 +342,7 @@ export default function MiniGamePage() {
   return (
     <main className="mini-game-screen mg-page relative z-[60] min-h-[100svh] w-full overflow-x-hidden overflow-y-auto overscroll-y-contain bg-[#080711] px-3 pb-[max(18px,env(safe-area-inset-bottom))] pt-[max(10px,env(safe-area-inset-top))] text-white sm:px-5">
       <div className="mg-game-layout mx-auto flex min-h-[calc(100svh-24px)] w-full max-w-[720px] flex-col gap-3 overflow-visible">
-        <div className="flex items-center justify-between gap-3">
+        <div className="mg-game-topbar flex items-center justify-between gap-3">
           <button type="button" onClick={() => setConfirmExit(true)} className="ui-interactive rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[10px] font-black tracking-wider text-purple-200">← KELUAR GAME</button>
           <button
             type="button"
@@ -353,18 +354,18 @@ export default function MiniGamePage() {
           </button>
         </div>
 
-        <header className="shrink-0 space-y-1 text-center">
-          <p className="ui-eyebrow">DAJJAL FAMILY · ARCADE</p>
-          <h1 className="ui-title mx-auto w-full max-w-full px-2 py-2 text-center text-[clamp(1.35rem,5.5vw,2.35rem)] leading-tight">
+        <header className="mg-game-header shrink-0 space-y-1 text-center">
+          <p className="mg-eyebrow">DAJJAL FAMILY · ARCADE</p>
+          <h1 className="mg-game-title ui-title mx-auto w-full max-w-full px-2 py-2 text-center">
             DAJJAL FAMILY <span className="text-purple-300">JUMP</span>
           </h1>
-          <p className="ui-subtitle mx-auto max-w-[38rem] px-3 text-center text-sm leading-relaxed sm:text-base">
+          <p className="mg-copy mx-auto max-w-[38rem] px-3 text-center">
             Lari sejauh mungkin. Hindari rintangan. Pecahkan rekor jarakmu!
           </p>
         </header>
 
-        <section className="mg-arena flex w-full flex-none flex-col justify-start overflow-hidden rounded-3xl border border-purple-400/20 bg-[#100d1d] p-2.5 shadow-[0_20px_70px_rgba(76,29,149,.16)] sm:p-4">
-          <div className="mb-2 flex shrink-0 items-center justify-between px-1 sm:mb-3">
+        <section className="mg-arena mg-game-arena flex w-full flex-none flex-col justify-start overflow-hidden p-2.5 sm:p-4">
+          <div className="mg-game-stats mb-2 flex shrink-0 items-center justify-between px-1 sm:mb-3">
             <div>
               <p className="text-[9px] font-black tracking-[.22em] text-purple-300">DISTANCE</p>
               <p className="font-mono text-2xl font-black tabular-nums sm:text-3xl">
@@ -379,7 +380,7 @@ export default function MiniGamePage() {
             </div>
           </div>
 
-          <div className="relative flex w-full shrink-0 items-center overflow-hidden rounded-2xl border border-purple-300/15 bg-[#0c0a17]">
+          <div className="mg-game-canvas-frame relative flex w-full shrink-0 items-center overflow-hidden rounded-2xl border border-purple-300/15 bg-[#0c0a17]">
             <canvas
               ref={canvasRef}
               className="mg-game-canvas block w-full touch-none"
@@ -410,7 +411,7 @@ export default function MiniGamePage() {
             )}
           </div>
 
-          <div className="mt-2 flex shrink-0 flex-col items-center gap-2 sm:mt-3">
+          <div className="mg-game-controls mt-2 flex shrink-0 flex-col items-center gap-2 sm:mt-3">
             <p className="text-center text-[10px] leading-relaxed text-gray-500 sm:text-[11px]">
               TAP layar untuk melompat · SPACE / ↑ di desktop
             </p>
