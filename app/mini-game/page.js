@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 const miniGames = [
-  { href: "/mini-game/run-jump", title: "RUN & JUMP", description: "Lari sejauh mungkin, lompat melewati rintangan, dan pecahkan rekor jarak.", tag: "ARCADE RUNNER", symbol: "🦖", tone: "from-violet-500/20 to-cyan-500/5" },
+  { href: "/mini-game/run-jump", title: "DAJJAL FAMILY JUMP", description: "Lari sejauh mungkin, lompat melewati rintangan, dan pecahkan rekor jarak.", tag: "DAJJAL FAMILY ARCADE", symbol: "🦖", tone: "from-violet-500/20 to-cyan-500/5" },
 ];
 
 export default function MiniGameDirectoryPage() {
