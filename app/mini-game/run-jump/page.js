@@ -44,6 +44,7 @@ const paletteColor = (palette, level) => {
 
 export default function MiniGamePage() {
   const canvasRef = useRef(null);
+  const characterSpriteRef = useRef(null);
   const arenaRef = useRef(null);
   const gameRef = useRef(null);
   const frameRef = useRef(0);
@@ -171,6 +172,14 @@ export default function MiniGamePage() {
     } catch {
       // Some mobile browsers block fullscreen/orientation APIs; keep the normal game usable.
     }
+  }, []);
+
+  useEffect(() => {
+    const sprite = new Image();
+    sprite.src = "/mini-game/run-jump/char.png";
+    sprite.onload = () => { characterSpriteRef.current = sprite; };
+    sprite.onerror = () => { characterSpriteRef.current = null; };
+    return () => { characterSpriteRef.current = null; };
   }, []);
 
   useEffect(() => {
@@ -562,104 +571,23 @@ export default function MiniGamePage() {
 
       const player = game.player;
       const running = game.running && !player.jumping;
-      const stride = running ? Math.sin(time / 72) : 0;
       const bob = running ? Math.abs(Math.sin(time / 72)) * 3 : 0;
       const jumpTilt = player.jumping ? Math.max(-0.12, Math.min(0.12, player.velocityY * 0.006)) : 0;
-      const px = player.x;
-      const py = player.y + bob;
-      const ellipse = (x,y,rx,ry,fill,stroke="#263447",line=3) => {
-        context.fillStyle=fill; context.strokeStyle=stroke; context.lineWidth=line;
-        context.beginPath(); context.ellipse(x,y,rx,ry,0,0,Math.PI*2); context.fill(); context.stroke();
-      };
-      const limb = (x,y,angle,upper,lower,footColor="#263447") => {
-        context.save(); context.translate(x,y); context.rotate(angle);
-        context.strokeStyle="#263447"; context.lineWidth=13; context.lineCap="round";
-        context.beginPath(); context.moveTo(0,0); context.lineTo(upper,8); context.lineTo(upper+lower,18); context.stroke();
-        context.strokeStyle="#f2c38e"; context.lineWidth=8;
-        context.beginPath(); context.moveTo(0,0); context.lineTo(upper,8); context.stroke();
-        context.fillStyle=footColor; context.beginPath(); context.ellipse(upper+lower+3,20,12,6,.15,0,Math.PI*2); context.fill();
+      const sprite = characterSpriteRef.current;
+      if (sprite?.complete && sprite.naturalWidth > 0) {
+        const cellW = sprite.naturalWidth / 3;
+        const cellH = sprite.naturalHeight / 3;
+        const frame = running ? Math.floor(time / 95) % 9 : player.jumping ? 7 : 0;
+        const sx = (frame % 3) * cellW;
+        const sy = Math.floor(frame / 3) * cellH;
+        const drawW = 246;
+        const drawH = 218;
+        context.save();
+        context.translate(player.x + 91, player.y + bob + 108);
+        context.rotate(jumpTilt);
+        context.drawImage(sprite, sx, sy, cellW, cellH, -drawW / 2, -drawH + 108, drawW, drawH);
         context.restore();
-      };
-      context.save();
-      context.translate(px,py);
-      context.rotate(jumpTilt);
-      // Long striped tail, drawn behind the family.
-      context.save(); context.translate(54,76); context.rotate(-.12+stride*.035);
-      context.fillStyle="#1764b4"; context.strokeStyle="#18334d"; context.lineWidth=4;
-      context.beginPath(); context.moveTo(0,0); context.quadraticCurveTo(-48,-34,-112,-7); context.quadraticCurveTo(-78,18,-5,17); context.closePath(); context.fill(); context.stroke();
-      context.strokeStyle="#f6c63e"; context.lineWidth=10;
-      for(let i=0;i<4;i++){ context.beginPath(); context.moveTo(-18-i*20,-2-i*1.5); context.lineTo(-31-i*20,8-i*1.5); context.stroke(); }
-      context.restore();
-      // Rear legs and feet cycle in opposite phases while running.
-      limb(62,91,.55+stride*.55,19,16);
-      limb(126,91,-.55-stride*.55,18,17);
-      // Blue-and-gold dinosaur body and belly.
-      ellipse(91,73,91,39,"#236fc0","#17334e",4);
-      ellipse(93,91,61,20,"#f2d59a","#17334e",2);
-      // Gold tiger-like markings on the flank.
-      context.strokeStyle="#f7c83e"; context.lineWidth=8; context.lineCap="round";
-      for(let i=0;i<5;i++){ context.beginPath(); context.moveTo(35+i*23,48); context.lineTo(24+i*23,70); context.stroke(); }
-      // Front legs.
-      limb(139,94,-.45-stride*.55,18,17);
-      limb(167,91,.5+stride*.55,17,18);
-      // Neck, jaw and oversized roaring head.
-      context.save(); context.translate(147,38); context.rotate(-.04+stride*.025);
-      context.fillStyle="#2878ca"; context.strokeStyle="#17334e"; context.lineWidth=4;
-      context.beginPath(); context.moveTo(-13,25); context.quadraticCurveTo(3,-22,47,-31); context.quadraticCurveTo(80,-42,93,-8); context.quadraticCurveTo(89,27,48,38); context.lineTo(4,48); context.closePath(); context.fill(); context.stroke();
-      ellipse(62,-8,34,23,"#f5cf45","#17334e",3);
-      // Open mouth, teeth and tongue.
-      context.fillStyle="#54202b"; context.beginPath(); context.ellipse(78,17,25,18,.12,0,Math.PI*2); context.fill();
-      context.fillStyle="#fff8df";
-      for(let i=0;i<5;i++){ context.beginPath(); context.moveTo(57+i*9,3); context.lineTo(62+i*9,14); context.lineTo(66+i*9,3); context.fill(); }
-      context.fillStyle="#f17b7b"; context.beginPath(); context.ellipse(83,25,12,6,0,0,Math.PI*2); context.fill();
-      ellipse(72,-20,8,7,"#ffcf43","#17334e",2); ellipse(74,-20,3,4,"#241b25","#241b25",1);
-      context.strokeStyle="#17334e"; context.lineWidth=4; context.beginPath(); context.moveTo(66,-33); context.lineTo(80,-37); context.stroke();
-      // Gold crown-like dinosaur brow ridge.
-      context.fillStyle="#f8ca48"; context.beginPath(); context.moveTo(26,-37); context.lineTo(34,-52); context.lineTo(43,-39); context.lineTo(54,-54); context.lineTo(61,-34); context.closePath(); context.fill(); context.stroke();
-      context.restore();
-      // Red saddle cloth with crown emblem.
-      context.fillStyle="#a51f32"; context.strokeStyle="#f4c34d"; context.lineWidth=3;
-      context.beginPath(); context.moveTo(40,61); context.lineTo(117,61); context.lineTo(124,111); context.lineTo(80,101); context.lineTo(43,112); context.closePath(); context.fill(); context.stroke();
-      context.fillStyle="#ffd45a"; context.font="bold 25px Georgia"; context.textAlign="center"; context.fillText("♛",82,94);
-      // Dad in front: spiky red hair, black-red outfit, riding low and holding reins.
-      context.save(); context.translate(118,8); context.rotate(-.04+stride*.025);
-      ellipse(0,5,18,23,"#f1bd91","#422b2a",2);
-      context.fillStyle="#9f2029"; context.strokeStyle="#421c25"; context.lineWidth=3;
-      context.beginPath(); context.moveTo(-17,-8); context.lineTo(-29,-22); context.lineTo(-9,-18); context.lineTo(-13,-35); context.lineTo(1,-22); context.lineTo(13,-39); context.lineTo(14,-20); context.lineTo(30,-29); context.lineTo(21,-8); context.closePath(); context.fill(); context.stroke();
-      context.fillStyle="#171b29"; context.beginPath(); context.roundRect(-16,18,34,34,8); context.fill(); context.stroke();
-      context.strokeStyle="#d63c32"; context.lineWidth=5; context.beginPath(); context.moveTo(-13,25); context.lineTo(12,46); context.stroke();
-      ellipse(7,2,3,4,"#fff","#35212a",1); ellipse(7,2,1.5,3,"#171b29","#171b29",1);
-      context.strokeStyle="#53202a"; context.lineWidth=3; context.beginPath(); context.moveTo(-8,12); context.lineTo(8,13); context.stroke();
-      limb(-10,40,.9+stride*.15,12,10,"#171b29");
-      context.restore();
-      // Child in the middle: bald head, red forehead mark and red cape.
-      context.save(); context.translate(65,-5);
-      context.fillStyle="#a51f32"; context.beginPath(); context.moveTo(-17,13); context.quadraticCurveTo(-34,46,-52,53); context.lineTo(-20,48); context.lineTo(5,55); context.lineTo(22,35); context.closePath(); context.fill();
-      ellipse(0,4,20,22,"#ffd0b0","#6b3c38",2);
-      context.fillStyle="#d83232"; context.beginPath(); context.moveTo(2,-18); context.lineTo(13,-5); context.lineTo(5,1); context.lineTo(11,11); context.lineTo(-1,3); context.lineTo(4,-4); context.closePath(); context.fill();
-      ellipse(-7,5,4,5,"#fff","#49313a",1); ellipse(8,5,4,5,"#fff","#49313a",1);
-      ellipse(-7,6,2,3,"#3384bd","#3384bd",1); ellipse(8,6,2,3,"#3384bd","#3384bd",1);
-      context.fillStyle="#702c36"; context.beginPath(); context.ellipse(1,17,8,7,0,0,Math.PI*2); context.fill();
-      context.strokeStyle="#74c9f0"; context.lineWidth=2; context.beginPath(); context.moveTo(-12,10); context.quadraticCurveTo(-18,18,-11,22); context.stroke();
-      context.fillStyle="#a51f32"; context.fillRect(-13,25,27,17);
-      context.restore();
-      // Mama Veylora at the back: flowing lilac hair, white captain hat and blue fur coat.
-      context.save(); context.translate(14,-3); context.rotate(-.06-stride*.025);
-      context.fillStyle="#b9a4d1"; context.strokeStyle="#493750"; context.lineWidth=3;
-      context.beginPath(); context.moveTo(-15,8); context.quadraticCurveTo(-53,-5,-53,31); context.quadraticCurveTo(-65,53,-37,47); context.quadraticCurveTo(-31,28,-8,27); context.fill(); context.stroke();
-      context.fillStyle="#e8dff1"; context.beginPath(); context.ellipse(0,-3,22,8,0,0,Math.PI*2); context.fill(); context.stroke();
-      context.fillStyle="#fff4e9"; context.beginPath(); context.ellipse(0,-13,22,13,0,Math.PI,Math.PI*2); context.fill(); context.stroke();
-      context.fillStyle="#f1bd91"; context.beginPath(); context.ellipse(0,11,16,19,0,0,Math.PI*2); context.fill(); context.stroke();
-      context.fillStyle="#b9a4d1"; context.beginPath(); context.moveTo(-16,2); context.quadraticCurveTo(-5,-14,9,0); context.lineTo(15,20); context.lineTo(3,12); context.lineTo(-8,20); context.closePath(); context.fill(); context.stroke();
-      context.fillStyle="#234f94"; context.beginPath(); context.roundRect(-20,28,42,32,9); context.fill(); context.stroke();
-      context.strokeStyle="#fff1e4"; context.lineWidth=6; context.beginPath(); context.moveTo(-18,31); context.lineTo(18,31); context.stroke();
-      context.fillStyle="#e3ad35"; context.font="bold 13px Georgia"; context.textAlign="center"; context.fillText("✿",0,-11);
-      context.strokeStyle="#2b2736"; context.lineWidth=3; context.beginPath(); context.moveTo(-9,12); context.lineTo(8,11); context.stroke();
-      context.restore();
-      // Dust puffs trail the dinosaur's feet.
-      if(running){ context.globalAlpha=.55; for(let i=0;i<3;i++){ const dx=(time/5+i*19)%48; ellipse(-15-dx,111,8,4,"#f2d9b2","rgba(120,88,58,.35)",1); } }
-      context.restore();
-
+      }
       game.obstacles.forEach((obstacle) => {
         const cx = obstacle.x + obstacle.width / 2;
         context.save();
