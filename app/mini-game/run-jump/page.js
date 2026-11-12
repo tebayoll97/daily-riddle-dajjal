@@ -15,6 +15,7 @@ export default function MiniGamePage() {
   const gameRef = useRef(null);
   const frameRef = useRef(0);
   const spriteRef = useRef(null);
+  const bestRef = useRef(0);
   const soundRef = useRef(true);
   const audioRef = useRef(null);
 
@@ -117,7 +118,7 @@ export default function MiniGamePage() {
   useEffect(() => {
     try {
       const savedBest = Number(window.localStorage.getItem(BEST_SCORE_KEY) || 0);
-      if (Number.isFinite(savedBest) && savedBest > 0) setBest(savedBest);
+      if (Number.isFinite(savedBest) && savedBest > 0) { bestRef.current = savedBest; setBest(savedBest); }
     } catch {
       // Private browsing or storage restrictions should not block the game.
     }
@@ -304,9 +305,9 @@ export default function MiniGamePage() {
         context.fillStyle="#fff2bd"; context.fillRect(species==="longneck"?42:29,-55,2,2);
         context.restore();
       };
-      drawDino(185-dinoShift+(dinoShift>1020?1120:0),180,.72,"longneck","#d99b54",0);
-      drawDino(515-dinoShift+(dinoShift>1020?1120:0),181,.62,"triceratops","#76a95c",1.3);
-      drawDino(835-dinoShift,180,.68,"stego","#d28b4e",2.6);
+      drawDino(((185-dinoShift+1200)%1200)-45,180,.72,"longneck","#d99b54",0);
+      drawDino(((515-dinoShift+1200)%1200)-45,181,.62,"triceratops","#76a95c",1.3);
+      drawDino(((835-dinoShift+1200)%1200)-45,180,.68,"stego","#d28b4e",2.6);
       context.restore();
 
       // Foreground grass and soil are part of the same canvas, aligned to collision.
@@ -370,7 +371,7 @@ export default function MiniGamePage() {
       context.fillStyle = "#fff6cf";
       context.shadowColor = "rgba(19,48,31,.8)";
       context.shadowBlur = 4;
-      context.fillText(String(best).padStart(5,"0"), WORLD_WIDTH - 17, 31);
+      context.fillText(String(bestRef.current).padStart(5,"0"), WORLD_WIDTH - 17, 31);
       context.restore();
 
       if (game.running && game.waveNoticeUntil > time) {
@@ -509,6 +510,7 @@ export default function MiniGamePage() {
         setScore(points);
         setBest((previousBest) => {
           const nextBest = Math.max(previousBest, points);
+          bestRef.current = nextBest;
           try {
             window.localStorage.setItem(BEST_SCORE_KEY, String(nextBest));
           } catch {
