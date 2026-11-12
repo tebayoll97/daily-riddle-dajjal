@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import "../mini-game-master.css";
 import "./run-jump.css";
 
@@ -54,8 +53,8 @@ export default function MiniGamePage() {
   const audioRef = useRef(null);
 
   const [status, setStatus] = useState("ready");
-  const [score, setScore] = useState(0);
-  const [best, setBest] = useState(0);
+  const [, setScore] = useState(0);
+  const [, setBest] = useState(0);
   const [soundOn, setSoundOn] = useState(true);
   const [confirmExit, setConfirmExit] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
