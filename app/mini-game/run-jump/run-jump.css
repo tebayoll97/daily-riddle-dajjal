@@ -499,3 +499,24 @@
 @media (prefers-reduced-motion:reduce) {
   .mg-jungle-world .mg-parallax-layer { animation:none !important; }
 }
+
+
+/* Canvas-rendered prehistoric environment supersedes the temporary PNG strips. */
+.mg-jungle-world .mg-game-canvas-frame {
+  aspect-ratio:900 / 320;
+  background:#55c7e8;
+}
+.mg-jungle-world .mg-game-canvas {
+  position:relative;
+  z-index:1;
+  display:block;
+  width:100%;
+  height:auto !important;
+  aspect-ratio:900 / 320;
+  background:transparent !important;
+}
+.mg-jungle-world .mg-parallax-layer { display:none !important; }
+.mg-jungle-world {
+  border-color:rgba(91,171,92,.45) !important;
+  background:#55c7e8;
+}
