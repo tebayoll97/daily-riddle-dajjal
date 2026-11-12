@@ -691,12 +691,12 @@
   background:#080711 !important;
 }
 .mg-fullscreen-arena:fullscreen .mg-game-canvas {
-  width:100% !important;
-  height:100% !important;
+  width:min(100vw,214.2857dvh) !important;
+  height:auto !important;
   max-width:100vw !important;
   max-height:100dvh !important;
-  aspect-ratio:auto !important;
-  object-fit:fill !important;
+  aspect-ratio:900 / 420 !important;
+  object-fit:contain !important;
   touch-action:manipulation !important;
 }
 .mg-fullscreen-arena:fullscreen .mg-game-controls,
