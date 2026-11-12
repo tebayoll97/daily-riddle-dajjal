@@ -1,0 +1,22 @@
+/* DAJJAL FAMILY JUMP — page-specific styling only.
+   Shared colors, breakpoints and controls live in mini-game-master.css.
+*/
+.mg-game-topbar { width:100%; }
+.mg-game-title {
+  padding: clamp(12px, 1.7vw, 20px) 14px !important;
+  font-size: clamp(1.3rem, 5.2vw, 2.2rem) !important;
+  line-height:1.14 !important;
+}
+.mg-game-arena { gap:0; }
+.mg-game-stats { min-height:58px; }
+.mg-game-canvas-frame { min-height:0; }
+.mg-game-controls { width:100%; }
+@media (max-width:380px) {
+  .mg-game-topbar { gap:8px; }
+  .mg-game-topbar .mg-control { min-height:40px; padding-inline:10px; }
+  .mg-game-stats { min-height:52px; }
+}
+@media (min-width:768px) {
+  .mg-game-layout { gap:18px; }
+  .mg-game-arena { padding:18px !important; }
+}
