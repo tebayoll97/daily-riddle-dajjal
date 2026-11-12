@@ -642,3 +642,94 @@
   aspect-ratio:900 / 420 !important;
   object-fit:fill;
 }
+
+
+/* Canvas-first game states and landscape fullscreen presentation. */
+.mg-fullscreen-arena:fullscreen {
+  position:fixed !important;
+  inset:0 !important;
+  z-index:9999 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:center !important;
+  align-items:stretch !important;
+  width:100vw !important;
+  height:100dvh !important;
+  max-width:none !important;
+  min-height:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:#080711 !important;
+}
+.mg-fullscreen-arena:fullscreen .mg-game-world-frame {
+  display:flex !important;
+  flex:1 1 auto !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:100% !important;
+  height:100% !important;
+  min-height:0 !important;
+  max-height:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:#080711 !important;
+  box-shadow:none !important;
+}
+.mg-fullscreen-arena:fullscreen .mg-game-canvas-frame {
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:100% !important;
+  height:100% !important;
+  aspect-ratio:auto !important;
+  overflow:hidden !important;
+  background:#080711 !important;
+}
+.mg-fullscreen-arena:fullscreen .mg-game-canvas {
+  width:100% !important;
+  height:100% !important;
+  max-width:100vw !important;
+  max-height:100dvh !important;
+  aspect-ratio:auto !important;
+  object-fit:fill !important;
+  touch-action:manipulation !important;
+}
+.mg-fullscreen-arena:fullscreen .mg-game-controls,
+.mg-fullscreen-arena:fullscreen .mg-game-topbar,
+.mg-fullscreen-arena:fullscreen .mg-game-header {
+  display:none !important;
+}
+.mg-fullscreen-arena:fullscreen .mg-fullscreen-exit {
+  position:absolute;
+  z-index:10002;
+  top:max(12px,env(safe-area-inset-top));
+  right:max(12px,env(safe-area-inset-right));
+  min-height:38px;
+  padding:8px 12px;
+  border:1px solid rgba(255,255,255,.3);
+  border-radius:12px;
+  color:#fff;
+  background:rgba(9,15,18,.62);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.06em;
+  backdrop-filter:blur(8px);
+}
+.mg-fullscreen-arena:fullscreen .mg-fullscreen-exit:active {
+  transform:scale(.96);
+}
+.mg-fullscreen-arena:not(:fullscreen) .mg-fullscreen-exit { display:none; }
+.is-hidden { display:none !important; }
+@media (orientation:landscape) and (max-height:520px) {
+  .mg-game-layout { min-height:100svh !important; }
+  .mg-game-header { display:none; }
+  .mg-game-arena { margin-top:0 !important; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .mg-fullscreen-exit { transition:none !important; }
+}
