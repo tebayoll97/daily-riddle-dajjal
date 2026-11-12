@@ -18,8 +18,8 @@ const WAVE_TITLES = [
   "ERA METEOR CHAOS",
 ];
 const WAVE_STARTS = [0, 1200, 2600, 4100, 5700, 7400];
-const WAVE_TRANSITION_LEAD_SECONDS = 6;
-const WAVE_TRANSITION_DURATION = 12000;
+const WAVE_TRANSITION_LEAD_SECONDS = 7;
+const WAVE_TRANSITION_DURATION = 14000;
 const WORLD_TINTS = [
   { color: [72, 190, 150], alpha: 0.00 },
   { color: [105, 174, 119], alpha: 0.035 },
@@ -36,6 +36,20 @@ const smoothStep = (value) => {
 const mix = (from, to, amount) => from + (to - from) * amount;
 const mixColor = (from, to, amount) =>
   `rgb(${Math.round(mix(from[0], to[0], amount))},${Math.round(mix(from[1], to[1], amount))},${Math.round(mix(from[2], to[2], amount))})`;
+
+const WORLD_PALETTES = {
+  skyTop: [[56,189,240],[92,183,218],[112,145,153],[82,91,105],[133,65,53],[64,28,42]],
+  skyHorizon: [[139,224,241],[151,211,196],[150,157,132],[112,104,102],[203,112,65],[126,49,43]],
+  mountain: [[128,201,160],[111,176,137],[123,139,112],[105,103,96],[119,75,62],[70,43,49]],
+  forest: [[67,143,101],[43,125,82],[89,104,70],[91,78,65],[115,66,47],[67,39,42]],
+  ground: [[139,90,55],[132,91,51],[117,83,58],[103,74,61],[111,60,42],[65,39,39]],
+  grass: [[85,185,79],[93,171,66],[133,145,57],[139,111,48],[164,79,39],[91,45,39]],
+};
+const paletteColor = (palette, level) => {
+  const position = Math.max(0, Math.min(palette.length - 1, level));
+  const index = Math.min(palette.length - 2, Math.floor(position));
+  return mixColor(palette[index], palette[index + 1], position - index);
+};
 
 export default function MiniGamePage() {
   const canvasRef = useRef(null);
@@ -210,10 +224,26 @@ export default function MiniGamePage() {
       // Living prehistoric world: all four parallax layers are drawn in one
       // canvas coordinate space so no image seams or black strip boundaries appear.
       const travel = game.distance;
+      // Resolve the visual Wave continuously, including the pre-Wave lead-in.
+      const activeTransition = game.transitionStartedAt !== null;
+      const transitionRaw = activeTransition
+        ? clamp01((time - game.transitionStartedAt) / WAVE_TRANSITION_DURATION)
+        : 1;
+      const transitionEase = smoothStep(transitionRaw);
+      const worldWave = activeTransition
+        ? mix(game.transitionFrom + 1, game.transitionTo + 1, transitionEase)
+        : game.wave;
+      const paletteLevel = Math.max(0, Math.min(5, worldWave - 1));
+      const skyTopColor = paletteColor(WORLD_PALETTES.skyTop, paletteLevel);
+      const skyHorizonColor = paletteColor(WORLD_PALETTES.skyHorizon, paletteLevel);
+      const mountainColor = paletteColor(WORLD_PALETTES.mountain, paletteLevel);
+      const forestColor = paletteColor(WORLD_PALETTES.forest, paletteLevel);
+      const groundColor = paletteColor(WORLD_PALETTES.ground, paletteLevel);
+      const grassColor = paletteColor(WORLD_PALETTES.grass, paletteLevel);
       const sky = context.createLinearGradient(0, 0, 0, WORLD_HEIGHT);
-      sky.addColorStop(0, "#38bdf0");
-      sky.addColorStop(0.62, "#8be0f1");
-      sky.addColorStop(1, "#c7edb0");
+      sky.addColorStop(0, skyTopColor);
+      sky.addColorStop(0.62, skyHorizonColor);
+      sky.addColorStop(1, paletteColor(WORLD_PALETTES.grass, Math.min(5, paletteLevel * 0.7)));
       context.fillStyle = sky;
       context.fillRect(0, -100, WORLD_WIDTH, WORLD_HEIGHT);
 
@@ -242,7 +272,7 @@ export default function MiniGamePage() {
       context.translate(-mountainShift, 0);
       for (let repeat = 0; repeat < 2; repeat += 1) {
         const ox = repeat * 900;
-        context.fillStyle = "#80c9a0";
+        context.fillStyle = mountainColor;
         context.beginPath();
         context.moveTo(ox - 40, 177);
         context.lineTo(ox + 105, 86);
@@ -281,7 +311,7 @@ export default function MiniGamePage() {
       context.translate(-forestShift, 0);
       for (let repeat = 0; repeat < 2; repeat += 1) {
         const ox = repeat * 900;
-        context.fillStyle = "#438f65";
+        context.fillStyle = forestColor;
         context.fillRect(ox, 166, 900, 63);
         const tree = (x, base, scale = 1) => {
           context.fillStyle = "#76583b";
@@ -322,7 +352,7 @@ export default function MiniGamePage() {
       context.restore();
 
       // Foreground grass and soil are part of the same canvas, aligned to collision.
-      context.fillStyle = "#8b5a37";
+      context.fillStyle = groundColor;
       context.fillRect(0, GROUND_Y, WORLD_WIDTH, WORLD_HEIGHT - GROUND_Y);
       context.fillStyle = "#6d452f";
       for (let x = -((travel * 1.0) % 90); x < WORLD_WIDTH + 90; x += 90) {
@@ -335,9 +365,9 @@ export default function MiniGamePage() {
         context.fill();
         context.fillStyle = "#6d452f";
       }
-      context.fillStyle = "#55b94f";
+      context.fillStyle = grassColor;
       context.fillRect(0, GROUND_Y, WORLD_WIDTH, 12);
-      context.fillStyle = "#8be06a";
+      context.fillStyle = paletteColor(WORLD_PALETTES.grass, Math.min(5, paletteLevel + 0.35));
       context.fillRect(0, GROUND_Y, WORLD_WIDTH, 4);
       context.fillStyle = "#328c42";
       for (let x = -((travel * 1.0) % 28); x < WORLD_WIDTH + 28; x += 28) {
@@ -360,31 +390,18 @@ export default function MiniGamePage() {
         context.stroke();
       }
 
-      // Progressive world atmosphere: palette and effects blend continuously across Wave boundaries.
-      const activeTransition = game.transitionStartedAt !== null;
-      const transitionRaw = activeTransition
-        ? clamp01((time - game.transitionStartedAt) / WAVE_TRANSITION_DURATION)
-        : 1;
-      const transitionEase = smoothStep(transitionRaw);
-      const tintFrom = WORLD_TINTS[game.transitionFrom] || WORLD_TINTS[0];
-      const tintTo = WORLD_TINTS[game.transitionTo] || tintFrom;
-      const tintAlpha = mix(tintFrom.alpha, tintTo.alpha, transitionEase);
-      const tintColor = mixColor(tintFrom.color, tintTo.color, transitionEase);
-
-      if (tintAlpha > 0.001) {
+      // A restrained atmospheric veil supports the full palette changes above.
+      const tintAlpha = paletteLevel <= 0.01 ? 0 : [0,0.12,0.19,0.25,0.30,0.36][Math.round(paletteLevel)];
+      if (tintAlpha > 0.01) {
         const atmosphere = context.createLinearGradient(0, 0, 0, GROUND_Y + 20);
-        atmosphere.addColorStop(0, `rgba(${tintColor.match(/\d+/g).join(",")},${tintAlpha})`);
-        atmosphere.addColorStop(1, `rgba(35,30,28,${tintAlpha * 0.42})`);
+        atmosphere.addColorStop(0, `rgba(38,48,52,${tintAlpha * 0.42})`);
+        atmosphere.addColorStop(1, `rgba(35,30,28,${tintAlpha * 0.24})`);
         context.fillStyle = atmosphere;
         context.fillRect(0, 0, WORLD_WIDTH, GROUND_Y + 20);
       }
 
-      const worldWave = activeTransition
-        ? mix(game.transitionFrom + 1, game.transitionTo + 1, transitionEase)
-        : game.wave;
-
       // Wave 3+: subtle earthquake dust and occasional falling stones.
-      const quakeStrength = smoothStep((worldWave - 2.25) / 0.8);
+      const quakeStrength = smoothStep((worldWave - 2.0) / 0.65);
       if (quakeStrength > 0.01) {
         context.save();
         context.globalAlpha = quakeStrength * 0.28;
@@ -401,7 +418,7 @@ export default function MiniGamePage() {
       }
 
       // Wave 4+: distant lightning flashes, kept faint so the runner remains readable.
-      const stormStrength = smoothStep((worldWave - 3.15) / 0.85);
+      const stormStrength = smoothStep((worldWave - 3.0) / 0.7);
       const lightningPulse = Math.pow(Math.max(0, Math.sin(time / 1750 + 0.8)), 18);
       if (stormStrength > 0.01 && lightningPulse > 0.12) {
         context.save();
@@ -421,7 +438,7 @@ export default function MiniGamePage() {
       }
 
       // Wave 5+: ember and ash particles; deterministic motion avoids per-frame random allocations.
-      const emberStrength = smoothStep((worldWave - 4.05) / 0.8);
+      const emberStrength = smoothStep((worldWave - 4.0) / 0.7);
       if (emberStrength > 0.01) {
         context.save();
         for (let i = 0; i < 22; i += 1) {
@@ -438,7 +455,7 @@ export default function MiniGamePage() {
       }
 
       // Wave 6: one distant meteor crosses the horizon; it never enters the play lane.
-      const meteorStrength = smoothStep((worldWave - 5.05) / 0.85);
+      const meteorStrength = smoothStep((worldWave - 5.0) / 0.7);
       if (meteorStrength > 0.01) {
         const meteorCycle = (time % 11500) / 11500;
         const meteorX = 850 - meteorCycle * 330;
