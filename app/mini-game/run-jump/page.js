@@ -326,13 +326,31 @@ export default function MiniGamePage() {
       }
 
       game.obstacles.forEach((obstacle) => {
-        context.font = obstacle.type === "rock" ? "34px system-ui" : "38px system-ui";
-        context.textAlign = "center";
-        context.fillText(
-          obstacle.type === "rock" ? "🪨" : "🌵",
-          obstacle.x + obstacle.width / 2,
-          GROUND_Y - 4
-        );
+        const cx = obstacle.x + obstacle.width / 2;
+        context.save();
+        context.lineWidth = 3;
+        context.lineJoin = "round";
+        if (obstacle.type === "rock") {
+          context.fillStyle = "#89969a"; context.strokeStyle = "#344b50";
+          context.beginPath(); context.moveTo(obstacle.x,GROUND_Y); context.lineTo(obstacle.x+5,GROUND_Y-20); context.lineTo(cx,GROUND_Y-35); context.lineTo(obstacle.x+obstacle.width-3,GROUND_Y-18); context.lineTo(obstacle.x+obstacle.width,GROUND_Y); context.closePath(); context.fill(); context.stroke();
+          context.fillStyle = "#e4ece5"; context.fillRect(obstacle.x+8,GROUND_Y-20,7,4);
+        } else if (obstacle.type === "egg") {
+          const colors = ["#f5d46b","#eaa49b","#b8d8ef"];
+          for (let n=0;n<3;n++) { const ex=cx+(n-1)*14; context.fillStyle=colors[n]; context.strokeStyle="#67432f"; context.beginPath(); context.ellipse(ex,GROUND_Y-13,9,14,0,0,Math.PI*2); context.fill(); context.stroke(); context.fillStyle="#fff4d4"; context.fillRect(ex-4,GROUND_Y-21,3,5); }
+        } else if (obstacle.type === "log") {
+          context.fillStyle="#a86632"; context.strokeStyle="#55331f"; context.beginPath(); context.roundRect(obstacle.x,GROUND_Y-22,obstacle.width,22,8); context.fill(); context.stroke();
+          context.fillStyle="#e9b66f"; context.beginPath(); context.ellipse(obstacle.x+obstacle.width-5,GROUND_Y-11,7,10,0,0,Math.PI*2); context.fill(); context.stroke();
+          context.strokeStyle="#f3ca82"; context.lineWidth=2; context.beginPath(); context.moveTo(obstacle.x+8,GROUND_Y-17); context.lineTo(obstacle.x+obstacle.width-12,GROUND_Y-17); context.stroke();
+        } else {
+          const flap = Math.sin(time / 85 + obstacle.phase) * 9;
+          context.translate(cx, obstacle.y);
+          context.fillStyle = obstacle.type === "ptero" ? "#e65d3f" : "#356ec1";
+          context.strokeStyle = obstacle.type === "ptero" ? "#762b24" : "#193a75";
+          context.beginPath(); context.moveTo(-8,0); context.quadraticCurveTo(-23,-23-flap,-43,-25-flap); context.quadraticCurveTo(-33,-4,-8,7); context.lineTo(0,2); context.lineTo(8,7); context.quadraticCurveTo(33,-4,43,-25-flap); context.quadraticCurveTo(23,-23-flap,8,0); context.closePath(); context.fill(); context.stroke();
+          context.beginPath(); context.ellipse(0,0,17,8,0,0,Math.PI*2); context.fill(); context.stroke();
+          context.fillStyle="#fff"; context.beginPath(); context.arc(10,-2,2.5,0,Math.PI*2); context.fill();
+        }
+        context.restore();
       });
 
       if (!game.running) {
@@ -360,13 +378,11 @@ export default function MiniGamePage() {
 
       game.spawn -= delta;
       if (game.spawn <= 0) {
-        const type = Math.random() > 0.72 ? "rock" : "cactus";
-        game.obstacles.push({
-          x: WORLD_WIDTH + 10,
-          width: type === "rock" ? 34 : 30,
-          type,
-        });
-        game.spawn = 62 + Math.random() * 54 - game.speed * 2;
+        const roll = Math.random();
+        const type = roll < 0.25 ? "rock" : roll < 0.5 ? "egg" : roll < 0.72 ? "log" : roll < 0.86 ? "ptero" : "archaeo";
+        const flying = type === "ptero" || type === "archaeo";
+        game.obstacles.push({ x: WORLD_WIDTH + 18, width: type === "log" ? 56 : type === "egg" ? 48 : flying ? 72 : 40, type, y: flying ? (type === "ptero" ? 145 : 112) : GROUND_Y, phase: Math.random()*6.28 });
+        game.spawn = 82 + Math.random() * 48 - game.speed * 1.4;
       }
 
       game.obstacles.forEach((obstacle) => { obstacle.x -= game.speed * delta; });
@@ -382,12 +398,12 @@ export default function MiniGamePage() {
         top: player.y + 12,
         bottom: player.y + 54,
       };
-      const collided = game.obstacles.some((obstacle) =>
-        playerBox.right > obstacle.x + 5 &&
-        playerBox.left < obstacle.x + obstacle.width - 4 &&
-        playerBox.bottom > GROUND_Y - 40 &&
-        playerBox.top < GROUND_Y
-      );
+      const collided = game.obstacles.some((obstacle) => {
+        const flying = obstacle.type === "ptero" || obstacle.type === "archaeo";
+        const top = flying ? obstacle.y - 27 : obstacle.type === "rock" ? GROUND_Y - 35 : GROUND_Y - 28;
+        const bottom = flying ? obstacle.y + 9 : GROUND_Y;
+        return playerBox.right > obstacle.x + 5 && playerBox.left < obstacle.x + obstacle.width - 4 && playerBox.bottom > top && playerBox.top < bottom;
+      });
 
       const points = Math.floor(game.distance / 8);
       if (points % 5 === 0 && points !== game.lastScore) {
