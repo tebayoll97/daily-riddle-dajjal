@@ -1,0 +1,52 @@
+/* DAJJAL FAMILY MINI GAME MASTER CSS
+   Shared responsive foundation for every future mini game.
+   Use mg-page, mg-game-layout, mg-arena and mg-game-canvas.
+*/
+:root {
+  --mg-bg: #080711;
+  --mg-panel: #100d1d;
+  --mg-panel-deep: #0c0a17;
+  --mg-purple: #a855f7;
+  --mg-purple-soft: rgba(168,85,247,.22);
+  --mg-line: rgba(168,85,247,.22);
+  --mg-text: #f7f4ff;
+  --mg-muted: #aaa3b8;
+  --mg-radius: 22px;
+  --mg-content-width: 760px;
+}
+.mg-page { width:100%; min-width:320px; color:var(--mg-text); }
+.mg-game-layout { width:min(100%,var(--mg-content-width)); margin-inline:auto; }
+.mg-arena {
+  min-width:0;
+  border:1px solid var(--mg-line);
+  border-radius:var(--mg-radius);
+  background:linear-gradient(145deg,rgba(20,15,32,.98),rgba(12,10,22,.98));
+  box-shadow:0 14px 42px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.025);
+}
+.mg-game-canvas {
+  width:100%;
+  height:clamp(390px,56svh,650px);
+  min-height:390px;
+  max-height:650px;
+  aspect-ratio:auto;
+  display:block;
+  touch-action:pan-y;
+  background:var(--mg-panel-deep);
+  object-fit:fill;
+}
+.mg-page button,.mg-page a { -webkit-tap-highlight-color:transparent; }
+@media (max-width:640px) {
+  .mg-page { padding-inline:12px; }
+  .mg-game-layout { gap:12px; }
+  .mg-arena { padding:10px; border-radius:20px; }
+  .mg-game-canvas { height:clamp(410px,58svh,610px); min-height:410px; }
+}
+@media (max-height:700px) and (orientation:landscape) {
+  .mg-game-canvas { height: min(62svh,430px); min-height:280px; }
+}
+@media (min-width:768px) {
+  .mg-game-canvas { height:clamp(430px,58vh,650px); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .mg-page *, .mg-page *::before, .mg-page *::after { scroll-behavior:auto !important; }
+}
