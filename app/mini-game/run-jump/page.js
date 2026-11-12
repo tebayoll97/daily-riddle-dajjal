@@ -326,8 +326,8 @@ export default function MiniGamePage() {
   };
 
   return (
-    <main className="mini-game-screen fixed inset-0 z-[60] h-[100dvh] w-full overflow-hidden overscroll-none bg-[#080711] px-3 pb-[max(8px,env(safe-area-inset-bottom))] pt-[max(8px,env(safe-area-inset-top))] text-white sm:px-5">
-      <div className="mx-auto flex h-full w-full max-w-[620px] flex-col gap-2 overflow-hidden">
+    <main className="mini-game-screen relative z-[60] min-h-[100svh] w-full overflow-x-hidden overflow-y-auto overscroll-y-contain bg-[#080711] px-3 pb-[max(14px,env(safe-area-inset-bottom))] pt-[max(10px,env(safe-area-inset-top))] text-white sm:px-5">
+      <div className="mx-auto flex min-h-[calc(100svh-24px)] w-full max-w-[620px] flex-col gap-3 overflow-visible">
         <div className="flex items-center justify-between gap-3">
           <button type="button" onClick={() => setConfirmExit(true)} className="ui-interactive rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[10px] font-black tracking-wider text-purple-200">← KELUAR GAME</button>
           <button
@@ -340,18 +340,18 @@ export default function MiniGamePage() {
           </button>
         </div>
 
-        <header className="shrink-0 text-center">
+        <header className="shrink-0 space-y-1 text-center">
           <p className="ui-eyebrow">DAJJAL FAMILY · ARCADE</p>
-          <h1 className="ui-title text-center">
+          <h1 className="ui-title mx-auto w-full max-w-full px-2 py-2 text-center text-[clamp(1.35rem,5.5vw,2.35rem)] leading-tight">
             DAJJAL FAMILY <span className="text-purple-300">JUMP</span>
           </h1>
-          <p className="ui-subtitle mx-auto text-center">
+          <p className="ui-subtitle mx-auto max-w-[38rem] px-3 text-center text-sm leading-relaxed sm:text-base">
             Lari sejauh mungkin. Hindari rintangan. Pecahkan rekor jarakmu!
           </p>
         </header>
 
-        <section className="flex min-h-0 flex-1 flex-col justify-center overflow-hidden rounded-3xl border border-purple-400/20 bg-[#100d1d] p-2 shadow-[0_20px_70px_rgba(76,29,149,.16)]">
-          <div className="mb-2 flex shrink-0 items-center justify-between px-1">
+        <section className="flex w-full flex-none flex-col justify-start overflow-hidden rounded-3xl border border-purple-400/20 bg-[#100d1d] p-2.5 shadow-[0_20px_70px_rgba(76,29,149,.16)] sm:p-4">
+          <div className="mb-2 flex shrink-0 items-center justify-between px-1 sm:mb-3">
             <div>
               <p className="text-[9px] font-black tracking-[.22em] text-purple-300">DISTANCE</p>
               <p className="font-mono text-2xl font-black tabular-nums sm:text-3xl">
@@ -366,7 +366,7 @@ export default function MiniGamePage() {
             </div>
           </div>
 
-          <div className="relative flex shrink-0 items-center overflow-hidden rounded-2xl border border-purple-300/15 bg-[#0c0a17]">
+          <div className="relative flex w-full shrink-0 items-center overflow-hidden rounded-2xl border border-purple-300/15 bg-[#0c0a17]">
             <canvas
               ref={canvasRef}
               className="block aspect-[900/320] w-full touch-none"
@@ -374,14 +374,14 @@ export default function MiniGamePage() {
               onPointerDown={jump}
             />
             {status !== "playing" && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#080711]/45 px-4 text-center backdrop-blur-[2px]">
-                <div className="mb-2 text-4xl" aria-hidden="true">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[#080711]/55 px-3 py-2 text-center backdrop-blur-[2px]">
+                <div className="mb-0.5 text-2xl sm:text-4xl" aria-hidden="true">
                   {status === "over" ? "💥" : "🏃"}
                 </div>
-                <p className="text-lg font-black tracking-wide">
+                <p className="text-base font-black tracking-wide sm:text-lg">
                   {status === "over" ? "GAME OVER" : "READY TO RUN?"}
                 </p>
-                <p className="mt-1 text-xs text-gray-300">
+                <p className="mt-0.5 text-[10px] leading-tight text-gray-300 sm:text-xs">
                   {status === "over"
                     ? `Jarak kamu: ${score} poin`
                     : "Tekan tombol untuk memulai permainan"}
@@ -389,7 +389,7 @@ export default function MiniGamePage() {
                 <button
                   type="button"
                   onClick={startGame}
-                  className="ui-interactive mt-4 rounded-xl bg-purple-600 px-7 py-3 text-xs font-black tracking-wider shadow-lg shadow-purple-950/40 hover:bg-purple-500"
+                  className="ui-interactive mt-2 min-h-10 rounded-xl bg-purple-600 px-6 py-2 text-[10px] font-black tracking-wider shadow-lg shadow-purple-950/40 hover:bg-purple-500 sm:mt-4 sm:px-7 sm:py-3 sm:text-xs"
                 >
                   {status === "over" ? "PLAY AGAIN" : "START GAME"}
                 </button>
@@ -397,15 +397,15 @@ export default function MiniGamePage() {
             )}
           </div>
 
-          <div className="mt-2 flex shrink-0 flex-col items-center gap-2">
-            <p className="text-center text-[11px] text-gray-500">
+          <div className="mt-2 flex shrink-0 flex-col items-center gap-2 sm:mt-3">
+            <p className="text-center text-[10px] leading-relaxed text-gray-500 sm:text-[11px]">
               TAP layar untuk melompat · SPACE / ↑ di desktop
             </p>
             <button
               type="button"
               onClick={jump}
               disabled={status === "over"}
-              className="ui-interactive w-full rounded-xl border border-purple-400/30 bg-purple-500/10 px-6 py-2.5 text-sm font-black text-purple-100 hover:bg-purple-500/20 disabled:opacity-40"
+              className="ui-interactive min-h-11 w-full rounded-xl border border-purple-400/30 bg-purple-500/10 px-6 py-2.5 text-xs font-black text-purple-100 hover:bg-purple-500/20 disabled:opacity-40 sm:text-sm"
             >
               JUMP ↑
             </button>
