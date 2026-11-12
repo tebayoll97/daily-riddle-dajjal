@@ -553,9 +553,7 @@ export default function MiniGamePage() {
             {status !== "playing" && (
               <div className="mg-game-state-overlay">
                 <div className="mg-game-state-card">
-                  <div className="mb-1 text-3xl sm:text-4xl" aria-hidden="true">
-                    {status === "over" ? "💥" : "🏃"}
-                  </div>
+                  <div className="mg-dino-badge" aria-hidden="true">{status === "over" ? "🦖💫" : "🦕"}</div>
                   <p className="text-lg font-black tracking-wide sm:text-xl">
                     {status === "over" ? "GAME OVER" : "READY TO RUN?"}
                   </p>
@@ -567,7 +565,7 @@ export default function MiniGamePage() {
                   <button
                     type="button"
                     onClick={startGame}
-                    className="ui-interactive mt-3 min-h-11 w-full max-w-[240px] rounded-xl bg-purple-600 px-6 py-2.5 text-xs font-black tracking-wider shadow-lg shadow-purple-950/40 hover:bg-purple-500 sm:mt-4 sm:text-sm"
+                    className="mg-dino-action ui-interactive mt-2 min-h-10 w-full max-w-[210px] rounded-xl px-5 py-2 text-xs font-black tracking-wider sm:mt-3 sm:text-sm"
                   >
                     {status === "over" ? "PLAY AGAIN" : "START GAME"}
                   </button>
@@ -584,7 +582,7 @@ export default function MiniGamePage() {
               type="button"
               onClick={jump}
               disabled={status === "over"}
-              className="ui-interactive min-h-11 w-full rounded-xl border border-purple-400/30 bg-purple-500/10 px-6 py-2.5 text-xs font-black text-purple-100 hover:bg-purple-500/20 disabled:opacity-40 sm:text-sm"
+              className="mg-dino-jump ui-interactive min-h-11 w-full rounded-xl px-6 py-2.5 text-xs font-black sm:text-sm"
             >
               JUMP ↑
             </button>
