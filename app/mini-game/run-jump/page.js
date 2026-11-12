@@ -18,16 +18,8 @@ const WAVE_TITLES = [
   "ERA METEOR CHAOS",
 ];
 const WAVE_STARTS = [0, 1200, 2600, 4100, 5700, 7400];
-const WAVE_TRANSITION_LEAD_SECONDS = 7;
-const WAVE_TRANSITION_DURATION = 14000;
-const WORLD_TINTS = [
-  { color: [72, 190, 150], alpha: 0.00 },
-  { color: [105, 174, 119], alpha: 0.035 },
-  { color: [115, 132, 105], alpha: 0.09 },
-  { color: [103, 111, 117], alpha: 0.17 },
-  { color: [191, 91, 55], alpha: 0.22 },
-  { color: [112, 35, 37], alpha: 0.34 },
-];
+const WAVE_TRANSITION_LEAD_SECONDS = 8;
+const WAVE_TRANSITION_DURATION = 10000;
 const clamp01 = (value) => Math.max(0, Math.min(1, value));
 const smoothStep = (value) => {
   const t = clamp01(value);
