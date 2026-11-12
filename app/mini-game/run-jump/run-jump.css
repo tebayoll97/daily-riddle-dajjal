@@ -387,3 +387,115 @@
 @media (prefers-reduced-motion:reduce) {
   .mg-parallax-layer { animation:none !important; }
 }
+
+
+/* FINAL JUNGLE VALLEY COMPOSITION
+   The four supplied strips overlap deliberately so their baked sky/forest
+   colors cover the crop edges instead of creating black separator lines. */
+.mg-jungle-world {
+  --jungle-sky-height: 46%;
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  border:1px solid rgba(87,164,104,.42) !important;
+  border-radius:22px;
+  background:#55c6e9;
+}
+.mg-jungle-world .mg-game-canvas-frame {
+  position:relative;
+  isolation:isolate;
+  width:100%;
+  aspect-ratio:900 / 320;
+  overflow:hidden;
+  background:linear-gradient(180deg,#31b7ed 0%,#78d4e8 55%,#7acb58 100%);
+}
+.mg-jungle-world .mg-parallax-layer {
+  position:absolute;
+  display:block;
+  pointer-events:none;
+  left:-1px;
+  right:-1px;
+  width:calc(100% + 2px);
+  background-repeat:repeat-x;
+  background-position:0 50%;
+  background-size:auto calc(100% + 10px);
+  overflow:hidden;
+  transform:translateZ(0);
+  will-change:background-position;
+}
+.mg-jungle-world .mg-parallax-sky {
+  z-index:0;
+  top:0;
+  height:48%;
+  background-image:url("/mini-game/run-jump/jungle-sky-clouds.png");
+  animation:mg-jungle-sky 180s linear infinite;
+}
+.mg-jungle-world .mg-parallax-mountains {
+  z-index:1;
+  top:21%;
+  height:51%;
+  background-image:url("/mini-game/run-jump/jungle-mountains-volcano.png");
+  animation:mg-jungle-mountains 105s linear infinite;
+}
+.mg-jungle-world .mg-parallax-forest {
+  z-index:2;
+  top:42%;
+  bottom:13%;
+  height:auto;
+  background-image:url("/mini-game/run-jump/jungle-forest-ruins.png");
+  animation:mg-jungle-forest 58s linear infinite;
+}
+.mg-jungle-world .mg-parallax-ground {
+  z-index:3;
+  bottom:0;
+  height:31%;
+  background-image:url("/mini-game/run-jump/jungle-ground.png");
+  background-size:auto calc(100% + 8px);
+  animation:mg-jungle-ground 27s linear infinite;
+}
+.mg-jungle-world .mg-game-canvas {
+  position:relative;
+  z-index:4;
+  display:block;
+  width:100%;
+  height:auto !important;
+  min-height:0 !important;
+  max-height:none !important;
+  aspect-ratio:900 / 320;
+  background:transparent !important;
+  object-fit:contain;
+}
+.mg-jungle-world .mg-game-state-overlay {
+  background:rgba(14,35,24,.28);
+}
+.mg-jungle-world .mg-game-state-card {
+  border-color:rgba(210,255,218,.42);
+  background:rgba(17,43,30,.88);
+  box-shadow:0 16px 44px rgba(5,30,14,.32);
+}
+@keyframes mg-jungle-sky {
+  from { background-position:0 50%; }
+  to { background-position:-1500px 50%; }
+}
+@keyframes mg-jungle-mountains {
+  from { background-position:0 50%; }
+  to { background-position:-1250px 50%; }
+}
+@keyframes mg-jungle-forest {
+  from { background-position:0 50%; }
+  to { background-position:-1900px 50%; }
+}
+@keyframes mg-jungle-ground {
+  from { background-position:0 50%; }
+  to { background-position:-2400px 50%; }
+}
+@media (max-width:480px) {
+  .mg-jungle-world { border-radius:18px; }
+  .mg-jungle-world .mg-parallax-sky { height:47%; }
+  .mg-jungle-world .mg-parallax-mountains { top:20%; height:52%; }
+  .mg-jungle-world .mg-parallax-forest { top:41%; bottom:14%; }
+  .mg-jungle-world .mg-parallax-ground { height:32%; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .mg-jungle-world .mg-parallax-layer { animation:none !important; }
+}
