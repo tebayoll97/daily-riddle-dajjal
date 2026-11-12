@@ -146,7 +146,7 @@ export default function MiniGamePage() {
     const x = ((event.clientX - rect.left) / rect.width) * WORLD_WIDTH;
     const y = ((event.clientY - rect.top) / rect.height) * WORLD_HEIGHT;
     if (!game.running) {
-      const button = { left: 350, right: 550, top: 232, bottom: 284 };
+      const button = { left: 350, right: 550, top: 238, bottom: 286 };
       if (x >= button.left && x <= button.right && y >= button.top && y <= button.bottom) {
         startGame();
       }
@@ -242,18 +242,20 @@ export default function MiniGamePage() {
       const rect = canvas.getBoundingClientRect();
       const pixelRatio = Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.35 : 1.5);
       const width = Math.max(1, Math.round(rect.width * pixelRatio));
-      const height = Math.max(1, Math.round((rect.width * WORLD_HEIGHT / WORLD_WIDTH) * pixelRatio));
+      const fullscreen = Boolean(canvas.closest(".mg-fullscreen-arena")?.classList.contains("is-fullscreen"));
+      const height = Math.max(1, Math.round((fullscreen ? rect.height : rect.width * WORLD_HEIGHT / WORLD_WIDTH) * pixelRatio));
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
         canvas.height = height;
       }
-      context.setTransform(width / WORLD_WIDTH, 0, 0, width / WORLD_WIDTH, 0, 0);
+      context.setTransform(width / WORLD_WIDTH, 0, 0, height / WORLD_HEIGHT, 0, 0);
     };
 
     const draw = (time) => {
       // Reset the transform every frame so offsets can never accumulate.
-      const logicalScale = canvas.width / WORLD_WIDTH;
-      context.setTransform(logicalScale, 0, 0, logicalScale, 0, 0);
+      const logicalScaleX = canvas.width / WORLD_WIDTH;
+      const logicalScaleY = canvas.height / WORLD_HEIGHT;
+      context.setTransform(logicalScaleX, 0, 0, logicalScaleY, 0, 0);
       context.clearRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
       context.save();
       context.translate(0, 100);
