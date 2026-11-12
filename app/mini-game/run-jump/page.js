@@ -2,10 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import "../mini-game-master.css";
 
 const WORLD_WIDTH = 900;
-const WORLD_HEIGHT = 320;
-const GROUND_Y = 258;
+const WORLD_HEIGHT = 480;
+const GROUND_Y = 408;
 const BEST_SCORE_KEY = "dajjal-run-jump-best";
 
 export default function MiniGamePage() {
@@ -99,6 +100,18 @@ export default function MiniGamePage() {
   }, [soundOn]);
 
   useEffect(() => {
+    // Trap one browser-history step so Android/browser Back opens the in-game exit confirmation.
+    const addGuard = () => window.history.pushState({ miniGameBackGuard: true }, "", window.location.href);
+    addGuard();
+    const handlePopState = () => {
+      setConfirmExit(true);
+      addGuard();
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  useEffect(() => {
     try {
       const savedBest = Number(window.localStorage.getItem(BEST_SCORE_KEY) || 0);
       if (Number.isFinite(savedBest) && savedBest > 0) setBest(savedBest);
@@ -137,10 +150,10 @@ export default function MiniGamePage() {
       const rect = canvas.getBoundingClientRect();
       const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
       const width = Math.max(1, Math.round(rect.width * pixelRatio));
-      const height = Math.max(1, Math.round((rect.width * WORLD_HEIGHT / WORLD_WIDTH) * pixelRatio));
+      const height = Math.max(1, Math.round(rect.height * pixelRatio));
       canvas.width = width;
       canvas.height = height;
-      context.setTransform(width / WORLD_WIDTH, 0, 0, width / WORLD_WIDTH, 0, 0);
+      context.setTransform(width / WORLD_WIDTH, 0, 0, height / WORLD_HEIGHT, 0, 0);
     };
 
     const draw = (time) => {
@@ -326,8 +339,8 @@ export default function MiniGamePage() {
   };
 
   return (
-    <main className="mini-game-screen relative z-[60] min-h-[100svh] w-full overflow-x-hidden overflow-y-auto overscroll-y-contain bg-[#080711] px-3 pb-[max(14px,env(safe-area-inset-bottom))] pt-[max(10px,env(safe-area-inset-top))] text-white sm:px-5">
-      <div className="mx-auto flex min-h-[calc(100svh-24px)] w-full max-w-[620px] flex-col gap-3 overflow-visible">
+    <main className="mini-game-screen mg-page relative z-[60] min-h-[100svh] w-full overflow-x-hidden overflow-y-auto overscroll-y-contain bg-[#080711] px-3 pb-[max(18px,env(safe-area-inset-bottom))] pt-[max(10px,env(safe-area-inset-top))] text-white sm:px-5">
+      <div className="mg-game-layout mx-auto flex min-h-[calc(100svh-24px)] w-full max-w-[720px] flex-col gap-3 overflow-visible">
         <div className="flex items-center justify-between gap-3">
           <button type="button" onClick={() => setConfirmExit(true)} className="ui-interactive rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[10px] font-black tracking-wider text-purple-200">← KELUAR GAME</button>
           <button
@@ -350,7 +363,7 @@ export default function MiniGamePage() {
           </p>
         </header>
 
-        <section className="flex w-full flex-none flex-col justify-start overflow-hidden rounded-3xl border border-purple-400/20 bg-[#100d1d] p-2.5 shadow-[0_20px_70px_rgba(76,29,149,.16)] sm:p-4">
+        <section className="mg-arena flex w-full flex-none flex-col justify-start overflow-hidden rounded-3xl border border-purple-400/20 bg-[#100d1d] p-2.5 shadow-[0_20px_70px_rgba(76,29,149,.16)] sm:p-4">
           <div className="mb-2 flex shrink-0 items-center justify-between px-1 sm:mb-3">
             <div>
               <p className="text-[9px] font-black tracking-[.22em] text-purple-300">DISTANCE</p>
@@ -369,7 +382,7 @@ export default function MiniGamePage() {
           <div className="relative flex w-full shrink-0 items-center overflow-hidden rounded-2xl border border-purple-300/15 bg-[#0c0a17]">
             <canvas
               ref={canvasRef}
-              className="block aspect-[900/320] w-full touch-none"
+              className="mg-game-canvas block w-full touch-none"
               aria-label="Permainan lari dan melompat. Ketuk area permainan atau tekan Space untuk melompat."
               onPointerDown={jump}
             />
