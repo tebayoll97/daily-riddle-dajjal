@@ -397,15 +397,23 @@ export default function MiniGamePage() {
                 aria-label="Permainan lari dan melompat. Ketuk area permainan atau tekan Space untuk melompat."
                 onPointerDown={jump}
               />
-              {status !== "playing" && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[#080711]/55 px-3 py-2 text-center backdrop-blur-[2px]">
-                  <div className="mb-0.5 text-2xl sm:text-4xl" aria-hidden="true">
+            </div>
+            <div className="mg-galaxy-overlay" aria-hidden="true">
+              <span className="mg-aurora-ribbon mg-aurora-ribbon--one" />
+              <span className="mg-aurora-ribbon mg-aurora-ribbon--two" />
+              <span className="mg-galaxy-nebula" />
+              <span className="mg-galaxy-stars" />
+            </div>
+            {status !== "playing" && (
+              <div className="mg-game-state-overlay">
+                <div className="mg-game-state-card">
+                  <div className="mb-1 text-3xl sm:text-4xl" aria-hidden="true">
                     {status === "over" ? "💥" : "🏃"}
                   </div>
-                  <p className="text-base font-black tracking-wide sm:text-lg">
+                  <p className="text-lg font-black tracking-wide sm:text-xl">
                     {status === "over" ? "GAME OVER" : "READY TO RUN?"}
                   </p>
-                  <p className="mt-0.5 text-[10px] leading-tight text-gray-300 sm:text-xs">
+                  <p className="mt-1 text-xs leading-relaxed text-gray-200 sm:text-sm">
                     {status === "over"
                       ? `Jarak kamu: ${score} poin`
                       : "Tekan tombol untuk memulai permainan"}
@@ -413,13 +421,13 @@ export default function MiniGamePage() {
                   <button
                     type="button"
                     onClick={startGame}
-                    className="ui-interactive mt-2 min-h-10 rounded-xl bg-purple-600 px-6 py-2 text-[10px] font-black tracking-wider shadow-lg shadow-purple-950/40 hover:bg-purple-500 sm:mt-4 sm:px-7 sm:py-3 sm:text-xs"
+                    className="ui-interactive mt-3 min-h-11 w-full max-w-[240px] rounded-xl bg-purple-600 px-6 py-2.5 text-xs font-black tracking-wider shadow-lg shadow-purple-950/40 hover:bg-purple-500 sm:mt-4 sm:text-sm"
                   >
                     {status === "over" ? "PLAY AGAIN" : "START GAME"}
                   </button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           <div className="mg-game-controls mt-2 flex shrink-0 flex-col items-center gap-2 sm:mt-3">
