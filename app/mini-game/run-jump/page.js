@@ -269,6 +269,39 @@ export default function MiniGamePage() {
       }
       context.restore();
 
+      // Three distinct dinosaur species animate quietly in the distant valley.
+      const dinoShift = (travel * 0.12) % 1120;
+      const drawDino = (x, y, scale, species, color, phase) => {
+        context.save();
+        context.translate(x, y + Math.sin(time / 480 + phase) * 2);
+        context.scale(scale, scale);
+        context.fillStyle = color;
+        context.strokeStyle = "rgba(31,75,48,.8)";
+        context.lineWidth = 2;
+        context.lineJoin = "round";
+        context.beginPath();
+        context.ellipse(0,-12,23,12,0,0,Math.PI*2);
+        context.fill(); context.stroke();
+        if (species === "longneck") {
+          context.beginPath(); context.moveTo(12,-18); context.quadraticCurveTo(25,-43,29,-52); context.lineTo(38,-52); context.lineTo(33,-43); context.quadraticCurveTo(27,-28,25,-9); context.closePath(); context.fill(); context.stroke();
+          context.beginPath(); context.arc(40,-53,7,0,Math.PI*2); context.fill(); context.stroke();
+        } else if (species === "triceratops") {
+          context.beginPath(); context.arc(23,-20,13,0,Math.PI*2); context.fill(); context.stroke();
+          context.beginPath(); context.moveTo(16,-27); context.lineTo(10,-39); context.lineTo(23,-28); context.moveTo(28,-27); context.lineTo(37,-38); context.lineTo(34,-22); context.stroke();
+          context.fillStyle="#f7e5b4"; context.beginPath(); context.moveTo(32,-18); context.lineTo(45,-14); context.lineTo(32,-12); context.fill();
+        } else {
+          for(let k=-16;k<=12;k+=9){context.beginPath();context.moveTo(k,-20);context.lineTo(k+5,-35);context.lineTo(k+12,-19);context.closePath();context.fill();context.stroke();}
+        }
+        context.fillStyle=color;
+        context.fillRect(-14,-5,7,16); context.fillRect(9,-5,7,16);
+        context.beginPath(); context.moveTo(-20,-13); context.lineTo(-37,-21); context.lineTo(-25,-7); context.closePath(); context.fill(); context.stroke();
+        context.fillStyle="#fff2bd"; context.fillRect(species==="longneck"?42:29,-55,2,2);
+        context.restore();
+      };
+      drawDino(185-dinoShift+(dinoShift>1020?1120:0),180,.72,"longneck","#d99b54",0);
+      drawDino(515-dinoShift+(dinoShift>1020?1120:0),181,.62,"triceratops","#76a95c",1.3);
+      drawDino(835-dinoShift,180,.68,"stego","#d28b4e",2.6);
+
       // Foreground grass and soil are part of the same canvas, aligned to collision.
       context.fillStyle = "#8b5a37";
       context.fillRect(0, GROUND_Y, WORLD_WIDTH, WORLD_HEIGHT - GROUND_Y);
