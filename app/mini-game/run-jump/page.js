@@ -6,8 +6,8 @@ import "../mini-game-master.css";
 import "./run-jump.css";
 
 const WORLD_WIDTH = 900;
-const WORLD_HEIGHT = 320;
-const GROUND_Y = 226;
+const WORLD_HEIGHT = 420;
+const GROUND_Y = 326;
 const BEST_SCORE_KEY = "dajjal-run-jump-best";
 
 export default function MiniGamePage() {
@@ -59,9 +59,14 @@ export default function MiniGamePage() {
       over: false,
       speed: 6,
       distance: 0,
+      wave: 1,
+      waveNoticeUntil: 0,
       spawn: 72,
       lastTime: 0,
       lastScore: -1,
+      wave: 1,
+      waveNoticeUntil: performance.now() + 3000,
+      spawn: 90,
     });
     Object.assign(game.player, {
       y: GROUND_Y - 58,
@@ -159,6 +164,8 @@ export default function MiniGamePage() {
 
     const draw = (time) => {
       context.clearRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+      context.save();
+      context.translate(0, 100);
 
       // Living prehistoric world: all four parallax layers are drawn in one
       // canvas coordinate space so no image seams or black strip boundaries appear.
@@ -168,7 +175,7 @@ export default function MiniGamePage() {
       sky.addColorStop(0.62, "#8be0f1");
       sky.addColorStop(1, "#c7edb0");
       context.fillStyle = sky;
-      context.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+      context.fillRect(0, -100, WORLD_WIDTH, WORLD_HEIGHT);
 
       // Warm sunlight and softly drifting clouds (slowest layer).
       context.fillStyle = "rgba(255,244,177,.72)";
@@ -274,7 +281,7 @@ export default function MiniGamePage() {
       const drawDino = (x, y, scale, species, color, phase) => {
         context.save();
         context.translate(x, y + Math.sin(time / 480 + phase) * 2);
-        context.scale(scale, scale);
+        context.scale(-scale, scale);
         context.fillStyle = color;
         context.strokeStyle = "rgba(31,75,48,.8)";
         context.lineWidth = 2;
@@ -301,6 +308,7 @@ export default function MiniGamePage() {
       drawDino(185-dinoShift+(dinoShift>1020?1120:0),180,.72,"longneck","#d99b54",0);
       drawDino(515-dinoShift+(dinoShift>1020?1120:0),181,.62,"triceratops","#76a95c",1.3);
       drawDino(835-dinoShift,180,.68,"stego","#d28b4e",2.6);
+      context.restore();
 
       // Foreground grass and soil are part of the same canvas, aligned to collision.
       context.fillStyle = "#8b5a37";
@@ -308,11 +316,11 @@ export default function MiniGamePage() {
       context.fillStyle = "#6d452f";
       for (let x = -((travel * 1.0) % 90); x < WORLD_WIDTH + 90; x += 90) {
         context.beginPath();
-        context.ellipse(x + 28, 276, 32, 15, 0, 0, Math.PI * 2);
+        context.ellipse(x + 28, 376, 32, 15, 0, 0, Math.PI * 2);
         context.fill();
         context.fillStyle = "#a96f43";
         context.beginPath();
-        context.ellipse(x + 65, 300, 26, 11, 0, 0, Math.PI * 2);
+        context.ellipse(x + 65, 400, 26, 11, 0, 0, Math.PI * 2);
         context.fill();
         context.fillStyle = "#6d452f";
       }
@@ -344,21 +352,47 @@ export default function MiniGamePage() {
       // Arcade-style score HUD is rendered inside the playfield canvas.
       context.save();
       context.textBaseline = "top";
-      context.font = "900 17px system-ui, sans-serif";
+      const displayedPoints = Math.floor(game.distance / 8);
+      context.font = "900 16px system-ui, sans-serif";
       context.textAlign = "left";
-      context.fillStyle = "rgba(20,55,36,.82)";
-      context.fillText("DISTANCE", 17, 13);
+      context.fillStyle = "rgba(20,55,36,.94)";
+      context.fillText("DISTANCE / SCORE", 17, 13);
       context.font = "900 25px ui-monospace, monospace";
       context.fillStyle = "#fff6cf";
       context.shadowColor = "rgba(19,48,31,.8)";
       context.shadowBlur = 5;
-      context.fillText(String(Math.floor(game.distance)).padStart(5,"0"), 16, 31);
+      context.fillText(String(displayedPoints).padStart(5,"0"), 16, 31);
       context.textAlign = "right";
       context.shadowBlur = 0;
-      context.font = "800 11px system-ui, sans-serif";
-      context.fillStyle = "rgba(24,60,39,.88)";
-      context.fillText("BEST " + String(best).padStart(5,"0"), WORLD_WIDTH - 17, 17);
+      context.font = "900 15px system-ui, sans-serif";
+      context.fillStyle = "rgba(24,60,39,.96)";
+      context.fillText("BEST DISTANCE", WORLD_WIDTH - 17, 12);
+      context.font = "900 23px ui-monospace, monospace";
+      context.fillStyle = "#fff6cf";
+      context.shadowColor = "rgba(19,48,31,.8)";
+      context.shadowBlur = 4;
+      context.fillText(String(best).padStart(5,"0"), WORLD_WIDTH - 17, 31);
       context.restore();
+
+      if (game.running && game.waveNoticeUntil > time) {
+        context.save();
+        context.globalAlpha = Math.min(1, (game.waveNoticeUntil - time) / 450);
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillStyle = "rgba(24,62,39,.96)";
+        context.strokeStyle = "#f4d36f";
+        context.lineWidth = 3;
+        context.beginPath();
+        context.roundRect(WORLD_WIDTH / 2 - 112, 75, 224, 54, 14);
+        context.fill(); context.stroke();
+        context.fillStyle = "#ffe58a";
+        context.font = "900 24px system-ui, sans-serif";
+        context.fillText("WAVE " + game.wave, WORLD_WIDTH / 2, 94);
+        context.fillStyle = "#ffffff";
+        context.font = "800 11px system-ui, sans-serif";
+        context.fillText("GET READY!", WORLD_WIDTH / 2, 115);
+        context.restore();
+      }
 
       const player = game.player;
       const runningBob = game.running && !player.jumping ? Math.sin(time / 75) * 2 : 0;
@@ -417,7 +451,14 @@ export default function MiniGamePage() {
       const delta = game.lastTime ? Math.min((time - game.lastTime) / 16.67, 2) : 1;
       game.lastTime = time;
       game.distance += game.speed * delta;
-      game.speed = Math.min(11.5, game.speed + 0.0018 * delta);
+      const points = Math.floor(game.distance / 8);
+      const nextWave = Math.min(6, Math.floor(points / 1000) + 1);
+      if (nextWave !== game.wave) {
+        game.wave = nextWave;
+        game.waveNoticeUntil = time + 3000;
+        playTone(760, 0.12);
+      }
+      game.speed = 6 * (1 + (game.wave - 1) * 0.2);
 
       const player = game.player;
       player.velocityY += 0.72 * delta;
@@ -433,8 +474,9 @@ export default function MiniGamePage() {
         const roll = Math.random();
         const type = roll < 0.25 ? "rock" : roll < 0.5 ? "egg" : roll < 0.72 ? "log" : roll < 0.86 ? "ptero" : "archaeo";
         const flying = type === "ptero" || type === "archaeo";
-        game.obstacles.push({ x: WORLD_WIDTH + 18, width: type === "log" ? 56 : type === "egg" ? 48 : flying ? 72 : 40, type, y: flying ? (type === "ptero" ? 145 : 112) : GROUND_Y, phase: Math.random()*6.28 });
-        game.spawn = 82 + Math.random() * 48 - game.speed * 1.4;
+        game.obstacles.push({ x: WORLD_WIDTH + 18, width: type === "log" ? 56 : type === "egg" ? 48 : flying ? 72 : 40, type, y: flying ? (type === "ptero" ? 245 : 212) : GROUND_Y, phase: Math.random()*6.28 });
+        const obstacleGap = 492 + Math.random() * 288;
+        game.spawn = obstacleGap / game.speed;
       }
 
       game.obstacles.forEach((obstacle) => { obstacle.x -= game.speed * delta; });
@@ -457,8 +499,7 @@ export default function MiniGamePage() {
         return playerBox.right > obstacle.x + 5 && playerBox.left < obstacle.x + obstacle.width - 4 && playerBox.bottom > top && playerBox.top < bottom;
       });
 
-      const points = Math.floor(game.distance / 8);
-      if (points % 5 === 0 && points !== game.lastScore) {
+      if (points !== game.lastScore) {
         game.lastScore = points;
         setScore(points);
       }
