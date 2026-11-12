@@ -520,3 +520,55 @@
   border-color:rgba(91,171,92,.45) !important;
   background:#55c7e8;
 }
+
+
+/* Compact dinosaur-themed state card: always contained within the 900:320 canvas. */
+.mg-jungle-world { position:relative; }
+.mg-jungle-world .mg-game-state-overlay {
+  position:absolute;
+  inset:0;
+  z-index:8;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px;
+  overflow:hidden;
+  background:rgba(17,39,24,.26);
+  backdrop-filter:blur(1px);
+}
+.mg-jungle-world .mg-game-state-card {
+  width:min(76%,270px);
+  max-width:270px;
+  max-height:calc(100% - 20px);
+  gap:4px;
+  padding:11px 14px;
+  border:2px solid #e0b85e;
+  border-radius:16px;
+  background:linear-gradient(155deg,#315b38,#1d422c);
+  box-shadow:0 4px 0 #684b27,0 12px 26px rgba(0,0,0,.35),inset 0 0 0 2px rgba(255,232,160,.12);
+  overflow:auto;
+}
+.mg-jungle-world .mg-game-state-card p { margin:0; }
+.mg-jungle-world .mg-game-state-card > p:first-of-type { font-size:clamp(15px,2.5vw,21px); line-height:1.15; }
+.mg-jungle-world .mg-game-state-card > p:nth-of-type(2) { font-size:clamp(10px,1.8vw,13px); line-height:1.35; }
+.mg-dino-badge { font-size:clamp(21px,4vw,29px); line-height:1; }
+.mg-dino-action {
+  color:#382515;
+  border:2px solid #ffe18a;
+  background:linear-gradient(180deg,#ffdc70,#d88c35);
+  box-shadow:0 3px 0 #895222,0 6px 12px rgba(0,0,0,.24);
+  text-shadow:0 1px rgba(255,255,255,.4);
+}
+.mg-dino-action:active { transform:translateY(2px); box-shadow:0 1px 0 #895222; }
+.mg-dino-jump {
+  color:#fff4cf;
+  border:2px solid #e5c36d;
+  background:linear-gradient(180deg,#55a94e,#28633b);
+  box-shadow:0 4px 0 #17442b,0 8px 14px rgba(0,0,0,.2);
+  letter-spacing:.08em;
+}
+.mg-dino-jump:active { transform:translateY(3px); box-shadow:0 1px 0 #17442b; }
+.mg-dino-jump:disabled { filter:grayscale(.65); opacity:.48; }
+@media (max-width:480px) {
+  .mg-jungle-world .mg-game-state-card { width:min(80%,250px); padding:10px 12px; }
+}
