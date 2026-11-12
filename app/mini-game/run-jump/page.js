@@ -160,6 +160,154 @@ export default function MiniGamePage() {
     const draw = (time) => {
       context.clearRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
+      // Living prehistoric world: all four parallax layers are drawn in one
+      // canvas coordinate space so no image seams or black strip boundaries appear.
+      const travel = game.distance;
+      const sky = context.createLinearGradient(0, 0, 0, WORLD_HEIGHT);
+      sky.addColorStop(0, "#38bdf0");
+      sky.addColorStop(0.62, "#8be0f1");
+      sky.addColorStop(1, "#c7edb0");
+      context.fillStyle = sky;
+      context.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+
+      // Warm sunlight and softly drifting clouds (slowest layer).
+      context.fillStyle = "rgba(255,244,177,.72)";
+      context.beginPath();
+      context.arc(735, 48, 23, 0, Math.PI * 2);
+      context.fill();
+      const cloud = (x, y, scale = 1) => {
+        context.fillStyle = "rgba(255,255,255,.86)";
+        context.beginPath();
+        context.ellipse(x, y, 31 * scale, 11 * scale, 0, 0, Math.PI * 2);
+        context.ellipse(x - 17 * scale, y - 5 * scale, 17 * scale, 13 * scale, 0, 0, Math.PI * 2);
+        context.ellipse(x + 5 * scale, y - 10 * scale, 21 * scale, 17 * scale, 0, 0, Math.PI * 2);
+        context.ellipse(x + 23 * scale, y - 3 * scale, 17 * scale, 12 * scale, 0, 0, Math.PI * 2);
+        context.fill();
+      };
+      const cloudShift = (travel * 0.08) % 1080;
+      cloud(125 - cloudShift + (cloudShift > 900 ? 1080 : 0), 67, .85);
+      cloud(440 - cloudShift + (cloudShift > 900 ? 1080 : 0), 42, .68);
+      cloud(820 - cloudShift, 91, .78);
+
+      // Far mountains and a small volcano; their movement is deliberately subtle.
+      const mountainShift = (travel * 0.18) % 900;
+      context.save();
+      context.translate(-mountainShift, 0);
+      for (let repeat = 0; repeat < 2; repeat += 1) {
+        const ox = repeat * 900;
+        context.fillStyle = "#80c9a0";
+        context.beginPath();
+        context.moveTo(ox - 40, 177);
+        context.lineTo(ox + 105, 86);
+        context.lineTo(ox + 205, 177);
+        context.lineTo(ox + 315, 105);
+        context.lineTo(ox + 435, 177);
+        context.lineTo(ox + 560, 94);
+        context.lineTo(ox + 705, 177);
+        context.lineTo(ox + 815, 112);
+        context.lineTo(ox + 930, 177);
+        context.closePath();
+        context.fill();
+        context.fillStyle = "#b5e4c0";
+        context.beginPath();
+        context.moveTo(ox + 78, 105); context.lineTo(ox + 105, 86); context.lineTo(ox + 132, 110);
+        context.lineTo(ox + 105, 101); context.closePath(); context.fill();
+        context.beginPath();
+        context.moveTo(ox + 535, 111); context.lineTo(ox + 560, 94); context.lineTo(ox + 586, 113);
+        context.lineTo(ox + 560, 105); context.closePath(); context.fill();
+        // Volcano silhouette with a quiet orange crater accent.
+        context.fillStyle = "#668f79";
+        context.beginPath();
+        context.moveTo(ox + 625, 178); context.lineTo(ox + 700, 73);
+        context.lineTo(ox + 725, 88); context.lineTo(ox + 790, 178);
+        context.closePath(); context.fill();
+        context.fillStyle = "#e88b54";
+        context.beginPath();
+        context.moveTo(ox + 689, 89); context.lineTo(ox + 700, 73); context.lineTo(ox + 711, 90);
+        context.closePath(); context.fill();
+      }
+      context.restore();
+
+      // Mid-distance jungle silhouettes, ruins and tiny waterfall.
+      const forestShift = (travel * 0.45) % 900;
+      context.save();
+      context.translate(-forestShift, 0);
+      for (let repeat = 0; repeat < 2; repeat += 1) {
+        const ox = repeat * 900;
+        context.fillStyle = "#438f65";
+        context.fillRect(ox, 166, 900, 63);
+        const tree = (x, base, scale = 1) => {
+          context.fillStyle = "#76583b";
+          context.fillRect(x - 5 * scale, base - 54 * scale, 10 * scale, 58 * scale);
+          context.fillStyle = "#277c50";
+          context.beginPath();
+          context.arc(x, base - 61 * scale, 34 * scale, 0, Math.PI * 2);
+          context.arc(x - 22 * scale, base - 48 * scale, 23 * scale, 0, Math.PI * 2);
+          context.arc(x + 24 * scale, base - 48 * scale, 24 * scale, 0, Math.PI * 2);
+          context.fill();
+          context.fillStyle = "rgba(139,207,105,.55)";
+          context.beginPath();
+          context.arc(x - 8 * scale, base - 75 * scale, 14 * scale, 0, Math.PI * 2);
+          context.fill();
+        };
+        tree(ox + 120, 224, .8);
+        tree(ox + 340, 222, 1.12);
+        tree(ox + 610, 225, .9);
+        tree(ox + 830, 222, 1.05);
+        // Ancient stone arch/ruin.
+        context.fillStyle = "#9b9875";
+        context.fillRect(ox + 690, 137, 15, 48);
+        context.fillRect(ox + 748, 137, 15, 48);
+        context.fillRect(ox + 684, 130, 85, 13);
+        context.fillStyle = "#587c5e";
+        context.fillRect(ox + 703, 149, 38, 36);
+        // Waterfall ribbon on the distant cliff.
+        context.fillStyle = "rgba(190,239,242,.75)";
+        context.fillRect(ox + 485, 142, 13, 37);
+        context.fillStyle = "rgba(255,255,255,.55)";
+        context.fillRect(ox + 488 + Math.sin(time / 230) * 2, 145, 3, 29);
+      }
+      context.restore();
+
+      // Foreground grass and soil are part of the same canvas, aligned to collision.
+      context.fillStyle = "#8b5a37";
+      context.fillRect(0, GROUND_Y, WORLD_WIDTH, WORLD_HEIGHT - GROUND_Y);
+      context.fillStyle = "#6d452f";
+      for (let x = -((travel * 1.0) % 90); x < WORLD_WIDTH + 90; x += 90) {
+        context.beginPath();
+        context.ellipse(x + 28, 276, 32, 15, 0, 0, Math.PI * 2);
+        context.fill();
+        context.fillStyle = "#a96f43";
+        context.beginPath();
+        context.ellipse(x + 65, 300, 26, 11, 0, 0, Math.PI * 2);
+        context.fill();
+        context.fillStyle = "#6d452f";
+      }
+      context.fillStyle = "#55b94f";
+      context.fillRect(0, GROUND_Y, WORLD_WIDTH, 12);
+      context.fillStyle = "#8be06a";
+      context.fillRect(0, GROUND_Y, WORLD_WIDTH, 4);
+      context.fillStyle = "#328c42";
+      for (let x = -((travel * 1.0) % 28); x < WORLD_WIDTH + 28; x += 28) {
+        context.beginPath();
+        context.moveTo(x, GROUND_Y + 1);
+        context.lineTo(x + 5, GROUND_Y - 5);
+        context.lineTo(x + 8, GROUND_Y + 2);
+        context.fill();
+      }
+      // Small foreground ferns create extra depth without obscuring the runner.
+      const fernShift = (travel * 0.72) % 230;
+      for (let x = -fernShift; x < WORLD_WIDTH + 230; x += 230) {
+        context.strokeStyle = "#267c3b";
+        context.lineWidth = 3;
+        context.beginPath();
+        context.moveTo(x + 12, GROUND_Y + 3);
+        context.quadraticCurveTo(x + 2, GROUND_Y - 18, x - 4, GROUND_Y - 22);
+        context.moveTo(x + 12, GROUND_Y + 3);
+        context.quadraticCurveTo(x + 22, GROUND_Y - 17, x + 32, GROUND_Y - 19);
+        context.stroke();
+      }
+
       const player = game.player;
       const runningBob = game.running && !player.jumping ? Math.sin(time / 75) * 2 : 0;
       if (spriteRef.current?.complete && spriteRef.current.naturalWidth > 0) {
@@ -346,10 +494,6 @@ export default function MiniGamePage() {
 
           <div className="mg-game-world-frame mg-jungle-world w-full overflow-hidden rounded-2xl border border-purple-300/15">
             <div className="mg-game-canvas-frame relative w-full overflow-hidden">
-              <div className="mg-parallax-layer mg-parallax-sky" aria-hidden="true" />
-              <div className="mg-parallax-layer mg-parallax-mountains" aria-hidden="true" />
-              <div className="mg-parallax-layer mg-parallax-forest" aria-hidden="true" />
-              <div className="mg-parallax-layer mg-parallax-ground" aria-hidden="true" />
               <canvas
                 ref={canvasRef}
                 className="mg-game-canvas block w-full touch-none"
