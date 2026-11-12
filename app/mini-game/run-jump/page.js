@@ -17,6 +17,25 @@ const WAVE_TITLES = [
   "Amukan Langit dan Bumi",
   "ERA METEOR CHAOS",
 ];
+const WAVE_STARTS = [0, 1200, 2600, 4100, 5700, 7400];
+const WAVE_TRANSITION_LEAD_SECONDS = 6;
+const WAVE_TRANSITION_DURATION = 12000;
+const WORLD_TINTS = [
+  { color: [72, 190, 150], alpha: 0.00 },
+  { color: [105, 174, 119], alpha: 0.035 },
+  { color: [115, 132, 105], alpha: 0.09 },
+  { color: [103, 111, 117], alpha: 0.17 },
+  { color: [191, 91, 55], alpha: 0.22 },
+  { color: [112, 35, 37], alpha: 0.34 },
+];
+const clamp01 = (value) => Math.max(0, Math.min(1, value));
+const smoothStep = (value) => {
+  const t = clamp01(value);
+  return t * t * (3 - 2 * t);
+};
+const mix = (from, to, amount) => from + (to - from) * amount;
+const mixColor = (from, to, amount) =>
+  `rgb(${Math.round(mix(from[0], to[0], amount))},${Math.round(mix(from[1], to[1], amount))},${Math.round(mix(from[2], to[2], amount))})`;
 
 export default function MiniGamePage() {
   const canvasRef = useRef(null);
@@ -70,6 +89,9 @@ export default function MiniGamePage() {
       distance: 0,
       wave: 1,
       waveChangedAt: performance.now(),
+      transitionStartedAt: null,
+      transitionFrom: 0,
+      transitionTo: 0,
       lastUiUpdate: 0,
       spawn: 90,
       lastTime: 0,
@@ -147,6 +169,9 @@ export default function MiniGamePage() {
       distance: 0,
       wave: 1,
       waveChangedAt: 0,
+      transitionStartedAt: null,
+      transitionFrom: 0,
+      transitionTo: 0,
       lastUiUpdate: 0,
       spawn: 72,
       lastTime: 0,
@@ -288,40 +313,7 @@ export default function MiniGamePage() {
       }
       context.restore();
 
-      // Three distinct dinosaur species animate quietly in the distant valley.
-      const dinoTrack = (offset, speed) => WORLD_WIDTH - ((time * speed / 1000 + offset) % (WORLD_WIDTH + 120));
-      const drawDino = (x, y, scale, species, color, phase) => {
-        context.save();
-        context.translate(x, y + Math.sin(time / 480 + phase) * 2);
-        context.scale(-scale, scale);
-        context.fillStyle = color;
-        context.strokeStyle = "rgba(31,75,48,.8)";
-        context.lineWidth = 2;
-        context.lineJoin = "round";
-        context.beginPath();
-        context.ellipse(0,-12,23,12,0,0,Math.PI*2);
-        context.fill(); context.stroke();
-        if (species === "longneck") {
-          context.beginPath(); context.moveTo(12,-18); context.quadraticCurveTo(25,-43,29,-52); context.lineTo(38,-52); context.lineTo(33,-43); context.quadraticCurveTo(27,-28,25,-9); context.closePath(); context.fill(); context.stroke();
-          context.beginPath(); context.arc(40,-53,7,0,Math.PI*2); context.fill(); context.stroke();
-        } else if (species === "triceratops") {
-          context.beginPath(); context.arc(23,-20,13,0,Math.PI*2); context.fill(); context.stroke();
-          context.beginPath(); context.moveTo(16,-27); context.lineTo(10,-39); context.lineTo(23,-28); context.moveTo(28,-27); context.lineTo(37,-38); context.lineTo(34,-22); context.stroke();
-          context.fillStyle="#f7e5b4"; context.beginPath(); context.moveTo(32,-18); context.lineTo(45,-14); context.lineTo(32,-12); context.fill();
-        } else {
-          for(let k=-16;k<=12;k+=9){context.beginPath();context.moveTo(k,-20);context.lineTo(k+5,-35);context.lineTo(k+12,-19);context.closePath();context.fill();context.stroke();}
-        }
-        context.fillStyle=color;
-        context.fillRect(-14,-5,7,16); context.fillRect(9,-5,7,16);
-        context.beginPath(); context.moveTo(-20,-13); context.lineTo(-37,-21); context.lineTo(-25,-7); context.closePath(); context.fill(); context.stroke();
-        context.fillStyle="#fff2bd"; context.fillRect(species==="longneck"?42:29,-55,2,2);
-        context.restore();
-      };
-      // Each dinosaur moves continuously from right to left, then re-enters from the right.
-      drawDino(dinoTrack(760, 34) - 45,180,.72,"longneck","#d99b54",0);
-      drawDino(dinoTrack(430, 31) - 45,181,.62,"triceratops","#76a95c",1.3);
-      drawDino(dinoTrack(100, 37) - 45,180,.68,"stego","#d28b4e",2.6);
-      context.restore();
+      // Decorative dinosaur silhouettes were removed; distant scenery stays uncluttered.
 
       // Foreground grass and soil are part of the same canvas, aligned to collision.
       context.fillStyle = "#8b5a37";
@@ -360,6 +352,114 @@ export default function MiniGamePage() {
         context.moveTo(x + 12, GROUND_Y + 3);
         context.quadraticCurveTo(x + 22, GROUND_Y - 17, x + 32, GROUND_Y - 19);
         context.stroke();
+      }
+
+      // Progressive world atmosphere: palette and effects blend continuously across Wave boundaries.
+      const activeTransition = game.transitionStartedAt !== null;
+      const transitionRaw = activeTransition
+        ? clamp01((time - game.transitionStartedAt) / WAVE_TRANSITION_DURATION)
+        : 1;
+      const transitionEase = smoothStep(transitionRaw);
+      const tintFrom = WORLD_TINTS[game.transitionFrom] || WORLD_TINTS[0];
+      const tintTo = WORLD_TINTS[game.transitionTo] || tintFrom;
+      const tintAlpha = mix(tintFrom.alpha, tintTo.alpha, transitionEase);
+      const tintColor = mixColor(tintFrom.color, tintTo.color, transitionEase);
+
+      if (tintAlpha > 0.001) {
+        const atmosphere = context.createLinearGradient(0, 0, 0, GROUND_Y + 20);
+        atmosphere.addColorStop(0, `rgba(${tintColor.match(/\\d+/g).join(",")},${tintAlpha})`);
+        atmosphere.addColorStop(1, `rgba(35,30,28,${tintAlpha * 0.42})`);
+        context.fillStyle = atmosphere;
+        context.fillRect(0, 0, WORLD_WIDTH, GROUND_Y + 20);
+      }
+
+      const worldWave = activeTransition
+        ? mix(game.transitionFrom + 1, game.transitionTo + 1, transitionEase)
+        : game.wave;
+
+      // Wave 3+: subtle earthquake dust and occasional falling stones.
+      const quakeStrength = smoothStep((worldWave - 2.25) / 0.8);
+      if (quakeStrength > 0.01) {
+        context.save();
+        context.globalAlpha = quakeStrength * 0.28;
+        for (let i = 0; i < 9; i += 1) {
+          const drift = (time * (0.035 + i * 0.004) + i * 137) % (WORLD_WIDTH + 30);
+          const x = WORLD_WIDTH - drift;
+          const y = 185 + ((i * 29) % 105) + Math.sin(time / 420 + i) * 4;
+          context.fillStyle = i % 2 ? "#b5a28b" : "#796b5d";
+          context.beginPath();
+          context.arc(x, y, 1.5 + (i % 3), 0, Math.PI * 2);
+          context.fill();
+        }
+        context.restore();
+      }
+
+      // Wave 4+: distant lightning flashes, kept faint so the runner remains readable.
+      const stormStrength = smoothStep((worldWave - 3.15) / 0.85);
+      const lightningPulse = Math.pow(Math.max(0, Math.sin(time / 1750 + 0.8)), 18);
+      if (stormStrength > 0.01 && lightningPulse > 0.12) {
+        context.save();
+        context.globalAlpha = stormStrength * lightningPulse * 0.24;
+        context.fillStyle = "#dcecff";
+        context.fillRect(0, 0, WORLD_WIDTH, GROUND_Y);
+        context.globalAlpha *= 1.8;
+        context.strokeStyle = "#e9f5ff";
+        context.lineWidth = 2;
+        context.beginPath();
+        context.moveTo(690, 18);
+        context.lineTo(678, 42);
+        context.lineTo(690, 42);
+        context.lineTo(674, 70);
+        context.stroke();
+        context.restore();
+      }
+
+      // Wave 5+: ember and ash particles; deterministic motion avoids per-frame random allocations.
+      const emberStrength = smoothStep((worldWave - 4.05) / 0.8);
+      if (emberStrength > 0.01) {
+        context.save();
+        for (let i = 0; i < 22; i += 1) {
+          const x = (i * 83 + time * (0.018 + (i % 4) * 0.008)) % WORLD_WIDTH;
+          const y = GROUND_Y - ((time * (0.018 + (i % 5) * 0.006) + i * 31) % 245);
+          const flicker = 0.45 + 0.55 * Math.abs(Math.sin(time / 190 + i * 1.7));
+          context.globalAlpha = emberStrength * flicker * 0.72;
+          context.fillStyle = i % 3 === 0 ? "#ffd27a" : "#ff7848";
+          context.beginPath();
+          context.arc(x, y, i % 4 === 0 ? 2.2 : 1.35, 0, Math.PI * 2);
+          context.fill();
+        }
+        context.restore();
+      }
+
+      // Wave 6: one distant meteor crosses the horizon; it never enters the play lane.
+      const meteorStrength = smoothStep((worldWave - 5.05) / 0.85);
+      if (meteorStrength > 0.01) {
+        const meteorCycle = (time % 11500) / 11500;
+        const meteorX = 850 - meteorCycle * 330;
+        const meteorY = 78 + meteorCycle * 76;
+        context.save();
+        context.globalAlpha = meteorStrength * (meteorCycle < 0.82 ? 1 : 0);
+        context.strokeStyle = "rgba(255,151,83,.25)";
+        context.lineWidth = 13;
+        context.beginPath();
+        context.moveTo(meteorX + 72, meteorY - 34);
+        context.lineTo(meteorX, meteorY);
+        context.stroke();
+        context.strokeStyle = "rgba(255,207,126,.78)";
+        context.lineWidth = 4;
+        context.beginPath();
+        context.moveTo(meteorX + 55, meteorY - 26);
+        context.lineTo(meteorX, meteorY);
+        context.stroke();
+        const meteorGlow = context.createRadialGradient(meteorX, meteorY, 1, meteorX, meteorY, 25);
+        meteorGlow.addColorStop(0, "rgba(255,246,197,.95)");
+        meteorGlow.addColorStop(0.35, "rgba(255,135,72,.8)");
+        meteorGlow.addColorStop(1, "rgba(255,85,45,0)");
+        context.fillStyle = meteorGlow;
+        context.beginPath();
+        context.arc(meteorX, meteorY, 25, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
       }
 
       // Arcade-style score HUD is rendered inside the playfield canvas.
@@ -462,11 +562,25 @@ export default function MiniGamePage() {
       game.lastTime = time;
       game.distance += game.speed * delta;
       const points = Math.floor(game.distance / 8);
-      const nextWave = Math.min(6, Math.floor(points / 1000) + 1);
+      const nextWave = WAVE_STARTS.reduce((wave, start, index) => points >= start ? index + 1 : wave, 1);
+      const nextBoundary = WAVE_STARTS[game.wave] ?? Infinity;
+      const leadPoints = (game.speed * 60 / 8) * WAVE_TRANSITION_LEAD_SECONDS;
+
+      // Start blending before the next Wave, then finish several seconds after its title changes.
+      if (game.transitionStartedAt === null && game.wave < 6 && points >= nextBoundary - leadPoints) {
+        game.transitionStartedAt = time;
+        game.transitionFrom = game.wave - 1;
+        game.transitionTo = game.wave;
+      }
       if (nextWave !== game.wave) {
         game.wave = nextWave;
         game.waveChangedAt = time;
         playTone(760, 0.12);
+      }
+      if (game.transitionStartedAt !== null && time - game.transitionStartedAt >= WAVE_TRANSITION_DURATION) {
+        game.transitionStartedAt = null;
+        game.transitionFrom = game.wave - 1;
+        game.transitionTo = game.wave - 1;
       }
       game.speed = 6 * (1 + (game.wave - 1) * 0.4);
 
