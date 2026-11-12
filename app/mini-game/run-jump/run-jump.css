@@ -572,3 +572,49 @@
 @media (max-width:480px) {
   .mg-jungle-world .mg-game-state-card { width:min(80%,250px); padding:10px 12px; }
 }
+
+
+/* State dialog: fixed 2:1 width-to-height proportion, compact type and content-fit action. */
+.mg-jungle-world .mg-game-state-card {
+  width:min(76%,280px);
+  max-width:280px;
+  aspect-ratio:2 / 1;
+  min-height:0;
+  max-height:calc(100% - 16px);
+  padding:clamp(9px,1.6vw,14px);
+  gap:3px;
+  justify-content:center;
+  overflow:hidden;
+}
+.mg-jungle-world .mg-game-state-card > p:first-of-type {
+  font-size:clamp(13px,2.1vw,18px);
+  line-height:1.12;
+}
+.mg-jungle-world .mg-game-state-card > p:nth-of-type(2) {
+  font-size:clamp(9px,1.35vw,11px);
+  line-height:1.25;
+}
+.mg-jungle-world .mg-dino-badge { font-size:clamp(18px,3vw,24px); }
+.mg-jungle-world .mg-dino-action {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:auto !important;
+  min-width:0;
+  max-width:100%;
+  min-height:30px;
+  margin-top:4px;
+  padding:5px 15px;
+  font-size:clamp(9px,1.4vw,11px);
+  line-height:1;
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+@media (max-width:480px) {
+  .mg-jungle-world .mg-game-state-card {
+    width:min(76%,260px);
+    aspect-ratio:2 / 1;
+    padding:8px 10px;
+  }
+  .mg-jungle-world .mg-dino-action { min-height:28px; padding:4px 13px; }
+}
