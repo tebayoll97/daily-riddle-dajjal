@@ -302,3 +302,88 @@
 @media (prefers-reduced-motion:reduce) {
   .mg-game-canvas-frame { scroll-behavior:auto; }
 }
+
+
+/* Four-layer lightweight Jungle Valley parallax.
+   Keep the 900x320 gameplay canvas transparent and its proportions unchanged. */
+.mg-game-world-frame {
+  background:#75d4f4;
+  border-color:rgba(80,160,110,.3);
+}
+.mg-game-canvas-frame {
+  position:relative;
+  isolation:isolate;
+  width:100%;
+  aspect-ratio:900 / 320;
+  overflow:hidden;
+  background:linear-gradient(180deg,#50bde9 0%,#8cdef3 70%,#a6df83 100%);
+}
+.mg-parallax-layer {
+  position:absolute;
+  left:0;
+  width:100%;
+  pointer-events:none;
+  background-repeat:repeat-x;
+  background-position:0 100%;
+  background-size:auto 100%;
+  will-change:background-position;
+}
+.mg-parallax-sky {
+  z-index:0;
+  top:0;
+  height:56%;
+  background-image:url("/mini-game/run-jump/jungle-sky-clouds.png");
+  animation:mg-parallax-sky-move 150s linear infinite;
+}
+.mg-parallax-mountains {
+  z-index:1;
+  top:18%;
+  height:46%;
+  background-image:url("/mini-game/run-jump/jungle-mountains-volcano.png");
+  animation:mg-parallax-mountain-move 92s linear infinite;
+}
+.mg-parallax-forest {
+  z-index:2;
+  bottom:19%;
+  height:52%;
+  background-image:url("/mini-game/run-jump/jungle-forest-ruins.png");
+  animation:mg-parallax-forest-move 48s linear infinite;
+}
+.mg-parallax-ground {
+  z-index:3;
+  bottom:0;
+  height:30%;
+  background-image:url("/mini-game/run-jump/jungle-ground.png");
+  animation:mg-parallax-ground-move 20s linear infinite;
+}
+.mg-game-canvas {
+  position:relative;
+  z-index:4;
+  display:block;
+  width:100%;
+  height:auto !important;
+  min-height:0 !important;
+  max-height:none !important;
+  aspect-ratio:900 / 320;
+  background:transparent !important;
+  object-fit:contain;
+}
+@keyframes mg-parallax-sky-move {
+  from { background-position:0 100%; }
+  to { background-position:-1200px 100%; }
+}
+@keyframes mg-parallax-mountain-move {
+  from { background-position:0 100%; }
+  to { background-position:-1600px 100%; }
+}
+@keyframes mg-parallax-forest-move {
+  from { background-position:0 100%; }
+  to { background-position:-2200px 100%; }
+}
+@keyframes mg-parallax-ground-move {
+  from { background-position:0 100%; }
+  to { background-position:-2600px 100%; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .mg-parallax-layer { animation:none !important; }
+}
