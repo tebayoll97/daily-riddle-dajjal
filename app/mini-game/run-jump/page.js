@@ -7,7 +7,7 @@ import "./run-jump.css";
 
 const WORLD_WIDTH = 900;
 const WORLD_HEIGHT = 320;
-const GROUND_Y = 258;
+const GROUND_Y = 226;
 const BEST_SCORE_KEY = "dajjal-run-jump-best";
 
 export default function MiniGamePage() {
@@ -158,43 +158,7 @@ export default function MiniGamePage() {
     };
 
     const draw = (time) => {
-      const sky = context.createLinearGradient(0, 0, 0, WORLD_HEIGHT);
-      sky.addColorStop(0, "#17142d");
-      sky.addColorStop(1, "#0b1020");
-      context.fillStyle = sky;
-      context.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-
-      context.fillStyle = "rgba(255,255,255,.48)";
-      for (let i = 0; i < 28; i += 1) {
-        context.fillRect((i * 137 + 23) % WORLD_WIDTH, (i * 47 + 17) % 175, 2, 2);
-      }
-
-      game.clouds.forEach((cloud) => {
-        context.fillStyle = "rgba(191,180,230,.12)";
-        context.beginPath();
-        context.arc(cloud.x, cloud.y, 17, 0, Math.PI * 2);
-        context.arc(cloud.x + 20, cloud.y - 7, 22, 0, Math.PI * 2);
-        context.arc(cloud.x + 43, cloud.y, 16, 0, Math.PI * 2);
-        context.fill();
-      });
-
-      context.fillStyle = "#17142b";
-      context.fillRect(0, GROUND_Y, WORLD_WIDTH, WORLD_HEIGHT - GROUND_Y);
-      context.strokeStyle = "rgba(167,139,250,.65)";
-      context.lineWidth = 2;
-      context.beginPath();
-      context.moveTo(0, GROUND_Y);
-      context.lineTo(WORLD_WIDTH, GROUND_Y);
-      context.stroke();
-
-      context.strokeStyle = "rgba(167,139,250,.2)";
-      context.lineWidth = 1;
-      for (let x = -((game.distance * 1.4) % 48); x < WORLD_WIDTH; x += 48) {
-        context.beginPath();
-        context.moveTo(x, GROUND_Y + 19);
-        context.lineTo(x + 22, GROUND_Y + 19);
-        context.stroke();
-      }
+      context.clearRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
       const player = game.player;
       const runningBob = game.running && !player.jumping ? Math.sin(time / 75) * 2 : 0;
@@ -381,28 +345,13 @@ export default function MiniGamePage() {
           </div>
 
           <div className="mg-game-world-frame w-full overflow-hidden rounded-2xl border border-purple-300/15">
-            <div className="mg-extended-sky" aria-hidden="true">
-              <span className="mg-sky-star mg-sky-star--one" />
-              <span className="mg-sky-star mg-sky-star--two" />
-              <span className="mg-sky-star mg-sky-star--three" />
-              <span className="mg-sky-cloud mg-sky-cloud--one" />
-              <span className="mg-sky-cloud mg-sky-cloud--two" />
-              <span className="mg-sky-cloud mg-sky-cloud--three" />
-              <span className="mg-sky-glow" />
-            </div>
-            <div className="mg-game-canvas-frame relative w-full overflow-hidden bg-[#0c0a17]">
+            <div className="mg-game-canvas-frame relative w-full overflow-hidden">
               <canvas
                 ref={canvasRef}
                 className="mg-game-canvas block w-full touch-none"
                 aria-label="Permainan lari dan melompat. Ketuk area permainan atau tekan Space untuk melompat."
                 onPointerDown={jump}
               />
-            </div>
-            <div className="mg-galaxy-overlay" aria-hidden="true">
-              <span className="mg-aurora-ribbon mg-aurora-ribbon--one" />
-              <span className="mg-aurora-ribbon mg-aurora-ribbon--two" />
-              <span className="mg-galaxy-nebula" />
-              <span className="mg-galaxy-stars" />
             </div>
             {status !== "playing" && (
               <div className="mg-game-state-overlay">
