@@ -618,3 +618,15 @@
   }
   .mg-jungle-world .mg-dino-action { min-height:28px; padding:4px 13px; }
 }
+
+/* Taller playfield keeps the same logical width and gives state panels room. */
+.mg-jungle-world .mg-game-canvas-frame { width:100%; aspect-ratio:900 / 420 !important; }
+.mg-jungle-world .mg-game-canvas { width:100%; height:auto !important; aspect-ratio:900 / 420 !important; object-fit:fill; }
+.mg-jungle-world .mg-game-state-overlay { padding:14px; }
+.mg-jungle-world .mg-game-state-card { width:min(68%,280px); max-width:280px; aspect-ratio:2 / 1; padding:clamp(10px,1.8vw,15px); gap:5px; }
+.mg-jungle-world .mg-game-state-card > p:first-of-type { font-size:clamp(15px,2.3vw,20px); }
+.mg-jungle-world .mg-game-state-card > p:nth-of-type(2) { font-size:clamp(10px,1.6vw,13px); }
+.mg-jungle-world .mg-dino-action { min-height:32px; font-size:clamp(10px,1.4vw,12px); }
+@media (max-width:480px) {
+  .mg-jungle-world .mg-game-state-card { width:min(72%,270px); aspect-ratio:2 / 1; padding:10px 12px; }
+}
