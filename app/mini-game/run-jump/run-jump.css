@@ -630,3 +630,15 @@
 @media (max-width:480px) {
   .mg-jungle-world .mg-game-state-card { width:min(72%,270px); aspect-ratio:2 / 1; padding:10px 12px; }
 }
+
+/* Final canvas geometry: match the 900x420 logical game world. */
+.mg-jungle-world .mg-game-canvas-frame {
+  width:100%;
+  aspect-ratio:900 / 420 !important;
+}
+.mg-jungle-world .mg-game-canvas {
+  width:100%;
+  height:auto !important;
+  aspect-ratio:900 / 420 !important;
+  object-fit:fill;
+}
