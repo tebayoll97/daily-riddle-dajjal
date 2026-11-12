@@ -15,10 +15,10 @@ export default function MiniGameDirectoryPage() {
     <main className="mg-page min-h-screen bg-[#080711] px-4 py-8 text-white sm:py-12">
       <div className="mx-auto w-full max-w-5xl">
         <Link href="/games" className="ui-interactive inline-flex rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold text-purple-200">← GAME LIBRARY</Link>
-        <header className="mb-8 mt-8 text-center">
-          <p className="ui-eyebrow">DAJJAL FAMILY · GAMING UNIVERSE</p>
-          <h1 className="ui-title">MINI <span className="text-purple-300">GAMES</span></h1>
-          <p className="ui-subtitle mx-auto mt-3 max-w-xl">Pilih permainanmu. Setiap mini game memiliki dunia, tampilan, dan pengalaman bermain sendiri.</p>
+        <header className="mg-library-header mb-8 mt-8 text-center">
+          <p className="mg-eyebrow">DAJJAL FAMILY · GAMING UNIVERSE</p>
+          <h1 className="mg-heading ui-title">MINI <span className="text-purple-300">GAMES</span></h1>
+          <p className="mg-copy mx-auto mt-3 max-w-xl">Pilih permainanmu. Setiap mini game memiliki dunia, tampilan, dan pengalaman bermain sendiri.</p>
         </header>
         <section className="grid gap-4 sm:grid-cols-2">
           {miniGames.map((game, index) => (
