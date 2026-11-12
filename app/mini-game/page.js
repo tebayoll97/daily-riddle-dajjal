@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import "./mini-game-master.css";
 
 const miniGames = [
   { href: "/mini-game/run-jump", title: "DAJJAL FAMILY JUMP", description: "Lari sejauh mungkin, lompat melewati rintangan, dan pecahkan rekor jarak.", tag: "DAJJAL FAMILY ARCADE", symbol: "🦖", tone: "from-violet-500/20 to-cyan-500/5" },
@@ -11,7 +12,7 @@ export default function MiniGameDirectoryPage() {
   const [selectedGame, setSelectedGame] = useState(null);
 
   return (
-    <main className="min-h-screen bg-[#080711] px-4 py-8 text-white sm:py-12">
+    <main className="mg-page min-h-screen bg-[#080711] px-4 py-8 text-white sm:py-12">
       <div className="mx-auto w-full max-w-5xl">
         <Link href="/games" className="ui-interactive inline-flex rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold text-purple-200">← GAME LIBRARY</Link>
         <header className="mb-8 mt-8 text-center">
