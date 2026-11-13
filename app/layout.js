@@ -1,26 +1,18 @@
 import "./globals.css";
+import "./home.css";
 import RouteChrome from "./components/RouteChrome";
 import GlobalAudioController from "./components/GlobalAudioController";
 import { LanguageProvider } from "./components/LanguageProvider";
 
 export const metadata = {
+  metadataBase: new URL("https://dajjalfamily.com"),
   title: {
-    default: "Dajjal Family | Gaming Universe",
-    template: "%s | Dajjal Family | Gaming Universe",
+    default: "Dajjal Family — One Family. Many Possibilities.",
+    template: "%s | Dajjal Family",
   },
-  description:
-    "One Account. One Profile. Multiple Games. One Universe. Explore Daily Riddle, Rune Puzzle, Memory Challenge, Logic Battle, and more.",
-  applicationName: "Dajjal Family | Gaming Universe",
-  keywords: [
-    "Dajjal",
-    "Veylora",
-    "Gaming Universe",
-    "Daily Riddle",
-    "Rune Puzzle",
-    "Memory Challenge",
-    "Logic Battle",
-    "Online Mini Games",
-  ],
+  description: "Explore Dajjal Family, a growing digital ecosystem for gaming, knowledge, articles, digital products, business, and community.",
+  applicationName: "Dajjal Family",
+  keywords: ["Dajjal Family", "digital ecosystem", "online games", "digital products", "knowledge and learning", "digital community"],
 };
 
 export default function RootLayout({ children }) {
