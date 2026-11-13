@@ -4,9 +4,18 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useLanguage } from "@/app/components/LanguageProvider";
+import "../../wedding-anak-dajjal/wedding.css";
+
+const copy = {
+  en: { back:"← MY INVITATIONS", step:"NEW WEDDING PROJECT · STEP 1 OF 5", title:"Start your invitation", intro:"First, give this invitation a title. You can add the couple’s names, event details, photos, and design in the next builder steps.", label:"Invitation title", placeholder:"e.g. The Wedding of Alex & Maya", hint:"This is your private project title for now.", submit:"CREATE DRAFT INVITATION", busy:"CREATING…", error:"Could not create invitation." },
+  id: { back:"← UNDANGAN SAYA", step:"PROYEK WEDDING BARU · LANGKAH 1 DARI 5", title:"Mulai undanganmu", intro:"Pertama, berikan judul untuk undangan ini. Nama pasangan, detail acara, foto, dan desain dapat ditambahkan pada langkah builder berikutnya.", label:"Judul undangan", placeholder:"Contoh: Pernikahan Alex & Maya", hint:"Untuk saat ini, judul ini digunakan sebagai nama proyek pribadimu.", submit:"BUAT UNDANGAN DRAFT", busy:"MEMBUAT…", error:"Undangan tidak dapat dibuat." }
+};
 
 export default function CreateWeddingPage() {
   const router = useRouter();
+  const { language, setLanguage } = useLanguage();
+  const t = copy[language] || copy.en;
   const [title, setTitle] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -17,17 +26,27 @@ export default function CreateWeddingPage() {
     setBusy(true); setError("");
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user || session.user.is_anonymous) {
-        router.replace("/login?next=%2Fdf%2Fwedding%2Fcreate");
-        return;
-      }
-      const response = await fetch("/api/wedding/invitations", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ title }) });
+      if (!session?.user || session.user.is_anonymous) { router.replace("/login?next=%2Fdf%2Fwedding%2Fcreate"); return; }
+      const response = await fetch("/api/wedding/invitations", { method:"POST", headers:{ "Content-Type":"application/json", Authorization:`Bearer ${session.access_token}` }, body:JSON.stringify({ title }) });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Could not create invitation.");
+      if (!response.ok) throw new Error(result.error || t.error);
       router.push("/df/wedding/dashboard");
-    } catch (e) { setError(e.message); setBusy(false); }
+    } catch (e) { setError(e.message || t.error); setBusy(false); }
   }
 
-  return <main className="min-h-screen bg-[#fff8f7] px-4 py-10 text-[#543b49] sm:px-8"><div className="mx-auto max-w-2xl"><Link href="/df/wedding/dashboard" className="text-xs font-bold tracking-widest text-[#a66a83]">← MY INVITATIONS</Link><p className="mt-10 text-xs font-bold tracking-[.22em] text-[#b47a91]">NEW WEDDING PROJECT · STEP 1 OF 5</p><h1 className="mt-3 font-serif text-4xl text-[#75465e]">Start your invitation</h1><p className="mt-3 text-sm leading-7 text-[#897580]">First, give this invitation a title. You can add the couple’s names, event details, photos, and design in the next builder steps.</p>
-  <form onSubmit={submit} className="mt-8 rounded-3xl border border-[#f0dce3] bg-white p-6 shadow-sm sm:p-8"><label htmlFor="invitation-title" className="block text-sm font-bold text-[#75465e]">Invitation title</label><input id="invitation-title" value={title} onChange={e=>setTitle(e.target.value)} required minLength={3} maxLength={100} placeholder="e.g. The Wedding of Alex & Maya" className="mt-3 w-full rounded-xl border border-[#e7ccd6] bg-[#fffafb] px-4 py-3 text-sm text-[#543b49] outline-none focus:border-[#b77a93]" /><p className="mt-2 text-xs text-[#a18b94]">This will be used as the private project title for now.</p>{error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}<button disabled={busy || title.trim().length<3} className="mt-7 w-full rounded-full bg-[#a96582] px-6 py-4 text-sm font-bold text-white disabled:opacity-50">{busy ? "CREATING…" : "CREATE DRAFT INVITATION"}</button></form></div></main>;
+  return <div className="df-main"><main className="wedding-page wedding-platform">
+    <header className="wedding-topbar"><Link href="/df/wedding/dashboard" className="wedding-back">{t.back}</Link><div className="wedding-lang"><button type="button" onClick={()=>setLanguage("en")} aria-pressed={language==="en"}>EN</button><button type="button" onClick={()=>setLanguage("id")} aria-pressed={language==="id"}>ID</button></div></header>
+    <div className="wedding-content wedding-platform-content">
+      <section className="wedding-hero wedding-platform-heading"><p className="wedding-kicker">{t.step}</p><h1>{t.title}</h1><p className="wedding-intro">{t.intro}</p></section>
+      <section className="wedding-section wedding-platform-form">
+        <form className="wedding-form" onSubmit={submit}>
+          <label htmlFor="invitation-title">{t.label}<input id="invitation-title" value={title} onChange={e=>setTitle(e.target.value)} required minLength={3} maxLength={100} placeholder={t.placeholder}/></label>
+          <p className="wedding-platform-hint">{t.hint}</p>
+          {error && <p role="alert" className="wedding-platform-error">{error}</p>}
+          <button className="wedding-primary" type="submit" disabled={busy || title.trim().length<3}>{busy?t.busy:t.submit}</button>
+        </form>
+      </section>
+    </div>
+    <footer className="wedding-footer"><strong>DAJJAL FAMILY · WEDDING EXPERIENCES</strong></footer>
+  </main></div>;
 }
