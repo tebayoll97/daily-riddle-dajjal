@@ -105,7 +105,7 @@ export default function MiniGamePage() {
       lastScore: -1,
     });
     Object.assign(game.player, {
-      y: GROUND_Y - 112,
+      y: GROUND_Y - 58,
       velocityY: 0,
       jumping: false,
     });
@@ -571,21 +571,38 @@ export default function MiniGamePage() {
 
       const player = game.player;
       const running = game.running && !player.jumping;
-      const bob = running ? Math.abs(Math.sin(time / 72)) * 3 : 0;
-      const jumpTilt = player.jumping ? Math.max(-0.12, Math.min(0.12, player.velocityY * 0.006)) : 0;
+      const stride = running ? Math.sin(time / 72) : 0;
+      const bob = running ? Math.abs(Math.sin(time / 72)) * 1.8 : 0;
+      const jumpTilt = player.jumping ? Math.max(-0.08, Math.min(0.08, player.velocityY * 0.004)) : 0;
       const sprite = characterSpriteRef.current;
+      const jumpHeight = Math.max(0, (GROUND_Y - 58) - player.y);
+      const shadowScale = Math.max(0.42, 1 - jumpHeight / 190);
+      const shadowAlpha = Math.max(0.16, 0.34 - jumpHeight / 520);
+      // Soft contact shadow stays on the grass; it tightens and fades while airborne.
+      context.save();
+      context.globalAlpha = shadowAlpha;
+      context.fillStyle = "#183b27";
+      context.filter = "blur(5px)";
+      context.beginPath();
+      context.ellipse(player.x + 61, GROUND_Y + 8, 42 * shadowScale, 8 * shadowScale, 0, 0, Math.PI * 2);
+      context.fill();
+      context.filter = "none";
+      context.restore();
       if (sprite?.complete && sprite.naturalWidth > 0) {
         const cellW = sprite.naturalWidth / 3;
         const cellH = sprite.naturalHeight / 3;
-        const frame = running ? Math.floor(time / 95) % 9 : player.jumping ? 7 : 0;
+        const frame = running ? Math.floor(time / 105) % 9 : player.jumping ? 7 : 0;
         const sx = (frame % 3) * cellW;
         const sy = Math.floor(frame / 3) * cellH;
-        const drawW = 246;
-        const drawH = 218;
+        // Compact runner scale, anchored precisely to the top edge of the grass.
+        const drawW = 132;
+        const drawH = 117;
+        const groundAnchorX = player.x + 61;
+        const groundAnchorY = player.y + 58 + bob;
         context.save();
-        context.translate(player.x + 91, player.y + bob + 108);
+        context.translate(groundAnchorX, groundAnchorY);
         context.rotate(jumpTilt);
-        context.drawImage(sprite, sx, sy, cellW, cellH, -drawW / 2, -drawH + 108, drawW, drawH);
+        context.drawImage(sprite, sx, sy, cellW, cellH, -drawW / 2, -drawH, drawW, drawH);
         context.restore();
       }
       game.obstacles.forEach((obstacle) => {
@@ -690,8 +707,8 @@ export default function MiniGamePage() {
       const player = game.player;
       player.velocityY += 0.72 * delta;
       player.y += player.velocityY * delta;
-      if (player.y >= GROUND_Y - 112) {
-        player.y = GROUND_Y - 112;
+      if (player.y >= GROUND_Y - 58) {
+        player.y = GROUND_Y - 58;
         player.velocityY = 0;
         player.jumping = false;
       }
@@ -713,11 +730,12 @@ export default function MiniGamePage() {
         if (cloud.x < -70) cloud.x = WORLD_WIDTH + 40;
       });
 
+      // Gameplay hitbox is intentionally compact and independent of sprite artwork size.
       const playerBox = {
-        left: player.x + 34,
-        right: player.x + 176,
+        left: player.x + 18,
+        right: player.x + 104,
         top: player.y + 22,
-        bottom: player.y + 110,
+        bottom: player.y + 56,
       };
       const collided = game.obstacles.some((obstacle) => {
         const flying = obstacle.type === "ptero" || obstacle.type === "archaeo";
