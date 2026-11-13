@@ -871,3 +871,21 @@
 .mg-fullscreen-icon-stack .mg-fullscreen-exit:active {
   transform:scale(.94);
 }
+
+
+/* Hard-pin the landscape action stack so Exit sits directly below Pause. */
+.mg-fullscreen-tools .mg-fullscreen-icon-stack {
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:7px !important;
+}
+.mg-fullscreen-tools .mg-fullscreen-icon-stack > .mg-icon-control,
+.mg-fullscreen-arena:fullscreen .mg-fullscreen-tools .mg-fullscreen-icon-stack > .mg-fullscreen-exit {
+  position:relative !important;
+  inset:auto !important;
+  flex:0 0 38px !important;
+  align-self:center !important;
+  margin:0 !important;
+}
