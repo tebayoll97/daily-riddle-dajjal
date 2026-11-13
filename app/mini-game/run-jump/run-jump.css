@@ -889,3 +889,14 @@
   align-self:center !important;
   margin:0 !important;
 }
+
+
+/* Performance tuning for the canvas game on mid-range mobile devices. */
+.mg-jungle-world .mg-game-canvas-frame,
+.mg-jungle-world .mg-game-canvas {
+  contain:layout paint;
+}
+.mg-jungle-world .mg-game-canvas {
+  backface-visibility:hidden;
+  transform:translateZ(0);
+}
