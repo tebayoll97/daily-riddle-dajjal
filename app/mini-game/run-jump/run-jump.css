@@ -733,3 +733,106 @@
 @media (prefers-reduced-motion:reduce) {
   .mg-fullscreen-exit { transition:none !important; }
 }
+
+
+/* Responsive portrait toolbar and fullscreen landscape controls. */
+.mg-game-topbar {
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;
+  align-items:center;
+  gap:clamp(5px,1.4vw,10px) !important;
+  min-width:0;
+}
+.mg-toolbar-exit,.mg-toolbar-landscape {
+  min-width:0;
+  min-height:40px;
+  padding:8px clamp(7px,1.7vw,13px) !important;
+  white-space:nowrap;
+  font-size:clamp(8px,2.2vw,10px) !important;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.mg-toolbar-icons {
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+.mg-icon-control {
+  display:inline-flex;
+  width:40px;
+  height:40px;
+  min-width:40px;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(196,181,253,.24);
+  border-radius:12px;
+  color:#eadcff;
+  background:linear-gradient(145deg,rgba(113,72,158,.22),rgba(35,26,57,.88));
+  box-shadow:inset 0 1px rgba(255,255,255,.08),0 4px 12px rgba(0,0,0,.18);
+  font-size:23px;
+  font-weight:900;
+  line-height:1;
+  touch-action:manipulation;
+}
+.mg-icon-control:active { transform:scale(.94); }
+.mg-fullscreen-tools {
+  position:absolute;
+  z-index:30;
+  inset:0;
+  pointer-events:none;
+}
+.mg-fullscreen-tools .mg-fullscreen-exit,
+.mg-fullscreen-tools .mg-icon-control { pointer-events:auto; }
+.mg-fullscreen-tools .mg-fullscreen-exit {
+  position:absolute;
+  top:max(8px,env(safe-area-inset-top));
+  right:clamp(132px,18vw,174px);
+  min-height:34px;
+  padding:6px 10px;
+  border:1px solid rgba(255,255,255,.32);
+  border-radius:10px;
+  color:#fff;
+  background:rgba(9,15,18,.72);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.04em;
+  backdrop-filter:blur(8px);
+  white-space:nowrap;
+}
+.mg-fullscreen-icon-stack {
+  position:absolute;
+  top:max(56px,calc(env(safe-area-inset-top) + 48px));
+  right:max(9px,env(safe-area-inset-right));
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  pointer-events:auto;
+}
+.mg-fullscreen-icon-stack .mg-icon-control {
+  width:38px;
+  height:38px;
+  min-width:38px;
+  border-color:rgba(255,255,255,.36);
+  color:#fff;
+  background:rgba(11,19,24,.72);
+  backdrop-filter:blur(8px);
+}
+@media (max-width:360px) {
+  .mg-game-topbar { gap:4px !important; }
+  .mg-toolbar-exit,.mg-toolbar-landscape {
+    padding-inline:5px !important;
+    font-size:8px !important;
+    letter-spacing:0 !important;
+  }
+  .mg-icon-control {
+    width:35px;
+    height:38px;
+    min-width:35px;
+    border-radius:10px;
+  }
+  .mg-toolbar-icons { gap:4px; }
+}
+@media (orientation:landscape) and (max-height:520px) {
+  .mg-fullscreen-tools .mg-fullscreen-exit { right:clamp(128px,17vw,164px); }
+  .mg-fullscreen-icon-stack { top:max(54px,calc(env(safe-area-inset-top) + 46px)); }
+}
