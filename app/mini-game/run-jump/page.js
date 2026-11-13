@@ -9,12 +9,12 @@ const WORLD_HEIGHT = 420;
 const GROUND_Y = 326;
 const BEST_SCORE_KEY = "dajjal-run-jump-best";
 const WAVE_TITLES = [
-  "Awal Mula Era Dinosaurus",
-  "Kebangkitan Para Raksasa",
-  "Guncangan Zaman Purba",
-  "Badai Kepunahan",
-  "Amukan Langit dan Bumi",
-  "ERA METEOR CHAOS",
+  "SAWIT HIJAU",
+  "BATAS RIMBA",
+  "HUTAN KALIMANTAN",
+  "MUSIM KERING",
+  "ANCAMAN KARHUTLA",
+  "KEBAKARAN HUTAN",
 ];
 const WAVE_STARTS = [0, 1200, 2600, 4100, 5700, 7400];
 const WAVE_TRANSITION_LEAD_SECONDS = 8;
@@ -29,12 +29,12 @@ const mixColor = (from, to, amount) =>
   `rgb(${Math.round(mix(from[0], to[0], amount))},${Math.round(mix(from[1], to[1], amount))},${Math.round(mix(from[2], to[2], amount))})`;
 
 const WORLD_PALETTES = {
-  skyTop: [[56,189,240],[92,183,218],[112,145,153],[82,91,105],[133,65,53],[64,28,42]],
-  skyHorizon: [[139,224,241],[151,211,196],[150,157,132],[112,104,102],[203,112,65],[126,49,43]],
-  mountain: [[128,201,160],[111,176,137],[123,139,112],[105,103,96],[119,75,62],[70,43,49]],
-  forest: [[67,143,101],[43,125,82],[89,104,70],[91,78,65],[115,66,47],[67,39,42]],
-  ground: [[139,90,55],[132,91,51],[117,83,58],[103,74,61],[111,60,42],[65,39,39]],
-  grass: [[85,185,79],[93,171,66],[133,145,57],[139,111,48],[164,79,39],[91,45,39]],
+  skyTop: [[68,178,224],[74,159,174],[43,111,112],[174,151,91],[111,91,79],[63,37,34]],
+  skyHorizon: [[190,226,206],[143,190,155],[95,139,111],[203,169,111],[160,112,83],[124,57,39]],
+  mountain: [[86,139,91],[62,119,82],[42,91,67],[119,113,76],[91,70,57],[54,42,38]],
+  forest: [[43,116,68],[35,99,65],[28,77,58],[91,91,57],[88,65,48],[53,42,37]],
+  ground: [[133,91,55],[116,83,52],[94,76,53],[113,88,57],[82,62,49],[49,42,38]],
+  grass: [[75,153,62],[66,130,57],[52,102,52],[139,119,57],[112,75,43],[58,48,39]],
 };
 const paletteColor = (palette, level) => {
   const position = Math.max(0, Math.min(palette.length - 1, level));
@@ -361,46 +361,28 @@ export default function MiniGamePage() {
       cloud(440 - cloudShift + (cloudShift > 900 ? 1080 : 0), 42, .68);
       cloud(820 - cloudShift, 91, .78);
 
-      // Far mountains and a small volcano; their movement is deliberately subtle.
-      const mountainShift = (travel * 0.18) % 900;
+      // Distant layered Borneo canopy replaces prehistoric mountains.
+      const mountainShift = (travel * 0.16) % 900;
       context.save();
       context.translate(-mountainShift, 0);
       for (let repeat = 0; repeat < 2; repeat += 1) {
         const ox = repeat * 900;
-        context.fillStyle = mountainColor;
-        context.beginPath();
-        context.moveTo(ox - 40, 177);
-        context.lineTo(ox + 105, 86);
-        context.lineTo(ox + 205, 177);
-        context.lineTo(ox + 315, 105);
-        context.lineTo(ox + 435, 177);
-        context.lineTo(ox + 560, 94);
-        context.lineTo(ox + 705, 177);
-        context.lineTo(ox + 815, 112);
-        context.lineTo(ox + 930, 177);
-        context.closePath();
-        context.fill();
-        context.fillStyle = "#b5e4c0";
-        context.beginPath();
-        context.moveTo(ox + 78, 105); context.lineTo(ox + 105, 86); context.lineTo(ox + 132, 110);
-        context.lineTo(ox + 105, 101); context.closePath(); context.fill();
-        context.beginPath();
-        context.moveTo(ox + 535, 111); context.lineTo(ox + 560, 94); context.lineTo(ox + 586, 113);
-        context.lineTo(ox + 560, 105); context.closePath(); context.fill();
-        // Volcano silhouette with a quiet orange crater accent.
-        context.fillStyle = "#668f79";
-        context.beginPath();
-        context.moveTo(ox + 625, 178); context.lineTo(ox + 700, 73);
-        context.lineTo(ox + 725, 88); context.lineTo(ox + 790, 178);
-        context.closePath(); context.fill();
-        context.fillStyle = "#e88b54";
-        context.beginPath();
-        context.moveTo(ox + 689, 89); context.lineTo(ox + 700, 73); context.lineTo(ox + 711, 90);
-        context.closePath(); context.fill();
+        for (let layer = 0; layer < 3; layer += 1) {
+          context.fillStyle = layer === 0 ? mountainColor : layer === 1 ? "rgba(35,91,62,.72)" : "rgba(24,68,49,.55)";
+          context.beginPath();
+          context.moveTo(ox - 20, 180);
+          for (let x = 0; x <= 940; x += 55) {
+            const y = 137 + Math.sin((x + layer * 37) / 95) * (13 + layer * 4) + Math.sin(x / 31) * 5 + layer * 13;
+            context.lineTo(ox + x, y);
+          }
+          context.lineTo(ox + 940, 210);
+          context.lineTo(ox - 20, 210);
+          context.closePath();
+          context.fill();
+        }
       }
       context.restore();
 
-      // Mid-distance jungle silhouettes, ruins and tiny waterfall.
       const forestShift = (travel * 0.45) % 900;
       context.save();
       context.translate(-forestShift, 0);
@@ -408,36 +390,90 @@ export default function MiniGamePage() {
         const ox = repeat * 900;
         context.fillStyle = forestColor;
         context.fillRect(ox, 166, 900, 63);
-        const tree = (x, base, scale = 1) => {
-          context.fillStyle = "#76583b";
-          context.fillRect(x - 5 * scale, base - 54 * scale, 10 * scale, 58 * scale);
-          context.fillStyle = "#277c50";
+        const palm = (x, base, scale = 1, tone = "#286d43") => {
+          const trunkTop = base - 77 * scale;
+          context.strokeStyle = "#76583b";
+          context.lineWidth = 8 * scale;
           context.beginPath();
-          context.arc(x, base - 61 * scale, 34 * scale, 0, Math.PI * 2);
-          context.arc(x - 22 * scale, base - 48 * scale, 23 * scale, 0, Math.PI * 2);
-          context.arc(x + 24 * scale, base - 48 * scale, 24 * scale, 0, Math.PI * 2);
-          context.fill();
-          context.fillStyle = "rgba(139,207,105,.55)";
+          context.moveTo(x, base);
+          context.quadraticCurveTo(x + 3 * scale, base - 42 * scale, x, trunkTop);
+          context.stroke();
+          context.strokeStyle = "#a17a4d";
+          context.lineWidth = 2 * scale;
           context.beginPath();
-          context.arc(x - 8 * scale, base - 75 * scale, 14 * scale, 0, Math.PI * 2);
+          context.moveTo(x + 2 * scale, base - 8 * scale);
+          context.lineTo(x + 2 * scale, trunkTop + 8 * scale);
+          context.stroke();
+          for (let frond = 0; frond < 9; frond += 1) {
+            const angle = -Math.PI + frond * (Math.PI / 8);
+            const reach = (34 + (frond % 3) * 5) * scale;
+            const endX = x + Math.cos(angle) * reach;
+            const endY = trunkTop + Math.sin(angle) * reach * 0.48 - 3 * scale;
+            context.strokeStyle = tone;
+            context.lineWidth = (4.5 - (frond % 2)) * scale;
+            context.beginPath();
+            context.moveTo(x, trunkTop);
+            context.quadraticCurveTo(x + Math.cos(angle) * reach * .45, trunkTop + Math.sin(angle) * reach * .22 - 7 * scale, endX, endY);
+            context.stroke();
+            for (let leaf = 1; leaf <= 4; leaf += 1) {
+              const t = leaf / 5, lx = x + (endX - x) * t, ly = trunkTop + (endY - trunkTop) * t;
+              context.beginPath();
+              context.moveTo(lx, ly);
+              context.lineTo(lx - Math.sin(angle) * 5 * scale, ly + 3 * scale);
+              context.stroke();
+            }
+          }
+          context.fillStyle = "#9a633c";
+          context.beginPath();
+          context.arc(x, trunkTop + 2 * scale, 5 * scale, 0, Math.PI * 2);
           context.fill();
         };
-        tree(ox + 120, 224, .8);
-        tree(ox + 340, 222, 1.12);
-        tree(ox + 610, 225, .9);
-        tree(ox + 830, 222, 1.05);
-        // Ancient stone arch/ruin.
-        context.fillStyle = "#9b9875";
-        context.fillRect(ox + 690, 137, 15, 48);
-        context.fillRect(ox + 748, 137, 15, 48);
-        context.fillRect(ox + 684, 130, 85, 13);
-        context.fillStyle = "#587c5e";
-        context.fillRect(ox + 703, 149, 38, 36);
-        // Waterfall ribbon on the distant cliff.
-        context.fillStyle = "rgba(190,239,242,.75)";
-        context.fillRect(ox + 485, 142, 13, 37);
-        context.fillStyle = "rgba(255,255,255,.55)";
-        context.fillRect(ox + 488 + Math.sin(time / 230) * 2, 145, 3, 29);
+        const rainforestTree = (x, base, scale = 1) => {
+          context.fillStyle = "#594a35";
+          context.fillRect(x - 5 * scale, base - 72 * scale, 10 * scale, 76 * scale);
+          context.fillStyle = "#235b3b";
+          context.beginPath();
+          context.arc(x, base - 82 * scale, 34 * scale, 0, Math.PI * 2);
+          context.arc(x - 23 * scale, base - 65 * scale, 25 * scale, 0, Math.PI * 2);
+          context.arc(x + 24 * scale, base - 65 * scale, 25 * scale, 0, Math.PI * 2);
+          context.fill();
+        };
+        const palmAmount = smoothStep((2.8 - worldWave) / 1.8);
+        palm(ox + 115, 226, .88, "#347b43");
+        palm(ox + 350, 225, 1.08, "#2e7040");
+        palm(ox + 625, 227, .92, "#347b43");
+        palm(ox + 835, 225, .98, "#2e7040");
+        context.globalAlpha = 1 - palmAmount * .72;
+        rainforestTree(ox + 235, 225, .9);
+        rainforestTree(ox + 495, 226, 1.12);
+        rainforestTree(ox + 740, 224, .96);
+        context.globalAlpha = 1;
+
+        // Distant fire line for the final Wave; it stays above the play lane.
+        const fireStrength = smoothStep((worldWave - 4.65) / 1.05);
+        if (fireStrength > 0.01) {
+          context.save();
+          context.globalAlpha = fireStrength * .88;
+          for (let flame = 0; flame < 13; flame += 1) {
+            const fx = ox + 28 + flame * 72, pulse = Math.sin(time / 170 + flame * 1.8);
+            const height = 13 + (flame % 4) * 7 + pulse * 4;
+            context.fillStyle = flame % 2 ? "#d84c24" : "#f08a32";
+            context.beginPath();
+            context.moveTo(fx - 9, 177);
+            context.quadraticCurveTo(fx - 13, 177 - height * .55, fx + pulse * 4, 177 - height);
+            context.quadraticCurveTo(fx + 12, 177 - height * .45, fx + 10, 177);
+            context.closePath();
+            context.fill();
+            context.fillStyle = "rgba(255,194,91,.72)";
+            context.beginPath();
+            context.moveTo(fx - 3, 177);
+            context.quadraticCurveTo(fx - 5, 177 - height * .35, fx + 1, 177 - height * .62);
+            context.quadraticCurveTo(fx + 7, 177 - height * .25, fx + 5, 177);
+            context.closePath();
+            context.fill();
+          }
+          context.restore();
+        }
       }
       context.restore();
 
@@ -495,88 +531,68 @@ export default function MiniGamePage() {
         context.fillRect(0, 0, WORLD_WIDTH, GROUND_Y + 20);
       }
 
-      // Wave 3+: subtle earthquake dust and occasional falling stones.
-      const quakeStrength = smoothStep((worldWave - 2.0) / 0.65);
-      if (quakeStrength > 0.01) {
+      // Wave 3+: drifting forest haze and dry-season dust.
+      const dryStrength = smoothStep((worldWave - 2.0) / 1.8);
+      if (dryStrength > 0.01) {
         context.save();
-        context.globalAlpha = quakeStrength * 0.28;
-        for (let i = 0; i < 9; i += 1) {
-          const drift = (time * (0.035 + i * 0.004) + i * 137) % (WORLD_WIDTH + 30);
-          const x = WORLD_WIDTH - drift;
-          const y = 185 + ((i * 29) % 105) + Math.sin(time / 420 + i) * 4;
-          context.fillStyle = i % 2 ? "#b5a28b" : "#796b5d";
+        for (let i = 0; i < 12; i += 1) {
+          const drift = (time * (0.025 + (i % 4) * 0.009) + i * 113) % (WORLD_WIDTH + 50);
+          const x = WORLD_WIDTH - drift, y = 145 + ((i * 31) % 105) + Math.sin(time / 520 + i) * 5;
+          context.globalAlpha = dryStrength * (0.08 + (i % 3) * 0.025);
+          context.fillStyle = i % 2 ? "#c6a879" : "#7d7860";
           context.beginPath();
-          context.arc(x, y, 1.5 + (i % 3), 0, Math.PI * 2);
+          context.ellipse(x, y, 13 + (i % 4) * 4, 3 + (i % 2) * 2, -.12, 0, Math.PI * 2);
           context.fill();
         }
         context.restore();
       }
 
-      // Wave 4+: distant lightning flashes, kept faint so the runner remains readable.
-      const stormStrength = smoothStep((worldWave - 3.0) / 0.7);
-      const lightningPulse = Math.pow(Math.max(0, Math.sin(time / 1750 + 0.8)), 18);
-      if (stormStrength > 0.01 && lightningPulse > 0.12) {
+      // Wave 4+: layered smoke drifts across the distant sky, never obscuring the runner.
+      const smokeStrength = smoothStep((worldWave - 3.0) / 1.8);
+      if (smokeStrength > 0.01) {
         context.save();
-        context.globalAlpha = stormStrength * lightningPulse * 0.24;
-        context.fillStyle = "#dcecff";
-        context.fillRect(0, 0, WORLD_WIDTH, GROUND_Y);
-        context.globalAlpha *= 1.8;
-        context.strokeStyle = "#e9f5ff";
-        context.lineWidth = 2;
-        context.beginPath();
-        context.moveTo(690, 18);
-        context.lineTo(678, 42);
-        context.lineTo(690, 42);
-        context.lineTo(674, 70);
-        context.stroke();
+        for (let i = 0; i < 8; i += 1) {
+          const x = ((i * 151 + time * (0.012 + (i % 3) * 0.004)) % (WORLD_WIDTH + 180)) - 90;
+          const y = 82 + (i % 4) * 27 + Math.sin(time / 1100 + i) * 5;
+          const radius = 28 + (i % 3) * 12;
+          context.globalAlpha = smokeStrength * (0.10 + (i % 3) * 0.025);
+          context.fillStyle = i % 2 ? "#77716a" : "#8b7868";
+          context.beginPath();
+          context.ellipse(x, y, radius * 1.65, radius * .42, 0, 0, Math.PI * 2);
+          context.ellipse(x + radius * .6, y - 5, radius, radius * .36, 0, 0, Math.PI * 2);
+          context.fill();
+        }
         context.restore();
       }
 
-      // Wave 5+: ember and ash particles; deterministic motion avoids per-frame random allocations.
-      const emberStrength = smoothStep((worldWave - 4.0) / 0.7);
+      // Wave 5+: drifting ash and distant embers.
+      const emberStrength = smoothStep((worldWave - 4.0) / 1.2);
       if (emberStrength > 0.01) {
         context.save();
-        for (let i = 0; i < 22; i += 1) {
+        for (let i = 0; i < 24; i += 1) {
           const x = (i * 83 + time * (0.018 + (i % 4) * 0.008)) % WORLD_WIDTH;
-          const y = GROUND_Y - ((time * (0.018 + (i % 5) * 0.006) + i * 31) % 245);
-          const flicker = 0.45 + 0.55 * Math.abs(Math.sin(time / 190 + i * 1.7));
-          context.globalAlpha = emberStrength * flicker * 0.72;
-          context.fillStyle = i % 3 === 0 ? "#ffd27a" : "#ff7848";
+          const y = 80 + ((time * (0.018 + (i % 5) * 0.006) + i * 31) % 205);
+          const flicker = 0.4 + 0.6 * Math.abs(Math.sin(time / 190 + i * 1.7));
+          context.globalAlpha = emberStrength * flicker * 0.58;
+          context.fillStyle = i % 4 === 0 ? "#d6c3a2" : (i % 3 === 0 ? "#ffbd69" : "#e77a43");
           context.beginPath();
-          context.arc(x, y, i % 4 === 0 ? 2.2 : 1.35, 0, Math.PI * 2);
+          context.arc(x, y, i % 4 === 0 ? 2 : 1.3, 0, Math.PI * 2);
           context.fill();
         }
         context.restore();
       }
 
-      // Wave 6: one distant meteor crosses the horizon; it never enters the play lane.
-      const meteorStrength = smoothStep((worldWave - 5.0) / 0.7);
-      if (meteorStrength > 0.01) {
-        const meteorCycle = (time % 11500) / 11500;
-        const meteorX = 850 - meteorCycle * 330;
-        const meteorY = 78 + meteorCycle * 76;
+      // Wave 6: warm firelight glow replaces the old meteor effect.
+      const fireWorldStrength = smoothStep((worldWave - 5.0) / 0.85);
+      if (fireWorldStrength > 0.01) {
         context.save();
-        context.globalAlpha = meteorStrength * (meteorCycle < 0.82 ? 1 : 0);
-        context.strokeStyle = "rgba(255,151,83,.25)";
-        context.lineWidth = 13;
-        context.beginPath();
-        context.moveTo(meteorX + 72, meteorY - 34);
-        context.lineTo(meteorX, meteorY);
-        context.stroke();
-        context.strokeStyle = "rgba(255,207,126,.78)";
-        context.lineWidth = 4;
-        context.beginPath();
-        context.moveTo(meteorX + 55, meteorY - 26);
-        context.lineTo(meteorX, meteorY);
-        context.stroke();
-        const meteorGlow = context.createRadialGradient(meteorX, meteorY, 1, meteorX, meteorY, 25);
-        meteorGlow.addColorStop(0, "rgba(255,246,197,.95)");
-        meteorGlow.addColorStop(0.35, "rgba(255,135,72,.8)");
-        meteorGlow.addColorStop(1, "rgba(255,85,45,0)");
-        context.fillStyle = meteorGlow;
-        context.beginPath();
-        context.arc(meteorX, meteorY, 25, 0, Math.PI * 2);
-        context.fill();
+        const glow = context.createLinearGradient(0, 105, 0, GROUND_Y);
+        glow.addColorStop(0, "rgba(89,43,32,0)");
+        glow.addColorStop(.72, "rgba(181,72,34,.12)");
+        glow.addColorStop(1, "rgba(235,91,31,.17)");
+        context.globalAlpha = fireWorldStrength;
+        context.fillStyle = glow;
+        context.fillRect(0, 100, WORLD_WIDTH, GROUND_Y - 100);
         context.restore();
       }
 
