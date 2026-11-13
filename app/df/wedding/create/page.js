@@ -207,7 +207,7 @@ export default function CreateWeddingPage() {
 
         <section className="wedding-section wedding-platform-form wedding-builder-panel">
           <form className="wedding-form" onSubmit={e=>e.preventDefault()}>
-            {step===0 && <>{field("invitationTitle",t.title,"Contoh: Pernikahan Alex & Maya")}<p className="wedding-platform-hint">{t.titleHint}</p></>}
+            {step===0 && <><label htmlFor="invitationTitle">{t.title}<input id="invitationTitle" value={invitationTitle} onChange={e=>{setInvitationTitle(e.target.value);setNotice("");}} placeholder="Contoh: Pernikahan Alex & Maya" maxLength={100}/></label><p className="wedding-platform-hint">{t.titleHint}</p></>}
             {step===1 && <div className="wedding-builder-grid">
               {field("groom_name",t.groom)}{field("bride_name",t.bride)}
               {field("groom_parent_names",t.groomParents)}{field("bride_parent_names",t.brideParents)}
