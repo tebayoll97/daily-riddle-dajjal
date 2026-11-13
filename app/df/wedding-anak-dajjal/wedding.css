@@ -671,3 +671,28 @@
  .df-main .wedding-account-logout{font-size:.53rem}
  .df-main .wedding-platform .wedding-lang button{padding:.45rem .48rem}
 }
+
+
+/* Review page and compact responsive account row */
+.df-main .wedding-platform .wedding-topbar{display:flex;flex-wrap:wrap;align-items:center;row-gap:.25rem;height:auto;padding:.6rem 0}
+.df-main .wedding-platform .wedding-topbar-account{width:100%;display:flex;justify-content:flex-end;min-width:0}
+.df-main .wedding-account-controls{width:100%;flex-wrap:wrap;justify-content:flex-end}
+.df-main .wedding-account-dashboard{color:#a34f78;text-decoration:none;font:900 .65rem "Nunito Sans",Arial,sans-serif;white-space:nowrap}
+.df-main .wedding-account-dashboard:hover{text-decoration:underline}
+.df-main .wedding-account-email{max-width:min(48vw,360px)}
+.df-main .wedding-platform-delete{border:1px solid #e9c2ce;border-radius:99px;padding:.55rem .8rem;background:#fff4f5;color:#a14f68;font:900 .62rem "Nunito Sans",Arial,sans-serif;cursor:pointer}
+.df-main .wedding-platform-delete:disabled{opacity:.55}
+.df-main .wedding-live-preview{max-width:850px;margin:0 auto 2rem;border:1px solid #edcbd9;border-radius:28px;overflow:hidden;background:#fffaf6;box-shadow:0 18px 48px rgba(137,77,111,.12)}
+.df-main .wedding-live-cover{padding:clamp(2rem,6vw,4rem) 1.2rem;text-align:center;background:radial-gradient(circle at 10% 10%,#ffe0eb,transparent 40%),linear-gradient(145deg,#fffaf0,#fff0f5 55%,#f0faf3);color:#874768}
+.df-main .wedding-live-cover>span{font:2rem Georgia,serif;color:#c18a9f}
+.df-main .wedding-live-cover>p{font:800 .72rem "Nunito Sans",Arial,sans-serif;letter-spacing:.12em}
+.df-main .wedding-live-cover h2{max-width:100%;overflow-wrap:anywhere;font:700 clamp(1.7rem,5vw,3rem)/1.25 "Playfair Display",Georgia,serif;color:#a34f78!important}
+.df-main .wedding-live-cover h2 i{color:#c89a76;font-weight:400}
+.df-main .wedding-live-cover img{display:block;width:min(100%,420px);max-height:440px;object-fit:cover;margin:1.5rem auto;border:7px solid #fff;border-radius:22px;box-shadow:0 12px 32px #80506b22}
+.df-main .wedding-live-details{padding:clamp(1.2rem,4vw,2.5rem);text-align:center}
+.df-main .wedding-live-details h3{margin:1.5rem 0 .7rem;color:#a34f78;font:900 .75rem "Nunito Sans",Arial,sans-serif;letter-spacing:.12em}
+.df-main .wedding-live-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem}
+.df-main .wedding-live-gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}
+.df-main .wedding-review-actions{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;margin:1.5rem auto 3rem}
+.df-main .wedding-review-actions>*{min-width:min(100%,220px)}
+@media(max-width:480px){.df-main .wedding-live-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.df-main .wedding-account-email{max-width:40vw}.df-main .wedding-account-dashboard,.df-main .wedding-account-logout{font-size:.56rem}}
