@@ -13,7 +13,7 @@ const copy = {
     title: "Your story deserves", accent: "a beautiful invitation.",
     intro: "Create a personal digital wedding invitation, share it with the people you love, and keep every special moment in one place.",
     dashboard: "MY WEDDING DASHBOARD", create: "CREATE YOUR INVITATION", sample: "VIEW SAMPLE INVITATION",
-    loginPrompt: "Sign in with your Google account to create and manage wedding invitations.", google: "CONTINUE WITH GOOGLE", loggingIn: "CONNECTING...", loginError: "Google sign-in could not be started.", loginPrompt: "Sign in with your Google account to create and manage wedding invitations.", google: "CONTINUE WITH GOOGLE", loggingIn: "CONNECTING...", loginError: "Google sign-in could not be started.",
+    loginPrompt: "Sign in with your Google account to create and manage wedding invitations.", google: "CONTINUE WITH GOOGLE", loggingIn: "CONNECTING...", loginError: "Google sign-in could not be started.",
     limit: "One Dajjal Family account · Up to 3 invitations per account",
     steps: [
       ["01", "Choose your style", "Start with a visual theme and colors that reflect your celebration."],
@@ -27,7 +27,7 @@ const copy = {
     title: "Kisah istimewamu layak memiliki", accent: "undangan yang menawan.",
     intro: "Buat undangan pernikahan digital yang personal, bagikan kepada orang-orang tersayang, dan simpan setiap momen istimewa dalam satu tempat.",
     dashboard: "DASHBOARD UNDANGAN SAYA", create: "BUAT UNDANGAN", sample: "LIHAT CONTOH UNDANGAN",
-    loginPrompt: "Masuk menggunakan akun Google untuk membuat dan mengelola undangan pernikahan.", google: "LANJUTKAN DENGAN GOOGLE", loggingIn: "MENGHUBUNGKAN...", loginError: "Login Google belum dapat dimulai.", loginPrompt: "Masuk menggunakan akun Google untuk membuat dan mengelola undangan pernikahan.", google: "LANJUTKAN DENGAN GOOGLE", loggingIn: "MENGHUBUNGKAN...", loginError: "Login Google belum dapat dimulai.",
+    loginPrompt: "Masuk menggunakan akun Google untuk membuat dan mengelola undangan pernikahan.", google: "LANJUTKAN DENGAN GOOGLE", loggingIn: "MENGHUBUNGKAN...", loginError: "Login Google belum dapat dimulai.",
     limit: "Satu akun Dajjal Family · Maksimal 3 undangan per akun",
     steps: [
       ["01", "Pilih gaya undangan", "Mulai dengan tema visual dan warna yang mencerminkan perayaanmu."],
