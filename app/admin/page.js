@@ -192,8 +192,8 @@ export default function AdminDashboardPage() {
       accent: "from-blue-500/20 via-indigo-500/5",
     },
     {
-      href: null,
-      icon: "📊",
+      href: "/admin/wedding-gallery",
+      icon: "💒",
       number: "03",
       title: t.gallery,
       description: t.galleryDesc,
