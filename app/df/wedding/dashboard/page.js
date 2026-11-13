@@ -53,7 +53,7 @@ export default function WeddingDashboardPage() {
         <section className="wedding-platform-list">{items.map(item=><article key={item.id} className="wedding-section wedding-platform-invitation">
           <div className="wedding-platform-meta"><span className={item.is_active?"wedding-status-published":"wedding-status-draft"}>{item.is_active?t.published:t.draft}</span><time>{new Date(item.created_at).toLocaleDateString(language==="id"?"id-ID":"en-US")}</time></div>
           <h2>{item.title}</h2><p className="wedding-platform-slug">/df/wedding={item.slug}</p>
-          <div className="wedding-platform-card-actions"><Link href={`/df/wedding/${item.id}/details`} className="wedding-platform-link">{language==="id"?"Lanjutkan pengaturan →":"Continue editing →"}</Link><Link href={`/df/wedding=${encodeURIComponent(item.slug)}`} className="wedding-platform-link">{t.preview}</Link></div>
+          <div className="wedding-platform-card-actions"><Link href={`/df/wedding/create?id=${item.id}`} className="wedding-platform-link">{language==="id"?"Lanjutkan pengaturan →":"Continue editing →"}</Link><Link href={`/df/wedding=${encodeURIComponent(item.slug)}`} className="wedding-platform-link">{t.preview}</Link></div>
         </article>)}</section>}
     </div>
     <footer className="wedding-footer"><strong>DAJJAL FAMILY · WEDDING EXPERIENCES</strong></footer>
