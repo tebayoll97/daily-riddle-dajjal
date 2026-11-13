@@ -842,3 +842,32 @@
   top:max(8px,env(safe-area-inset-top));
   right:clamp(132px,18vw,174px);
 }
+
+
+/* Landscape controls: sound, pause, then icon-only exit in one vertical stack. */
+.mg-fullscreen-icon-stack .mg-fullscreen-exit,
+.mg-fullscreen-arena:fullscreen .mg-fullscreen-tools .mg-fullscreen-exit {
+  position:static !important;
+  inset:auto !important;
+  display:inline-flex !important;
+  width:38px !important;
+  height:38px !important;
+  min-width:38px !important;
+  min-height:38px !important;
+  align-items:center;
+  justify-content:center;
+  margin:0;
+  padding:0 !important;
+  border:1px solid rgba(255,255,255,.36) !important;
+  border-radius:12px !important;
+  color:#fff !important;
+  background:rgba(11,19,24,.72) !important;
+  font-size:22px !important;
+  font-weight:900 !important;
+  line-height:1 !important;
+  letter-spacing:0 !important;
+  backdrop-filter:blur(8px);
+}
+.mg-fullscreen-icon-stack .mg-fullscreen-exit:active {
+  transform:scale(.94);
+}
