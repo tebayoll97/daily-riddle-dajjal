@@ -597,3 +597,39 @@
 .df-main .wedding-platform-card-actions{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:1rem}
 .df-main .wedding-platform-card-actions .wedding-platform-link{margin-top:0}
 @media(max-width:480px){.df-main .wedding-platform-card-actions{flex-direction:column;align-items:flex-start;gap:.75rem}}
+
+
+/* Single-page wedding invitation wizard */
+.df-main .wedding-builder-page{padding-bottom:110px}
+.df-main .wedding-builder-progress{padding:1.2rem clamp(1rem,3vw,2rem)!important;text-align:left!important}
+.df-main .wedding-builder-progress-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;color:#a35b7d;font:800 .72rem "Nunito Sans",Arial,sans-serif;letter-spacing:.08em}
+.df-main .wedding-builder-progress-top strong{font:800 .9rem "Nunito Sans",Arial,sans-serif;color:#8f4c70!important}
+.df-main .wedding-builder-progress-track{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.45rem;margin:1rem 0 .7rem}
+.df-main .wedding-builder-progress-track button{height:7px;border:0;border-radius:99px;background:#eadce3;cursor:pointer}
+.df-main .wedding-builder-progress-track button.is-done{background:linear-gradient(90deg,#d98eae,#e9bd7a)}
+.df-main .wedding-builder-progress>p{margin:0;color:#98758a;font:600 .78rem "Nunito Sans",Arial,sans-serif}
+.df-main .wedding-builder-panel{min-height:300px}
+.df-main .wedding-builder-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.df-main .wedding-builder-full{grid-column:1/-1}
+.df-main .wedding-builder-panel .wedding-form{width:100%;max-width:760px}
+.df-main .wedding-builder-panel .wedding-form select{width:100%;min-width:0;border:1px solid #e8bfd0;border-radius:13px;padding:.9rem;background:#fffdfb;color:#80506b;font:.9rem "Nunito Sans",Arial,sans-serif}
+.df-main .wedding-builder-panel .wedding-form input[type=date],
+.df-main .wedding-builder-panel .wedding-form input[type=time]{min-height:46px}
+.df-main .wedding-builder-toggle{display:flex!important;align-items:center;gap:.7rem;padding:1rem;border:1px solid #efcfdd;border-radius:14px;background:#fff9f5}
+.df-main .wedding-builder-toggle input{width:18px!important;height:18px;accent-color:#b96e90}
+.df-main .wedding-builder-review{text-align:center;padding:2rem 1rem;color:#80506b;font-family:"Nunito Sans",Arial,sans-serif}
+.df-main .wedding-builder-review h2{font:700 clamp(1.4rem,3vw,2rem) "Playfair Display",Georgia,serif;color:#a34f78!important}
+.df-main .wedding-builder-navigation{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:1rem 0 2rem}
+.df-main .wedding-builder-navigation button{min-width:150px}
+.df-main .wedding-builder-secondary{min-height:48px;padding:.8rem 1.2rem;border:1px solid #e4b9ca;border-radius:99px;background:#fff;color:#92506e;font:900 .68rem "Nunito Sans",Arial,sans-serif;letter-spacing:.08em}
+.df-main .wedding-builder-secondary:disabled{opacity:.35}
+.df-main .wedding-builder-save-float{position:fixed;z-index:1000;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:center;gap:.6rem;min-height:54px;padding:.9rem 1.35rem;border:1px solid #e3b36d;border-radius:999px;background:linear-gradient(120deg,#ffb8ce,#ffd58e 55%,#c9eedb);color:#653b56;box-shadow:0 12px 32px rgba(137,77,111,.25);font:900 .72rem "Nunito Sans",Arial,sans-serif;letter-spacing:.08em;cursor:pointer}
+.df-main .wedding-builder-save-float span{font-size:1.1rem}
+.df-main .wedding-builder-save-float:disabled{opacity:.65;cursor:wait}
+@media(max-width:650px){
+ .df-main .wedding-builder-grid{grid-template-columns:1fr}
+ .df-main .wedding-builder-full{grid-column:auto}
+ .df-main .wedding-builder-navigation button{min-width:0;flex:1}
+ .df-main .wedding-builder-save-float{right:14px;bottom:max(14px,env(safe-area-inset-bottom));min-height:50px;padding:.8rem 1.05rem;font-size:.65rem}
+ .df-main .wedding-builder-progress-top{align-items:flex-start;flex-direction:column;gap:.4rem}
+}
