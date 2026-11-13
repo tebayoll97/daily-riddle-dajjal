@@ -52,7 +52,7 @@ const copy = {
     music:"URL musik / audio", gallery:"URL foto galeri (satu baris untuk setiap foto)",
     story:"Love Story", rsvp:"Aktifkan RSVP", guestbook:"Aktifkan buku tamu", gifts:"Informasi hadiah (opsional)",
     save:"SIMPAN DRAF", saving:"MENYIMPAN…", saved:"Draf berhasil disimpan.", error:"Draf belum berhasil disimpan.",
-    previous:"SEBELUMNYA", next:"BERIKUTNYA", continue:"LANJUT PENGATURAN", finish:"TINJAU DRAF", review:"Draf undangan siap ditinjau.",
+    previous:"SEBELUMNYA", next:"BERIKUTNYA", continue:"LANJUT PENGATURAN", finish:"TINJAU UNDANGAN", review:"Draf undangan siap ditinjau.",
     noTitle:"Masukkan judul undangan (minimal 3 karakter).", createError:"Undangan belum berhasil dibuat.",
     themeRoyal:"Royal Romance", themeGarden:"Garden Bloom", themeClassic:"Classic Elegance",
     rose:"Dusty Rose", peach:"Peach", mint:"Sage & Mint", lavender:"Lavender",
@@ -248,7 +248,7 @@ export default function CreateWeddingPage() {
         </section>
         <div className="wedding-builder-navigation">
           <button type="button" className="wedding-builder-secondary" onClick={previousStep} disabled={step===0}>{t.previous}</button>
-          {step<6 ? <button type="button" className="wedding-primary" onClick={nextStep} disabled={saving}>{step===0?t.continue:t.next} →</button> : <button type="button" className="wedding-primary" onClick={()=>saveDraft(6)} disabled={saving}>{t.finish}</button>}
+          {step<6 ? <button type="button" className="wedding-primary" onClick={nextStep} disabled={saving}>{step===0?t.continue:t.next} →</button> : <button type="button" className="wedding-primary" onClick={async()=>{const ok=await saveDraft(6);if(ok){const id=invitationId || new URLSearchParams(window.location.search).get("id");router.push(`/df/wedding/preview?id=${id}`);}}} disabled={saving}>{language==="id"?"TINJAU UNDANGAN":"REVIEW INVITATION"} →</button>}
         </div>
       </>}
     </div>
