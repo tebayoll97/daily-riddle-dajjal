@@ -1,6 +1,5 @@
 import "./globals.css";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
+import RouteChrome from "./components/RouteChrome";
 import GlobalAudioController from "./components/GlobalAudioController";
 import { LanguageProvider } from "./components/LanguageProvider";
 
@@ -30,15 +29,7 @@ export default function RootLayout({ children }) {
       <body className="min-h-screen flex flex-col">
         <LanguageProvider>
           <GlobalAudioController />
-          <Header />
-
-          <div className="flex-1 w-full">
-            <div className="ui-route-frame">
-              {children}
-            </div>
-          </div>
-
-          <Footer />
+          <RouteChrome>{children}</RouteChrome>
         </LanguageProvider>
       </body>
     </html>
