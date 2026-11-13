@@ -836,3 +836,9 @@
   .mg-fullscreen-tools .mg-fullscreen-exit { right:clamp(128px,17vw,164px); }
   .mg-fullscreen-icon-stack { top:max(54px,calc(env(safe-area-inset-top) + 46px)); }
 }
+
+/* Keep the fullscreen exit control immediately to the left of the canvas Best Distance HUD. */
+.mg-fullscreen-arena:fullscreen .mg-fullscreen-tools .mg-fullscreen-exit {
+  top:max(8px,env(safe-area-inset-top));
+  right:clamp(132px,18vw,174px);
+}
