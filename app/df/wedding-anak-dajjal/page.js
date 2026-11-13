@@ -125,6 +125,25 @@ export default function WeddingInvitationPage() {
     return () => { active = false; };
   }, []);
 
+  useEffect(() => {
+    if (!opened) return;
+    const nodes = document.querySelectorAll(".wedding-reveal");
+    if (!("IntersectionObserver" in window)) {
+      nodes.forEach((node) => node.classList.add("is-visible"));
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -45px 0px" });
+    nodes.forEach((node) => observer.observe(node));
+    return () => observer.disconnect();
+  }, [opened]);
+
   const submitRsvp = async (event) => {
     event.preventDefault();
     setRsvpLoading(true);
@@ -226,7 +245,7 @@ export default function WeddingInvitationPage() {
 
       {opened && (
         <div className="wedding-content">
-          <section className="wedding-hero">
+          <section className="wedding-hero wedding-reveal">
             <div className="wedding-ornament">✦ ❧ ✦</div>
             <p className="wedding-kicker">{t.opened}</p>
             <h1>{t.title}</h1>
@@ -246,7 +265,7 @@ export default function WeddingInvitationPage() {
             <p className="couple-subtitle">MALIKA — KEDELAI HITAM PILIHAN</p>
           </section>
 
-          <section className="wedding-section">
+          <section className="wedding-section wedding-reveal">
             <p className="wedding-kicker">SAVE THE CELEBRATION</p>
             <h2>{t.reception}</h2>
             <div className="detail-grid">
@@ -257,7 +276,7 @@ export default function WeddingInvitationPage() {
             <div className="wedding-note">{t.schedule}<p>{eventInfo?.schedule || t.scheduleText}</p></div>
           </section>
 
-          <section className="wedding-section wedding-form-section">
+          <section className="wedding-section wedding-form-section wedding-reveal">
             <p className="wedding-kicker">WE HOPE YOU CAN JOIN</p>
             <h2>{t.rsvp}</h2>
             <p className="section-copy">{t.rsvpText}</p>
@@ -270,7 +289,7 @@ export default function WeddingInvitationPage() {
             </form>
           </section>
 
-          <section className="wedding-section wedding-guestbook">
+          <section className="wedding-section wedding-guestbook wedding-reveal">
             <p className="wedding-kicker">WORDS FROM THE HEART</p>
             <h2>{t.guestbook}</h2>
             <p className="section-copy">{t.guestbookText}</p>
@@ -285,7 +304,7 @@ export default function WeddingInvitationPage() {
             
           </section>
 
-          <section className="wedding-share">
+          <section className="wedding-share wedding-reveal">
             <p className="wedding-kicker">SPREAD THE JOY</p>
             <h2>{t.couple}</h2>
             <div className="share-actions">
