@@ -448,3 +448,61 @@
    max-width:720px!important;
  }
 }
+
+/* Unified wedding text palette: replace leftover near-black/basic text */
+.df-main .wedding-page{
+  --w-text-primary:#873f68;
+  --w-text-secondary:#986080;
+  --w-text-muted:#ad7290;
+  color:var(--w-text-secondary)!important;
+}
+.df-main .wedding-page p,
+.df-main .wedding-page small,
+.df-main .wedding-page label,
+.df-main .wedding-page li,
+.df-main .wedding-page dt,
+.df-main .wedding-page dd,
+.df-main .wedding-page .detail-grid article,
+.df-main .wedding-page .detail-grid article h3,
+.df-main .wedding-page .wedding-note,
+.df-main .wedding-page .guestbook-note,
+.df-main .wedding-page .form-notice,
+.df-main .wedding-page .approved-messages p,
+.df-main .wedding-page .approved-messages strong,
+.df-main .wedding-page .opening-invite,
+.df-main .wedding-page .opening-footnote,
+.df-main .wedding-page .couple-placeholder,
+.df-main .wedding-page .couple-placeholder small{
+  color:var(--w-text-secondary)!important;
+  -webkit-text-fill-color:var(--w-text-secondary);
+}
+.df-main .wedding-page h1,
+.df-main .wedding-page h2,
+.df-main .wedding-page h3,
+.df-main .wedding-page strong,
+.df-main .wedding-page .couple-names,
+.df-main .wedding-page .wedding-section-heading{
+  color:var(--w-text-primary)!important;
+}
+.df-main .wedding-page .wedding-kicker,
+.df-main .wedding-page .couple-subtitle,
+.df-main .wedding-page .detail-grid article>p,
+.df-main .wedding-page .opening-footnote{
+  color:var(--w-text-muted)!important;
+  -webkit-text-fill-color:var(--w-text-muted);
+}
+.df-main .wedding-page .wedding-form input,
+.df-main .wedding-page .wedding-form textarea,
+.df-main .wedding-page .wedding-form select{
+  color:#80506b!important;
+  caret-color:#b85f88;
+}
+.df-main .wedding-page .wedding-form input::placeholder,
+.df-main .wedding-page .wedding-form textarea::placeholder{
+  color:#bd91a7!important;opacity:1;
+}
+.df-main .wedding-page .wedding-primary,
+.df-main .wedding-page .share-actions button,
+.df-main .wedding-page .wedding-music{
+  color:#80415f!important;
+}
