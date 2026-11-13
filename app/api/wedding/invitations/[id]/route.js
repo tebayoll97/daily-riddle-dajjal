@@ -10,7 +10,7 @@ const columns = [
 ];
 
 async function getOwner(request, invitationId) {
-  const token = (request.headers.get("authorization") || "").replace(/^Bearer\\s+/i, "");
+  const token = (request.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
   if (!token) return { error: "Sign in to continue.", status: 401 };
   const { data: auth, error: authError } = await supabaseAdmin.auth.getUser(token);
   if (authError || !auth?.user || auth.user.is_anonymous) return { error: "Your session has expired. Please sign in again.", status: 401 };
@@ -59,7 +59,7 @@ export async function PATCH(request, { params }) {
     }
     if (Object.prototype.hasOwnProperty.call(body, "event_date")) {
       const value = String(body.event_date || "");
-      if (value && !/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return fail("Invalid event date.", 400);
+      if (value && !/^\d{4}-\d{2}-\d{2}$/.test(value)) return fail("Invalid event date.", 400);
       profile.event_date = value || null;
     }
     for (const field of ["event_schedule", "gallery_urls"]) {
