@@ -191,7 +191,7 @@ export default function CreateWeddingPage() {
   return <div className="df-main"><main className="wedding-page wedding-platform wedding-builder-page">
     <header className="wedding-topbar">
       <Link href="/df/wedding/dashboard" className="wedding-back">← <span>{t.back}</span></Link>
-      <div className="wedding-topbar-account"><WeddingAccountControls /><div className="wedding-lang"><button type="button" onClick={()=>setLanguage("en")} aria-pressed={language==="en"}>EN</button><button type="button" onClick={()=>setLanguage("id")} aria-pressed={language==="id"}>ID</button></div>
+      <div className="wedding-topbar-account"><WeddingAccountControls /><div className="wedding-lang"><button type="button" onClick={()=>setLanguage("en")} aria-pressed={language==="en"}>EN</button><button type="button" onClick={()=>setLanguage("id")} aria-pressed={language==="id"}>ID</button></div></div>
     </header>
     <div className="wedding-content wedding-platform-content">
       <section className="wedding-hero wedding-platform-heading">
