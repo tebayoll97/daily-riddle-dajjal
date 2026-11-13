@@ -265,8 +265,8 @@ export default function WeddingInvitationPage() {
               <label>{t.name}<input required name="guest_name" placeholder={t.name} maxLength={100} /></label>
               <label>{t.guests}<input required name="guest_count" type="number" min="1" step="1" defaultValue="1" /></label>
               <label>{t.attendance}<select name="attendance" defaultValue="yes"><option value="yes">{t.yes}</option><option value="no">{t.no}</option></select></label>
-              <button className="wedding-primary" type="submit">{t.send}</button>
-              {formNotice && <p className="form-notice" role="status">{t.coming}</p>}
+              <button className="wedding-primary" type="submit" disabled={rsvpLoading}>{rsvpLoading ? t.sending : t.send}</button>
+              {rsvpStatus && <p className="form-notice" role="status">{rsvpStatus === "success" ? t.rsvpSuccess : t.submitError}</p>}
             </form>
           </section>
 
@@ -277,9 +277,12 @@ export default function WeddingInvitationPage() {
             <form className="wedding-form" onSubmit={submitGuestbook}>
               <label>{t.name}<input required name="guestbook_name" maxLength="100" placeholder={t.name} /></label>
               <label>{t.message}<textarea required name="guestbook_message" rows="4" maxLength="500" placeholder={t.message} /></label>
-              <button className="wedding-primary" type="submit" disabled={guestbookLoading}>{guestbookLoading ? t.sending : t.sign}</button>\n              {guestbookStatus && <p className="form-notice" role="status">{guestbookStatus === "success" ? t.guestbookSuccess : t.submitError}</p>}
+              <button className="wedding-primary" type="submit" disabled={guestbookLoading}>{guestbookLoading ? t.sending : t.sign}</button>
+              {guestbookStatus && <p className="form-notice" role="status">{guestbookStatus === "success" ? t.guestbookSuccess : t.submitError}</p>}
             </form>
-            <p className="guestbook-note">✧ {t.note}</p>\n            {guestbookEntries.length > 0 && <div className="approved-messages">{guestbookEntries.map((entry) => <article key={entry.id}><strong>{entry.guest_name}</strong><p>{entry.message}</p></article>)}</div>}\n            {guestbookEntries.length > 0 && <div className="approved-messages">{guestbookEntries.map((entry) => <article key={entry.id}><strong>{entry.guest_name}</strong><p>{entry.message}</p></article>)}</div>}
+            <p className="guestbook-note">✧ {t.note}</p>
+            {guestbookEntries.length > 0 && <div className="approved-messages">{guestbookEntries.map((entry) => <article key={entry.id}><strong>{entry.guest_name}</strong><p>{entry.message}</p></article>)}</div>}
+            
           </section>
 
           <section className="wedding-share">
