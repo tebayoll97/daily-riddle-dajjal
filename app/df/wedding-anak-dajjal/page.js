@@ -98,14 +98,84 @@ export default function WeddingInvitationPage() {
   const { language, setLanguage } = useLanguage();
   const t = words[language] || words.en;
   const [opened, setOpened] = useState(false);
-  const [musicNotice, setMusicNotice] = useState(false);
-  const [formNotice, setFormNotice] = useState(false);
+  const [guestName, setGuestName] = useState("");
+  const [eventInfo, setEventInfo] = useState(null);
+  const [guestbookEntries, setGuestbookEntries] = useState([]);
+  const [rsvpStatus, setRsvpStatus] = useState("");
+  const [guestbookStatus, setGuestbookStatus] = useState("");
+  const [rsvpLoading, setRsvpLoading] = useState(false);
+  const [guestbookLoading, setGuestbookLoading] = useState(false);
+  const [musicOn, setMusicOn] = useState(false);
   const [copied, setCopied] = useState(false);
+  const audioRef = useRef(null);
 
-  const guestName = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    return new URLSearchParams(window.location.search).get("to") || "";
+  useEffect(() => {
+    setGuestName(new URLSearchParams(window.location.search).get("to") || "");
+    let active = true;
+    async function loadWeddingData() {
+      const [settingsResult, messagesResult] = await Promise.all([
+        supabase.from("df_event_settings").select("*").eq("id", true).maybeSingle(),
+        supabase.from("df_guestbook").select("id, guest_name, message, created_at").eq("is_approved", true).order("created_at", { ascending: false }).limit(30),
+      ]);
+      if (!active) return;
+      if (settingsResult.data) setEventInfo(settingsResult.data);
+      if (messagesResult.data) setGuestbookEntries(messagesResult.data);
+    }
+    loadWeddingData();
+    return () => { active = false; };
   }, []);
+
+  const submitRsvp = async (event) => {
+    event.preventDefault();
+    setRsvpLoading(true);
+    setRsvpStatus("");
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const guestCount = Number(data.get("guest_count"));
+    const { error } = await supabase.from("df_rsvps").insert({
+      guest_name: String(data.get("guest_name") || "").trim(),
+      guest_count: guestCount,
+      attendance: String(data.get("attendance") || "yes"),
+      invited_name: guestName || null,
+      language,
+    });
+    setRsvpLoading(false);
+    if (error) { setRsvpStatus("error"); return; }
+    form.reset();
+    setRsvpStatus("success");
+  };
+
+  const submitGuestbook = async (event) => {
+    event.preventDefault();
+    setGuestbookLoading(true);
+    setGuestbookStatus("");
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const { error } = await supabase.from("df_guestbook").insert({
+      guest_name: String(data.get("guestbook_name") || "").trim(),
+      message: String(data.get("guestbook_message") || "").trim(),
+      language,
+    });
+    setGuestbookLoading(false);
+    if (error) { setGuestbookStatus("error"); return; }
+    form.reset();
+    setGuestbookStatus("success");
+  };
+
+  const toggleMusic = async () => {
+    if (!eventInfo?.music_url || !audioRef.current) return;
+    if (musicOn) {
+      audioRef.current.pause();
+      setMusicOn(false);
+      return;
+    }
+    try {
+      await audioRef.current.play();
+      setMusicOn(true);
+    } catch {
+      setMusicOn(false);
+    }
+  };
 
   const copyLink = async () => {
     try {
@@ -163,11 +233,11 @@ export default function WeddingInvitationPage() {
             <p className="wedding-intro">{t.intro}</p>
             <div className="couple-frame">
               <div className="couple-placeholder">
-                <span className="placeholder-crown">♛</span>
+                {eventInfo?.couple_photo_url ? <img className="couple-photo" src={eventInfo.couple_photo_url} alt={t.photoAlt} /> : <><span className="placeholder-crown">♛</span>
                 <strong>ANAK DAJJAL</strong>
                 <span className="placeholder-amp">&</span>
                 <strong>MALIKA</strong>
-                <small>THE COUPLE&apos;S PHOTO WILL APPEAR HERE</small>
+                <small>THE COUPLE&apos;S PHOTO WILL APPEAR HERE</small></>}
               </div>
               <span className="frame-corner frame-tl">✦</span><span className="frame-corner frame-tr">✦</span>
               <span className="frame-corner frame-bl">✦</span><span className="frame-corner frame-br">✦</span>
@@ -209,7 +279,7 @@ export default function WeddingInvitationPage() {
               <label>{t.message}<textarea required name="guestbook_message" rows="4" maxLength="500" placeholder={t.message} /></label>
               <button className="wedding-primary" type="submit" disabled={guestbookLoading}>{guestbookLoading ? t.sending : t.sign}</button>\n              {guestbookStatus && <p className="form-notice" role="status">{guestbookStatus === "success" ? t.guestbookSuccess : t.submitError}</p>}
             </form>
-            <p className="guestbook-note">✧ {t.note}</p>\n            {guestbookEntries.length > 0 && <div className="approved-messages">{guestbookEntries.map((entry) => <article key={entry.id}><strong>{entry.guest_name}</strong><p>{entry.message}</p></article>)}</div>}
+            <p className="guestbook-note">✧ {t.note}</p>\n            {guestbookEntries.length > 0 && <div className="approved-messages">{guestbookEntries.map((entry) => <article key={entry.id}><strong>{entry.guest_name}</strong><p>{entry.message}</p></article>)}</div>}\n            {guestbookEntries.length > 0 && <div className="approved-messages">{guestbookEntries.map((entry) => <article key={entry.id}><strong>{entry.guest_name}</strong><p>{entry.message}</p></article>)}</div>}
           </section>
 
           <section className="wedding-share">
