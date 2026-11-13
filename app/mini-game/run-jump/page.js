@@ -703,7 +703,12 @@ export default function MiniGamePage() {
       }
       game.obstacles.forEach((obstacle) => {
         const cx = obstacle.x + obstacle.width / 2;
+        const flying = obstacle.type === "ptero" || obstacle.type === "archaeo";
+        // Render every obstacle at 80% size, centered on its original position.
         context.save();
+        context.translate(cx, flying ? obstacle.y : GROUND_Y);
+        context.scale(0.8, 0.8);
+        context.translate(-cx, flying ? -obstacle.y : -GROUND_Y);
         context.lineWidth = 3;
         context.lineJoin = "round";
         if (obstacle.type === "rock") {
@@ -867,9 +872,15 @@ export default function MiniGamePage() {
       };
       const collided = game.obstacles.some((obstacle) => {
         const flying = obstacle.type === "ptero" || obstacle.type === "archaeo";
-        const top = flying ? obstacle.y - 27 : obstacle.type === "rock" ? GROUND_Y - 35 : GROUND_Y - 28;
-        const bottom = flying ? obstacle.y + 9 : GROUND_Y;
-        return playerBox.right > obstacle.x + 5 && playerBox.left < obstacle.x + obstacle.width - 4 && playerBox.bottom > top && playerBox.top < bottom;
+        const originalTop = flying ? obstacle.y - 27 : obstacle.type === "rock" ? GROUND_Y - 35 : GROUND_Y - 28;
+        const originalBottom = flying ? obstacle.y + 9 : GROUND_Y;
+        const centerY = (originalTop + originalBottom) / 2;
+        const halfHeight = (originalBottom - originalTop) * 0.4;
+        const hitLeft = obstacle.x + obstacle.width * 0.1;
+        const hitRight = obstacle.x + obstacle.width * 0.9;
+        const hitTop = centerY - halfHeight;
+        const hitBottom = centerY + halfHeight;
+        return playerBox.right > hitLeft && playerBox.left < hitRight && playerBox.bottom > hitTop && playerBox.top < hitBottom;
       });
 
       if (points !== game.lastScore) {
