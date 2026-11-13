@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import "bootstrap/dist/css/bootstrap-grid.min.css";
+import AOS from "aos";
+import "aos/dist/aos.css";
 import { supabase } from "../../../lib/supabase";
 import { useLanguage } from "../../components/LanguageProvider";
 import "./wedding.css";
@@ -125,18 +128,17 @@ export default function WeddingInvitationPage() {
 
   useEffect(() => {
     if (!opened) return;
-    const nodes = document.querySelectorAll(".wedding-reveal");
-    if (!("IntersectionObserver" in window)) {
-      nodes.forEach((node) => node.classList.add("is-visible"));
-      return;
-    }
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        entry.target.classList.toggle("is-visible", entry.isIntersecting);
-      });
-    }, { threshold: 0.12, rootMargin: "0px 0px -45px 0px" });
-    nodes.forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
+    AOS.init({
+      duration: 850,
+      easing: "ease-out-cubic",
+      offset: 90,
+      once: false,
+      mirror: true,
+      anchorPlacement: "top-bottom",
+      disable: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    });
+    AOS.refreshHard();
+    return () => AOS.refresh();
   }, [opened]);
 
   const submitGuestbook = async (event) => {
@@ -216,7 +218,7 @@ export default function WeddingInvitationPage() {
 
       {opened && (
         <div className="wedding-content">
-          <section className="wedding-hero wedding-reveal reveal-from-left">
+          <section className="wedding-hero wedding-reveal" data-aos="fade-right">
             <div className="wedding-ornament">✦ ❧ ✦</div>
             <p className="wedding-kicker">{t.opened}</p>
             <h1>{t.title}</h1>
@@ -236,7 +238,7 @@ export default function WeddingInvitationPage() {
             <p className="couple-subtitle">MALIKA — KEDELAI HITAM PILIHAN</p>
           </section>
 
-          <section className="wedding-section wedding-reveal reveal-from-right">
+          <section className="wedding-section wedding-reveal" data-aos="fade-left">
             <p className="wedding-kicker">SAVE THE CELEBRATION</p>
             <h2 className="wedding-section-heading">{t.reception}</h2>
             <div className="detail-grid">
@@ -247,7 +249,7 @@ export default function WeddingInvitationPage() {
             <div className="wedding-note">{t.schedule}<p>{eventInfo?.schedule || t.scheduleText}</p></div>
           </section>
 
-          <section className="wedding-section wedding-guestbook wedding-reveal reveal-from-left">
+          <section className="wedding-section wedding-guestbook wedding-reveal" data-aos="fade-right">
             <p className="wedding-kicker">WORDS FROM THE HEART</p>
             <h2 className="wedding-section-heading">{t.guestbook}</h2>
             <p className="section-copy">{t.guestbookText}</p>
@@ -262,7 +264,7 @@ export default function WeddingInvitationPage() {
             
           </section>
 
-          <section className="wedding-share wedding-reveal reveal-from-right">
+          <section className="wedding-share wedding-reveal" data-aos="fade-left">
             <p className="wedding-kicker">SPREAD THE JOY</p>
             <h2 className="wedding-section-heading">{t.couple}</h2>
             <div className="share-actions">
