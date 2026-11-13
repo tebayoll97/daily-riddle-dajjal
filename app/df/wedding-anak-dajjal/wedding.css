@@ -421,3 +421,30 @@
  .df-main .wedding-page .wedding-section-heading,
  .df-main .wedding-page .couple-names{padding:.55rem .45rem!important}
 }
+
+/* Intro paragraph: centered on every viewport, with vivid readable contrast */
+.df-main .wedding-page .wedding-hero > .wedding-intro{
+  display:block!important;
+  width:min(100%,760px)!important;
+  max-width:760px!important;
+  margin:1rem auto 1.8rem!important;
+  padding:0 clamp(.5rem,2vw,1.25rem)!important;
+  text-align:center!important;
+  text-align-last:center!important;
+  color:#873f68!important;
+  -webkit-text-fill-color:#873f68!important;
+  font-family:var(--w-body)!important;
+  font-size:clamp(1rem,1.35vw,1.15rem)!important;
+  font-weight:700!important;
+  line-height:1.9!important;
+  letter-spacing:.012em!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.75);
+  overflow-wrap:normal!important;
+  text-wrap:pretty;
+}
+@media(min-width:721px){
+ .df-main .wedding-page .wedding-hero > .wedding-intro{
+   margin-left:auto!important;margin-right:auto!important;
+   max-width:720px!important;
+ }
+}
