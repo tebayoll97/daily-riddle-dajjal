@@ -771,30 +771,30 @@ main :is(.ui-subtitle,.ui-section-subtitle) {
 }
 /* Any page heading is the root H1-level anchor; its description stays
    visually grouped with it while the route frame contains the full page. */
-.ui-route-frame main h1:not(.welcome-title) {
+.ui-route-frame main:not(.wedding-page) h1:not(.welcome-title) {
   width: 100%;
   margin: 0 0 .65rem !important;
 }
-.ui-route-frame main h1:not(.welcome-title) + p {
+.ui-route-frame main:not(.wedding-page) h1:not(.welcome-title) + p {
   margin: -.2rem 0 1.1rem !important;
   padding-inline: .15rem;
 }
 /* Semantic section frames: H2 is a section container, H3/H4 remain
    component/subcomponent headings inside their parent section. */
-.ui-route-frame main section:has(> h2),
-.ui-route-frame main section:has(> div > h2),
-.ui-route-frame main section:has(> h2.ui-section-title),
-.ui-route-frame main section:has(> div > h2.ui-section-title) {
+.ui-route-frame main:not(.wedding-page) section:has(> h2),
+.ui-route-frame main:not(.wedding-page) section:has(> div > h2),
+.ui-route-frame main:not(.wedding-page) section:has(> h2.ui-section-title),
+.ui-route-frame main:not(.wedding-page) section:has(> div > h2.ui-section-title) {
   border: 1px solid var(--ui-border) !important;
   border-radius: var(--ui-radius-card) !important;
   background: linear-gradient(145deg, rgba(22,17,34,.94), rgba(13,12,23,.94)) !important;
   padding: clamp(.8rem, 1.4vw, 1.2rem);
   min-width: 0;
 }
-.ui-route-frame main section:has(> h3),
-.ui-route-frame main section:has(> div > h3),
-.ui-route-frame main section:has(> h4),
-.ui-route-frame main section:has(> div > h4) {
+.ui-route-frame main:not(.wedding-page) section:has(> h3),
+.ui-route-frame main:not(.wedding-page) section:has(> div > h3),
+.ui-route-frame main:not(.wedding-page) section:has(> h4),
+.ui-route-frame main:not(.wedding-page) section:has(> div > h4) {
   border: 1px solid rgba(168,85,247,.14);
   border-radius: 12px;
   background: rgba(21,16,32,.72);
@@ -837,4 +837,35 @@ body:has(.mini-game-screen) > * { min-height: 0; }
   .mini-game-screen > div { gap: .35rem !important; }
   .mini-game-screen .ui-title { padding-block: .4rem !important; }
   .mini-game-screen .ui-subtitle { margin-top: .25rem !important; }
+}
+
+
+/* Wedding pages own their complete visual system. Keep the global gaming HUD
+   frame, dark section panels and heading spacing away from these routes. */
+.ui-route-frame main.wedding-page,
+.ui-route-frame main.wedding-page section,
+.ui-route-frame main.wedding-page h1,
+.ui-route-frame main.wedding-page h2,
+.ui-route-frame main.wedding-page h3,
+.ui-route-frame main.wedding-page p,
+.ui-route-frame main.wedding-page label,
+.ui-route-frame main.wedding-page button,
+.ui-route-frame main.wedding-page a {
+  font-family: "Nunito Sans", Arial, sans-serif;
+}
+.ui-route-frame main.wedding-page h1,
+.ui-route-frame main.wedding-page h2,
+.ui-route-frame main.wedding-page .couple-names,
+.ui-route-frame main.wedding-page .wedding-platform-invitation h2 {
+  font-family: "Playfair Display", Georgia, serif;
+}
+.ui-route-frame main.wedding-page section:has(> h2),
+.ui-route-frame main.wedding-page section:has(> div > h2),
+.ui-route-frame main.wedding-page section:has(> h3),
+.ui-route-frame main.wedding-page section:has(> div > h3),
+.ui-route-frame main.wedding-page section:has(> h4),
+.ui-route-frame main.wedding-page section:has(> div > h4) {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
