@@ -71,7 +71,7 @@ export default function HomeExperience() {
         <header className="df-content-topbar"><div><span className="df-breadcrumb">DAJJAL FAMILY <span>/</span> HOME</span><p>Explore our growing digital universe.</p></div><Link href="/contact" className="df-topbar-link">Get in touch <span>↗</span></Link></header>
         <section className="df-welcome" aria-labelledby="home-title">
           <div className="df-welcome-glow"/>
-          <div className="df-welcome-copy"><span className="df-eyebrow">WELCOME TO OUR UNIVERSE</span><h1 id="home-title">One Family.<br/><em>Many Possibilities.</em></h1><p>Dajjal Family is a growing digital ecosystem bringing together gaming, knowledge, creativity, digital products, and new business ideas.</p><div className="df-hero-actions"><Link href="#categories" className="df-primary-button">EXPLORE THE UNIVERSE <span>↗</span></Link><Link href="/about" className="df-secondary-button">OUR STORY</Link></div></div>
+          <div className="df-welcome-copy"><span className="df-eyebrow">WELCOME TO OUR UNIVERSE</span><h1 id="home-title" className="welcome-title">One Family.<br/><em>Many Possibilities.</em></h1><p>Dajjal Family is a growing digital ecosystem bringing together gaming, knowledge, creativity, digital products, and new business ideas.</p><div className="df-hero-actions"><Link href="#categories" className="df-primary-button">EXPLORE THE UNIVERSE <span>↗</span></Link><Link href="/about" className="df-secondary-button">OUR STORY</Link></div></div>
           <div className="df-orbit-art" aria-hidden="true"><div className="df-orbit orbit-one"/><div className="df-orbit orbit-two"/><div className="df-orbit-core">DF</div><span className="df-orbit-dot dot-one"/><span className="df-orbit-dot dot-two"/><span className="df-orbit-dot dot-three"/></div>
           <span className="df-hero-index">01 / A NEW BEGINNING</span>
         </section>
@@ -81,7 +81,7 @@ export default function HomeExperience() {
         </section>
         <section className="df-feature-strip" id="featured"><div><span className="df-eyebrow">THE IDEA BEHIND THE BRAND</span><h2>More than a website.<br/><em>A universe in progress.</em></h2><p>We are building a home for digital experiences and projects that can evolve over time. Start exploring and grow with us.</p></div><div className="df-feature-symbol" aria-hidden="true">✳</div></section>
         <section className="df-latest" id="latest"><div><span className="df-eyebrow">WHAT'S NEXT</span><h2>New experiences are taking shape.</h2><p>We are preparing new content, products, and community experiences. This space will grow as each part of the universe becomes ready.</p></div><Link href="/about" className="df-secondary-button">DISCOVER DAJJAL FAMILY ↗</Link></section>
-        <footer className="df-home-footer"><div><strong>DAJJAL FAMILY</strong><span>One Family. Many Possibilities.</span></div><nav><Link href="/about">About</Link><Link href="/contact">Contact</Link><Link href="/privacy">Privacy</Link></nav><small>© {new Date().getFullYear()} Dajjal Family. All rights reserved.</small></footer>
+        <footer className="df-home-footer"><div><strong>DAJJAL FAMILY</strong><span>One Family. Many Possibilities.</span></div><nav><Link href="/about">About</Link><Link href="/contact">Contact</Link></nav><small>© {new Date().getFullYear()} Dajjal Family. All rights reserved.</small></footer>
       </main>
       <Sidebar right/>
     </div>
