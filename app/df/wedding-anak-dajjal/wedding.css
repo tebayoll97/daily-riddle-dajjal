@@ -183,3 +183,108 @@
 .df-main .wedding-page .share-actions button{color:#92506e!important}
 .df-main .wedding-page .wedding-opening .opening-invite{color:#796a78!important}
 .df-main .wedding-page .wedding-opening .opening-footnote{color:#b18b9e!important}
+
+/* FINAL WEDDING OVERRIDES — dusty pink surfaces and safe slide-in panels */
+.df-main:has(.wedding-page){background:#fff1f5!important;overflow-x:clip}
+.df-main .wedding-page{
+  width:100%;max-width:100%;overflow-x:clip;
+  background:
+    radial-gradient(ellipse at 10% 12%,rgba(255,190,211,.58),transparent 36%),
+    radial-gradient(ellipse at 90% 44%,rgba(255,218,190,.48),transparent 34%),
+    linear-gradient(180deg,#fff5f7 0%,#ffeef3 45%,#fff5ed 100%)!important;
+}
+.df-main .wedding-page .wedding-content{
+  width:min(100% - 2rem,940px)!important;max-width:940px!important;
+  min-width:0!important;margin-inline:auto!important;overflow:visible;
+}
+.df-main .wedding-page .wedding-hero,
+.df-main .wedding-page .wedding-section,
+.df-main .wedding-page .wedding-share{
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  margin-inline:0!important;box-sizing:border-box!important;
+  border:1px solid #efbfd0!important;border-radius:24px!important;
+  color:#70475c!important;
+  background:linear-gradient(145deg,#f8dce8 0%,#f5d4e2 48%,#f8e0d8 100%)!important;
+  box-shadow:0 12px 32px rgba(177,91,128,.13)!important;
+}
+.df-main .wedding-page .wedding-hero{
+  padding:clamp(2rem,6vw,4rem) clamp(1rem,4vw,2.5rem)!important;
+  margin-top:1.4rem!important;
+}
+.df-main .wedding-page .wedding-section{
+  padding:clamp(1.2rem,4vw,2.5rem)!important;
+  margin:1.5rem 0!important;
+}
+.df-main .wedding-page .wedding-share{
+  padding:clamp(1.8rem,5vw,3rem) 1rem!important;
+  margin:1.5rem 0 3rem!important;
+}
+.df-main .wedding-page .couple-frame{
+  width:min(100%,510px)!important;max-width:100%!important;
+  margin:1.6rem auto!important;padding:10px!important;
+  border:3px solid #e8a9c2!important;border-radius:24px!important;
+  background:linear-gradient(135deg,#fff0f5,#f3d6e7,#ffebd7)!important;
+}
+.df-main .wedding-page .couple-placeholder{
+  width:100%;min-width:0;overflow:hidden;
+  background:linear-gradient(145deg,#f4dff5,#fce4ec 55%,#e2f3e9)!important;
+  border:1px dashed #d69ab5!important;
+}
+.df-main .wedding-page .couple-names{color:#9a5274!important}
+.df-main .wedding-page .wedding-section-heading{
+  width:100%;max-width:100%;min-width:0;box-sizing:border-box;
+  color:#914b6d!important;
+  background:linear-gradient(100deg,#fbe5ed,#f6d9e6 55%,#f9e6dc)!important;
+  border-color:#e9b9cc!important;border-left-color:#d982a7!important;
+}
+.df-main .wedding-page .wedding-section-heading::after{
+  background:linear-gradient(90deg,#d982a7,#dcae69,#94c9a9)!important;
+}
+.df-main .wedding-page .detail-grid article{
+  background:linear-gradient(145deg,#fff0f4,#fff7ed)!important;
+  border-color:#edc6d4!important;
+}
+.df-main .wedding-page .detail-grid article:nth-child(2){
+  background:linear-gradient(145deg,#f0f8f0,#f5effb)!important;
+}
+.df-main .wedding-page .detail-grid article:nth-child(3){
+  background:linear-gradient(145deg,#fff1dc,#fce8ef)!important;
+}
+.df-main .wedding-page .wedding-note,
+.df-main .wedding-page .approved-messages article{
+  background:rgba(255,250,250,.72)!important;border-color:#ecc7d5!important;
+}
+.df-main .wedding-page .wedding-form input,
+.df-main .wedding-page .wedding-form textarea,
+.df-main .wedding-page .wedding-form select{
+  background:#fffafb!important;color:#60465a!important;border-color:#e7bdcd!important;
+}
+.df-main .wedding-page .wedding-share{
+  background:linear-gradient(120deg,#f8d9e6,#f9e7d5,#e2f1e5)!important;
+}
+/* Slide panels inside their own width: no horizontal clipping on phones */
+.df-main .wedding-page .wedding-reveal{
+  opacity:0;clip-path:inset(0 0 0 0 round 24px);
+  transition:opacity .65s ease,transform .72s cubic-bezier(.2,.75,.25,1);
+  will-change:opacity,transform;
+}
+.df-main .wedding-page .wedding-reveal.reveal-from-left{
+  transform:translate3d(-30px,12px,0);
+}
+.df-main .wedding-page .wedding-reveal.reveal-from-right{
+  transform:translate3d(30px,12px,0);
+}
+.df-main .wedding-page .wedding-reveal.is-visible{
+  opacity:1;transform:translate3d(0,0,0);
+}
+@media(max-width:600px){
+ .df-main .wedding-page .wedding-content{width:calc(100% - 1.2rem)!important}
+ .df-main .wedding-page .wedding-hero,
+ .df-main .wedding-page .wedding-section,
+ .df-main .wedding-page .wedding-share{border-radius:19px!important}
+ .df-main .wedding-page .wedding-reveal.reveal-from-left{transform:translate3d(-16px,8px,0)}
+ .df-main .wedding-page .wedding-reveal.reveal-from-right{transform:translate3d(16px,8px,0)}
+}
+@media(prefers-reduced-motion:reduce){
+ .df-main .wedding-page .wedding-reveal{opacity:1;transform:none;clip-path:none;transition:none}
+}
