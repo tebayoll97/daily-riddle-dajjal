@@ -666,8 +666,8 @@ export default function MiniGamePage() {
         const sx = (frame % 3) * cellW;
         const sy = Math.floor(frame / 3) * cellH;
         // Compact runner scale, anchored precisely to the top edge of the grass.
-        const drawW = 70;
-        const drawH = 62.3;
+        const drawW = 100;
+        const drawH = 89;
         const groundAnchorX = player.x + 61;
         const groundAnchorY = player.y + 58 + bob;
         context.save();
@@ -821,7 +821,7 @@ export default function MiniGamePage() {
         const roll = Math.random();
         const type = roll < 0.25 ? "rock" : roll < 0.5 ? "egg" : roll < 0.72 ? "log" : roll < 0.86 ? "ptero" : "archaeo";
         const flying = type === "ptero" || type === "archaeo";
-        game.obstacles.push({ x: WORLD_WIDTH + 18, width: type === "log" ? 56 : type === "egg" ? 48 : flying ? 72 : 40, type, y: flying ? (type === "ptero" ? 245 : 212) : GROUND_Y, phase: Math.random()*6.28 });
+        game.obstacles.push({ x: WORLD_WIDTH + 18, width: type === "log" ? 56 : type === "egg" ? 48 : flying ? 72 : 40, type, y: flying ? (type === "ptero" ? 155 : 178) : GROUND_Y, phase: Math.random()*6.28 });
         const obstacleGap = 492 + Math.random() * 288;
         game.spawn = obstacleGap / game.speed;
       }
