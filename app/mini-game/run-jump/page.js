@@ -631,13 +631,22 @@ export default function MiniGamePage() {
       const bannerW = 490;
       const bannerH = 54;
       const banner = context.createLinearGradient(0, bannerY, 0, bannerY + bannerH);
-      banner.addColorStop(0, "rgba(24,54,49,.52)");
-      banner.addColorStop(.5, "rgba(25,45,43,.48)");
-      banner.addColorStop(1, "rgba(17,34,34,.54)");
-      context.shadowColor = "rgba(255,210,112,.42)";
+      const bannerFills = [
+        ["rgba(20,66,38,.82)","rgba(19,49,34,.82)"],
+        ["rgba(21,71,48,.84)","rgba(15,48,37,.84)"],
+        ["rgba(17,55,39,.86)","rgba(12,36,31,.86)"],
+        ["rgba(91,73,39,.88)","rgba(55,49,34,.88)"],
+        ["rgba(75,59,48,.90)","rgba(43,38,35,.90)"],
+        ["rgba(83,37,27,.92)","rgba(38,25,24,.94)"],
+      ][Math.round(paletteLevel)];
+      const bannerStrokes = ["#b7df91","#9bcf91","#8ab89a","#d5bd79","#c69b78","#ff9a58"];
+      banner.addColorStop(0, bannerFills[0]);
+      banner.addColorStop(.5, bannerFills[1]);
+      banner.addColorStop(1, bannerFills[1]);
+      context.shadowColor = paletteLevel >= 4 ? "rgba(255,116,55,.48)" : "rgba(170,211,132,.35)";
       context.shadowBlur = 13;
       context.fillStyle = banner;
-      context.strokeStyle = "rgba(255,213,112,.98)";
+      context.strokeStyle = bannerStrokes[Math.round(paletteLevel)];
       context.lineWidth = 2;
       context.beginPath();
       context.roundRect(bannerX, bannerY, bannerW, bannerH, 15);
