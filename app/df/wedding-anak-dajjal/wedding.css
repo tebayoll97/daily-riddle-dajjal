@@ -121,3 +121,65 @@
 .df-shell:has(.wedding-page) .df-footer-name{color:#98506f}
 .df-shell:has(.wedding-page) .df-footer-crest{color:#d69b42}
 .df-shell:has(.wedding-page) .df-footer-tagline,.df-shell:has(.wedding-page) .df-footer>small{color:#a98b9b}
+
+/* Wedding-only theme isolation: neutralize the global dark HUD heading system */
+.df-main .wedding-page,
+.df-main .wedding-page *{color-scheme:light}
+.df-main .wedding-page h1,
+.df-main .wedding-page h1:not(.welcome-title){
+  display:block!important;position:relative!important;width:auto!important;max-width:100%!important;
+  margin:.3rem 0 1.4rem!important;padding:0!important;overflow:visible!important;
+  border:0!important;border-radius:0!important;background:transparent!important;
+  box-shadow:none!important;color:#a64f76!important;
+  font-family:Georgia,"Times New Roman",serif!important;
+  font-size:clamp(1.65rem,5vw,2.8rem)!important;font-weight:700!important;
+  line-height:1.2!important;letter-spacing:0!important;text-align:center!important;
+}
+.df-main .wedding-page h1::before{content:none!important;display:none!important}
+.df-main .wedding-page h1::after{
+  content:""!important;display:block!important;width:4rem!important;height:3px!important;
+  margin:.7rem auto 0!important;border:0!important;border-radius:99px!important;
+  background:linear-gradient(90deg,#ef9dbb,#e8bd72,#a9dfc1)!important;
+  box-shadow:0 0 12px rgba(221,151,179,.24)!important;
+}
+.df-main .wedding-page .wedding-section-heading{
+  display:block;position:relative;width:100%;margin:.5rem 0 1.5rem;padding:.8rem 1rem;
+  border:1px solid #f0d2df;border-left:4px solid #e8a2bd;border-radius:13px;
+  background:linear-gradient(100deg,#fff8f1 0%,#fff0f6 55%,#f1fbf5 100%);
+  box-shadow:0 5px 18px rgba(180,119,148,.08);
+  color:#92506f;font-size:clamp(1.2rem,1rem + .7vw,1.65rem);
+  font-weight:700;line-height:1.25;text-align:center;
+}
+.df-main .wedding-page .wedding-section-heading::after{
+  content:"";display:block;width:2.8rem;height:2px;margin:.55rem auto 0;
+  border-radius:99px;background:linear-gradient(90deg,#efa3bd,#e7bd78,#a9dfc1);
+}
+.df-main .wedding-page .wedding-opening h1{
+  display:block!important;width:min(100%,100%)!important;max-width:100%!important;
+  padding:0!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;
+}
+.df-main .wedding-page .wedding-opening h1::after{display:none!important}
+.df-main .wedding-page .wedding-footer{display:none!important}
+.df-main .wedding-page .wedding-section,
+.df-main .wedding-page .wedding-share,
+.df-main .wedding-page .couple-frame,
+.df-main .wedding-page .detail-grid article{
+  color:#49384d!important;
+  background-color:#fffaf5!important;
+}
+.df-main .wedding-page .wedding-section *{color:inherit}
+.df-main .wedding-page .wedding-section h2{color:#92506f!important}
+.df-main .wedding-page .wedding-section .wedding-kicker,
+.df-main .wedding-page .wedding-kicker{color:#b36a88!important}
+.df-main .wedding-page .wedding-intro,
+.df-main .wedding-page .section-copy,
+.df-main .wedding-page .wedding-note p{color:#776b79!important}
+.df-main .wedding-page .detail-grid h3{color:#654c62!important}
+.df-main .wedding-page .detail-grid article p{color:#ae8298!important}
+.df-main .wedding-page .wedding-form label{color:#76566d!important}
+.df-main .wedding-page .approved-messages p{color:#776b79!important}
+.df-main .wedding-page .wedding-primary{color:#653b56!important}
+.df-main .wedding-page .share-actions button{color:#92506e!important}
+.df-main .wedding-page .wedding-opening .opening-invite{color:#796a78!important}
+.df-main .wedding-page .wedding-opening .opening-footnote{color:#b18b9e!important}
