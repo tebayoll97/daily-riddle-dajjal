@@ -218,7 +218,7 @@ export default function WeddingInvitationPage() {
 
       {opened && (
         <div className="wedding-content">
-          <section className="wedding-hero wedding-reveal" data-aos="fade-right">
+          <section className="wedding-hero" data-aos="fade-right">
             <div className="wedding-ornament">✦ ❧ ✦</div>
             <p className="wedding-kicker">{t.opened}</p>
             <h1>{t.title}</h1>
@@ -238,7 +238,7 @@ export default function WeddingInvitationPage() {
             <p className="couple-subtitle">MALIKA — KEDELAI HITAM PILIHAN</p>
           </section>
 
-          <section className="wedding-section wedding-reveal" data-aos="fade-left">
+          <section className="wedding-section" data-aos="fade-left">
             <p className="wedding-kicker">SAVE THE CELEBRATION</p>
             <h2 className="wedding-section-heading">{t.reception}</h2>
             <div className="detail-grid">
@@ -249,7 +249,7 @@ export default function WeddingInvitationPage() {
             <div className="wedding-note">{t.schedule}<p>{eventInfo?.schedule || t.scheduleText}</p></div>
           </section>
 
-          <section className="wedding-section wedding-guestbook wedding-reveal" data-aos="fade-right">
+          <section className="wedding-section wedding-guestbook" data-aos="fade-right">
             <p className="wedding-kicker">WORDS FROM THE HEART</p>
             <h2 className="wedding-section-heading">{t.guestbook}</h2>
             <p className="section-copy">{t.guestbookText}</p>
@@ -264,7 +264,7 @@ export default function WeddingInvitationPage() {
             
           </section>
 
-          <section className="wedding-share wedding-reveal" data-aos="fade-left">
+          <section className="wedding-share" data-aos="fade-left">
             <p className="wedding-kicker">SPREAD THE JOY</p>
             <h2 className="wedding-section-heading">{t.couple}</h2>
             <div className="share-actions">
