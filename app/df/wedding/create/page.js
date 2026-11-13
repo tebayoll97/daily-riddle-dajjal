@@ -30,7 +30,7 @@ export default function CreateWeddingPage() {
       const response = await fetch("/api/wedding/invitations", { method:"POST", headers:{ "Content-Type":"application/json", Authorization:`Bearer ${session.access_token}` }, body:JSON.stringify({ title }) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || t.error);
-      router.push("/df/wedding/dashboard");
+      router.push(`/df/wedding/${result.invitation.id}/details`);
     } catch (e) { setError(e.message || t.error); setBusy(false); }
   }
 
