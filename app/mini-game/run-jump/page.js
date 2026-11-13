@@ -152,7 +152,7 @@ export default function MiniGamePage() {
     }
 
     if (!game.player.jumping) {
-      game.player.velocityY = -15.2;
+      game.player.velocityY = -13.5;
       game.player.jumping = true;
       playTone(500);
     }
@@ -821,7 +821,7 @@ export default function MiniGamePage() {
         const roll = Math.random();
         const type = roll < 0.25 ? "rock" : roll < 0.5 ? "egg" : roll < 0.72 ? "log" : roll < 0.86 ? "ptero" : "archaeo";
         const flying = type === "ptero" || type === "archaeo";
-        game.obstacles.push({ x: WORLD_WIDTH + 18, width: type === "log" ? 56 : type === "egg" ? 48 : flying ? 72 : 40, type, y: flying ? (type === "ptero" ? 155 : 178) : GROUND_Y, phase: Math.random()*6.28 });
+        game.obstacles.push({ x: WORLD_WIDTH + 18, width: type === "log" ? 56 : type === "egg" ? 48 : flying ? 72 : 40, type, y: flying ? (type === "ptero" ? 175 : 198) : GROUND_Y, phase: Math.random()*6.28 });
         const obstacleGap = 492 + Math.random() * 288;
         game.spawn = obstacleGap / game.speed;
       }
