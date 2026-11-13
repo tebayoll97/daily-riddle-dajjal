@@ -123,3 +123,85 @@
 @media (prefers-reduced-motion: reduce) {
   .df-shell * { scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
+
+
+/* Responsive refinement: shared sizing, wrapping and readable text */
+.df-shell, .df-shell * { box-sizing: border-box; }
+.df-shell { overflow-x: clip; }
+.df-header-inner, .df-home { min-width: 0; }
+.df-header-tools { display: flex; align-items: center; justify-content: flex-end; gap: 1rem; min-width: 0; }
+.df-nav { min-width: 0; flex-wrap: wrap; justify-content: flex-end; }
+.df-language-switch { display: inline-flex; flex: 0 0 auto; gap: .25rem; padding: .22rem; border: 1px solid rgba(199,166,108,.28); border-radius: 999px; background: rgba(255,255,255,.04); }
+.df-language-switch button { min-width: 38px; min-height: 32px; padding: .35rem .55rem; border: 0; border-radius: 999px; color: #c9b9a5; background: transparent; cursor: pointer; font: 800 .68rem/1 Arial,sans-serif; }
+.df-language-switch button[aria-pressed="true"] { color: #160e12; background: linear-gradient(135deg,#e6ce9d,#b88e52); }
+.df-home, .df-hero, .df-section, .df-card, .df-event-card { min-width: 0; }
+.df-hero h1, .df-section-heading, .df-card h3, .df-event-card h3 { overflow-wrap: anywhere; }
+.df-eyebrow { max-width: 100%; overflow-wrap: anywhere; }
+.df-hero-copy, .df-section-subtitle, .df-card p, .df-event-card p { overflow-wrap: break-word; }
+.df-button { max-width: 100%; white-space: normal; text-align: center; line-height: 1.35; }
+.df-event-card > div { flex: 1 1 240px; min-width: 0; }
+.df-footer-name, .df-footer-tagline, .df-footer > small { max-width: 100%; overflow-wrap: anywhere; }
+
+@media (min-width: 721px) and (max-width: 1024px) {
+  .df-header-inner { width: min(100% - 2rem, 960px); gap: 1rem; }
+  .df-header-tools { gap: .65rem; }
+  .df-nav { gap: .75rem; }
+  .df-nav a { font-size: .66rem; }
+  .df-home { width: min(100% - 2.5rem, 960px); }
+  .df-card-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+
+@media (max-width: 720px) {
+  .df-header-inner { width: calc(100% - 1.25rem); min-height: 0; padding: .7rem 0 .55rem; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: .65rem .5rem; }
+  .df-brand { min-width: 0; gap: .45rem; }
+  .df-brand-crest { font-size: 1.65rem; }
+  .df-brand-copy { min-width: 0; }
+  .df-brand-copy strong { font-size: clamp(.65rem, 3.2vw, .78rem); letter-spacing: .11em; white-space: nowrap; }
+  .df-brand-copy small { font-size: .48rem; letter-spacing: .14em; }
+  .df-header-tools { display: contents; }
+  .df-nav { grid-column: 1 / -1; grid-row: 2; width: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: .35rem .9rem; overflow: visible; padding: .35rem 0 .15rem; border-top: 1px solid rgba(199,166,108,.12); }
+  .df-nav a { white-space: nowrap; font-size: .64rem; padding: .2rem 0; }
+  .df-language-switch { grid-column: 2; grid-row: 1; justify-self: end; }
+  .df-language-switch button { min-width: 34px; min-height: 30px; font-size: .62rem; }
+  .df-home { width: calc(100% - 1.25rem); padding: 1.35rem 0 3rem; }
+  .df-hero { padding: clamp(2.4rem, 10vw, 3.5rem) 1rem; border-radius: 18px; }
+  .df-hero::before { top: .75rem; left: .8rem; font-size: 1.1rem; }
+  .df-hero::after { right: .8rem; bottom: .75rem; font-size: 1.1rem; }
+  .df-eyebrow { font-size: .58rem; letter-spacing: .16em; line-height: 1.6; }
+  .df-hero h1 { font-size: clamp(1.8rem, 9vw, 3rem); letter-spacing: .025em; line-height: 1.12; }
+  .df-hero h1 span { font-size: .38em; letter-spacing: .18em; margin-top: .55rem; }
+  .df-hero-copy { max-width: 34rem; margin-top: 1rem; font-size: .88rem; line-height: 1.7; }
+  .df-hero-actions { margin-top: 1.4rem; gap: .6rem; }
+  .df-button { flex: 1 1 145px; min-height: 44px; padding: .72rem .8rem; font-size: .64rem; letter-spacing: .07em; }
+  .df-section { margin-top: 2.5rem; }
+  .df-section-heading { margin-bottom: 1rem; font-size: clamp(1.25rem, 6vw, 1.65rem); line-height: 1.2; }
+  .df-section-subtitle { margin: -.45rem 0 1rem; font-size: .82rem; line-height: 1.65; }
+  .df-card-grid { grid-template-columns: minmax(0,1fr); gap: .75rem; }
+  .df-card { min-height: 0; padding: 1.05rem; border-radius: 14px; }
+  .df-card h3 { margin-top: .55rem; font-size: 1rem; line-height: 1.35; }
+  .df-card p, .df-event-card p { font-size: .82rem; line-height: 1.65; }
+  .df-event-card { align-items: stretch; flex-direction: column; padding: 1.05rem; gap: .85rem; }
+  .df-event-card .df-button { width: 100%; flex-basis: auto; }
+  .df-footer { padding: 2rem 1rem 1.35rem; }
+  .df-footer-name { font-size: .82rem; letter-spacing: .15em; }
+  .df-footer-tagline { font-size: .52rem; letter-spacing: .1em; }
+}
+
+@media (max-width: 360px) {
+  .df-header-inner { width: calc(100% - 1rem); }
+  .df-brand-crest { font-size: 1.4rem; }
+  .df-brand-copy strong { font-size: .61rem; letter-spacing: .08em; }
+  .df-brand-copy small { font-size: .42rem; letter-spacing: .1em; }
+  .df-nav { column-gap: .65rem; }
+  .df-nav a { font-size: .59rem; }
+  .df-home { width: calc(100% - 1rem); }
+  .df-hero h1 { font-size: 1.7rem; }
+  .df-hero-actions { flex-direction: column; }
+  .df-button { width: 100%; flex-basis: auto; }
+}
+
+@media (min-width: 721px) {
+  .df-home { padding-top: clamp(2.5rem, 5vw, 5rem); }
+  .df-hero-copy { font-size: clamp(.9rem, 1.2vw, 1rem); }
+  .df-card p, .df-event-card p { font-size: .84rem; }
+}
