@@ -97,12 +97,15 @@ const words = {
   },
 };
 
-export default function WeddingInvitationPage() {
+export default function WeddingInvitationPage({ invitationSlug = "anak-dajjal-malika" } = {}) {
   const { language } = useLanguage();
   const t = words[language] || words.en;
   const [opened, setOpened] = useState(false);
   const [guestName, setGuestName] = useState("");
   const [eventInfo, setEventInfo] = useState(null);
+  const [invitationId, setInvitationId] = useState(null);
+  const [galleryItems, setGalleryItems] = useState([]);
+  const [galleryIndex, setGalleryIndex] = useState(0);
   const [guestbookEntries, setGuestbookEntries] = useState([]);
   const [guestbookStatus, setGuestbookStatus] = useState("");
   const [guestbookLoading, setGuestbookLoading] = useState(false);
@@ -114,17 +117,23 @@ export default function WeddingInvitationPage() {
     setGuestName(new URLSearchParams(window.location.search).get("to") || "");
     let active = true;
     async function loadWeddingData() {
-      const [settingsResult, messagesResult] = await Promise.all([
-        supabase.from("df_event_settings").select("*").eq("id", true).maybeSingle(),
-        supabase.from("df_guestbook").select("id, guest_name, message, created_at").eq("is_approved", true).order("created_at", { ascending: false }).limit(30),
+      const invitationResult = await supabase.from("df_invitations").select("id,slug,title,is_active").eq("slug", invitationSlug).eq("is_active", true).maybeSingle();
+      if (!active || !invitationResult.data) return;
+      const id = invitationResult.data.id;
+      setInvitationId(id);
+      const [settingsResult, galleryResult, messagesResult] = await Promise.all([
+        supabase.from("df_event_settings").select("*").eq("invitation_id", id).maybeSingle(),
+        supabase.from("df_gallery_items").select("id,title,description,album,image_url,sort_order").eq("invitation_id", id).eq("is_published", true).order("sort_order", { ascending: true }),
+        supabase.from("df_guestbook").select("id, guest_name, message, created_at").eq("invitation_id", id).eq("is_approved", true).order("created_at", { ascending: false }).limit(30),
       ]);
       if (!active) return;
       if (settingsResult.data) setEventInfo(settingsResult.data);
+      if (galleryResult.data) setGalleryItems(galleryResult.data);
       if (messagesResult.data) setGuestbookEntries(messagesResult.data);
     }
     loadWeddingData();
     return () => { active = false; };
-  }, []);
+  }, [invitationSlug]);
 
   useEffect(() => {
     if (!opened) return;
@@ -151,6 +160,7 @@ export default function WeddingInvitationPage() {
       guest_name: String(data.get("guestbook_name") || "").trim(),
       message: String(data.get("guestbook_message") || "").trim(),
       language,
+      invitation_id: invitationId,
     });
     setGuestbookLoading(false);
     if (error) { setGuestbookStatus("error"); return; }
@@ -237,6 +247,22 @@ export default function WeddingInvitationPage() {
             <h2 className="couple-names">{t.couple}</h2>
             <p className="couple-subtitle">MALIKA — KEDELAI HITAM PILIHAN</p>
           </section>
+
+          {galleryItems.length > 0 && (
+            <section className="wedding-section wedding-gallery-section" data-aos="fade-left">
+              <p className="wedding-kicker">OUR PRECIOUS MOMENTS</p>
+              <h2 className="wedding-section-heading">{language === "id" ? "Galeri Kenangan" : "Our Photo Gallery"}</h2>
+              <div className="wedding-gallery-viewer">
+                <img src={galleryItems[galleryIndex]?.image_url} alt={galleryItems[galleryIndex]?.title || "Wedding memory"} className="wedding-gallery-image" />
+                <div className="wedding-gallery-controls">
+                  <button type="button" aria-label="Foto sebelumnya" onClick={() => setGalleryIndex((galleryIndex - 1 + galleryItems.length) % galleryItems.length)}>‹</button>
+                  <span>{galleryIndex + 1} / {galleryItems.length}</span>
+                  <button type="button" aria-label="Foto berikutnya" onClick={() => setGalleryIndex((galleryIndex + 1) % galleryItems.length)}>›</button>
+                </div>
+                {galleryItems[galleryIndex]?.title && <p className="wedding-gallery-caption">{galleryItems[galleryIndex].title}</p>}
+              </div>
+            </section>
+          )}
 
           <section className="wedding-section" data-aos="fade-left">
             <p className="wedding-kicker">SAVE THE CELEBRATION</p>
