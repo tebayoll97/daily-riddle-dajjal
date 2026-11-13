@@ -39,7 +39,19 @@ export default function WeddingDashboardPage() {
     return () => { alive = false; };
   }, [router, t.error]);
 
-  async function deleteDraft(item) {\n    if (!window.confirm(t.confirmRemove)) return;\n    setDeleting(item.id);\n    try {\n      const { data:{session} } = await supabase.auth.getSession();\n      const response = await fetch(`/api/wedding/invitations/${item.id}`, { method:"DELETE", headers:{Authorization:`Bearer ${session.access_token}`} });\n      const result = await response.json();\n      if (!response.ok) throw new Error(result.error || t.removeError);\n      setItems(current=>current.filter(entry=>entry.id!==item.id));\n    } catch(e) { setError(e.message || t.removeError); } finally { setDeleting(""); }\n  }\n\n  return <div className="df-main"><main className="wedding-page wedding-platform">
+  async function deleteDraft(item) {
+    if (!window.confirm(t.confirmRemove)) return;
+    setDeleting(item.id);
+    try {
+      const { data:{session} } = await supabase.auth.getSession();
+      const response = await fetch(`/api/wedding/invitations/${item.id}`, { method:"DELETE", headers:{Authorization:`Bearer ${session.access_token}`} });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || t.removeError);
+      setItems(current=>current.filter(entry=>entry.id!==item.id));
+    } catch(e) { setError(e.message || t.removeError); } finally { setDeleting(""); }
+  }
+
+  return <div className="df-main"><main className="wedding-page wedding-platform">
     <header className="wedding-topbar">
       <Link href="/df/wedding" className="wedding-back">← <span>{t.home}</span></Link>
       <div className="wedding-topbar-account"><WeddingAccountControls /><div className="wedding-lang"><button type="button" onClick={()=>setLanguage("en")} aria-pressed={language==="en"}>EN</button><button type="button" onClick={()=>setLanguage("id")} aria-pressed={language==="id"}>ID</button></div></div>
