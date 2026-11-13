@@ -9,8 +9,8 @@ import WeddingAccountControls from "../WeddingAccountControls";
 import "../../wedding-anak-dajjal/wedding.css";
 
 const copy = {
-  en: { home:"WEDDING HOME", kicker:"YOUR PRIVATE SPACE", title:"My Invitations", intro:"Manage your wedding invitations in one place.", create:"＋ CREATE INVITATION", limit:"You can create up to 3 invitations with this account. Draft invitations are private until published.", loading:"Loading your invitations…", empty:"Your story starts here", emptyText:"You have not created an invitation yet.", first:"CREATE YOUR FIRST INVITATION", published:"PUBLISHED", draft:"DRAFT", preview:"Preview invitation ↗", error:"Unable to load your invitations." },
-  id: { home:"BERANDA WEDDING", kicker:"RUANG PRIBADIMU", title:"Undangan Saya", intro:"Kelola semua undangan pernikahanmu di satu tempat.", create:"＋ BUAT UNDANGAN", limit:"Kamu dapat membuat maksimal 3 undangan dengan akun ini. Undangan Draft bersifat pribadi sampai dipublikasikan.", loading:"Memuat undangan…", empty:"Kisahmu dimulai di sini", emptyText:"Kamu belum membuat undangan.", first:"BUAT UNDANGAN PERTAMAMU", published:"DIPUBLIKASIKAN", draft:"DRAFT", preview:"Pratinjau undangan ↗", error:"Undangan tidak dapat dimuat." }
+  en: { home:"WEDDING HOME", kicker:"YOUR PRIVATE SPACE", title:"My Invitations", intro:"Manage your wedding invitations in one place.", create:"＋ CREATE INVITATION", limit:"You can create up to 3 invitations with this account. Draft invitations are private until published.", loading:"Loading your invitations…", empty:"Your story starts here", emptyText:"You have not created an invitation yet.", first:"CREATE YOUR FIRST INVITATION", published:"PUBLISHED", draft:"DRAFT", preview:"Preview invitation ↗", error:"Unable to load your invitations.", remove:"HAPUS DRAFT", removing:"MENGHAPUS…", confirmRemove:"Hapus draft ini secara permanen?", removeError:"Draft gagal dihapus." },
+  id: { home:"BERANDA WEDDING", kicker:"RUANG PRIBADIMU", title:"Undangan Saya", intro:"Kelola semua undangan pernikahanmu di satu tempat.", create:"＋ BUAT UNDANGAN", limit:"Kamu dapat membuat maksimal 3 undangan dengan akun ini. Undangan Draft bersifat pribadi sampai dipublikasikan.", loading:"Memuat undangan…", empty:"Kisahmu dimulai di sini", emptyText:"Kamu belum membuat undangan.", first:"BUAT UNDANGAN PERTAMAMU", published:"DIPUBLIKASIKAN", draft:"DRAFT", preview:"Pratinjau undangan ↗", error:"Undangan tidak dapat dimuat.", remove:"HAPUS DRAFT", removing:"MENGHAPUS…", confirmRemove:"Hapus draft ini secara permanen?", removeError:"Draft gagal dihapus." }
 };
 
 export default function WeddingDashboardPage() {
@@ -20,6 +20,7 @@ export default function WeddingDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
   const [error, setError] = useState("");
+  const [deleting, setDeleting] = useState("");
 
   useEffect(() => {
     let alive = true;
@@ -38,7 +39,7 @@ export default function WeddingDashboardPage() {
     return () => { alive = false; };
   }, [router, t.error]);
 
-  return <div className="df-main"><main className="wedding-page wedding-platform">
+  async function deleteDraft(item) {\n    if (!window.confirm(t.confirmRemove)) return;\n    setDeleting(item.id);\n    try {\n      const { data:{session} } = await supabase.auth.getSession();\n      const response = await fetch(`/api/wedding/invitations/${item.id}`, { method:"DELETE", headers:{Authorization:`Bearer ${session.access_token}`} });\n      const result = await response.json();\n      if (!response.ok) throw new Error(result.error || t.removeError);\n      setItems(current=>current.filter(entry=>entry.id!==item.id));\n    } catch(e) { setError(e.message || t.removeError); } finally { setDeleting(""); }\n  }\n\n  return <div className="df-main"><main className="wedding-page wedding-platform">
     <header className="wedding-topbar">
       <Link href="/df/wedding" className="wedding-back">← <span>{t.home}</span></Link>
       <div className="wedding-topbar-account"><WeddingAccountControls /><div className="wedding-lang"><button type="button" onClick={()=>setLanguage("en")} aria-pressed={language==="en"}>EN</button><button type="button" onClick={()=>setLanguage("id")} aria-pressed={language==="id"}>ID</button></div></div>
@@ -54,7 +55,7 @@ export default function WeddingDashboardPage() {
         <section className="wedding-platform-list">{items.map(item=><article key={item.id} className="wedding-section wedding-platform-invitation">
           <div className="wedding-platform-meta"><span className={item.is_active?"wedding-status-published":"wedding-status-draft"}>{item.is_active?t.published:t.draft}</span><time>{new Date(item.created_at).toLocaleDateString(language==="id"?"id-ID":"en-US")}</time></div>
           <h2>{item.title}</h2><p className="wedding-platform-slug">/df/wedding={item.slug}</p>
-          <div className="wedding-platform-card-actions"><Link href={`/df/wedding/create?id=${item.id}`} className="wedding-platform-link">{language==="id"?"Lanjutkan pengaturan →":"Continue editing →"}</Link><Link href={`/df/wedding=${encodeURIComponent(item.slug)}`} className="wedding-platform-link">{t.preview}</Link></div>
+          <div className="wedding-platform-card-actions"><Link href={`/df/wedding/create?id=${item.id}`} className="wedding-platform-link">{language==="id"?"Lanjutkan pengaturan →":"Continue editing →"}</Link><Link href={`/df/wedding/preview?id=${item.id}`} className="wedding-platform-link">{language==="id"?"Tinjau undangan ↗":"Review invitation ↗"}</Link>{!item.is_active && <button type="button" className="wedding-platform-delete" onClick={()=>deleteDraft(item)} disabled={deleting===item.id}>{deleting===item.id?t.removing:t.remove}</button>}{item.is_active && <Link href={`/df/wedding=${encodeURIComponent(item.slug)}`} className="wedding-platform-link">{t.preview}</Link>}</div>
         </article>)}</section>}
     </div>
     <footer className="wedding-footer"><strong>DAJJAL FAMILY · WEDDING EXPERIENCES</strong></footer>
