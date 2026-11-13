@@ -18,7 +18,9 @@ const WAVE_TITLES = [
 ];
 const WAVE_STARTS = [0, 1200, 2600, 4100, 5700, 7400];
 const WAVE_TRANSITION_LEAD_SECONDS = 8;
-const WAVE_TRANSITION_DURATION = 10000;
+const WAVE_TRANSITION_DURATION = 14000;
+const WAVE_SPEED_MULTIPLIERS = [1, 1.32, 1.64, 1.96, 2.28, 2.6];
+const getWaveSpeed = (wave) => 6 * WAVE_SPEED_MULTIPLIERS[Math.max(0, Math.min(5, wave - 1))];
 const clamp01 = (value) => Math.max(0, Math.min(1, value));
 const smoothStep = (value) => {
   const t = clamp01(value);
@@ -96,7 +98,7 @@ export default function MiniGamePage() {
       pauseStartedAt: 0,
       pausedDuration: 0,
       over: false,
-      speed: 6,
+      speed: getWaveSpeed(1),
       distance: 0,
       wave: 1,
       waveChangedAt: performance.now(),
@@ -276,7 +278,7 @@ export default function MiniGamePage() {
       pauseStartedAt: 0,
       pausedDuration: 0,
       over: false,
-      speed: 6,
+      speed: getWaveSpeed(1),
       distance: 0,
       wave: 1,
       waveChangedAt: 0,
@@ -296,7 +298,8 @@ export default function MiniGamePage() {
 
     const resizeCanvas = () => {
       const rect = canvas.getBoundingClientRect();
-      const pixelRatio = Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.35 : 1.5);
+      // Lower backing resolution reduces fill-rate pressure on mid-range phones.
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1 : 1.2);
       const width = Math.max(1, Math.round(rect.width * pixelRatio));
       const fullscreen = Boolean(canvas.closest(".mg-fullscreen-arena")?.classList.contains("is-fullscreen"));
       const height = Math.max(1, Math.round((fullscreen ? rect.height : rect.width * WORLD_HEIGHT / WORLD_WIDTH) * pixelRatio));
@@ -438,12 +441,13 @@ export default function MiniGamePage() {
           context.arc(x + 24 * scale, base - 65 * scale, 25 * scale, 0, Math.PI * 2);
           context.fill();
         };
-        const palmAmount = smoothStep((2.8 - worldWave) / 1.8);
+        const rainforestAmount = smoothStep((worldWave - 1.8) / 1.8);
+        context.globalAlpha = 1 - rainforestAmount * .62;
         palm(ox + 115, 226, .88, "#347b43");
         palm(ox + 350, 225, 1.08, "#2e7040");
         palm(ox + 625, 227, .92, "#347b43");
         palm(ox + 835, 225, .98, "#2e7040");
-        context.globalAlpha = 1 - palmAmount * .72;
+        context.globalAlpha = .35 + rainforestAmount * .65;
         rainforestTree(ox + 235, 225, .9);
         rainforestTree(ox + 495, 226, 1.12);
         rainforestTree(ox + 740, 224, .96);
@@ -522,7 +526,9 @@ export default function MiniGamePage() {
       }
 
       // A restrained atmospheric veil supports the full palette changes above.
-      const tintAlpha = paletteLevel <= 0.01 ? 0 : [0,0.12,0.19,0.25,0.30,0.36][Math.round(paletteLevel)];
+      const tintStops = [0,0.12,0.19,0.25,0.30,0.36];
+      const tintIndex = Math.min(4, Math.floor(paletteLevel));
+      const tintAlpha = mix(tintStops[tintIndex], tintStops[tintIndex + 1], paletteLevel - tintIndex);
       if (tintAlpha > 0.01) {
         const atmosphere = context.createLinearGradient(0, 0, 0, GROUND_Y + 20);
         atmosphere.addColorStop(0, `rgba(38,48,52,${tintAlpha * 0.42})`);
@@ -535,7 +541,7 @@ export default function MiniGamePage() {
       const dryStrength = smoothStep((worldWave - 2.0) / 1.8);
       if (dryStrength > 0.01) {
         context.save();
-        for (let i = 0; i < 12; i += 1) {
+        for (let i = 0; i < 7; i += 1) {
           const drift = (time * (0.025 + (i % 4) * 0.009) + i * 113) % (WORLD_WIDTH + 50);
           const x = WORLD_WIDTH - drift, y = 145 + ((i * 31) % 105) + Math.sin(time / 520 + i) * 5;
           context.globalAlpha = dryStrength * (0.08 + (i % 3) * 0.025);
@@ -551,7 +557,7 @@ export default function MiniGamePage() {
       const smokeStrength = smoothStep((worldWave - 3.0) / 1.8);
       if (smokeStrength > 0.01) {
         context.save();
-        for (let i = 0; i < 8; i += 1) {
+        for (let i = 0; i < 5; i += 1) {
           const x = ((i * 151 + time * (0.012 + (i % 3) * 0.004)) % (WORLD_WIDTH + 180)) - 90;
           const y = 82 + (i % 4) * 27 + Math.sin(time / 1100 + i) * 5;
           const radius = 28 + (i % 3) * 12;
@@ -569,7 +575,7 @@ export default function MiniGamePage() {
       const emberStrength = smoothStep((worldWave - 4.0) / 1.2);
       if (emberStrength > 0.01) {
         context.save();
-        for (let i = 0; i < 24; i += 1) {
+        for (let i = 0; i < 12; i += 1) {
           const x = (i * 83 + time * (0.018 + (i % 4) * 0.008)) % WORLD_WIDTH;
           const y = 80 + ((time * (0.018 + (i % 5) * 0.006) + i * 31) % 205);
           const flicker = 0.4 + 0.6 * Math.abs(Math.sin(time / 190 + i * 1.7));
@@ -631,22 +637,28 @@ export default function MiniGamePage() {
       const bannerW = 490;
       const bannerH = 54;
       const banner = context.createLinearGradient(0, bannerY, 0, bannerY + bannerH);
-      const bannerFills = [
-        ["rgba(20,66,38,.82)","rgba(19,49,34,.82)"],
-        ["rgba(21,71,48,.84)","rgba(15,48,37,.84)"],
-        ["rgba(17,55,39,.86)","rgba(12,36,31,.86)"],
-        ["rgba(91,73,39,.88)","rgba(55,49,34,.88)"],
-        ["rgba(75,59,48,.90)","rgba(43,38,35,.90)"],
-        ["rgba(83,37,27,.92)","rgba(38,25,24,.94)"],
-      ][Math.round(paletteLevel)];
-      const bannerStrokes = ["#b7df91","#9bcf91","#8ab89a","#d5bd79","#c69b78","#ff9a58"];
-      banner.addColorStop(0, bannerFills[0]);
-      banner.addColorStop(.5, bannerFills[1]);
-      banner.addColorStop(1, bannerFills[1]);
+      const bannerPalettes = [
+        [[20,66,38],[19,49,34],[183,223,145]],
+        [[21,71,48],[15,48,37],[155,207,145]],
+        [[17,55,39],[12,36,31],[138,184,154]],
+        [[91,73,39],[55,49,34],[213,189,121]],
+        [[75,59,48],[43,38,35],[198,155,120]],
+        [[83,37,27],[38,25,24],[255,154,88]],
+      ];
+      const bannerIndex = Math.min(4, Math.floor(paletteLevel));
+      const bannerProgress = paletteLevel - bannerIndex;
+      const bannerFrom = bannerPalettes[bannerIndex];
+      const bannerTo = bannerPalettes[bannerIndex + 1];
+      const bannerFillTop = mixColor(bannerFrom[0], bannerTo[0], bannerProgress);
+      const bannerFillBottom = mixColor(bannerFrom[1], bannerTo[1], bannerProgress);
+      const bannerStroke = mixColor(bannerFrom[2], bannerTo[2], bannerProgress);
+      banner.addColorStop(0, bannerFillTop);
+      banner.addColorStop(.5, bannerFillBottom);
+      banner.addColorStop(1, bannerFillBottom);
       context.shadowColor = paletteLevel >= 4 ? "rgba(255,116,55,.48)" : "rgba(170,211,132,.35)";
       context.shadowBlur = 13;
       context.fillStyle = banner;
-      context.strokeStyle = bannerStrokes[Math.round(paletteLevel)];
+      context.strokeStyle = bannerStroke;
       context.lineWidth = 2;
       context.beginPath();
       context.roundRect(bannerX, bannerY, bannerW, bannerH, 15);
@@ -678,11 +690,9 @@ export default function MiniGamePage() {
       context.save();
       context.globalAlpha = shadowAlpha;
       context.fillStyle = "#183b27";
-      context.filter = "blur(5px)";
       context.beginPath();
       context.ellipse(player.x + 61, GROUND_Y + 8, 24.5 * shadowScale, 4.9 * shadowScale, 0, 0, Math.PI * 2);
       context.fill();
-      context.filter = "none";
       context.restore();
       if (sprite?.complete && sprite.naturalWidth > 0) {
         const cellW = sprite.naturalWidth / 3;
@@ -811,7 +821,7 @@ export default function MiniGamePage() {
     const update = (time) => {
       if (!game.running || game.paused) return;
 
-      const delta = game.lastTime ? Math.min((time - game.lastTime) / 16.67, 2) : 1;
+      const delta = game.lastTime ? Math.min((time - game.lastTime) / 16.67, 1.75) : 1;
       game.lastTime = time;
       game.distance += game.speed * delta;
       const points = Math.floor(game.distance / 8);
@@ -835,7 +845,7 @@ export default function MiniGamePage() {
         game.transitionFrom = game.wave - 1;
         game.transitionTo = game.wave - 1;
       }
-      game.speed = 6 * (1 + (game.wave - 1) * 0.4);
+      game.speed = getWaveSpeed(game.wave);
 
       const player = game.player;
       player.velocityY += 0.72 * delta;
