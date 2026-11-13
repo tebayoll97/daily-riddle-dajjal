@@ -591,3 +591,9 @@
  .df-main .wedding-platform .wedding-opening h1{font-size:1.8rem!important}
  .df-main .wedding-platform-invitation{padding:1.1rem!important}
 }
+
+
+/* Wedding dashboard action links */
+.df-main .wedding-platform-card-actions{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:1rem}
+.df-main .wedding-platform-card-actions .wedding-platform-link{margin-top:0}
+@media(max-width:480px){.df-main .wedding-platform-card-actions{flex-direction:column;align-items:flex-start;gap:.75rem}}
