@@ -105,3 +105,19 @@
 .wedding-footer{background:linear-gradient(135deg,#fff8f0,#ffeef5,#f0fff5);border-top-color:#eccbd8}
 @media(max-width:600px){.wedding-reveal.reveal-from-left{transform:translate3d(-34px,14px,0) scale(.99)}.wedding-reveal.reveal-from-right{transform:translate3d(34px,14px,0) scale(.99)}.wedding-reveal.reveal-from-bottom{transform:translate3d(0,30px,0) scale(.99)}}
 @media(prefers-reduced-motion:reduce){.wedding-reveal,.wedding-reveal.reveal-from-left,.wedding-reveal.reveal-from-right,.wedding-reveal.reveal-from-bottom,.wedding-reveal.reveal-zoom{opacity:1;transform:none;transition:none}}
+
+/* Keep the shared DF header and footer bright on the wedding route only */
+.df-shell:has(.wedding-page){background:linear-gradient(180deg,#fffaf2,#fff0f6 55%,#f0fff5);color:#49384d}
+.df-shell:has(.wedding-page) .df-header{background:rgba(255,250,246,.96);border-bottom:1px solid #eccbd8;backdrop-filter:blur(16px)}
+.df-shell:has(.wedding-page) .df-brand{color:#98506f}
+.df-shell:has(.wedding-page) .df-brand-crest{color:#d69b42}
+.df-shell:has(.wedding-page) .df-brand-copy small{color:#b36a88}
+.df-shell:has(.wedding-page) .df-nav a{color:#805a70}
+.df-shell:has(.wedding-page) .df-nav a:hover{color:#b36a88}
+.df-shell:has(.wedding-page) .df-language-switch{background:#fff;border-color:#e8c6d7}
+.df-shell:has(.wedding-page) .df-language-switch button{color:#805a70}
+.df-shell:has(.wedding-page) .df-language-switch button[aria-pressed=true]{color:#63344d;background:linear-gradient(135deg,#ffb9cf,#ffc98e)}
+.df-shell:has(.wedding-page) .df-footer{background:linear-gradient(135deg,#fff8f0,#ffeef5,#f0fff5);border-top:1px solid #eccbd8}
+.df-shell:has(.wedding-page) .df-footer-name{color:#98506f}
+.df-shell:has(.wedding-page) .df-footer-crest{color:#d69b42}
+.df-shell:has(.wedding-page) .df-footer-tagline,.df-shell:has(.wedding-page) .df-footer>small{color:#a98b9b}
