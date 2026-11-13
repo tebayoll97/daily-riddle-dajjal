@@ -58,6 +58,7 @@ export default function MiniGamePage() {
   const [soundOn, setSoundOn] = useState(true);
   const [confirmExit, setConfirmExit] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   const playTone = useCallback((frequency, duration = 0.08) => {
     if (!soundRef.current || typeof window === "undefined") return;
@@ -91,6 +92,9 @@ export default function MiniGamePage() {
 
     Object.assign(game, {
       running: true,
+      paused: false,
+      pauseStartedAt: 0,
+      pausedDuration: 0,
       over: false,
       speed: 6,
       distance: 0,
@@ -117,9 +121,26 @@ export default function MiniGamePage() {
     ];
 
     setScore(0);
+    setIsPaused(false);
     setStatus("playing");
     playTone(650);
   }, [playTone]);
+
+  const togglePause = useCallback(() => {
+    const game = gameRef.current;
+    if (!game || (!game.running && !game.paused) || game.over) return;
+    if (game.paused) {
+      game.pausedDuration += performance.now() - game.pauseStartedAt;
+      game.paused = false;
+      game.pauseStartedAt = 0;
+      game.lastTime = 0;
+      setIsPaused(false);
+      return;
+    }
+    game.paused = true;
+    game.pauseStartedAt = performance.now();
+    setIsPaused(true);
+  }, []);
 
   const jump = useCallback(() => {
     const game = gameRef.current;
@@ -144,6 +165,10 @@ export default function MiniGamePage() {
     const rect = canvas.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * WORLD_WIDTH;
     const y = ((event.clientY - rect.top) / rect.height) * WORLD_HEIGHT;
+    if (game.paused) {
+      if (x >= 350 && x <= 550 && y >= 210 && y <= 270) togglePause();
+      return;
+    }
     if (!game.running) {
       const button = { left: 350, right: 550, top: 238, bottom: 286 };
       if (x >= button.left && x <= button.right && y >= button.top && y <= button.bottom) {
@@ -152,7 +177,7 @@ export default function MiniGamePage() {
       return;
     }
     jump();
-  }, [jump, startGame]);
+  }, [jump, startGame, togglePause]);
 
   const toggleFullscreen = useCallback(async () => {
     const target = arenaRef.current;
@@ -222,6 +247,9 @@ export default function MiniGamePage() {
 
     const game = {
       running: false,
+      paused: false,
+      pauseStartedAt: 0,
+      pausedDuration: 0,
       over: false,
       speed: 6,
       distance: 0,
@@ -552,21 +580,39 @@ export default function MiniGamePage() {
       context.fillText(String(bestRef.current).padStart(5,"0"), WORLD_WIDTH - 17, 31);
       context.restore();
 
-      // Permanent, background-free wave title. Blink three times after each transition.
+      // Cinematic Wave banner: readable panel, brief pulse, no speed indicator.
       context.save();
       const waveElapsed = Math.max(0, time - game.waveChangedAt);
-      const waveBlink = waveElapsed < 1500 ? (Math.floor(waveElapsed / 250) % 2 === 0 ? 1 : 0.28) : 1;
+      const waveBlink = waveElapsed < 1500 ? (Math.floor(waveElapsed / 300) % 2 === 0 ? 1 : 0.72) : 1;
       context.globalAlpha = waveBlink;
+      const bannerX = 205;
+      const bannerY = 48;
+      const bannerW = 490;
+      const bannerH = 54;
+      const banner = context.createLinearGradient(0, bannerY, 0, bannerY + bannerH);
+      banner.addColorStop(0, "rgba(24,54,49,.88)");
+      banner.addColorStop(.5, "rgba(25,45,43,.82)");
+      banner.addColorStop(1, "rgba(17,34,34,.9)");
+      context.shadowColor = "rgba(255,210,112,.28)";
+      context.shadowBlur = 13;
+      context.fillStyle = banner;
+      context.strokeStyle = "rgba(255,221,145,.88)";
+      context.lineWidth = 2;
+      context.beginPath();
+      context.roundRect(bannerX, bannerY, bannerW, bannerH, 15);
+      context.fill();
+      context.stroke();
+      context.shadowBlur = 0;
       context.textAlign = "center";
       context.textBaseline = "middle";
-      context.shadowColor = "rgba(22,62,35,.72)";
-      context.shadowBlur = 5;
-      context.fillStyle = "#fff2a8";
-      context.font = "900 22px system-ui, sans-serif";
-      context.fillText("WAVE " + game.wave + "  ·  " + WAVE_TITLES[game.wave - 1], WORLD_WIDTH / 2, 76);
+      context.fillStyle = "#ffe9a6";
+      context.font = "900 11px system-ui, sans-serif";
+      context.fillText("✦  A NEW ERA BEGINS  ✦", WORLD_WIDTH / 2, bannerY + 13);
       context.fillStyle = "#ffffff";
-      context.font = "800 13px system-ui, sans-serif";
-      context.fillText("SPEED  " + (1 + (game.wave - 1) * 0.4).toFixed(1) + "×", WORLD_WIDTH / 2, 99);
+      context.shadowColor = "rgba(0,0,0,.55)";
+      context.shadowBlur = 4;
+      context.font = "900 18px system-ui, sans-serif";
+      context.fillText("WAVE " + game.wave + "  ·  " + WAVE_TITLES[game.wave - 1], WORLD_WIDTH / 2, bannerY + 36);
       context.restore();
 
       const player = game.player;
@@ -584,7 +630,7 @@ export default function MiniGamePage() {
       context.fillStyle = "#183b27";
       context.filter = "blur(5px)";
       context.beginPath();
-      context.ellipse(player.x + 61, GROUND_Y + 8, 42 * shadowScale, 8 * shadowScale, 0, 0, Math.PI * 2);
+      context.ellipse(player.x + 61, GROUND_Y + 8, 35 * shadowScale, 7 * shadowScale, 0, 0, Math.PI * 2);
       context.fill();
       context.filter = "none";
       context.restore();
@@ -595,8 +641,8 @@ export default function MiniGamePage() {
         const sx = (frame % 3) * cellW;
         const sy = Math.floor(frame / 3) * cellH;
         // Compact runner scale, anchored precisely to the top edge of the grass.
-        const drawW = 132;
-        const drawH = 117;
+        const drawW = 100;
+        const drawH = 89;
         const groundAnchorX = player.x + 61;
         const groundAnchorY = player.y + 58 + bob;
         context.save();
@@ -633,7 +679,39 @@ export default function MiniGamePage() {
         context.restore();
       });
 
-      if (!game.running) {
+      if (game.paused) {
+        context.save();
+        context.fillStyle = "rgba(5,12,15,.58)";
+        context.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+        const blink = 0.82 + Math.sin(time / 240) * 0.18;
+        context.globalAlpha = blink;
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.shadowColor = "rgba(0,0,0,.7)";
+        context.shadowBlur = 12;
+        context.fillStyle = "#ffe79a";
+        context.font = "900 38px system-ui, sans-serif";
+        context.fillText("PAUSED", WORLD_WIDTH / 2, 165);
+        context.globalAlpha = 1;
+        const resumeGradient = context.createLinearGradient(0, 210, 0, 266);
+        resumeGradient.addColorStop(0, "#62bd61");
+        resumeGradient.addColorStop(1, "#23623b");
+        context.shadowBlur = 9;
+        context.fillStyle = resumeGradient;
+        context.strokeStyle = "#ffe18a";
+        context.lineWidth = 3;
+        context.beginPath();
+        context.roundRect(350, 210, 200, 56, 14);
+        context.fill();
+        context.stroke();
+        context.shadowBlur = 0;
+        context.fillStyle = "#fff7d8";
+        context.font = "900 17px system-ui, sans-serif";
+        context.fillText("▶  LANJUTKAN", WORLD_WIDTH / 2, 238);
+        context.restore();
+      }
+
+      if (!game.running && !game.paused) {
         context.fillStyle = game.over ? "rgba(5,12,15,.48)" : "rgba(5,15,19,.22)";
         context.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
         context.save();
@@ -676,7 +754,7 @@ export default function MiniGamePage() {
     };
 
     const update = (time) => {
-      if (!game.running) return;
+      if (!game.running || game.paused) return;
 
       const delta = game.lastTime ? Math.min((time - game.lastTime) / 16.67, 2) : 1;
       game.lastTime = time;
@@ -773,7 +851,10 @@ export default function MiniGamePage() {
 
     const frame = (time) => {
       update(time);
-      draw(time);
+      const visualTime = game.paused
+        ? game.pauseStartedAt - game.pausedDuration
+        : time - game.pausedDuration;
+      draw(visualTime);
       frameRef.current = window.requestAnimationFrame(frame);
     };
 
@@ -812,19 +893,11 @@ export default function MiniGamePage() {
     <main className="mini-game-screen mg-page relative z-[60] min-h-[100svh] w-full overflow-x-hidden overflow-y-auto overscroll-y-contain bg-[#080711] px-3 pb-[max(18px,env(safe-area-inset-bottom))] pt-[max(10px,env(safe-area-inset-top))] text-white sm:px-5">
       <div className="mg-game-layout mx-auto flex min-h-[calc(100svh-24px)] w-full max-w-[720px] flex-col gap-3 overflow-visible">
         <div className={`mg-game-topbar flex items-center justify-between gap-3 ${isFullscreen ? "is-hidden" : ""}`}>
-          <button type="button" onClick={() => setConfirmExit(true)} className="ui-interactive rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[10px] font-black tracking-wider text-purple-200">← KELUAR GAME</button>
-          <div className="flex items-center gap-2">
-          <button type="button" onClick={toggleFullscreen} className="ui-interactive rounded-xl border border-emerald-300/20 bg-emerald-500/10 px-3 py-2.5 text-[10px] font-black text-emerald-100">
-            {isFullscreen ? "↙ EXIT FULL" : "⛶ LANDSCAPE"}
-          </button>
-          <button
-            type="button"
-            onClick={toggleSound}
-            aria-pressed={soundOn}
-            className="ui-interactive rounded-xl border border-purple-400/20 bg-purple-500/10 px-3 py-2.5 text-xs font-bold text-purple-100"
-          >
-            {soundOn ? "♫ SOUND ON" : "♪ SOUND OFF"}
-          </button>
+          <button type="button" onClick={() => setConfirmExit(true)} className="mg-toolbar-exit ui-interactive rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[10px] font-black tracking-wider text-purple-200">← KELUAR GAME</button>
+          <button type="button" onClick={toggleFullscreen} className="mg-toolbar-landscape ui-interactive rounded-xl border border-emerald-300/20 bg-emerald-500/10 px-3 py-2.5 text-[10px] font-black text-emerald-100">⛶ LANDSCAPE</button>
+          <div className="mg-toolbar-icons">
+            <button type="button" onClick={toggleSound} aria-label={soundOn ? "Matikan suara" : "Nyalakan suara"} aria-pressed={soundOn} className="mg-icon-control" title={soundOn ? "Sound ON" : "Sound OFF"}>{soundOn ? "♫" : "♪"}</button>
+            <button type="button" onClick={togglePause} aria-label={isPaused ? "Lanjutkan permainan" : "Pause permainan"} className="mg-icon-control" title={isPaused ? "Lanjutkan" : "Pause"}>{isPaused ? "▶" : "Ⅱ"}</button>
           </div>
         </div>
 
@@ -841,6 +914,13 @@ export default function MiniGamePage() {
         <section ref={arenaRef} className={`mg-arena mg-game-arena mg-fullscreen-arena flex w-full flex-none flex-col justify-start overflow-hidden p-2.5 sm:p-4 ${isFullscreen ? "is-fullscreen" : ""}`}>
           <div className="mg-game-world-frame mg-jungle-world w-full overflow-hidden rounded-2xl border border-purple-300/15">
             <div className="mg-game-canvas-frame relative w-full overflow-hidden">
+              {isFullscreen && <div className="mg-fullscreen-tools">
+                <button type="button" onClick={toggleFullscreen} className="mg-fullscreen-exit" aria-label="Keluar mode landscape">↙ EXIT</button>
+                <div className="mg-fullscreen-icon-stack">
+                  <button type="button" onClick={toggleSound} aria-label={soundOn ? "Matikan suara" : "Nyalakan suara"} className="mg-icon-control">{soundOn ? "♫" : "♪"}</button>
+                  <button type="button" onClick={togglePause} aria-label={isPaused ? "Lanjutkan permainan" : "Pause permainan"} className="mg-icon-control">{isPaused ? "▶" : "Ⅱ"}</button>
+                </div>
+              </div>}
               <canvas
                 ref={canvasRef}
                 className="mg-game-canvas block w-full touch-none"
@@ -851,7 +931,6 @@ export default function MiniGamePage() {
 
           </div>
 
-          {isFullscreen && <button type="button" onClick={toggleFullscreen} className="mg-fullscreen-exit">EXIT FULLSCREEN ✕</button>}
           <div className={`mg-game-controls mt-2 flex shrink-0 flex-col items-center gap-2 sm:mt-3 ${isFullscreen ? "is-hidden" : ""}`}>
             <p className="text-center text-[10px] leading-relaxed text-gray-500 sm:text-[11px]">
               TAP layar untuk melompat · SPACE / ↑ di desktop
