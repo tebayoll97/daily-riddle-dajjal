@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { supabase } from "../../../lib/supabase";
 import { useLanguage } from "../../components/LanguageProvider";
 import "./wedding.css";
 
@@ -40,6 +41,13 @@ const words = {
     copy: "COPY LINK",
     copied: "Link copied",
     count: "Guests",
+    rsvpSuccess: "Thank you. Your RSVP has been received.",
+    guestbookSuccess: "Thank you. Your message was sent for approval.",
+    submitError: "Something went wrong. Please try again.",
+    sending: "SENDING…",
+    musicOff: "MUSIC OFF",
+    musicOn: "MUSIC ON",
+    photoAlt: "Anak Dajjal and Malika",
   },
   id: {
     eyebrow: "SEDIKIT KEMERIAHAN, BANYAK CINTA",
@@ -76,6 +84,13 @@ const words = {
     copy: "SALIN TAUTAN",
     copied: "Tautan disalin",
     count: "Tamu",
+    rsvpSuccess: "Terima kasih. Konfirmasi kehadiran Anda sudah diterima.",
+    guestbookSuccess: "Terima kasih. Pesan Anda dikirim untuk ditinjau admin.",
+    submitError: "Terjadi kendala. Silakan coba kembali.",
+    sending: "MENGIRIM…",
+    musicOff: "MUSIK MATI",
+    musicOn: "MUSIK NYALA",
+    photoAlt: "Anak Dajjal dan Malika",
   },
 };
 
@@ -119,7 +134,7 @@ export default function WeddingInvitationPage() {
             <button type="button" onClick={() => setLanguage("id")} aria-pressed={language === "id"}>🇮🇩 ID</button>
             <button type="button" onClick={() => setLanguage("en")} aria-pressed={language === "en"}>🇬🇧 EN</button>
           </div>
-          <button className="wedding-music" type="button" onClick={() => setMusicNotice(!musicNotice)}>{t.music} ♫</button>
+          <button className="wedding-music" type="button" onClick={toggleMusic} disabled={!eventInfo?.music_url} aria-pressed={musicOn}>{musicOn ? t.musicOn : t.musicOff} ♫</button>
         </div>
       </div>
 
@@ -134,7 +149,7 @@ export default function WeddingInvitationPage() {
           <p className="opening-invite">{t.invite}</p>
           <h1>{t.couple}</h1>
           {guestName && <p className="guest-name">{language === "id" ? "Kepada Yth." : "Dear"} {guestName}</p>}
-          <button className="wedding-primary" type="button" onClick={() => setOpened(true)}>{t.open} <span>✧</span></button>
+          <button className="wedding-primary" type="button" onClick={() => { setOpened(true); if (eventInfo?.music_url && audioRef.current) audioRef.current.play().then(() => setMusicOn(true)).catch(() => setMusicOn(false)); }}>{t.open} <span>✧</span></button>
           <p className="opening-footnote">ROYAL PLAYFUL EDITION</p>
         </section>
       )}
@@ -165,20 +180,20 @@ export default function WeddingInvitationPage() {
             <p className="wedding-kicker">SAVE THE CELEBRATION</p>
             <h2>{t.reception}</h2>
             <div className="detail-grid">
-              <article><span>◷</span><h3>{t.date}</h3><p>DATE</p></article>
-              <article><span>⌖</span><h3>{t.venue}</h3><p>LOCATION</p></article>
-              <article><span>♧</span><h3>{t.time}</h3><p>TIME</p></article>
+              <article><span>◷</span><h3>{eventInfo?.event_date ? new Date(`${eventInfo.event_date}T00:00:00`).toLocaleDateString(language === "id" ? "id-ID" : "en-US", { dateStyle: "long" }) : t.date}</h3><p>DATE</p></article>
+              <article><span>⌖</span><h3>{eventInfo?.venue || t.venue}</h3><p>LOCATION</p></article>
+              <article><span>♧</span><h3>{eventInfo?.event_time || t.time}</h3><p>TIME</p></article>
             </div>
-            <div className="wedding-note">{t.schedule}<p>{t.scheduleText}</p></div>
+            <div className="wedding-note">{t.schedule}<p>{eventInfo?.schedule || t.scheduleText}</p></div>
           </section>
 
           <section className="wedding-section wedding-form-section">
             <p className="wedding-kicker">WE HOPE YOU CAN JOIN</p>
             <h2>{t.rsvp}</h2>
             <p className="section-copy">{t.rsvpText}</p>
-            <form className="wedding-form" onSubmit={(event) => { event.preventDefault(); setFormNotice(true); }}>
+            <form className="wedding-form" onSubmit={submitRsvp}>
               <label>{t.name}<input required name="guest_name" placeholder={t.name} maxLength={100} /></label>
-              <label>{t.guests}<input required name="guest_count" type="number" min="1" max="50" defaultValue="1" /></label>
+              <label>{t.guests}<input required name="guest_count" type="number" min="1" step="1" defaultValue="1" /></label>
               <label>{t.attendance}<select name="attendance" defaultValue="yes"><option value="yes">{t.yes}</option><option value="no">{t.no}</option></select></label>
               <button className="wedding-primary" type="submit">{t.send}</button>
               {formNotice && <p className="form-notice" role="status">{t.coming}</p>}
@@ -189,12 +204,12 @@ export default function WeddingInvitationPage() {
             <p className="wedding-kicker">WORDS FROM THE HEART</p>
             <h2>{t.guestbook}</h2>
             <p className="section-copy">{t.guestbookText}</p>
-            <form className="wedding-form" onSubmit={(event) => { event.preventDefault(); setFormNotice(true); }}>
+            <form className="wedding-form" onSubmit={submitGuestbook}>
               <label>{t.name}<input required name="guestbook_name" maxLength="100" placeholder={t.name} /></label>
               <label>{t.message}<textarea required name="guestbook_message" rows="4" maxLength="500" placeholder={t.message} /></label>
-              <button className="wedding-primary" type="submit">{t.sign}</button>
+              <button className="wedding-primary" type="submit" disabled={guestbookLoading}>{guestbookLoading ? t.sending : t.sign}</button>\n              {guestbookStatus && <p className="form-notice" role="status">{guestbookStatus === "success" ? t.guestbookSuccess : t.submitError}</p>}
             </form>
-            <p className="guestbook-note">✧ {t.note}</p>
+            <p className="guestbook-note">✧ {t.note}</p>\n            {guestbookEntries.length > 0 && <div className="approved-messages">{guestbookEntries.map((entry) => <article key={entry.id}><strong>{entry.guest_name}</strong><p>{entry.message}</p></article>)}</div>}
           </section>
 
           <section className="wedding-share">
@@ -214,7 +229,7 @@ export default function WeddingInvitationPage() {
         <small>{t.footer}</small>
       </footer>
 
-      {musicNotice && <div className="wedding-toast" role="status">{t.musicSoon}</div>}
+      {eventInfo?.music_url && <audio ref={audioRef} src={eventInfo.music_url} loop preload="none" /> }
     </main>
   );
 }
