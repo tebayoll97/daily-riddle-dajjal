@@ -86,3 +86,22 @@ export async function PATCH(request, { params }) {
     return fail("Unable to save your draft. Please try again.", 500);
   }
 }
+
+
+export async function DELETE(request, { params }) {
+  try {
+    const { id } = await params;
+    if (!UUID.test(id)) return fail("Invalid invitation ID.", 400);
+    const owner = await getOwner(request, id);
+    if (owner.error) return fail(owner.error, owner.status);
+    if (owner.invitation.is_active) return fail("Published invitations cannot be deleted here. Deactivate them first.", 409);
+    const { error: profileError } = await supabaseAdmin.from("df_wedding_profiles").delete().eq("invitation_id", id);
+    if (profileError) throw profileError;
+    const { error } = await supabaseAdmin.from("df_invitations").delete().eq("id", id).eq("owner_user_id", owner.user.id);
+    if (error) throw error;
+    return Response.json({ success: true });
+  } catch (error) {
+    console.error("Wedding invitation DELETE:", error);
+    return fail("Unable to delete this draft.", 500);
+  }
+}
