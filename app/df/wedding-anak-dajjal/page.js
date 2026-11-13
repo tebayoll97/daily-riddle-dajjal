@@ -238,7 +238,7 @@ export default function WeddingInvitationPage() {
 
           <section className="wedding-section wedding-reveal reveal-from-right">
             <p className="wedding-kicker">SAVE THE CELEBRATION</p>
-            <h2>{t.reception}</h2>
+            <h2 className="wedding-section-heading">{t.reception}</h2>
             <div className="detail-grid">
               <article><span>◷</span><h3>{eventInfo?.event_date ? new Date(`${eventInfo.event_date}T00:00:00`).toLocaleDateString(language === "id" ? "id-ID" : "en-US", { dateStyle: "long" }) : t.date}</h3><p>DATE</p></article>
               <article><span>⌖</span><h3>{eventInfo?.venue || t.venue}</h3><p>LOCATION</p></article>
@@ -249,7 +249,7 @@ export default function WeddingInvitationPage() {
 
           <section className="wedding-section wedding-guestbook wedding-reveal reveal-from-left">
             <p className="wedding-kicker">WORDS FROM THE HEART</p>
-            <h2>{t.guestbook}</h2>
+            <h2 className="wedding-section-heading">{t.guestbook}</h2>
             <p className="section-copy">{t.guestbookText}</p>
             <form className="wedding-form" onSubmit={submitGuestbook}>
               <label>{t.name}<input required name="guestbook_name" maxLength="100" placeholder={t.name} /></label>
@@ -264,7 +264,7 @@ export default function WeddingInvitationPage() {
 
           <section className="wedding-share wedding-reveal reveal-from-right">
             <p className="wedding-kicker">SPREAD THE JOY</p>
-            <h2>{t.couple}</h2>
+            <h2 className="wedding-section-heading">{t.couple}</h2>
             <div className="share-actions">
               <button type="button" onClick={shareInvite}>{t.share}</button>
               <button type="button" onClick={copyLink}>{copied ? t.copied : t.copy}</button>
@@ -272,12 +272,6 @@ export default function WeddingInvitationPage() {
           </section>
         </div>
       )}
-
-      <footer className="wedding-footer">
-        <span>♛</span>
-        <strong>DAJJAL FAMILY UNIVERSE</strong>
-        <small>{t.footer}</small>
-      </footer>
 
       {eventInfo?.music_url && <audio ref={audioRef} src={eventInfo.music_url} loop preload="none" /> }
     </main>
