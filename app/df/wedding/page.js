@@ -3,8 +3,41 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useLanguage } from "@/app/components/LanguageProvider";
+import "../wedding-anak-dajjal/wedding.css";
+
+const copy = {
+  en: {
+    back: "DAJJAL FAMILY UNIVERSE", eyebrow: "A BEAUTIFUL WAY TO CELEBRATE LOVE",
+    title: "Your story deserves", accent: "a beautiful invitation.",
+    intro: "Create a personal digital wedding invitation, share it with the people you love, and keep every special moment in one place.",
+    dashboard: "MY WEDDING DASHBOARD", create: "CREATE YOUR INVITATION", sample: "VIEW SAMPLE INVITATION",
+    limit: "One Dajjal Family account · Up to 3 invitations per account",
+    steps: [
+      ["01", "Choose your style", "Start with a visual theme and colors that reflect your celebration."],
+      ["02", "Tell your story", "Add the couple, event details, photos, music, and personal touches."],
+      ["03", "Share the moment", "Preview your invitation, publish it, and share its unique link."]
+    ],
+    footer: "DAJJAL FAMILY · WEDDING EXPERIENCES"
+  },
+  id: {
+    back: "DAJJAL FAMILY UNIVERSE", eyebrow: "CARA INDAH MERAYAKAN CINTA",
+    title: "Kisah istimewamu layak memiliki", accent: "undangan yang menawan.",
+    intro: "Buat undangan pernikahan digital yang personal, bagikan kepada orang-orang tersayang, dan simpan setiap momen istimewa dalam satu tempat.",
+    dashboard: "DASHBOARD UNDANGAN SAYA", create: "BUAT UNDANGAN", sample: "LIHAT CONTOH UNDANGAN",
+    limit: "Satu akun Dajjal Family · Maksimal 3 undangan per akun",
+    steps: [
+      ["01", "Pilih gaya undangan", "Mulai dengan tema visual dan warna yang mencerminkan perayaanmu."],
+      ["02", "Ceritakan kisah kalian", "Tambahkan nama pasangan, detail acara, foto, musik, dan sentuhan personal."],
+      ["03", "Bagikan momen bahagia", "Lihat pratinjau, publikasikan undangan, lalu bagikan tautan uniknya."]
+    ],
+    footer: "DAJJAL FAMILY · WEDDING EXPERIENCES"
+  }
+};
 
 export default function WeddingHomePage() {
+  const { language, setLanguage } = useLanguage();
+  const t = copy[language] || copy.en;
   const [signedIn, setSignedIn] = useState(false);
   useEffect(() => {
     let alive = true;
@@ -13,31 +46,36 @@ export default function WeddingHomePage() {
     return () => { alive = false; subscription.unsubscribe(); };
   }, []);
 
-  return (
-    <main className="min-h-screen overflow-hidden bg-[#fff8f7] text-[#543b49]">
-      <section className="relative isolate px-5 pb-20 pt-16 sm:px-8 sm:pt-24">
-        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_0%,#f7dce5_0%,transparent_62%)]" />
-        <div className="mx-auto max-w-5xl text-center">
-          <Link href="/df" className="text-xs font-bold tracking-[.24em] text-[#a66a83]">DAJJAL FAMILY UNIVERSE</Link>
-          <p className="mt-12 text-xs font-bold tracking-[.28em] text-[#b47a91]">A BEAUTIFUL WAY TO CELEBRATE LOVE</p>
-          <h1 className="mx-auto mt-5 max-w-4xl font-serif text-5xl font-semibold leading-[1.08] text-[#75465e] sm:text-7xl">Your story deserves<br/><span className="italic text-[#c17c98]">a beautiful invitation.</span></h1>
-          <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-[#806b75] sm:text-lg">Create a personal digital wedding invitation, share it with the people you love, and keep every special moment in one place.</p>
-          <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link href={signedIn ? "/df/wedding/dashboard" : "/login?next=%2Fdf%2Fwedding%2Fdashboard"} className="rounded-full bg-[#a96582] px-8 py-4 text-sm font-bold tracking-wide text-white shadow-lg shadow-[#a96582]/20 transition hover:-translate-y-0.5 hover:bg-[#945570]"> {signedIn ? "MY WEDDING DASHBOARD" : "CREATE YOUR INVITATION"} </Link>
-            <Link href="/df/wedding=anak-dajjal-malika" className="rounded-full border border-[#d9b7c4] bg-white/70 px-8 py-4 text-sm font-bold text-[#8a5b70] transition hover:bg-white">VIEW SAMPLE INVITATION</Link>
+  return <div className="df-main">
+    <main className="wedding-page wedding-platform">
+      <header className="wedding-topbar">
+        <Link href="/df" className="wedding-back">♛ <span>{t.back}</span></Link>
+        <div className="wedding-tools">
+          <div className="wedding-lang" aria-label="Language">
+            <button type="button" onClick={() => setLanguage("en")} aria-pressed={language === "en"}>EN</button>
+            <button type="button" onClick={() => setLanguage("id")} aria-pressed={language === "id"}>ID</button>
           </div>
-          <p className="mt-5 text-xs text-[#a18b94]">One Dajjal Family account · Up to 3 invitations per account</p>
         </div>
+      </header>
+      <section className="wedding-opening wedding-platform-hero">
+        <div className="opening-sparkle">✦　❧　✦</div>
+        <p className="wedding-kicker">{t.eyebrow}</p>
+        <h1>{t.title}<br/><em>{t.accent}</em></h1>
+        <p className="wedding-intro">{t.intro}</p>
+        <div className="wedding-platform-actions">
+          <Link className="wedding-primary" href={signedIn ? "/df/wedding/dashboard" : "/login?next=%2Fdf%2Fwedding%2Fdashboard"}>{signedIn ? t.dashboard : t.create}</Link>
+          <Link className="wedding-platform-secondary" href="/df/wedding=anak-dajjal-malika">{t.sample}</Link>
+        </div>
+        <p className="opening-footnote">{t.limit}</p>
       </section>
-
-      <section className="mx-auto grid max-w-5xl gap-5 px-5 pb-20 sm:grid-cols-3 sm:px-8">
-        {[
-          ["01", "Choose your style", "Start with a visual theme and colors that reflect your celebration."],
-          ["02", "Tell your story", "Add the couple, event details, photos, music, and personal touches."],
-          ["03", "Share the moment", "Preview your invitation, publish it, and share its unique link."],
-        ].map(([n, title, desc]) => <article key={n} className="rounded-3xl border border-[#f0dce3] bg-white/80 p-7 shadow-[0_12px_35px_rgba(125,75,96,.06)]"><span className="font-serif text-3xl italic text-[#c58ca2]">{n}</span><h2 className="mt-5 font-serif text-2xl text-[#75465e]">{title}</h2><p className="mt-3 text-sm leading-7 text-[#897580]">{desc}</p></article>)}
+      <section className="wedding-platform-steps">
+        {t.steps.map(([number, title, description]) => <article className="wedding-section" key={number}>
+          <span className="wedding-platform-number">{number}</span>
+          <h2 className="wedding-section-heading">{title}</h2>
+          <p className="section-copy">{description}</p>
+        </article>)}
       </section>
-      <footer className="border-t border-[#f0dce3] px-5 py-8 text-center text-xs tracking-[.18em] text-[#a18b94]">DAJJAL FAMILY · WEDDING EXPERIENCES</footer>
+      <footer className="wedding-footer"><span>✧</span><strong>{t.footer}</strong></footer>
     </main>
-  );
+  </div>;
 }
