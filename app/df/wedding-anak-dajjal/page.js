@@ -119,18 +119,26 @@ export default function WeddingInvitationPage({ invitationSlug = "anak-dajjal-ma
     setGuestName(new URLSearchParams(window.location.search).get("to") || "");
     let active = true;
     async function loadWeddingData() {
-      const invitationResult = await supabase.from("df_invitations").select("id,slug,title,is_active").eq("slug", invitationSlug).eq("is_active", true).maybeSingle();
-      if (!active || !invitationResult.data) return;
-      const id = invitationResult.data.id;
+      const publicResponse = await fetch("/api/wedding/public/" + encodeURIComponent(invitationSlug), { cache: "no-store" });
+      if (!publicResponse.ok) return;
+      const publicData = await publicResponse.json();
+      if (!active || !publicData.invitation) return;
+      const id = publicData.invitation.id;
+      const profile = publicData.profile || {};
       setInvitationId(id);
-      const [settingsResult, galleryResult, messagesResult] = await Promise.all([
-        supabase.from("df_event_settings").select("*").eq("invitation_id", id).maybeSingle(),
-        supabase.from("df_gallery_items").select("id,title,description,album,image_url,sort_order").eq("invitation_id", id).eq("is_published", true).order("sort_order", { ascending: true }),
-        supabase.from("df_guestbook").select("id, guest_name, message, created_at").eq("invitation_id", id).eq("is_approved", true).order("created_at", { ascending: false }).limit(30),
-      ]);
+      setEventInfo({
+        ...profile,
+        invitation_title: publicData.invitation.title,
+        couple_photo_url: profile.main_photo_url,
+        schedule: Array.isArray(profile.event_schedule) ? profile.event_schedule.join(" · ") : "",
+        couple_display: [profile.groom_name, profile.bride_name].filter(Boolean).join(" & "),
+        event_date: profile.event_date,
+        event_time: profile.event_time,
+        venue: profile.venue,
+      });
+      if (Array.isArray(profile.gallery_urls)) setGalleryItems(profile.gallery_urls.map((url,index)=>({id:index,title:"",image_url:url})));
+      const messagesResult = await supabase.from("df_guestbook").select("id, guest_name, message, created_at").eq("invitation_id", id).eq("is_approved", true).order("created_at", { ascending: false }).limit(30);
       if (!active) return;
-      if (settingsResult.data) setEventInfo(settingsResult.data);
-      if (galleryResult.data) setGalleryItems(galleryResult.data);
       if (messagesResult.data) setGuestbookEntries(messagesResult.data);
     }
     loadWeddingData();
@@ -227,7 +235,7 @@ export default function WeddingInvitationPage({ invitationSlug = "anak-dajjal-ma
             <div className="envelope-flap" />
           </div>
           <p className="opening-invite">{t.invite}</p>
-          <h1>{t.couple}</h1>
+          <h1>{eventInfo?.couple_display || t.couple}</h1>
           {guestName && <p className="guest-name">{language === "id" ? "Kepada Yth." : "Dear"} {guestName}</p>}
           <button className="wedding-primary" type="button" onClick={() => { setOpened(true); if (eventInfo?.music_url && audioRef.current) audioRef.current.play().then(() => setMusicOn(true)).catch(() => setMusicOn(false)); }}>{t.open} <span>✧</span></button>
           <p className="opening-footnote">ROYAL PLAYFUL EDITION</p>
@@ -239,7 +247,7 @@ export default function WeddingInvitationPage({ invitationSlug = "anak-dajjal-ma
           <section className="wedding-hero" data-aos="fade-right">
             <div className="wedding-ornament">✦ ❧ ✦</div>
             <p className="wedding-kicker">{t.opened}</p>
-            <h1>{t.title}</h1>
+            <h1>{eventInfo?.invitation_title || t.title}</h1>
             <p className="wedding-intro">{t.intro}</p>
             <div className="couple-frame">
               <div className="couple-placeholder">
@@ -252,7 +260,7 @@ export default function WeddingInvitationPage({ invitationSlug = "anak-dajjal-ma
               <span className="frame-corner frame-tl">✦</span><span className="frame-corner frame-tr">✦</span>
               <span className="frame-corner frame-bl">✦</span><span className="frame-corner frame-br">✦</span>
             </div>
-            <h2 className="couple-names">{t.couple}</h2>
+            <h2 className="couple-names">{eventInfo?.couple_display || t.couple}</h2>
             <p className="couple-subtitle">MALIKA — KEDELAI HITAM PILIHAN</p>
           </section>
 
