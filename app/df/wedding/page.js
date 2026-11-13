@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import WeddingAccountControls from "./WeddingAccountControls";
-import WeddingAccountControls from "./WeddingAccountControls";
 import { supabase } from "@/lib/supabase";
 import { useLanguage } from "@/app/components/LanguageProvider";
 import "../wedding-anak-dajjal/wedding.css";
@@ -13,7 +12,8 @@ const copy = {
     back: "DAJJAL FAMILY UNIVERSE", eyebrow: "A BEAUTIFUL WAY TO CELEBRATE LOVE",
     title: "Your story deserves", accent: "a beautiful invitation.",
     intro: "Create a personal digital wedding invitation, share it with the people you love, and keep every special moment in one place.",
-    dashboard: "MY WEDDING DASHBOARD", create: "CREATE YOUR INVITATION", sample: "VIEW SAMPLE INVITATION", loginPrompt: "Sign in with your Google account to create and manage wedding invitations.", google: "CONTINUE WITH GOOGLE", loggingIn: "CONNECTING...", loginError: "Google sign-in could not be started.", loginPrompt: "Sign in with your Google account to create and manage wedding invitations.", google: "CONTINUE WITH GOOGLE", loggingIn: "CONNECTING...", loginError: "Google sign-in could not be started.",
+    dashboard: "MY WEDDING DASHBOARD", create: "CREATE YOUR INVITATION", sample: "VIEW SAMPLE INVITATION",
+    loginPrompt: "Sign in with your Google account to create and manage wedding invitations.", google: "CONTINUE WITH GOOGLE", loggingIn: "CONNECTING...", loginError: "Google sign-in could not be started.", loginPrompt: "Sign in with your Google account to create and manage wedding invitations.", google: "CONTINUE WITH GOOGLE", loggingIn: "CONNECTING...", loginError: "Google sign-in could not be started.",
     limit: "One Dajjal Family account · Up to 3 invitations per account",
     steps: [
       ["01", "Choose your style", "Start with a visual theme and colors that reflect your celebration."],
@@ -26,7 +26,8 @@ const copy = {
     back: "DAJJAL FAMILY UNIVERSE", eyebrow: "CARA INDAH MERAYAKAN CINTA",
     title: "Kisah istimewamu layak memiliki", accent: "undangan yang menawan.",
     intro: "Buat undangan pernikahan digital yang personal, bagikan kepada orang-orang tersayang, dan simpan setiap momen istimewa dalam satu tempat.",
-    dashboard: "DASHBOARD UNDANGAN SAYA", create: "BUAT UNDANGAN", sample: "LIHAT CONTOH UNDANGAN", loginPrompt: "Masuk menggunakan akun Google untuk membuat dan mengelola undangan pernikahan.", google: "LANJUTKAN DENGAN GOOGLE", loggingIn: "MENGHUBUNGKAN...", loginError: "Login Google belum dapat dimulai.", loginPrompt: "Masuk menggunakan akun Google untuk membuat dan mengelola undangan pernikahan.", google: "LANJUTKAN DENGAN GOOGLE", loggingIn: "MENGHUBUNGKAN...", loginError: "Login Google belum dapat dimulai.",
+    dashboard: "DASHBOARD UNDANGAN SAYA", create: "BUAT UNDANGAN", sample: "LIHAT CONTOH UNDANGAN",
+    loginPrompt: "Masuk menggunakan akun Google untuk membuat dan mengelola undangan pernikahan.", google: "LANJUTKAN DENGAN GOOGLE", loggingIn: "MENGHUBUNGKAN...", loginError: "Login Google belum dapat dimulai.", loginPrompt: "Masuk menggunakan akun Google untuk membuat dan mengelola undangan pernikahan.", google: "LANJUTKAN DENGAN GOOGLE", loggingIn: "MENGHUBUNGKAN...", loginError: "Login Google belum dapat dimulai.",
     limit: "Satu akun Dajjal Family · Maksimal 3 undangan per akun",
     steps: [
       ["01", "Pilih gaya undangan", "Mulai dengan tema visual dan warna yang mencerminkan perayaanmu."],
@@ -42,7 +43,8 @@ export default function WeddingHomePage() {
   const t = copy[language] || copy.en;
   const [signedIn, setSignedIn] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [loginError, setLoginError] = useState("");\n  const [busy, setBusy] = useState(false);\n  const [loginError, setLoginError] = useState("");
+  const [loginError, setLoginError] = useState("");
+
   useEffect(() => {
     let alive = true;
     supabase.auth.getSession().then(({ data }) => { if (alive) setSignedIn(!!data.session?.user && !data.session.user.is_anonymous); });
@@ -50,11 +52,14 @@ export default function WeddingHomePage() {
     return () => { alive = false; subscription.unsubscribe(); };
   }, []);
 
-  async function handleGoogleLogin() {\n    if (busy) return;\n    setBusy(true); setLoginError("");\n    const { error } = await supabase.auth.signInWithOAuth({\n      provider: "google",\n      options: { redirectTo: window.location.origin + "/df/wedding", queryParams: { prompt: "select_account" } }\n    });\n    if (error) { setLoginError(error.message || t.loginError); setBusy(false); }\n  }\n\n  async function handleGoogleLogin() {
+  async function handleGoogleLogin() {
     if (busy) return;
     setBusy(true);
     setLoginError("");
-    const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin + "/df/wedding", queryParams: { prompt: "select_account" } } });
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin + "/df/wedding", queryParams: { prompt: "select_account" } }
+    });
     if (error) { setLoginError(error.message || t.loginError); setBusy(false); }
   }
 
