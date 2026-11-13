@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useEffect, useRef, useState } from "react";
 import "bootstrap/dist/css/bootstrap-grid.min.css";
 import AOS from "aos";
@@ -210,7 +212,7 @@ export default function WeddingInvitationPage({ invitationSlug = "anak-dajjal-ma
   return (
     <main className="wedding-page">
       <div className="wedding-topbar">
-        <a className="wedding-back" href="/df">♛ <span>DAJJAL FAMILY UNIVERSE</span></a>
+        <Link className="wedding-back" href="/df">♛ <span>DAJJAL FAMILY UNIVERSE</span></Link>
         <div className="wedding-tools">
           <button className="wedding-music" type="button" onClick={toggleMusic} disabled={!eventInfo?.music_url} aria-pressed={musicOn}>{musicOn ? t.musicOn : t.musicOff} ♫</button>
         </div>
