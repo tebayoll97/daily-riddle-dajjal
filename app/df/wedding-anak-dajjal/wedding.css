@@ -84,3 +84,24 @@
  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
  .wedding-reveal{opacity:1;transform:none}
 }
+
+/* Bright wedding page and reversible directional scroll reveals */
+.wedding-page{position:relative;isolation:isolate;width:100%;min-height:100vh;color:#49384d;background:radial-gradient(ellipse at 8% 8%,rgba(255,194,216,.78),transparent 34%),radial-gradient(ellipse at 92% 32%,rgba(255,222,166,.72),transparent 32%),radial-gradient(ellipse at 10% 72%,rgba(191,237,215,.7),transparent 34%),linear-gradient(180deg,#fffaf2 0%,#fff0f6 27%,#f4efff 53%,#edfaf2 77%,#fff5df 100%) !important}
+.wedding-page:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.28;background-image:radial-gradient(#e7a9c0 1px,transparent 1px);background-size:26px 26px}
+.wedding-topbar{border-bottom-color:#eac8d8}
+.wedding-tools{display:flex;align-items:center;justify-content:flex-end}
+.wedding-music{color:#80506c;background:rgba(255,255,255,.8);border-color:#e7bfd1}
+.wedding-content{position:relative}
+.wedding-section{background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(255,239,246,.96)) !important}
+.wedding-section.wedding-guestbook{background:linear-gradient(145deg,#f0fff5,#f4efff) !important}
+.wedding-share{background:linear-gradient(120deg,#ffe0eb,#fff0cf,#e2f5e9) !important}
+.wedding-reveal{opacity:0;transition:opacity .72s ease,transform .82s cubic-bezier(.2,.72,.22,1);will-change:opacity,transform}
+.wedding-reveal.reveal-from-left{transform:translate3d(-72px,18px,0) scale(.985)}
+.wedding-reveal.reveal-from-right{transform:translate3d(72px,18px,0) scale(.985)}
+.wedding-reveal.reveal-from-bottom{transform:translate3d(0,48px,0) scale(.985)}
+.wedding-reveal.reveal-zoom{transform:scale(.9)}
+.wedding-reveal.is-visible{opacity:1;transform:translate3d(0,0,0) scale(1)}
+.wedding-opening{background:transparent}
+.wedding-footer{background:linear-gradient(135deg,#fff8f0,#ffeef5,#f0fff5);border-top-color:#eccbd8}
+@media(max-width:600px){.wedding-reveal.reveal-from-left{transform:translate3d(-34px,14px,0) scale(.99)}.wedding-reveal.reveal-from-right{transform:translate3d(34px,14px,0) scale(.99)}.wedding-reveal.reveal-from-bottom{transform:translate3d(0,30px,0) scale(.99)}}
+@media(prefers-reduced-motion:reduce){.wedding-reveal,.wedding-reveal.reveal-from-left,.wedding-reveal.reveal-from-right,.wedding-reveal.reveal-from-bottom,.wedding-reveal.reveal-zoom{opacity:1;transform:none;transition:none}}
