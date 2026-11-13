@@ -95,15 +95,13 @@ const words = {
 };
 
 export default function WeddingInvitationPage() {
-  const { language, setLanguage } = useLanguage();
+  const { language } = useLanguage();
   const t = words[language] || words.en;
   const [opened, setOpened] = useState(false);
   const [guestName, setGuestName] = useState("");
   const [eventInfo, setEventInfo] = useState(null);
   const [guestbookEntries, setGuestbookEntries] = useState([]);
-  const [rsvpStatus, setRsvpStatus] = useState("");
   const [guestbookStatus, setGuestbookStatus] = useState("");
-  const [rsvpLoading, setRsvpLoading] = useState(false);
   const [guestbookLoading, setGuestbookLoading] = useState(false);
   const [musicOn, setMusicOn] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -134,35 +132,12 @@ export default function WeddingInvitationPage() {
     }
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-          observer.unobserve(entry.target);
-        }
+        entry.target.classList.toggle("is-visible", entry.isIntersecting);
       });
     }, { threshold: 0.12, rootMargin: "0px 0px -45px 0px" });
     nodes.forEach((node) => observer.observe(node));
     return () => observer.disconnect();
   }, [opened]);
-
-  const submitRsvp = async (event) => {
-    event.preventDefault();
-    setRsvpLoading(true);
-    setRsvpStatus("");
-    const form = event.currentTarget;
-    const data = new FormData(form);
-    const guestCount = Number(data.get("guest_count"));
-    const { error } = await supabase.from("df_rsvps").insert({
-      guest_name: String(data.get("guest_name") || "").trim(),
-      guest_count: guestCount,
-      attendance: String(data.get("attendance") || "yes"),
-      invited_name: guestName || null,
-      language,
-    });
-    setRsvpLoading(false);
-    if (error) { setRsvpStatus("error"); return; }
-    form.reset();
-    setRsvpStatus("success");
-  };
 
   const submitGuestbook = async (event) => {
     event.preventDefault();
@@ -219,10 +194,6 @@ export default function WeddingInvitationPage() {
       <div className="wedding-topbar">
         <a className="wedding-back" href="/df">♛ <span>DAJJAL FAMILY UNIVERSE</span></a>
         <div className="wedding-tools">
-          <div className="wedding-lang" role="group" aria-label="Choose language">
-            <button type="button" onClick={() => setLanguage("id")} aria-pressed={language === "id"}>🇮🇩 ID</button>
-            <button type="button" onClick={() => setLanguage("en")} aria-pressed={language === "en"}>🇬🇧 EN</button>
-          </div>
           <button className="wedding-music" type="button" onClick={toggleMusic} disabled={!eventInfo?.music_url} aria-pressed={musicOn}>{musicOn ? t.musicOn : t.musicOff} ♫</button>
         </div>
       </div>
@@ -245,7 +216,7 @@ export default function WeddingInvitationPage() {
 
       {opened && (
         <div className="wedding-content">
-          <section className="wedding-hero wedding-reveal">
+          <section className="wedding-hero wedding-reveal reveal-from-left">
             <div className="wedding-ornament">✦ ❧ ✦</div>
             <p className="wedding-kicker">{t.opened}</p>
             <h1>{t.title}</h1>
@@ -265,7 +236,7 @@ export default function WeddingInvitationPage() {
             <p className="couple-subtitle">MALIKA — KEDELAI HITAM PILIHAN</p>
           </section>
 
-          <section className="wedding-section wedding-reveal">
+          <section className="wedding-section wedding-reveal reveal-from-right">
             <p className="wedding-kicker">SAVE THE CELEBRATION</p>
             <h2>{t.reception}</h2>
             <div className="detail-grid">
@@ -276,20 +247,7 @@ export default function WeddingInvitationPage() {
             <div className="wedding-note">{t.schedule}<p>{eventInfo?.schedule || t.scheduleText}</p></div>
           </section>
 
-          <section className="wedding-section wedding-form-section wedding-reveal">
-            <p className="wedding-kicker">WE HOPE YOU CAN JOIN</p>
-            <h2>{t.rsvp}</h2>
-            <p className="section-copy">{t.rsvpText}</p>
-            <form className="wedding-form" onSubmit={submitRsvp}>
-              <label>{t.name}<input required name="guest_name" placeholder={t.name} maxLength={100} /></label>
-              <label>{t.guests}<input required name="guest_count" type="number" min="1" step="1" defaultValue="1" /></label>
-              <label>{t.attendance}<select name="attendance" defaultValue="yes"><option value="yes">{t.yes}</option><option value="no">{t.no}</option></select></label>
-              <button className="wedding-primary" type="submit" disabled={rsvpLoading}>{rsvpLoading ? t.sending : t.send}</button>
-              {rsvpStatus && <p className="form-notice" role="status">{rsvpStatus === "success" ? t.rsvpSuccess : t.submitError}</p>}
-            </form>
-          </section>
-
-          <section className="wedding-section wedding-guestbook wedding-reveal">
+          <section className="wedding-section wedding-guestbook wedding-reveal reveal-from-left">
             <p className="wedding-kicker">WORDS FROM THE HEART</p>
             <h2>{t.guestbook}</h2>
             <p className="section-copy">{t.guestbookText}</p>
@@ -304,7 +262,7 @@ export default function WeddingInvitationPage() {
             
           </section>
 
-          <section className="wedding-share wedding-reveal">
+          <section className="wedding-share wedding-reveal reveal-from-right">
             <p className="wedding-kicker">SPREAD THE JOY</p>
             <h2>{t.couple}</h2>
             <div className="share-actions">
