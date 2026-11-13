@@ -123,6 +123,14 @@ export default function DajjalFamilyHome() {
         </div>
       </section>
 
+      <section className="df-section" id="wedding-platform">
+        <h2 className="df-section-heading">Wedding Experiences</h2>
+        <p className="df-section-subtitle">Create and manage your own digital wedding invitation.</p>
+        <div className="df-event-card">
+          <div><h3>Wedding Invitation Builder</h3><p>Design a personal invitation, add your event details, and share it with your guests.</p></div>
+          <Link href="/df/wedding" className="df-button">EXPLORE WEDDING</Link>
+        </div>
+      </section>
       <section className="df-section" id="events">
         <h2 className="df-section-heading">{t.events}</h2>
         <p className="df-section-subtitle">{t.eventsSub}</p>
