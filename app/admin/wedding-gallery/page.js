@@ -1,201 +1,60 @@
 "use client";
-
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabaseAdminClient } from "@/lib/supabaseAdminClient";
 
-const BUCKET = "df-wedding-gallery";
-
+const SLUG = "anak-dajjal-malika";
+const input = "mt-2 w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white outline-none focus:border-pink-400/60";
+const label = "block text-xs font-bold text-gray-300";
+function driveUrl(value) {
+  try {
+    const u = new URL(String(value || "").trim());
+    if (u.hostname.endsWith("drive.google.com")) {
+      const id = u.pathname.match(/\/file\/d\/([^/]+)/)?.[1] || u.searchParams.get("id");
+      if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w1600`;
+    }
+    return u.protocol === "https:" ? u.href : "";
+  } catch { return ""; }
+}
+function Panel({ title, subtitle, open, onClick, children }) {
+  return <section className="overflow-hidden rounded-2xl border border-pink-300/20 bg-[#15111f]">
+    <button type="button" onClick={onClick} aria-expanded={open} className="flex w-full items-center justify-between gap-4 p-5 text-left">
+      <span><strong className="block font-extrabold">{title}</strong><small className="mt-1 block text-gray-400">{subtitle}</small></span><b className="text-xl text-pink-300">{open ? "−" : "+"}</b>
+    </button>{open && <div className="border-t border-white/10 p-5">{children}</div>}
+  </section>;
+}
 export default function WeddingGalleryAdminPage() {
   const router = useRouter();
-  const [checking, setChecking] = useState(true);
-  const [items, setItems] = useState([]);
-  const [files, setFiles] = useState([]);
-  const [title, setTitle] = useState("");
-  const [album, setAlbum] = useState("Wedding");
-  const [description, setDescription] = useState("");
-  const [publishOnUpload, setPublishOnUpload] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-
-  const loadItems = useCallback(async () => {
-    const { data, error: queryError } = await supabaseAdminClient
-      .from("df_gallery_items")
-      .select("*")
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: false });
-    if (queryError) throw queryError;
-    setItems(data || []);
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-    async function verify() {
-      try {
-        const { data, error: sessionError } = await supabaseAdminClient.auth.getSession();
-        if (sessionError) throw sessionError;
-        if (!data?.session) {
-          router.replace("/admin/login");
-          return;
-        }
-        const response = await fetch("/api/admin/me", {
-          headers: { Authorization: `Bearer ${data.session.access_token}` },
-          cache: "no-store",
-        });
-        if (!response.ok) {
-          router.replace("/admin/login");
-          return;
-        }
-        if (active) await loadItems();
-      } catch (e) {
-        if (active) setError(e.message || "Tidak dapat memuat galeri.");
-      } finally {
-        if (active) setChecking(false);
-      }
-    }
-    verify();
-    return () => { active = false; };
-  }, [router, loadItems]);
-
-  async function uploadImages(event) {
-    event.preventDefault();
-    setError("");
-    setMessage("");
-    if (!files.length) {
-      setError("Pilih minimal satu foto terlebih dahulu.");
-      return;
-    }
-    if (files.some((file) => !["image/jpeg", "image/png", "image/webp"].includes(file.type))) {
-      setError("Format yang didukung hanya JPG, PNG, dan WEBP.");
-      return;
-    }
-    if (files.some((file) => file.size > 12 * 1024 * 1024)) {
-      setError("Ukuran setiap foto maksimal 12 MB.");
-      return;
-    }
-
-    setBusy(true);
-    let completed = 0;
-    try {
-      for (const file of files) {
-        const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-        const path = `${Date.now()}-${crypto.randomUUID()}.${ext}`;
-        const { error: storageError } = await supabaseAdminClient.storage.from(BUCKET).upload(path, file, {
-          cacheControl: "31536000",
-          contentType: file.type,
-          upsert: false,
-        });
-        if (storageError) throw storageError;
-
-        const { data: publicData } = supabaseAdminClient.storage.from(BUCKET).getPublicUrl(path);
-        const { error: insertError } = await supabaseAdminClient.from("df_gallery_items").insert({
-          title: title.trim() || file.name.replace(/\\.[^.]+$/, ""),
-          description: description.trim(),
-          album: album.trim() || "Wedding",
-          image_url: publicData.publicUrl,
-          storage_path: path,
-          is_published: publishOnUpload,
-          sort_order: items.length + completed,
-        });
-        if (insertError) {
-          await supabaseAdminClient.storage.from(BUCKET).remove([path]);
-          throw insertError;
-        }
-        completed += 1;
-      }
-      setMessage(`${completed} foto berhasil diunggah.`);
-      setFiles([]);
-      setTitle("");
-      setDescription("");
-      const picker = document.getElementById("gallery-files");
-      if (picker) picker.value = "";
-      await loadItems();
-    } catch (e) {
-      setError(e.message || "Upload gagal. Periksa koneksi dan coba lagi.");
-      if (completed) await loadItems();
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function togglePublished(item) {
-    setError("");
-    const { error: updateError } = await supabaseAdminClient
-      .from("df_gallery_items")
-      .update({ is_published: !item.is_published })
-      .eq("id", item.id);
-    if (updateError) setError(updateError.message);
-    else await loadItems();
-  }
-
-  async function deleteItem(item) {
-    if (!window.confirm("Hapus foto ini dari galeri secara permanen?")) return;
-    setError("");
-    setBusy(true);
-    try {
-      const { error: deleteError } = await supabaseAdminClient
-        .from("df_gallery_items").delete().eq("id", item.id);
-      if (deleteError) throw deleteError;
-      const { error: storageError } = await supabaseAdminClient.storage.from(BUCKET).remove([item.storage_path]);
-      if (storageError) throw storageError;
-      await loadItems();
-      setMessage("Foto berhasil dihapus.");
-    } catch (e) {
-      setError(e.message || "Foto gagal dihapus.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  if (checking) return <main className="min-h-screen bg-[#080711] text-purple-200 grid place-items-center"><p className="animate-pulse text-xs font-bold tracking-[.2em]">MEMVERIFIKASI ADMIN...</p></main>;
-
-  return (
-    <main className="min-h-screen bg-[#080711] px-4 py-8 text-white sm:px-6 sm:py-12">
-      <div className="mx-auto max-w-6xl">
-        <Link href="/admin" className="inline-flex rounded-lg border border-purple-400/20 bg-purple-500/10 px-4 py-2 text-xs font-bold text-purple-200 hover:bg-purple-500/20">← KEMBALI KE DASHBOARD</Link>
-        <header className="mt-7">
-          <p className="text-[10px] font-extrabold tracking-[.22em] text-pink-300">DAJJAL FAMILY · WEDDING MANAGEMENT</p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">WEDDING <span className="bg-gradient-to-r from-pink-300 to-rose-400 bg-clip-text text-transparent">GALLERY</span></h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-400">Unggah foto dari HP, kelompokkan berdasarkan album, lalu pilih foto mana yang boleh tampil di halaman undangan.</p>
-        </header>
-
-        <section className="mt-8 rounded-2xl border border-pink-400/20 bg-[#15111f] p-5 shadow-xl shadow-black/20 sm:p-7">
-          <div className="mb-5 flex items-center gap-3"><span className="text-2xl">📤</span><div><h2 className="text-lg font-extrabold">Upload foto baru</h2><p className="text-xs text-gray-400">JPG, PNG, WEBP · Maksimal 12 MB per foto</p></div></div>
-          <form onSubmit={uploadImages} className="space-y-4">
-            <label className="block text-xs font-bold text-gray-300">Pilih foto (bisa lebih dari satu)
-              <input id="gallery-files" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(e) => setFiles(Array.from(e.target.files || []))} className="mt-2 block w-full rounded-xl border border-dashed border-pink-300/30 bg-black/20 p-4 text-sm text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-pink-500/20 file:px-3 file:py-2 file:text-xs file:font-bold file:text-pink-200" />
-            </label>
-            {files.length > 0 && <p className="text-xs text-cyan-200">{files.length} foto dipilih · {(files.reduce((sum, f) => sum + f.size, 0) / 1024 / 1024).toFixed(1)} MB total</p>}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block text-xs font-bold text-gray-300">Judul foto (opsional)
-                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Contoh: The Royal Wedding" className="mt-2 w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white outline-none focus:border-pink-400/60" />
-              </label>
-              <label className="block text-xs font-bold text-gray-300">Nama album
-                <input value={album} onChange={(e) => setAlbum(e.target.value)} placeholder="Wedding" className="mt-2 w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white outline-none focus:border-pink-400/60" />
-              </label>
-            </div>
-            <label className="block text-xs font-bold text-gray-300">Keterangan (opsional)
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder="Tambahkan cerita singkat tentang foto..." className="mt-2 w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white outline-none focus:border-pink-400/60" />
-            </label>
-            <label className="flex items-center gap-3 text-sm text-gray-300"><input type="checkbox" checked={publishOnUpload} onChange={(e) => setPublishOnUpload(e.target.checked)} className="h-4 w-4 accent-pink-500" /> Langsung tampil di halaman undangan setelah upload</label>
-            <button disabled={busy || !files.length} className="w-full rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-pink-950/30 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto">{busy ? "SEDANG MENGUNGGAH..." : `UPLOAD ${files.length || ""} FOTO`}</button>
-          </form>
-          {message && <p role="status" className="mt-4 rounded-lg border border-emerald-400/20 bg-emerald-400/10 p-3 text-sm text-emerald-200">{message}</p>}
-          {error && <p role="alert" className="mt-4 rounded-lg border border-red-400/20 bg-red-400/10 p-3 text-sm text-red-200">{error}</p>}
-        </section>
-
-        <section className="mt-10">
-          <div className="mb-5 flex items-end justify-between gap-3"><div><p className="text-[10px] font-extrabold tracking-[.2em] text-pink-300">PHOTO LIBRARY</p><h2 className="mt-1 text-xl font-black">Kelola galeri <span className="text-pink-300">({items.length})</span></h2></div><button onClick={() => loadItems().catch((e) => setError(e.message))} className="rounded-lg border border-white/10 px-3 py-2 text-xs font-bold text-gray-300 hover:bg-white/5">↻ Refresh</button></div>
-          {items.length === 0 ? <div className="rounded-2xl border border-dashed border-white/10 bg-white/[.02] p-10 text-center text-sm text-gray-500">Belum ada foto. Unggah foto pertama di atas.</div> : <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {items.map((item) => <article key={item.id} className="overflow-hidden rounded-xl border border-white/10 bg-[#15111f]">
-              <div className="relative aspect-[4/3] bg-black/30"><img src={item.image_url} alt={item.title || "Wedding gallery"} className="h-full w-full object-cover" /><span className={`absolute left-2 top-2 rounded-full px-2 py-1 text-[9px] font-extrabold ${item.is_published ? "bg-emerald-500/90 text-white" : "bg-amber-400/90 text-black"}`}>{item.is_published ? "PUBLISHED" : "DRAFT"}</span></div>
-              <div className="p-3"><p className="truncate text-xs font-bold text-white">{item.title || "Untitled photo"}</p><p className="mt-1 truncate text-[10px] text-gray-500">{item.album}</p><div className="mt-3 grid grid-cols-2 gap-2"><button disabled={busy} onClick={() => togglePublished(item)} className="rounded-lg border border-pink-300/20 bg-pink-400/10 px-2 py-2 text-[10px] font-bold text-pink-200">{item.is_published ? "Sembunyikan" : "Publikasikan"}</button><button disabled={busy} onClick={() => deleteItem(item)} className="rounded-lg border border-red-400/20 bg-red-500/10 px-2 py-2 text-[10px] font-bold text-red-200">Hapus</button></div></div>
-            </article>)}
-          </div>}
-        </section>
-      </div>
-    </main>
-  );
+  const [checking,setChecking]=useState(true), [invite,setInvite]=useState(null), [items,setItems]=useState([]);
+  const [event,setEvent]=useState({event_title:"The Royal Wedding — Anak Dajjal & Malika",event_date:"",event_time:"",venue:"",schedule:"",music_url:"",couple_photo_url:""});
+  const [cover,setCover]=useState(""), [urls,setUrls]=useState(""), [album,setAlbum]=useState("Prewedding"), [description,setDescription]=useState("");
+  const [panel,setPanel]=useState("cover"), [busy,setBusy]=useState(false), [toast,setToast]=useState(""), [error,setError]=useState("");
+  const notify=(s)=>{setToast(s);window.setTimeout(()=>setToast(""),3200);};
+  const load=useCallback(async()=>{
+    const {data:i,error:ie}=await supabaseAdminClient.from("df_invitations").select("*").eq("slug",SLUG).single(); if(ie) throw ie;
+    const [{data:s,error:se},{data:g,error:ge}]=await Promise.all([
+      supabaseAdminClient.from("df_event_settings").select("*").eq("invitation_id",i.id).maybeSingle(),
+      supabaseAdminClient.from("df_gallery_items").select("*").eq("invitation_id",i.id).order("sort_order").order("created_at",{ascending:false})
+    ]);
+    if(se) throw se;if(ge) throw ge;setInvite(i);if(s){setEvent({...event,...s,event_date:s.event_date||""});setCover(s.couple_photo_url||"");}setItems(g||[]);
+  },[]);
+  useEffect(()=>{let active=true;(async()=>{try{const {data,error:e}=await supabaseAdminClient.auth.getSession();if(e)throw e;if(!data?.session){router.replace("/admin/login");return;}const r=await fetch("/api/admin/me",{headers:{Authorization:`Bearer ${data.session.access_token}`},cache:"no-store"});if(!r.ok){router.replace("/admin/login");return;}if(active)await load();}catch(e){if(active)setError(e.message);}finally{if(active)setChecking(false);}})();return()=>{active=false;};},[router,load]);
+  async function saveCover(e){e.preventDefault();setBusy(true);setError("");const url=driveUrl(cover);if(!url){setError("Masukkan URL HTTPS atau link Google Drive yang valid.");setBusy(false);return;}try{const {error:e}=await supabaseAdminClient.from("df_event_settings").upsert({invitation_id:invite.id,event_title:event.event_title,couple_photo_url:url},{onConflict:"invitation_id"});if(e)throw e;setCover(url);setEvent(v=>({...v,couple_photo_url:url}));notify("Foto utama berhasil diperbarui.");}catch(e){setError(e.message);}finally{setBusy(false);}}
+  async function saveDetails(e){e.preventDefault();setBusy(true);setError("");try{const {error:e}=await supabaseAdminClient.from("df_event_settings").upsert({invitation_id:invite.id,event_title:event.event_title||"Wedding Invitation",event_date:event.event_date||null,event_time:event.event_time||null,venue:event.venue||null,schedule:event.schedule||null,music_url:event.music_url||null,couple_photo_url:event.couple_photo_url||null},{onConflict:"invitation_id"});if(e)throw e;notify("Detail undangan berhasil disimpan.");}catch(e){setError(e.message);}finally{setBusy(false);}}
+  const testImage=(url)=>new Promise(resolve=>{const im=new Image();let done=false;const finish=v=>{if(!done){done=true;resolve(v);}};im.onload=()=>finish(true);im.onerror=()=>finish(false);im.src=url;window.setTimeout(()=>finish(false),8000);});
+  async function saveBatch(e){e.preventDefault();setBusy(true);setError("");let saved=0,skipped=0;try{const lines=urls.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);if(!lines.length)throw new Error("Masukkan minimal satu URL.");const normalized=lines.map(driveUrl);skipped+=normalized.filter(x=>!x).length;const unique=[...new Set(normalized.filter(Boolean))];const existing=new Set(items.map(x=>x.image_url));let order=items.length;for(const url of unique){if(existing.has(url)||!(await testImage(url))){skipped++;continue;}const {error:e}=await supabaseAdminClient.from("df_gallery_items").insert({invitation_id:invite.id,title:`Wedding Photo ${String(order+1).padStart(3,"0")}`,description:description.trim(),album:album.trim()||"Wedding",image_url:url,storage_path:null,is_published:true,sort_order:order});if(e)throw e;existing.add(url);order++;saved++;}await load();setUrls("");notify(`${saved} foto dipublikasikan.${skipped? ` ${skipped} URL dilewati.`:""}`);}catch(e){setError(e.message||"Gagal menyimpan foto.");await load();}finally{setBusy(false);}}
+  async function toggle(item){setBusy(true);try{const {error:e}=await supabaseAdminClient.from("df_gallery_items").update({is_published:!item.is_published}).eq("id",item.id);if(e)throw e;await load();notify(item.is_published?"Foto disembunyikan.":"Foto dipublikasikan.");}catch(e){setError(e.message);}finally{setBusy(false);}}
+  async function remove(item){if(!window.confirm("Hapus foto ini?"))return;setBusy(true);try{const {error:e}=await supabaseAdminClient.from("df_gallery_items").delete().eq("id",item.id);if(e)throw e;if(item.storage_path)await supabaseAdminClient.storage.from("df-wedding-gallery").remove([item.storage_path]);await load();notify("Foto berhasil dihapus.");}catch(e){setError(e.message);}finally{setBusy(false);}}
+  if(checking)return <main className="min-h-screen bg-[#080711] text-purple-200 grid place-items-center">MEMVERIFIKASI ADMIN...</main>;
+  return <main className="min-h-screen bg-[#080711] px-4 py-8 text-white sm:px-6"><div className="mx-auto max-w-5xl">
+    <Link href="/admin" className="inline-flex rounded-lg border border-purple-400/20 bg-purple-500/10 px-4 py-2 text-xs font-bold text-purple-200">← KEMBALI KE DASHBOARD</Link>
+    <header className="my-7"><p className="text-[10px] font-extrabold tracking-[.22em] text-pink-300">DAJJAL FAMILY · WEDDING MANAGEMENT</p><h1 className="mt-2 text-3xl font-black">WEDDING <span className="text-pink-300">MANAGER</span></h1><p className="mt-2 text-sm text-gray-400">{invite?.title}</p><p className="text-xs text-cyan-200">URL: /df/wedding={invite?.slug}</p></header>
+    {error&&<p role="alert" className="mb-4 rounded-xl bg-red-500/10 p-3 text-sm text-red-200">{error}</p>}
+    <div className="space-y-4">
+      <Panel title="01 · Foto Utama Pasangan" subtitle="Foto yang tampil di panel pembuka undangan." open={panel==="cover"} onClick={()=>setPanel(panel==="cover"?"":"cover")}><form onSubmit={saveCover} className="space-y-4"><label className={label}>URL foto Google Drive / HTTPS<input className={input} value={cover} onChange={e=>setCover(e.target.value)} placeholder="Tempel link foto di sini"/></label>{event.couple_photo_url&&<img src={event.couple_photo_url} alt="Foto utama" className="max-h-64 w-full rounded-xl object-contain"/>}<button disabled={busy} className="rounded-xl bg-pink-600 px-5 py-3 text-sm font-bold">{busy?"MENYIMPAN...":"SIMPAN FOTO UTAMA"}</button></form></Panel>
+      <Panel title="02 · Album Prewedding / Wedding" subtitle="Banyak URL sekaligus, satu URL per baris. Foto valid langsung Published." open={panel==="album"} onClick={()=>setPanel(panel==="album"?"":"album")}><form onSubmit={saveBatch} className="space-y-4"><label className={label}>Daftar URL<textarea className={input} rows={6} value={urls} onChange={e=>setUrls(e.target.value)} placeholder={"https://drive.google.com/file/d/ID1/view\nhttps://drive.google.com/file/d/ID2/view"}/></label><div className="grid gap-4 sm:grid-cols-2"><label className={label}>Album<input className={input} value={album} onChange={e=>setAlbum(e.target.value)}/></label><label className={label}>Deskripsi umum<input className={input} value={description} onChange={e=>setDescription(e.target.value)}/></label></div><button disabled={busy||!urls.trim()} className="rounded-xl bg-pink-600 px-5 py-3 text-sm font-bold">{busy?"MEMERIKSA FOTO...":"SIMPAN & PUBLISH FOTO"}</button></form><h3 className="mb-3 mt-7 font-bold">Foto tersimpan ({items.length})</h3><div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{items.map(item=><article key={item.id} className="overflow-hidden rounded-xl border border-white/10"><img src={item.image_url} alt={item.title} className="aspect-[4/3] w-full object-cover"/><div className="p-3"><p className="truncate text-xs font-bold">{item.title}</p><p className="text-[10px] text-gray-400">{item.album}</p><div className="mt-2 flex gap-2"><button disabled={busy} onClick={()=>toggle(item)} className="flex-1 rounded border border-pink-300/20 p-2 text-[10px]">{item.is_published?"Sembunyikan":"Publish"}</button><button disabled={busy} onClick={()=>remove(item)} className="rounded border border-red-400/20 p-2 text-[10px] text-red-200">Hapus</button></div></div></article>)}</div></Panel>
+      <Panel title="03 · Tanggal & Detail Acara" subtitle="Atur tanggal, waktu, lokasi, susunan acara, dan musik." open={panel==="details"} onClick={()=>setPanel(panel==="details"?"":"details")}><form onSubmit={saveDetails} className="space-y-4"><label className={label}>Judul undangan<input className={input} value={event.event_title||""} onChange={e=>setEvent({...event,event_title:e.target.value})}/></label><div className="grid gap-4 sm:grid-cols-2"><label className={label}>Tanggal<input type="date" className={input} value={event.event_date||""} onChange={e=>setEvent({...event,event_date:e.target.value})}/></label><label className={label}>Waktu<input className={input} value={event.event_time||""} onChange={e=>setEvent({...event,event_time:e.target.value})} placeholder="18.00 WIB"/></label></div><label className={label}>Lokasi<input className={input} value={event.venue||""} onChange={e=>setEvent({...event,venue:e.target.value})}/></label><label className={label}>Susunan acara<textarea rows={3} className={input} value={event.schedule||""} onChange={e=>setEvent({...event,schedule:e.target.value})}/></label><label className={label}>URL musik<input className={input} value={event.music_url||""} onChange={e=>setEvent({...event,music_url:e.target.value})}/></label><button disabled={busy} className="rounded-xl bg-pink-600 px-5 py-3 text-sm font-bold">{busy?"MENYIMPAN...":"SIMPAN DETAIL UNDANGAN"}</button></form></Panel>
+    </div>{toast&&<div role="status" className="fixed bottom-5 left-1/2 z-[100] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 rounded-2xl border border-emerald-300/30 bg-[#123329] p-4 text-center text-sm font-bold text-emerald-100 shadow-2xl">{toast}</div>}
+  </div></main>;
 }
