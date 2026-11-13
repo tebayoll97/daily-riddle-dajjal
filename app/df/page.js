@@ -1,5 +1,7 @@
 "use client";
 
+// Keep this route explicitly on the client: it reads the shared language context.
+
 import Link from "next/link";
 import { useLanguage } from "../components/LanguageProvider";
 
