@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useLanguage } from "@/app/components/LanguageProvider";
 
@@ -44,7 +45,7 @@ export default function WeddingAccountControls() {
 
   return <>
     <div className="wedding-account-controls">
-      <span className="wedding-account-email" title={email}>{email}</span>
+      <Link href="/df/wedding/dashboard" className="wedding-account-dashboard">{isID ? "Dashboard Saya" : "My Dashboard"}</Link><span className="wedding-account-email" title={email}>{email}</span>
       <button type="button" className="wedding-account-logout" onClick={() => { setError(""); setShowConfirm(true); }}>
         {isID ? "Keluar akun" : "Log out"}
       </button>
