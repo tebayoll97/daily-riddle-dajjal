@@ -353,3 +353,34 @@
   opacity:1!important;transform:none!important;translate:none!important;animation:none!important
  }
 }
+
+/* FAIL-SAFE SCROLL REVEAL: content is ALWAYS visible; motion is progressive enhancement */
+.df-main .wedding-page .wedding-reveal,
+.df-main .wedding-page .wedding-reveal.reveal-from-left,
+.df-main .wedding-page .wedding-reveal.reveal-from-right{
+  opacity:1!important;
+  transform:none!important;
+  translate:none!important;
+  animation:none!important;
+  visibility:visible!important;
+}
+.df-main .wedding-page .wedding-reveal.is-visible.reveal-from-left{
+  animation:wedding-slide-from-left .78s cubic-bezier(.22,.78,.2,1) both!important;
+}
+.df-main .wedding-page .wedding-reveal.is-visible.reveal-from-right{
+  animation:wedding-slide-from-right .78s cubic-bezier(.22,.78,.2,1) both!important;
+}
+@keyframes wedding-slide-from-left{
+  from{opacity:.55;translate:-72px 0}
+  to{opacity:1;translate:0 0}
+}
+@keyframes wedding-slide-from-right{
+  from{opacity:.55;translate:72px 0}
+  to{opacity:1;translate:0 0}
+}
+@media(prefers-reduced-motion:reduce){
+ .df-main .wedding-page .wedding-reveal.is-visible.reveal-from-left,
+ .df-main .wedding-page .wedding-reveal.is-visible.reveal-from-right{
+   animation:none!important
+ }
+}
