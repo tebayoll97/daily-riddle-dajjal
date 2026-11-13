@@ -1,18 +1,19 @@
 "use client";
 import Link from "next/link";
 import {useEffect,useState} from "react";
-import {useRouter,useSearchParams} from "next/navigation";
+import {useRouter} from "next/navigation";
 import {supabase} from "@/lib/supabase";
 import {useLanguage} from "@/app/components/LanguageProvider";
 import WeddingAccountControls from "../WeddingAccountControls";
 import "../../wedding-anak-dajjal/wedding.css";
 
 export default function WeddingPreviewPage(){
- const router=useRouter(); const params=useSearchParams(); const id=params.get("id");
+ const router=useRouter();
  const {language}=useLanguage(); const idLang=language==="id";
+ const [id,setId]=useState("");
  const [data,setData]=useState(null); const [busy,setBusy]=useState(false); const [error,setError]=useState("");
- useEffect(()=>{let alive=true;(async()=>{const {data:{session}}=await supabase.auth.getSession();if(!session?.user||session.user.is_anonymous){router.replace("/login?next="+encodeURIComponent("/df/wedding/preview?id="+id));return;}const res=await fetch("/api/wedding/invitations/"+id,{headers:{Authorization:"Bearer "+session.access_token},cache:"no-store"});const json=await res.json();if(!res.ok){setError(json.error||"Gagal memuat undangan");return;}if(alive)setData(json);})();return()=>{alive=false};},[id,router]);
- async function publish(){setBusy(true);setError("");try{const {data:{session}}=await supabase.auth.getSession();const res=await fetch("/api/wedding/invitations/"+id+"/publish",{method:"POST",headers:{Authorization:"Bearer "+session.access_token}});const json=await res.json();if(!res.ok)throw new Error(json.error||"Publikasi gagal");router.replace("/df/wedding="+encodeURIComponent(json.invitation.slug));}catch(e){setError(e.message)}finally{setBusy(false)}}
+ useEffect(()=>{let alive=true;const currentId=new URLSearchParams(window.location.search).get("id");if(!currentId){setError("ID undangan tidak ditemukan.");return;}setId(currentId);(async()=>{const {data:{session}}=await supabase.auth.getSession();if(!session?.user||session.user.is_anonymous){router.replace("/login?next="+encodeURIComponent("/df/wedding/preview?id="+currentId));return;}const res=await fetch("/api/wedding/invitations/"+currentId,{headers:{Authorization:"Bearer "+session.access_token},cache:"no-store"});const json=await res.json();if(!res.ok){if(alive)setError(json.error||"Gagal memuat undangan");return;}if(alive)setData(json);})();return()=>{alive=false};},[router]);
+ async function publish(){setBusy(true);setError("");try{const {data:{session}}=await supabase.auth.getSession();if(!session?.access_token)throw new Error("Sesi login berakhir. Silakan masuk kembali.");const res=await fetch("/api/wedding/invitations/"+id+"/publish",{method:"POST",headers:{Authorization:"Bearer "+session.access_token}});const json=await res.json();if(!res.ok)throw new Error(json.error||"Publikasi gagal");router.replace("/df/wedding="+encodeURIComponent(json.invitation.slug));}catch(e){setError(e.message)}finally{setBusy(false)}}
  const p=data?.profile||{}, inv=data?.invitation||{};
  return <div className="df-main"><main className="wedding-page wedding-platform wedding-review-page">
  <header className="wedding-topbar"><Link href={"/df/wedding/create?id="+id} className="wedding-back">← <span>{idLang?"KEMBALI KE BUILDER":"BACK TO BUILDER"}</span></Link><div className="wedding-topbar-account"><WeddingAccountControls/></div></header>
