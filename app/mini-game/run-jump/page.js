@@ -179,6 +179,15 @@ export default function MiniGamePage() {
     jump();
   }, [jump, startGame, togglePause]);
 
+  const pauseForDisplayChange = useCallback(() => {
+    const game = gameRef.current;
+    if (!game || !game.running || game.paused || game.over) return;
+    game.paused = true;
+    game.pauseStartedAt = performance.now();
+    game.lastTime = 0;
+    setIsPaused(true);
+  }, []);
+
   const toggleFullscreen = useCallback(async () => {
     const target = arenaRef.current;
     if (!target) return;
@@ -208,10 +217,26 @@ export default function MiniGamePage() {
   }, []);
 
   useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    let previousFullscreen = Boolean(document.fullscreenElement);
+    let previousOrientation = window.matchMedia("(orientation: landscape)").matches;
+    const handleFullscreenChange = () => {
+      const nextFullscreen = Boolean(document.fullscreenElement);
+      if (nextFullscreen !== previousFullscreen) pauseForDisplayChange();
+      previousFullscreen = nextFullscreen;
+      setIsFullscreen(nextFullscreen);
+    };
+    const handleOrientationChange = () => {
+      const nextOrientation = window.matchMedia("(orientation: landscape)").matches;
+      if (nextOrientation !== previousOrientation) pauseForDisplayChange();
+      previousOrientation = nextOrientation;
+    };
     document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
+    window.addEventListener("orientationchange", handleOrientationChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      window.removeEventListener("orientationchange", handleOrientationChange);
+    };
+  }, [pauseForDisplayChange]);
 
   useEffect(() => {
     soundRef.current = soundOn;
@@ -590,13 +615,13 @@ export default function MiniGamePage() {
       const bannerW = 490;
       const bannerH = 54;
       const banner = context.createLinearGradient(0, bannerY, 0, bannerY + bannerH);
-      banner.addColorStop(0, "rgba(24,54,49,.88)");
-      banner.addColorStop(.5, "rgba(25,45,43,.82)");
-      banner.addColorStop(1, "rgba(17,34,34,.9)");
-      context.shadowColor = "rgba(255,210,112,.28)";
+      banner.addColorStop(0, "rgba(24,54,49,.52)");
+      banner.addColorStop(.5, "rgba(25,45,43,.48)");
+      banner.addColorStop(1, "rgba(17,34,34,.54)");
+      context.shadowColor = "rgba(255,210,112,.42)";
       context.shadowBlur = 13;
       context.fillStyle = banner;
-      context.strokeStyle = "rgba(255,221,145,.88)";
+      context.strokeStyle = "rgba(255,213,112,.98)";
       context.lineWidth = 2;
       context.beginPath();
       context.roundRect(bannerX, bannerY, bannerW, bannerH, 15);
@@ -608,8 +633,8 @@ export default function MiniGamePage() {
       context.fillStyle = "#ffe9a6";
       context.font = "900 11px system-ui, sans-serif";
       context.fillText("✦  A NEW ERA BEGINS  ✦", WORLD_WIDTH / 2, bannerY + 13);
-      context.fillStyle = "#ffffff";
-      context.shadowColor = "rgba(0,0,0,.55)";
+      context.fillStyle = "#fff8df";
+      context.shadowColor = "rgba(0,0,0,.72)";
       context.shadowBlur = 4;
       context.font = "900 18px system-ui, sans-serif";
       context.fillText("WAVE " + game.wave + "  ·  " + WAVE_TITLES[game.wave - 1], WORLD_WIDTH / 2, bannerY + 36);
@@ -630,7 +655,7 @@ export default function MiniGamePage() {
       context.fillStyle = "#183b27";
       context.filter = "blur(5px)";
       context.beginPath();
-      context.ellipse(player.x + 61, GROUND_Y + 8, 35 * shadowScale, 7 * shadowScale, 0, 0, Math.PI * 2);
+      context.ellipse(player.x + 61, GROUND_Y + 8, 24.5 * shadowScale, 4.9 * shadowScale, 0, 0, Math.PI * 2);
       context.fill();
       context.filter = "none";
       context.restore();
@@ -641,8 +666,8 @@ export default function MiniGamePage() {
         const sx = (frame % 3) * cellW;
         const sy = Math.floor(frame / 3) * cellH;
         // Compact runner scale, anchored precisely to the top edge of the grass.
-        const drawW = 100;
-        const drawH = 89;
+        const drawW = 70;
+        const drawH = 62.3;
         const groundAnchorX = player.x + 61;
         const groundAnchorY = player.y + 58 + bob;
         context.save();
@@ -810,10 +835,10 @@ export default function MiniGamePage() {
 
       // Gameplay hitbox is intentionally compact and independent of sprite artwork size.
       const playerBox = {
-        left: player.x + 18,
-        right: player.x + 104,
-        top: player.y + 22,
-        bottom: player.y + 56,
+        left: player.x + 30.9,
+        right: player.x + 91.1,
+        top: player.y + 27,
+        bottom: player.y + 51,
       };
       const collided = game.obstacles.some((obstacle) => {
         const flying = obstacle.type === "ptero" || obstacle.type === "archaeo";
@@ -915,10 +940,10 @@ export default function MiniGamePage() {
           <div className="mg-game-world-frame mg-jungle-world w-full overflow-hidden rounded-2xl border border-purple-300/15">
             <div className="mg-game-canvas-frame relative w-full overflow-hidden">
               {isFullscreen && <div className="mg-fullscreen-tools">
-                <button type="button" onClick={toggleFullscreen} className="mg-fullscreen-exit" aria-label="Keluar mode landscape">↙ EXIT</button>
                 <div className="mg-fullscreen-icon-stack">
                   <button type="button" onClick={toggleSound} aria-label={soundOn ? "Matikan suara" : "Nyalakan suara"} className="mg-icon-control">{soundOn ? "♫" : "♪"}</button>
                   <button type="button" onClick={togglePause} aria-label={isPaused ? "Lanjutkan permainan" : "Pause permainan"} className="mg-icon-control">{isPaused ? "▶" : "Ⅱ"}</button>
+                  <button type="button" onClick={toggleFullscreen} className="mg-icon-control mg-fullscreen-exit" aria-label="Keluar mode landscape" title="Keluar landscape">↙</button>
                 </div>
               </div>}
               <canvas
