@@ -21,6 +21,8 @@ const copy = {
     playersDesc: "Browse player accounts, servers, and game activity.",
     statistics: "Game Statistics",
     statisticsDesc: "Track engagement, scores, and overall game performance.",
+    gallery: "Wedding Gallery",
+    galleryDesc: "Upload, organize, publish, and manage wedding photos.",
     open: "OPEN MODULE",
     coming: "COMING SOON",
     quick: "QUICK ACCESS",
@@ -49,6 +51,8 @@ const copy = {
     playersDesc: "Lihat akun pemain, server, dan aktivitas permainan.",
     statistics: "Statistik Permainan",
     statisticsDesc: "Pantau aktivitas, perolehan poin, dan performa game.",
+    gallery: "Galeri Pernikahan",
+    galleryDesc: "Upload, susun, publikasikan, dan kelola foto pernikahan.",
     open: "BUKA MENU",
     coming: "SEGERA HADIR",
     quick: "AKSES CEPAT",
@@ -191,6 +195,15 @@ export default function AdminDashboardPage() {
       href: null,
       icon: "📊",
       number: "03",
+      title: t.gallery,
+      description: t.galleryDesc,
+      available: true,
+      accent: "from-pink-500/20 via-rose-500/5",
+    },
+    {
+      href: null,
+      icon: "📊",
+      number: "04",
       title: t.statistics,
       description: t.statisticsDesc,
       available: false,
@@ -240,7 +253,7 @@ export default function AdminDashboardPage() {
               <p className="ui-eyebrow mb-1">{t.quick}</p>
               <h2 className="ui-section-title">{t.management}</h2>
             </div>
-            <span className="text-[10px] font-bold tracking-[0.18em] text-gray-600">03 MODULES</span>
+            <span className="text-[10px] font-bold tracking-[0.18em] text-gray-600">04 MODULES</span>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
