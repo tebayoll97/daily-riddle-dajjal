@@ -136,6 +136,12 @@ export default function WeddingInvitationPage({ invitationSlug = "anak-dajjal-ma
   }, [invitationSlug]);
 
   useEffect(() => {
+    if (galleryItems.length < 2) return;
+    const timer = window.setInterval(() => setGalleryIndex((index) => (index + 1) % galleryItems.length), 4500);
+    return () => window.clearInterval(timer);
+  }, [galleryItems.length]);
+
+  useEffect(() => {
     if (!opened) return;
     AOS.init({
       duration: 850,
