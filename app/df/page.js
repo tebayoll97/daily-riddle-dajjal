@@ -1,91 +1,132 @@
-import Link from "next/link";
+"use client";
 
-const cards = [
-  { icon: "♛", title: "The Family", description: "Meet the characters and personalities behind the Dajjal Family universe." },
-  { icon: "✧", title: "Gallery", description: "A collection of memorable moments, portraits, and family memories." },
-  { icon: "⚔", title: "Games", description: "Explore the games and adventures inside our universe.", href: "/games" },
-];
+import Link from "next/link";
+import { useLanguage } from "../components/LanguageProvider";
+
+const copy = {
+  en: {
+    eyebrow: "WELCOME TO OUR UNIVERSE",
+    title: "DAJJAL FAMILY",
+    subtitle: "GAMING UNIVERSE",
+    intro: "A place for our characters, games, stories, and unforgettable family moments. One universe, many personalities, countless adventures.",
+    explore: "EXPLORE PROJECTS",
+    viewEvents: "VIEW EVENTS",
+    family: "Inside the Family",
+    familySub: "Different characters. One extraordinary universe.",
+    cards: [
+      ["The Family", "Meet the characters and personalities behind the Dajjal Family universe."],
+      ["Gallery", "A collection of memorable moments, portraits, and family memories."],
+      ["Games", "Explore the games and adventures inside our universe."],
+    ],
+    projects: "Featured Projects",
+    projectsSub: "A growing collection of experiences from the DF universe.",
+    projectCards: [
+      ["DF Digital Experiences", "Special pages, creative experiments, and interactive family projects."],
+      ["Stories & Characters", "Discover the personalities and stories that shape our universe."],
+      ["Coming Soon", "More experiences will be added to the DF universe."],
+    ],
+    games: "Games Universe",
+    gamesSub: "Continue your adventure in the gaming world.",
+    gamesTitle: "Dajjal Family Games",
+    gamesText: "Discover the games available in our main universe.",
+    enterGames: "ENTER GAMES",
+    events: "Family Events",
+    eventsSub: "Special moments deserve their own place.",
+    wedding: "The Royal Wedding",
+    weddingText: "Anak Dajjal & Malika · Digital Wedding Invitation",
+    openInvite: "OPEN INVITATION",
+  },
+  id: {
+    eyebrow: "SELAMAT DATANG DI UNIVERSE KAMI",
+    title: "DAJJAL FAMILY",
+    subtitle: "GAMING UNIVERSE",
+    intro: "Rumah bagi karakter, game, cerita, dan momen keluarga yang tak terlupakan. Satu universe, banyak kepribadian, dan tak terhitung petualangan.",
+    explore: "JELAJAHI PROYEK",
+    viewEvents: "LIHAT ACARA",
+    family: "Di Dalam Keluarga",
+    familySub: "Karakter yang berbeda. Satu universe yang luar biasa.",
+    cards: [
+      ["Keluarga", "Kenali karakter dan kepribadian di balik universe Dajjal Family."],
+      ["Galeri", "Kumpulan momen berkesan, potret, dan kenangan keluarga."],
+      ["Game", "Jelajahi game dan petualangan di dalam universe kami."],
+    ],
+    projects: "Proyek Unggulan",
+    projectsSub: "Kumpulan pengalaman yang terus berkembang dari universe DF.",
+    projectCards: [
+      ["Pengalaman Digital DF", "Halaman khusus, eksperimen kreatif, dan proyek keluarga interaktif."],
+      ["Cerita & Karakter", "Kenali kepribadian dan cerita yang membentuk universe kami."],
+      ["Segera Hadir", "Lebih banyak pengalaman akan ditambahkan ke universe DF."],
+    ],
+    games: "Universe Game",
+    gamesSub: "Lanjutkan petualanganmu di dunia permainan.",
+    gamesTitle: "Game Dajjal Family",
+    gamesText: "Jelajahi game yang tersedia di universe utama kami.",
+    enterGames: "MASUK KE GAME",
+    events: "Acara Keluarga",
+    eventsSub: "Momen istimewa layak memiliki tempatnya sendiri.",
+    wedding: "Pernikahan Kerajaan",
+    weddingText: "Anak Dajjal & Malika · Undangan Pernikahan Digital",
+    openInvite: "BUKA UNDANGAN",
+  },
+};
 
 export default function DajjalFamilyHome() {
+  const { language } = useLanguage();
+  const t = copy[language] || copy.en;
+
   return (
     <main className="df-home">
       <section className="df-hero">
-        <p className="df-eyebrow">WELCOME TO OUR UNIVERSE</p>
-        <h1>DAJJAL FAMILY<span>GAMING UNIVERSE</span></h1>
-        <p className="df-hero-copy">
-          A place for our characters, games, stories, and unforgettable family moments.
-          One universe, many personalities, countless adventures.
-        </p>
+        <p className="df-eyebrow">{t.eyebrow}</p>
+        <h1>{t.title}<span>{t.subtitle}</span></h1>
+        <p className="df-hero-copy">{t.intro}</p>
         <div className="df-hero-actions">
-          <Link href="#projects" className="df-button">EXPLORE PROJECTS</Link>
-          <Link href="#events" className="df-button df-button-secondary">VIEW EVENTS</Link>
+          <Link href="#projects" className="df-button">{t.explore}</Link>
+          <Link href="#events" className="df-button df-button-secondary">{t.viewEvents}</Link>
         </div>
       </section>
 
       <section className="df-section" id="family">
-        <h2 className="df-section-heading">Inside the Family</h2>
-        <p className="df-section-subtitle">Different characters. One extraordinary universe.</p>
+        <h2 className="df-section-heading">{t.family}</h2>
+        <p className="df-section-subtitle">{t.familySub}</p>
         <div className="df-card-grid">
-          {cards.map((card) => {
-            const content = (
-              <>
-                <span className="df-card-icon" aria-hidden="true">{card.icon}</span>
-                <h3>{card.title}</h3>
-                <p>{card.description}</p>
-              </>
-            );
-            return card.href ? (
-              <Link href={card.href} className="df-card" key={card.title} style={{ textDecoration: "none" }}>{content}</Link>
-            ) : (
-              <article className="df-card" key={card.title}>{content}</article>
-            );
-          })}
+          {t.cards.map((card, index) => (
+            <article className="df-card" key={card[0]}>
+              <span className="df-card-icon" aria-hidden="true">{["♛", "✧", "⚔"][index]}</span>
+              <h3>{card[0]}</h3><p>{card[1]}</p>
+            </article>
+          ))}
         </div>
       </section>
 
       <section className="df-section" id="projects">
-        <h2 className="df-section-heading">Featured Projects</h2>
-        <p className="df-section-subtitle">A growing collection of experiences from the DF universe.</p>
+        <h2 className="df-section-heading">{t.projects}</h2>
+        <p className="df-section-subtitle">{t.projectsSub}</p>
         <div className="df-card-grid">
-          <article className="df-card">
-            <span className="df-card-icon" aria-hidden="true">✦</span>
-            <h3>DF Digital Experiences</h3>
-            <p>Special pages, creative experiments, and interactive family projects.</p>
-          </article>
-          <article className="df-card">
-            <span className="df-card-icon" aria-hidden="true">♜</span>
-            <h3>Stories & Characters</h3>
-            <p>Discover the personalities and stories that shape our universe.</p>
-          </article>
-          <article className="df-card">
-            <span className="df-card-icon" aria-hidden="true">◇</span>
-            <h3>Coming Soon</h3>
-            <p>More experiences will be added to the DF universe.</p>
-          </article>
+          {t.projectCards.map((card, index) => (
+            <article className="df-card" key={card[0]}>
+              <span className="df-card-icon" aria-hidden="true">{["✦", "♜", "◇"][index]}</span>
+              <h3>{card[0]}</h3><p>{card[1]}</p>
+            </article>
+          ))}
         </div>
       </section>
 
       <section className="df-section" id="games">
-        <h2 className="df-section-heading">Games Universe</h2>
-        <p className="df-section-subtitle">Continue your adventure in the gaming world.</p>
+        <h2 className="df-section-heading">{t.games}</h2>
+        <p className="df-section-subtitle">{t.gamesSub}</p>
         <div className="df-event-card">
-          <div>
-            <h3>Dajjal Family Games</h3>
-            <p>Discover the games available in our main universe.</p>
-          </div>
-          <Link href="/games" className="df-button">ENTER GAMES</Link>
+          <div><h3>{t.gamesTitle}</h3><p>{t.gamesText}</p></div>
+          <Link href="/games" className="df-button">{t.enterGames}</Link>
         </div>
       </section>
 
       <section className="df-section" id="events">
-        <h2 className="df-section-heading">Family Events</h2>
-        <p className="df-section-subtitle">Special moments deserve their own place.</p>
+        <h2 className="df-section-heading">{t.events}</h2>
+        <p className="df-section-subtitle">{t.eventsSub}</p>
         <div className="df-event-card">
-          <div>
-            <h3>The Royal Wedding</h3>
-            <p>Anak Dajjal & Malika · Digital Wedding Invitation</p>
-          </div>
-          <Link href="/df/wedding-anak-dajjal" className="df-button">OPEN INVITATION</Link>
+          <div><h3>{t.wedding}</h3><p>{t.weddingText}</p></div>
+          <Link href="/df/wedding-anak-dajjal" className="df-button">{t.openInvite}</Link>
         </div>
       </section>
     </main>
