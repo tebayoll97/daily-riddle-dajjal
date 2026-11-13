@@ -633,3 +633,41 @@
  .df-main .wedding-builder-save-float{right:14px;bottom:max(14px,env(safe-area-inset-bottom));min-height:50px;padding:.8rem 1.05rem;font-size:.65rem}
  .df-main .wedding-builder-progress-top{align-items:flex-start;flex-direction:column;gap:.4rem}
 }
+
+
+/* Shared Google account controls for Wedding platform */
+.df-main .wedding-platform .wedding-tools,
+.df-main .wedding-platform .wedding-topbar-account{display:flex;align-items:center;justify-content:flex-end;gap:.65rem;min-width:0}
+.df-main .wedding-account-controls{display:flex;align-items:center;justify-content:flex-end;gap:.55rem;min-width:0}
+.df-main .wedding-account-email{display:inline-block;max-width:min(34vw,260px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#87536d;font:700 .68rem "Nunito Sans",Arial,sans-serif}
+.df-main .wedding-account-logout{border:0;background:transparent;color:#a34f78;text-decoration:underline;text-underline-offset:3px;font:900 .65rem "Nunito Sans",Arial,sans-serif;cursor:pointer;white-space:nowrap}
+.df-main .wedding-google-login-wrap{width:min(100%,390px);display:flex;flex-direction:column;align-items:center;gap:.8rem;margin:0 auto}
+.df-main .wedding-login-prompt{max-width:390px;margin:.3rem auto .1rem;color:#806b75;font:600 .88rem/1.7 "Nunito Sans",Arial,sans-serif;text-align:center}
+.df-main .wedding-google-login{display:flex;align-items:center;justify-content:center;gap:.75rem;width:100%;min-height:54px;padding:.9rem 1.4rem;border:1px solid #ead7df;border-radius:999px;background:#fff;color:#59434f;box-shadow:0 8px 22px rgba(137,77,111,.12);font:900 .72rem "Nunito Sans",Arial,sans-serif;letter-spacing:.07em;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.df-main .wedding-google-login svg{width:20px;height:20px;flex:none}
+.df-main .wedding-google-login:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(137,77,111,.18)}
+.df-main .wedding-google-login:disabled{opacity:.6;cursor:wait;transform:none}
+.df-main .wedding-login-error,.df-main .wedding-logout-error{color:#a33e5c!important;font:700 .78rem/1.5 "Nunito Sans",Arial,sans-serif;text-align:center}
+.wedding-logout-overlay{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(54,34,49,.48);backdrop-filter:blur(5px)}
+.wedding-logout-modal{width:min(100%,430px);padding:clamp(1.5rem,5vw,2.2rem);border:1px solid #e9c6d5;border-radius:26px;background:linear-gradient(145deg,#fffdf8,#fff0f5 62%,#f1faf3);box-shadow:0 24px 80px rgba(70,40,60,.25);text-align:center}
+.wedding-logout-flower{display:block;margin-bottom:.6rem;color:#d28aa7;font:2.3rem Georgia,serif}
+.wedding-logout-modal h2{margin:.55rem 0;color:#9a4f73;font:700 clamp(1.35rem,4vw,1.8rem) "Playfair Display",Georgia,serif}
+.wedding-logout-modal>p:not(.wedding-kicker){color:#806b75;font:600 .86rem/1.7 "Nunito Sans",Arial,sans-serif}
+.wedding-logout-actions{display:flex;justify-content:center;gap:.7rem;margin-top:1.35rem}
+.wedding-logout-actions button{flex:1;min-height:46px;padding:.7rem 1rem;border-radius:99px;font:900 .68rem "Nunito Sans",Arial,sans-serif;cursor:pointer}
+.wedding-logout-cancel{border:1px solid #e3bfd0;background:#fff;color:#92506e}
+.wedding-logout-confirm{border:1px solid #e3b36d;background:linear-gradient(120deg,#ffb8ce,#ffd58e);color:#653b56}
+.wedding-logout-actions button:disabled{opacity:.55;cursor:wait}
+@media(max-width:700px){
+ .df-main .wedding-platform .wedding-topbar{gap:.45rem}
+ .df-main .wedding-account-controls{gap:.35rem}
+ .df-main .wedding-account-email{max-width:31vw;font-size:.58rem}
+ .df-main .wedding-account-logout{font-size:.58rem}
+ .df-main .wedding-topbar-account,.df-main .wedding-tools{gap:.35rem}
+}
+@media(max-width:420px){
+ .df-main .wedding-account-email{max-width:27vw}
+ .df-main .wedding-account-controls{gap:.25rem}
+ .df-main .wedding-account-logout{font-size:.53rem}
+ .df-main .wedding-platform .wedding-lang button{padding:.45rem .48rem}
+}
