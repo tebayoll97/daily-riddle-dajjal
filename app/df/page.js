@@ -3,7 +3,6 @@
 // Keep this route explicitly on the client: it reads the shared language context.
 
 import Link from "next/link";
-import { useLanguage } from "../components/LanguageProvider";
 
 const copy = {
   en: {
@@ -73,8 +72,7 @@ const copy = {
 };
 
 export default function DajjalFamilyHome() {
-  const { language } = useLanguage();
-  const t = copy[language] || copy.en;
+  const t = copy.en;
 
   return (
     <main className="df-home">
