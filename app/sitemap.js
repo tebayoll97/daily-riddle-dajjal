@@ -15,10 +15,8 @@ const publicRoutes = [
 ];
 
 export default function sitemap() {
-  const lastModified = new Date();
   return publicRoutes.map((route) => ({
     url: `${origin}${route}`,
-    lastModified,
     changeFrequency: route === "" ? "weekly" : "monthly",
     priority: route === "" ? 1 : route === "/games" ? 0.8 : 0.6,
   }));
