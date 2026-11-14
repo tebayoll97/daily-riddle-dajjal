@@ -219,22 +219,24 @@ export default function GamesPage() {
               </div>
             </div>
           </article>
-        </section>
 
-        <section className="mb-8">
-          <div className="mb-3 flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-purple-400 shadow-[0_0_10px_rgba(168,85,247,.7)]" />
-            <h2 className="text-[10px] font-bold tracking-[0.25em] text-purple-200 ui-section-title">ARCADE MINI GAMES</h2>
-          </div>
-          <article className="flex flex-col items-start gap-4 rounded-2xl border border-purple-400/25 bg-gradient-to-r from-[#211532] to-[#11101e] p-5 sm:flex-row sm:items-center sm:justify-between ui-card">
-            <div>
-              <p className="mb-1 text-[9px] font-black tracking-[.2em] text-purple-300">EXPLORE THE ARCADE</p>
-              <h3 className="text-xl font-black text-white">MINI GAME COLLECTION</h3>
-              <p className="mt-1 max-w-xl text-xs leading-relaxed text-gray-400">Nikmati RUN & JUMP dan berbagai permainan arcade ringan lainnya yang bisa langsung dimainkan tanpa login.</p>
+          <article className="relative mt-4 overflow-hidden rounded-3xl border border-cyan-400/25 bg-gradient-to-br from-[#102536] via-[#111827] to-[#100d19] ui-card">
+            <div className="relative flex flex-col items-stretch sm:flex-row sm:items-center">
+              <div className="relative flex h-44 w-full items-center justify-center overflow-hidden bg-gradient-to-br from-cyan-950/80 via-emerald-950/50 to-purple-950/80 text-7xl sm:h-64 sm:w-[42%]" aria-hidden="true">🦖</div>
+              <div className="flex flex-1 flex-col items-start gap-4 p-6 sm:p-8">
+                <div className="max-w-xl">
+                  <p className="mb-3 text-[10px] font-bold tracking-[0.3em] text-cyan-300">03 · ARCADE GAME</p>
+                  <h2 className="text-2xl font-black sm:text-3xl ui-section-title">DAJJAL FAMILY JUMP</h2>
+                  <p className="mt-3 text-sm leading-relaxed text-gray-300">{language === "id" ? "Lari sejauh mungkin, lompat melewati rintangan, dan pecahkan rekor jarakmu. Bisa dimainkan tanpa login." : "Run as far as you can, jump over obstacles, and beat your distance record. Play without signing in."}</p>
+                  <p className="mt-2 text-[10px] font-bold tracking-wider text-cyan-200/80">PUBLIC ARCADE · NO LOGIN REQUIRED</p>
+                </div>
+                <Link href="/games/run-jump" className="w-full shrink-0 rounded-xl bg-cyan-700 px-7 py-4 text-center text-sm font-black tracking-wider transition hover:bg-cyan-600 sm:w-auto">{language === "id" ? "MAIN SEKARANG" : "PLAY NOW"}</Link>
+              </div>
             </div>
-            <Link href="/mini-game" className="w-full shrink-0 rounded-xl bg-purple-600 px-6 py-3 text-center text-xs font-black tracking-wider text-white transition hover:bg-purple-500 active:scale-[.98] sm:w-auto">BROWSE MINI GAMES →</Link>
           </article>
         </section>
+
+
 
         <section>
           <div className="mb-3 flex items-center gap-2">
