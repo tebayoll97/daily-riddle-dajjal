@@ -12,7 +12,7 @@ export function LanguageProvider({ children, initialLanguage = "id" }) {
     if (nextLanguage !== "en" && nextLanguage !== "id") return;
     if (nextLanguage === currentLanguage) return;
 
-    document.cookie = `${LOCALE_COOKIE}=${nextLanguage}; Path=/; Max-Age=31536000; SameSite=Lax`;
+    document.cookie = `${LOCALE_COOKIE}=${nextLanguage}; Path=/; Max-Age=31536000; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`;
 
     const currentPath = window.location.pathname || "/";
     const segments = currentPath.split("/");
