@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 
 import { supabaseAdminClient } from "@/lib/supabaseAdminClient";
 import { useLanguage } from "./LanguageProvider";
+import ThemeToggle from "./ThemeToggle";
+import AccountEntry from "./AccountEntry";
 
 import audioEngine from "@/lib/audio/AudioEngine";
 import {
@@ -182,6 +184,11 @@ export default function Header() {
 
   const navLinks = [
     {
+      name: t.profile,
+      href: "/profile",
+      icon: "♙",
+    },
+    {
       name: t.home,
       href: "/",
       icon: "⌂",
@@ -268,6 +275,8 @@ export default function Header() {
               </span>
             </button>
 
+            <ThemeToggle />
+
             {/* SETTINGS */}
             <Link
               href="/settings"
@@ -281,20 +290,7 @@ export default function Header() {
             >
               <span className="text-lg">⚙</span>
             </Link>
-
-            {/* PROFILE */}
-            <Link
-              href="/profile"
-              aria-label={t.profile}
-              title={t.profile}
-              className={`${iconButton} ${
-                isActive("/profile")
-                  ? "border-purple-500/40 bg-purple-500/15 text-purple-300"
-                  : "border-white/10 bg-white/5 text-gray-400 hover:text-purple-300 hover:border-purple-500/30"
-              }`}
-            >
-              <span className="text-lg">♙</span>
-            </Link>
+            <AccountEntry />
           </div>
         </div>
 
@@ -330,7 +326,7 @@ export default function Header() {
         {/* MAIN NAVIGATION */}
         <nav
           className={`grid border-t border-purple-500/10 ${
-            isAdmin ? "grid-cols-4" : "grid-cols-3"
+            isAdmin ? "grid-cols-5" : "grid-cols-4"
           }`}
         >
           {navLinks.map((link) => {

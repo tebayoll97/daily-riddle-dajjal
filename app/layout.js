@@ -2,36 +2,11 @@ import "./globals.css";
 import RouteChrome from "./components/RouteChrome";
 import GlobalAudioController from "./components/GlobalAudioController";
 import { LanguageProvider } from "./components/LanguageProvider";
-
-export const metadata = {
-  title: {
-    default: "Dajjal Family | Gaming Universe",
-    template: "%s | Dajjal Family | Gaming Universe",
-  },
-  description:
-    "One Account. One Profile. Multiple Games. One Universe. Explore Daily Riddle, Rune Puzzle, Memory Challenge, Logic Battle, and more.",
-  applicationName: "Dajjal Family | Gaming Universe",
-  keywords: [
-    "Dajjal",
-    "Veylora",
-    "Gaming Universe",
-    "Daily Riddle",
-    "Rune Puzzle",
-    "Memory Challenge",
-    "Logic Battle",
-    "Online Mini Games",
-  ],
-};
-
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en">
-      <body className="min-h-screen flex flex-col">
-        <LanguageProvider>
-          <GlobalAudioController />
-          <RouteChrome>{children}</RouteChrome>
-        </LanguageProvider>
-      </body>
-    </html>
-  );
+import { ThemeProvider } from "./components/ThemeProvider";
+import { headers } from "next/headers";
+export const metadata={metadataBase:new URL("https://dajjalfamily.com"),title:{default:"Dajjal Family — One Family. Many Possibilities.",template:"%s | Dajjal Family"},description:"Explore Dajjal Family, a growing digital ecosystem for gaming, knowledge, articles, digital products, business, and community.",applicationName:"Dajjal Family",keywords:["Dajjal Family","digital ecosystem","online games","digital products","knowledge and learning","digital community"]};
+export default async function RootLayout({children}){
+ const requestHeaders=await headers();
+ const initialLanguage=requestHeaders.get("x-vercel-ip-country")==="ID"?"id":"en";
+ return <html lang={initialLanguage}><body className="min-h-screen flex flex-col"><ThemeProvider><LanguageProvider initialLanguage={initialLanguage}><GlobalAudioController/><RouteChrome>{children}</RouteChrome></LanguageProvider></ThemeProvider></body></html>;
 }

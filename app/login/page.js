@@ -20,6 +20,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   function getNextPath() {
     const value = new URLSearchParams(window.location.search).get("next") || "/games";
@@ -38,23 +40,27 @@ export default function LoginPage() {
           return;
         }
 
-        if (!isGoogleUser(session.user) || session.user.is_anonymous) {
+        if (session.user.is_anonymous) {
           if (active) {
             setError(isID
-              ? "Silakan gunakan akun Google untuk melanjutkan."
-              : "Please use a Google account to continue.");
+              ? "Silakan masuk dengan Google atau email dan kata sandi."
+              : "Please sign in with Google or email and password.");
             setLoading(false);
           }
           return;
         }
 
-        const response = await fetch("/api/player/ensure", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${session.access_token}` },
-          cache: "no-store",
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || "Unable to prepare player profile.");
+        // Google sign-ins need the player bootstrap; existing password accounts
+        // already have their linked player record and must not be re-created.
+        if (isGoogleUser(session.user)) {
+          const response = await fetch("/api/player/ensure", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${session.access_token}` },
+            cache: "no-store",
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || "Unable to prepare player profile.");
+        }
 
         if (active) router.replace(getNextPath());
       } catch (err) {
@@ -69,6 +75,32 @@ export default function LoginPage() {
     finishLogin();
     return () => { active = false; };
   }, [router, isID]);
+
+  async function handlePasswordLogin(event) {
+    event.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      const cleanEmail = email.trim();
+      if (!cleanEmail || !password) {
+        throw new Error(isID ? "Masukkan email dan kata sandi." : "Enter your email and password.");
+      }
+
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password,
+      });
+      if (loginError) throw loginError;
+      router.replace(getNextPath());
+    } catch (err) {
+      // Keep credential failures generic; do not disclose whether an email exists.
+      setError(isID
+        ? "Email atau kata sandi tidak valid. Periksa kembali atau gunakan Google."
+        : "Invalid email or password. Check your details or use Google.");
+      setBusy(false);
+    }
+  }
 
   async function handleGoogleLogin() {
     if (busy) return;
@@ -118,9 +150,33 @@ export default function LoginPage() {
         <h1 className="mt-4 text-3xl font-black ui-title">{isID ? "MASUK KE UNIVERSE" : "ENTER THE UNIVERSE"}</h1>
         <p className="mt-3 text-sm leading-relaxed text-gray-400">
           {isID
-            ? "Satu akun Google untuk semua game utama. Akun pemain baru akan dibuat otomatis."
-            : "One Google account for all main games. New player accounts are created automatically."}
+            ? "Masuk dengan email dan kata sandi akunmu, atau lanjutkan langsung dengan Google."
+            : "Sign in with your account email and password, or continue directly with Google."}
         </p>
+        <form onSubmit={handlePasswordLogin} className="mt-7 space-y-3 text-left">
+          <label className="block text-xs font-semibold text-gray-300">
+            {isID ? "EMAIL" : "EMAIL"}
+            <input type="email" autoComplete="username" required value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="you@example.com"
+              className="mt-2 w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500" />
+          </label>
+          <label className="block text-xs font-semibold text-gray-300">
+            {isID ? "KATA SANDI" : "PASSWORD"}
+            <input type="password" autoComplete="current-password" required value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="mt-2 w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500" />
+          </label>
+          <button type="submit" disabled={busy}
+            className="w-full rounded-xl border border-purple-400/40 bg-purple-700/30 px-5 py-3 font-bold text-white transition hover:bg-purple-700/50 disabled:opacity-50">
+            {busy ? (isID ? "MEMERIKSA..." : "SIGNING IN...") : (isID ? "MASUK DENGAN EMAIL" : "SIGN IN WITH EMAIL")}
+          </button>
+        </form>
+        <div className="my-5 flex items-center gap-3 text-[10px] font-bold tracking-widest text-gray-500">
+          <span className="h-px flex-1 bg-white/10"></span>
+          {isID ? "ATAU" : "OR"}
+          <span className="h-px flex-1 bg-white/10"></span>
+        </div>
         <button type="button" onClick={handleGoogleLogin} disabled={busy}
           className="mt-8 flex w-full items-center justify-center gap-3 rounded-xl bg-white px-5 py-4 font-bold text-gray-900 transition hover:bg-gray-100 disabled:opacity-50">
           <svg viewBox="0 0 48 48" className="h-5 w-5" aria-hidden="true">

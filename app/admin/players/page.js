@@ -9,23 +9,30 @@ import { useLanguage } from "@/app/components/LanguageProvider";
 const translations = {
   en: {
     checking: "Verifying administrator...",
-    title: "PLAYER",
+    title: "USER",
     titleAccent: "MANAGEMENT",
-    subtitle: "Manage player accounts and monitor activity.",
+    subtitle: "Manage account access, player profiles, and game activity.",
     back: "BACK TO DASHBOARD",
     ban: "BAN PLAYER",
     unban: "UNBAN",
-    delete: "DELETE PLAYER",
+    delete: "DELETE PROFILE",
+    email: "EMAIL",
+    lastSignIn: "LAST SIGN-IN",
+    authMissing: "LOGIN ACCOUNT NOT FOUND",
+    never: "Never",
     banned: "BANNED",
     active: "ACTIVE",
     actionTitle: "PLAYER ACTION",
     banConfirm: "Ban this player from signing in?",
     unbanConfirm: "Restore this player's access?",
-    deleteConfirm: "Permanently delete this player's game profile and score history? This cannot be undone.",
+    deleteConfirm: "Permanently delete this player's game profile and score history? The linked login account will remain. This cannot be undone.",
     cancel: "CANCEL",
     confirm: "CONFIRM",
     processing: "PROCESSING...",
     actionError: "Unable to complete this action.",
+    actionSuccessBan: "Login access has been blocked.",
+    actionSuccessUnban: "Login access has been restored.",
+    actionSuccessDelete: "Player profile and game history deleted. The login account remains.",
     logout: "SIGN OUT",
     total: "TOTAL PLAYERS",
     guest: "GUESTS ON THIS PAGE",
@@ -35,7 +42,9 @@ const translations = {
     guestFilter: "GUEST",
     googleFilter: "GOOGLE",
     other: "OTHER",
-    playerList: "PLAYER DIRECTORY",
+    activeFilter: "ACTIVE",
+    bannedFilter: "BANNED",
+    playerList: "USER DIRECTORY",
     found: "players found",
     noPlayers: "No players found.",
     noResults: "Try another nickname or filter.",
@@ -67,22 +76,29 @@ const translations = {
   id: {
     checking: "Memverifikasi administrator...",
     title: "MANAJEMEN",
-    titleAccent: "PEMAIN",
-    subtitle: "Kelola akun pemain dan pantau aktivitas permainan.",
+    titleAccent: "PENGGUNA",
+    subtitle: "Kelola akses akun, profil pemain, dan aktivitas permainan.",
     back: "KEMBALI KE DASHBOARD",
     ban: "BLOKIR PEMAIN",
     unban: "BUKA BLOKIR",
-    delete: "HAPUS PEMAIN",
+    delete: "HAPUS PROFIL",
+    email: "EMAIL",
+    lastSignIn: "LOGIN TERAKHIR",
+    authMissing: "AKUN LOGIN TIDAK DITEMUKAN",
+    never: "Belum pernah",
     banned: "DIBLOKIR",
     active: "AKTIF",
     actionTitle: "TINDAKAN PEMAIN",
     banConfirm: "Blokir pemain ini agar tidak bisa masuk?",
     unbanConfirm: "Pulihkan akses pemain ini?",
-    deleteConfirm: "Hapus permanen profil permainan dan seluruh riwayat skor pemain ini? Tindakan ini tidak dapat dibatalkan.",
+    deleteConfirm: "Hapus permanen profil permainan dan seluruh riwayat skor pemain ini? Akun login yang terhubung tetap ada. Tindakan ini tidak dapat dibatalkan.",
     cancel: "BATAL",
     confirm: "KONFIRMASI",
     processing: "MEMPROSES...",
     actionError: "Tindakan tidak dapat diselesaikan.",
+    actionSuccessBan: "Akses login berhasil diblokir.",
+    actionSuccessUnban: "Akses login berhasil dipulihkan.",
+    actionSuccessDelete: "Profil pemain dan riwayat game dihapus. Akun login tetap ada.",
     logout: "KELUAR",
     total: "TOTAL PEMAIN",
     guest: "GUEST DI HALAMAN INI",
@@ -92,7 +108,9 @@ const translations = {
     guestFilter: "GUEST",
     googleFilter: "GOOGLE",
     other: "LAINNYA",
-    playerList: "DAFTAR PEMAIN",
+    activeFilter: "AKTIF",
+    bannedFilter: "DIBLOKIR",
+    playerList: "DAFTAR PENGGUNA",
     found: "pemain ditemukan",
     noPlayers: "Pemain tidak ditemukan.",
     noResults: "Coba nickname atau filter lainnya.",
@@ -123,7 +141,7 @@ const translations = {
   },
 };
 
-const filters = ["ALL", "GUEST", "GOOGLE", "OTHER"];
+const filters = ["ALL", "GUEST", "GOOGLE", "OTHER", "ACTIVE", "BANNED"];
 
 function formatDate(date, language) {
   if (!date) return "-";
@@ -162,6 +180,7 @@ export default function AdminPlayersPage() {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -317,6 +336,7 @@ export default function AdminPlayersPage() {
     if (!actionTarget || !actionType || actionLoading) return;
     setActionLoading(true);
     setError("");
+    setSuccess("");
 
     try {
       const { data: { session }, error: sessionError } =
@@ -345,6 +365,7 @@ export default function AdminPlayersPage() {
 
       setActionTarget(null);
       setActionType(null);
+      setSuccess(actionType === "delete" ? t.actionSuccessDelete : actionType === "ban" ? t.actionSuccessBan : t.actionSuccessUnban);
       await loadPlayers();
     } catch (err) {
       setError(err.message || t.actionError);
@@ -355,6 +376,8 @@ export default function AdminPlayersPage() {
 
   const filteredPlayers = players.filter((player) => {
     if (filter === "ALL") return true;
+    if (filter === "BANNED") return player.isBanned;
+    if (filter === "ACTIVE") return !player.isBanned;
     if (filter === "OTHER") {
       return (
         player.accountType === "OTHER" ||
@@ -493,6 +516,8 @@ export default function AdminPlayersPage() {
           </div>
         </section>
 
+        {success && <div role="status" className="mt-4 rounded-xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{success}</div>}
+
         {/* SEARCH */}
         <section className="mt-5 sm:mt-8 rounded-xl sm:rounded-2xl border border-purple-500/20 bg-[#151020] p-3 sm:p-5 ui-card">
           <form
@@ -525,6 +550,8 @@ export default function AdminPlayersPage() {
                 GUEST: t.guestFilter,
                 GOOGLE: t.googleFilter,
                 OTHER: t.other,
+                ACTIVE: t.activeFilter,
+                BANNED: t.bannedFilter,
               };
 
               return (
@@ -616,8 +643,9 @@ export default function AdminPlayersPage() {
                             {player.nickname || "Unnamed Player"}
                           </p>
                           <p className="text-[11px] text-gray-400 mt-0.5">
-                            {t.server} {player.serverNumber || "-"}
+                            {player.authEmail || (player.hasAuthLink ? t.unknownLabel : t.authMissing)}
                           </p>
+                          <p className="text-[10px] text-gray-500 mt-0.5">{t.server} {player.serverNumber || "-"}</p>
                         </div>
 
                         <span className={`shrink-0 rounded-full border px-2 py-1 text-[9px] font-black ${accountStyle(player.accountType)}`}>
@@ -643,6 +671,10 @@ export default function AdminPlayersPage() {
                             {t.details}
                           </p>
 
+                          <div className="mb-2 rounded-lg bg-black/20 p-2.5 space-y-2">
+                            <div><p className="text-[9px] text-gray-500 font-bold">{t.email}</p><p className="text-xs text-white break-all mt-1">{player.authEmail || "—"}</p></div>
+                            <div><p className="text-[9px] text-gray-500 font-bold">{t.lastSignIn}</p><p className="text-xs text-white mt-1">{player.lastSignInAt ? formatDate(player.lastSignInAt, language) : t.never}</p></div>
+                          </div>
                           <div className="grid grid-cols-3 gap-2 rounded-lg bg-black/20 p-2.5">
                             <div className="min-w-0">
                               <p className="text-[9px] text-gray-500 font-bold">{t.points}</p>
@@ -675,12 +707,7 @@ export default function AdminPlayersPage() {
                               >
                                 {player.isBanned ? t.unban : t.ban}
                               </button>
-                              <button
-                                onClick={() => openPlayerAction(player, "delete")}
-                                className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[10px] font-bold text-red-300 active:scale-[0.98] transition"
-                              >
-                                {t.delete}
-                              </button>
+
                             </div>
                           </div>
                         </div>
@@ -696,11 +723,13 @@ export default function AdminPlayersPage() {
                   <thead className="bg-purple-500/5 border-b border-purple-500/20">
                     <tr className="text-[10px] text-purple-300 tracking-wider">
                       <th className="px-5 py-4">PLAYER</th>
+                      <th className="px-4 py-4">{t.email}</th>
                       <th className="px-4 py-4">{t.account}</th>
                       <th className="px-4 py-4">{t.server}</th>
                       <th className="px-4 py-4">{t.points}</th>
                       <th className="px-4 py-4">{t.games}</th>
                       <th className="px-4 py-4">{t.joined}</th>
+                      <th className="px-4 py-4">{t.lastSignIn}</th>
                       <th className="px-4 py-4">STATUS</th>
                       <th className="px-4 py-4">ACTIONS</th>
                     </tr>
@@ -725,11 +754,15 @@ export default function AdminPlayersPage() {
                                 "👤"
                               )}
                             </div>
-                            <span className="font-bold text-sm">
-                              {player.nickname || "Unnamed Player"}
-                            </span>
+                            <div className="min-w-0">
+                              <span className="font-bold text-sm block">
+                                {player.nickname || "Unnamed Player"}
+                              </span>
+                            </div>
                           </div>
                         </td>
+
+                        <td className="px-4 py-4 text-xs text-gray-300 break-all max-w-56">{player.authEmail || "—"}</td>
 
                         <td className="px-4 py-4">
                           <span
@@ -754,6 +787,9 @@ export default function AdminPlayersPage() {
                         <td className="px-4 py-4 text-xs text-gray-400">
                           {formatDate(player.createdAt, language)}
                         </td>
+                        <td className="px-4 py-4 text-xs text-gray-400">
+                          {player.lastSignInAt ? formatDate(player.lastSignInAt, language) : t.never}
+                        </td>
                         <td className="px-4 py-4">
                           <span className={`text-[9px] font-black rounded-full px-2 py-1 border ${player.isBanned ? "border-red-500/30 bg-red-500/10 text-red-300" : "border-green-500/20 bg-green-500/10 text-green-300"}`}>
                             {player.isBanned ? t.banned : t.active}
@@ -767,12 +803,7 @@ export default function AdminPlayersPage() {
                             >
                               {player.isBanned ? t.unban : t.ban}
                             </button>
-                            <button
-                              onClick={() => openPlayerAction(player, "delete")}
-                              className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[10px] font-bold text-red-300 whitespace-nowrap"
-                            >
-                              {t.delete}
-                            </button>
+
                           </div>
                         </td>
                       </tr>

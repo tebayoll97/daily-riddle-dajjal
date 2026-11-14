@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { useLanguage } from "@/app/components/LanguageProvider";
 import GameCharacter from "@/lib/GameCharacter";
 
+
 export default function EditProfilePage() {
   const router = useRouter();
   const { language } = useLanguage();
@@ -18,9 +19,16 @@ export default function EditProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [player, setPlayer] = useState(null);
+  const [profileIdentityEnabled, setProfileIdentityEnabled] = useState(false);
 
   const [nickname, setNickname] = useState("");
+  const [username, setUsername] = useState("");
+  const [gender, setGender] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [serverNumber, setServerNumber] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [avatarPath, setAvatarPath] = useState("");
 
@@ -36,37 +44,48 @@ export default function EditProfilePage() {
     setError("");
 
     try {
-      const { data: sessionData } =
+      const { data: sessionData, error: sessionError } =
         await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
 
       if (!isActive()) return;
 
       const user = sessionData?.session?.user;
 
       if (!user) {
-        router.push("/");
+        router.replace("/login?next=%2Fprofile%2Fedit");
         return;
       }
 
-      const { data, error: profileError } = await supabase
+      const { data: playerRef, error: playerRefError } = await supabase
         .from("players")
-        .select("id, nickname, server_number, avatar_url, avatar_path")
+        .select("id")
         .eq("auth_user_id", user.id)
         .maybeSingle();
 
       if (!isActive()) return;
-      if (profileError) throw profileError;
-
-      if (!data) {
-        throw new Error(
-          isID
-            ? "Profil pemain tidak ditemukan."
-            : "Player profile not found."
-        );
+      if (playerRefError) throw playerRefError;
+      if (!playerRef) {
+        throw new Error(isID ? "Profil pemain tidak ditemukan." : "Player profile not found.");
       }
 
+      const response = await fetch(`/api/player/${playerRef.id}`, {
+        headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
+        cache: "no-store",
+      });
+      const result = await response.json();
+      if (!response.ok || !result.player) {
+        throw new Error(result.error || (isID ? "Gagal memuat profil." : "Unable to load profile."));
+      }
+
+      const data = result.player;
       setPlayer(data);
+      setProfileIdentityEnabled(Boolean(data.profileIdentityEnabled));
       setNickname(data.nickname || "");
+      setUsername(data.username || "");
+      setGender(data.gender || "");
+      setPhoneNumber(data.phone_number || "");
+      setBirthDate(data.birth_date || "");
       setServerNumber(String(data.server_number || ""));
       setAvatarUrl(data.avatar_url || "");
       setAvatarPath(data.avatar_path || "");
@@ -155,8 +174,36 @@ export default function EditProfilePage() {
 
     setError("");
 
-    const cleanNickname = nickname.trim() || player.nickname || "";
+    const cleanNickname = nickname.trim();
+    const cleanUsername = username.trim();
+    const cleanPhone = phoneNumber.trim();
     const cleanServer = Number(serverNumber);
+
+    if (!cleanNickname || cleanNickname.length > 30) {
+      setError(isID ? "Nama wajib diisi dan maksimal 30 karakter." : "Display name is required and must be at most 30 characters.");
+      return;
+    }
+
+    if (profileIdentityEnabled && !/^[A-Za-z0-9]{3,20}$/.test(cleanUsername)) {
+      setError(isID ? "Username harus 3–20 karakter, hanya huruf dan angka." : "Username must be 3–20 characters using letters and numbers only.");
+      return;
+    }
+
+    if (cleanPhone && !/^\+[1-9][0-9]{7,14}$/.test(cleanPhone)) {
+      setError(isID ? "Nomor HP gunakan format internasional, contoh +628123456789." : "Use international phone format, e.g. +628123456789.");
+      return;
+    }
+
+    if (newPassword || confirmPassword) {
+      if (newPassword.length < 10 || !/[A-Za-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+        setError(isID ? "Kata sandi minimal 10 karakter dan harus memuat huruf serta angka." : "Password must be at least 10 characters and include letters and numbers.");
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        setError(isID ? "Konfirmasi kata sandi tidak cocok." : "Password confirmation does not match.");
+        return;
+      }
+    }
 
     if (cleanNickname.length > 30) {
       setError(
@@ -181,19 +228,19 @@ export default function EditProfilePage() {
     setSaving(true);
 
     let uploadedPath = null;
+    let profileSaved = false;
+    let savedProfile = null;
 
     try {
-      const { data: sessionData } =
+      const { data: sessionData, error: sessionError } =
         await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
 
       const user = sessionData?.session?.user;
 
       if (!user) {
-        throw new Error(
-          isID
-            ? "Sesi login berakhir."
-            : "Your session has expired."
-        );
+        router.replace("/login?next=%2Fprofile%2Fedit");
+        return;
       }
 
       let newAvatarUrl = avatarUrl;
@@ -239,6 +286,12 @@ export default function EditProfilePage() {
         .from("players")
         .update({
           nickname: cleanNickname,
+          ...(profileIdentityEnabled ? {
+            username: cleanUsername.toLowerCase(),
+            gender: gender || null,
+            phone_number: cleanPhone || null,
+            birth_date: birthDate || null,
+          } : {}),
           server_number: serverNumber.trim() ? cleanServer : null,
           avatar_url: newAvatarUrl,
           avatar_path: newAvatarPath,
@@ -258,18 +311,44 @@ export default function EditProfilePage() {
         );
       }
 
-      if (
-        avatarPath &&
-        avatarPath !== newAvatarPath
-      ) {
-        await supabase.storage
-          .from("avatars")
-          .remove([avatarPath]);
+      // The profile row now references the new avatar (if one was uploaded).
+      // From this point onward, never roll back that object as a side effect of
+      // a later password-update failure.
+      profileSaved = true;
+      savedProfile = {
+        avatarUrl: newAvatarUrl,
+        avatarPath: newAvatarPath,
+        nickname: cleanNickname,
+        username: cleanUsername.toLowerCase(),
+        serverNumber: serverNumber.trim() ? String(cleanServer) : "",
+      };
+
+      if (newPassword) {
+        const { error: passwordError } = await supabase.auth.updateUser({ password: newPassword });
+        if (passwordError) throw passwordError;
+      }
+
+      // Old-avatar cleanup is best-effort and must not turn a successful
+      // profile/password save into a misleading failure state.
+      if (avatarPath && avatarPath !== newAvatarPath) {
+        try {
+          const { error: removeError } = await supabase.storage
+            .from("avatars")
+            .remove([avatarPath]);
+          if (removeError) {
+            console.error("Unable to remove previous avatar:", removeError);
+          }
+        } catch (removeError) {
+          console.error("Unable to remove previous avatar:", removeError);
+        }
       }
 
       setAvatarUrl(newAvatarUrl || "");
       setAvatarPath(newAvatarPath || "");
       setNickname(cleanNickname);
+      setUsername(cleanUsername.toLowerCase());
+      setNewPassword("");
+      setConfirmPassword("");
       setServerNumber(serverNumber.trim() ? String(cleanServer) : "");
 
       clearPreview();
@@ -280,19 +359,41 @@ export default function EditProfilePage() {
         router.replace("/profile");
       }, 1800);
     } catch (err) {
-      if (uploadedPath) {
-        await supabase.storage
-          .from("avatars")
-          .remove([uploadedPath]);
+      if (!profileSaved && uploadedPath) {
+        // The database did not adopt this upload, so it is safe to clean up.
+        try {
+          await supabase.storage
+            .from("avatars")
+            .remove([uploadedPath]);
+        } catch (cleanupError) {
+          console.error("Unable to clean up unused avatar upload:", cleanupError);
+        }
       }
 
-      setError(
-        err.code === "23505"
-          ? isID
-            ? "Nickname ini sudah digunakan. Silakan pilih nickname lain."
-            : "This nickname is already in use. Please choose another one."
-          : err.message
-      );
+      if (profileSaved && savedProfile) {
+        // Keep the UI aligned with the already-committed profile. Password
+        // failure is a separate partial-success outcome, not a profile rollback.
+        setAvatarUrl(savedProfile.avatarUrl || "");
+        setAvatarPath(savedProfile.avatarPath || "");
+        setNickname(savedProfile.nickname);
+        setUsername(savedProfile.username);
+        setServerNumber(savedProfile.serverNumber);
+        clearPreview();
+        setRemoveAvatar(false);
+        setError(
+          isID
+            ? "Profil berhasil disimpan, tetapi kata sandi gagal diperbarui. Periksa kata sandi dan coba lagi."
+            : "Profile was saved, but the password could not be updated. Check the password and try again."
+        );
+      } else {
+        setError(
+          err.code === "23505"
+            ? isID
+              ? "Nama, username, atau nomor HP sudah digunakan. Periksa kembali."
+              : "Display name, username, or phone number is already in use."
+            : err.message
+        );
+      }
     } finally {
       setSaving(false);
     }
@@ -405,22 +506,48 @@ export default function EditProfilePage() {
             </div>
 
             <div>
-              <label className="block text-sm text-gray-300 mb-2">
-                Nickname
-              </label>
+              <label className="block text-sm text-gray-300 mb-2">{isID ? "Nama Tampilan (Publik)" : "Display Name (Public)"}</label>
+              <input required type="text" maxLength={30} value={nickname} onChange={(e) => setNickname(e.target.value)} className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500" />
+            </div>
 
-              <input
-                type="text"
-                maxLength={30}
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500"
-              />
+            <div>
+              <label className="block text-sm text-gray-300 mb-2">Username</label>
+              <input required={profileIdentityEnabled} disabled={!profileIdentityEnabled} type="text" minLength={3} maxLength={20} pattern="[A-Za-z0-9]{3,20}" autoCapitalize="none" value={username} onChange={(e) => setUsername(e.target.value.replace(/[^A-Za-z0-9]/g, ""))} className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500" />
+              <p className="mt-1 text-xs text-gray-500">{isID ? "Fitur username akan tersedia setelah pembaruan database." : "Username will be available after the database update."}</p>
+            </div>
+
+            <div>
+              <label className="block text-sm text-gray-300 mb-2">{isID ? "Jenis Kelamin (Opsional)" : "Gender (Optional)"}</label>
+              <select disabled={!profileIdentityEnabled} value={gender} onChange={(e) => setGender(e.target.value)} className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500">
+                <option value="">{isID ? "Pilih" : "Select"}</option>
+                <option value="male">{isID ? "Laki-laki" : "Male"}</option>
+                <option value="female">{isID ? "Wanita" : "Female"}</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm text-gray-300 mb-2">{isID ? "Nomor HP (Opsional)" : "Phone Number (Optional)"}</label>
+              <input disabled={!profileIdentityEnabled} type="tel" inputMode="tel" placeholder="+628123456789" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9+]/g, ""))} className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500" />
+              <p className="mt-1 text-xs text-gray-500">{isID ? "Gunakan format internasional. Verifikasi diperlukan sebelum dipakai untuk login." : "Use international format. Verification is required before using it to sign in."}</p>
+            </div>
+
+            <div>
+              <label className="block text-sm text-gray-300 mb-2">{isID ? "Tanggal Lahir (Opsional)" : "Date of Birth (Optional)"}</label>
+              <input disabled={!profileIdentityEnabled} type="date" max={new Date().toISOString().slice(0, 10)} value={birthDate} onChange={(e) => setBirthDate(e.target.value)} className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500" />
+            </div>
+
+            <div className="rounded-xl border border-purple-500/20 bg-black/20 p-4 space-y-3">
+              <div>
+                <p className="text-sm font-bold text-white">{isID ? "Kata Sandi Akun (Opsional)" : "Account Password (Optional)"}</p>
+                <p className="mt-1 text-xs text-gray-500">{isID ? "Atur agar akun Google juga bisa masuk dengan email dan kata sandi." : "Set a password so your Google account can also sign in with email and password."}</p>
+              </div>
+              <input type="password" autoComplete="new-password" minLength={10} placeholder={isID ? "Kata sandi baru" : "New password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500" />
+              <input type="password" autoComplete="new-password" minLength={10} placeholder={isID ? "Ulangi kata sandi" : "Confirm password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500" />
             </div>
 
             <div>
               <label className="block text-sm text-gray-300 mb-2">
-                {isID ? "Nomor Server (Opsional)" : "Server Number (Optional)"}
+                {isID ? "State Darkwar (Nomor Server, Opsional)" : "Darkwar State (Server Number, Optional)"}
               </label>
 
               <input

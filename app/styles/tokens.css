@@ -1,0 +1,93 @@
+/* Design tokens: the single source of truth for shared visual values. */
+:root {
+  color-scheme: dark;
+
+  /* Brand primitives */
+  --df-color-bg: #080711;
+  --df-color-surface: #151020;
+  --df-color-surface-raised: #1b1528;
+  --df-color-text: #f7f4ff;
+  --df-color-text-secondary: #c3b8d2;
+  --df-color-text-muted: #978da7;
+  --df-color-primary: #a855f7;
+  --df-color-secondary: #6366f1;
+  --df-color-cyan: #22d3ee;
+  --df-color-border: rgba(168,85,247,.20);
+  --df-gradient-brand: linear-gradient(115deg,#a855f7 0%,#6366f1 52%,#22d3ee 100%);
+  --df-gradient-glow: linear-gradient(90deg,transparent,#c084fc,#818cf8,transparent);
+
+  /* Semantic theme tokens — components should consume these. */
+  --df-bg: #080711;
+  --df-surface: #151020;
+  --df-surface-raised: #1b1528;
+  --df-surface-overlay: #241c34;
+  --df-text: #f7f4ff;
+  --df-text-secondary: #c3b8d2;
+  --df-text-muted: #978da7;
+  --df-border: rgba(195,184,210,.16);
+  --df-border-strong: rgba(195,184,210,.28);
+  --df-primary: #7e22ce;
+  --df-primary-hover: #9333ea;
+  --df-primary-soft: rgba(168,85,247,.14);
+  --df-secondary: #6366f1;
+  --df-accent: #22d3ee;
+  --df-focus: #c084fc;
+  --df-success: #22c55e;
+  --df-warning: #f59e0b;
+  --df-danger: #ef4444;
+  --df-info: #38bdf8;
+  --df-on-primary: #ffffff;
+
+  /* Typography */
+  --df-font-sans: Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --df-font-mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  --df-text-xs: .75rem;
+  --df-text-sm: .875rem;
+  --df-text-base: 1rem;
+  --df-text-lg: 1.125rem;
+  --df-text-xl: 1.25rem;
+  --df-text-2xl: 1.5rem;
+  --df-text-3xl: 1.875rem;
+  --df-text-display: clamp(2.5rem, 1.5rem + 3vw, 3.5rem);
+  --df-leading-tight: 1.15;
+  --df-leading-normal: 1.5;
+  --df-leading-relaxed: 1.65;
+
+  /* Spacing: 4px base scale */
+  --df-space-1: .25rem;
+  --df-space-2: .5rem;
+  --df-space-3: .75rem;
+  --df-space-4: 1rem;
+  --df-space-5: 1.25rem;
+  --df-space-6: 1.5rem;
+  --df-space-8: 2rem;
+  --df-space-10: 2.5rem;
+  --df-space-12: 3rem;
+  --df-space-16: 4rem;
+  --df-space-20: 5rem;
+  --df-space-24: 6rem;
+
+  /* Shape and elevation */
+  --df-radius-sm: .5rem;
+  --df-radius-md: .75rem;
+  --df-radius-lg: 1rem;
+  --df-radius-xl: 1.25rem;
+  --df-radius-pill: 999px;
+  --df-shadow-sm: 0 2px 8px rgba(0,0,0,.12);
+  --df-shadow-md: 0 8px 24px rgba(0,0,0,.18);
+  --df-shadow-lg: 0 18px 48px rgba(0,0,0,.24);
+
+  /* Layout and motion */
+  --df-content-width: 76rem;
+  --df-reading-width: 46rem;
+  --df-motion-standard: cubic-bezier(.22,1,.36,1);
+  --df-duration-fast: 160ms;
+  --df-duration-normal: 220ms;
+  --df-duration-emphasis: 300ms;
+
+  /* Breakpoint references for documentation; CSS media queries use literal values. */
+  --df-breakpoint-mobile: 760px;
+  --df-breakpoint-tablet: 1024px;
+}
+
+/* Existing legacy token names remain available during gradual migration. */

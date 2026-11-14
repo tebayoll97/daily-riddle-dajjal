@@ -1,0 +1,20 @@
+/* Shared page and content layout primitives. Use these on new or explicitly migrated pages. */
+.ui-page{width:min(calc(100% - 2 * var(--df-page-gutter, 1.25rem)),var(--df-content-width));margin-inline:auto;display:flex;flex-direction:column;gap:clamp(1.25rem,2.4vw,2rem);min-width:0}
+.ui-page-header,.ui-frame-h1{min-width:0;padding:clamp(1.125rem,2.5vw,2rem);border:1px solid var(--df-border);border-radius:var(--df-radius-xl);background:radial-gradient(ellipse at 0 0,var(--df-primary-soft),transparent 62%),var(--df-surface);box-shadow:var(--df-shadow-sm)}
+.ui-frame-h2,.ui-frame-h3,.ui-frame-h4{min-width:0;padding:clamp(1rem,1.8vw,1.5rem);border:1px solid var(--df-border);border-radius:var(--df-radius-lg);background:var(--df-surface)}
+.ui-frame-h2{border-color:color-mix(in srgb,var(--df-secondary) 28%,var(--df-border))}
+.ui-frame-h3{border-color:color-mix(in srgb,var(--df-secondary) 20%,var(--df-border))}
+.ui-frame-h4{border-color:var(--df-border)}
+.ui-container{width:min(calc(100% - 2 * var(--df-page-gutter, 1.25rem)),var(--df-content-width));margin-inline:auto}
+.ui-reading-container{width:min(calc(100% - 2 * var(--df-page-gutter, 1.25rem)),var(--df-reading-width));margin-inline:auto}
+.ui-stack{display:flex;flex-direction:column;gap:var(--df-space-4);min-width:0}
+.ui-stack-sm{display:flex;flex-direction:column;gap:var(--df-space-2);min-width:0}
+.ui-stack-lg{display:flex;flex-direction:column;gap:var(--df-space-6);min-width:0}
+.ui-cluster{display:flex;flex-wrap:wrap;align-items:center;gap:var(--df-space-3);min-width:0}
+.ui-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--df-space-4);min-width:0}
+.ui-grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--df-space-4);min-width:0}
+.ui-grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--df-space-4);min-width:0}
+.ui-grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--df-space-4);min-width:0}
+.ui-grid>*{min-width:0}
+@media(max-width:767px){:root{--df-page-gutter:1rem}.ui-grid-3,.ui-grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}.ui-page{gap:var(--df-space-5)}}
+@media(max-width:479px){.ui-grid-2,.ui-grid-3,.ui-grid-4{grid-template-columns:minmax(0,1fr)}}

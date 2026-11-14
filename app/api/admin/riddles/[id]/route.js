@@ -16,6 +16,10 @@ export async function PATCH(request, { params }) {
     const { id } = await params;
     const body = await request.json();
 
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return Response.json({ error: "Invalid request body." }, { status: 400 });
+    }
+
     const {
       riddle_date,
       question_en,
@@ -28,19 +32,21 @@ export async function PATCH(request, { params }) {
       is_active,
     } = body;
 
-    if (!id) {
-      return Response.json(
-        { error: "Riddle ID is required." },
-        { status: 400 }
-      );
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidPattern.test(String(id || ""))) {
+      return Response.json({ error: "Invalid riddle ID." }, { status: 400 });
     }
 
     if (
-      !riddle_date ||
-      !question_en?.trim() ||
-      !question_id?.trim() ||
-      !hint_en?.trim() ||
-      !hint_id?.trim()
+      typeof riddle_date !== "string" ||
+      typeof question_en !== "string" ||
+      typeof question_id !== "string" ||
+      typeof hint_en !== "string" ||
+      typeof hint_id !== "string" ||
+      !question_en.trim() ||
+      !question_id.trim() ||
+      !hint_en.trim() ||
+      !hint_id.trim()
     ) {
       return Response.json(
         { error: "Please complete all required fields." },
@@ -50,7 +56,13 @@ export async function PATCH(request, { params }) {
 
     if (
       !Array.isArray(answers_en) ||
-      !Array.isArray(answers_id)
+      !Array.isArray(answers_id) ||
+      answers_en.length === 0 ||
+      answers_id.length === 0 ||
+      answers_en.length > 30 ||
+      answers_id.length > 30 ||
+      answers_en.some((answer) => typeof answer !== "string") ||
+      answers_id.some((answer) => typeof answer !== "string")
     ) {
       return Response.json(
         { error: "Invalid accepted answers." },
@@ -59,21 +71,25 @@ export async function PATCH(request, { params }) {
     }
 
     const cleanAnswersEn = answers_en
-      .filter((answer) => typeof answer === "string")
       .map((answer) => answer.trim().toLowerCase())
       .filter(Boolean);
 
     const cleanAnswersId = answers_id
-      .filter((answer) => typeof answer === "string")
       .map((answer) => answer.trim().toLowerCase())
       .filter(Boolean);
 
     if (
       cleanAnswersEn.length === 0 ||
-      cleanAnswersId.length === 0
+      cleanAnswersId.length === 0 ||
+      cleanAnswersEn.some((answer) => answer.length > 120) ||
+      cleanAnswersId.some((answer) => answer.length > 120) ||
+      question_en.length > 2000 ||
+      question_id.length > 2000 ||
+      hint_en.length > 500 ||
+      hint_id.length > 500
     ) {
       return Response.json(
-        { error: "At least one accepted answer is required for each language." },
+        { error: "Question, hint, or accepted answer is invalid or too long." },
         { status: 400 }
       );
     }
@@ -180,11 +196,9 @@ export async function DELETE(request, { params }) {
   try {
     const { id } = await params;
 
-    if (!id) {
-      return Response.json(
-        { error: "Riddle ID is required." },
-        { status: 400 }
-      );
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidPattern.test(String(id || ""))) {
+      return Response.json({ error: "Invalid riddle ID." }, { status: 400 });
     }
 
     const { data, error } = await supabaseAdmin

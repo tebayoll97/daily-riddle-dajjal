@@ -1,0 +1,144 @@
+/* Homepage Foundation Compliance
+   All homepage surfaces and content chrome consume Master Foundation semantic tokens.
+   Scoped to .df-home-app to protect legacy product routes during gradual migration. */
+
+.df-home-app{
+  --df-home-bg:var(--df-bg);
+  --df-home-surface:var(--df-surface);
+  --df-home-raised:var(--df-surface-raised);
+  --df-home-overlay:var(--df-surface-overlay);
+  --df-home-text:var(--df-text);
+  --df-home-secondary:var(--df-text-secondary);
+  --df-home-muted:var(--df-text-muted);
+  --df-home-border:var(--df-border);
+  --df-home-border-strong:var(--df-border-strong);
+  --df-home-action:var(--df-primary);
+  --df-home-action-hover:var(--df-primary-hover);
+  --df-home-action-soft:var(--df-primary-soft);
+  --df-home-accent:var(--df-accent);
+  --df-home-focus:var(--df-focus);
+  color:var(--df-home-text);
+  background:var(--df-home-bg);
+  font-family:var(--df-font-sans);
+}
+.df-home-app .df-app-layout{background:transparent}
+.df-home-app .df-sidebar{
+  color:var(--df-home-text);
+  background:var(--df-home-surface);
+  border-color:var(--df-home-border);
+}
+.df-home-app .df-brand,.df-home-app .df-mobile-brand{color:var(--df-home-text)}
+.df-home-app .df-brand small,.df-home-app .df-version,
+.df-home-app .df-side-heading,.df-home-app .df-mini-label,
+.df-home-app .df-content-topbar p,.df-home-app .df-side-card p,
+.df-home-app .df-section-heading p,.df-home-app .df-category-card p,
+.df-home-app .df-feature-strip p,.df-home-app .df-latest p,
+.df-home-app .df-home-footer>div span,.df-home-app .df-home-footer>small{
+  color:var(--df-home-secondary)
+}
+.df-home-app .df-brand-mark,.df-home-app .df-category-icon,.df-home-app .df-feature-symbol{
+  color:var(--df-home-action);
+  background:var(--df-home-action-soft);
+  border-color:var(--df-home-border);
+}
+.df-home-app .df-nav-link{color:var(--df-home-secondary)}
+.df-home-app .df-nav-link:hover,.df-home-app .df-nav-link[aria-current="page"]{
+  color:var(--df-home-text);
+  background:var(--df-home-action-soft);
+}
+.df-home-app .df-nav-icon,.df-home-app .df-category-number,
+.df-home-app .df-category-tag,.df-home-app .df-section-count{color:var(--df-home-muted)}
+.df-home-app .df-side-card,.df-home-app .df-category-card{
+  color:var(--df-home-text);
+  background:var(--df-home-raised);
+  border:1px solid var(--df-home-border);
+  box-shadow:var(--df-shadow-sm);
+}
+.df-home-app .df-side-highlight{
+  background:linear-gradient(145deg,var(--df-home-raised),var(--df-home-surface));
+  border-color:var(--df-home-border-strong);
+}
+.df-home-app .df-side-highlight strong{color:var(--df-home-text)}
+.df-home-app .df-side-footer a,.df-home-app .df-home-footer nav a{color:var(--df-home-secondary)}
+.df-home-app .df-side-footer a:hover,.df-home-app .df-home-footer nav a:hover{color:var(--df-home-action)}
+.df-home-app .df-content-topbar{
+  color:var(--df-home-text);
+  border-color:var(--df-home-border);
+}
+.df-home-app .df-breadcrumb,.df-home-app .df-breadcrumb span{color:var(--df-home-muted)}
+.df-home-app .df-topbar-link{color:var(--df-home-action)}
+.df-home-app .df-language-switch{color:var(--df-home-muted)}
+.df-home-app .df-language-switch button.active{color:var(--df-home-action)}
+.df-home-app .df-theme-toggle{
+  color:var(--df-home-secondary);
+  background:var(--df-home-raised);
+  border-color:var(--df-home-border);
+}
+.df-home-app .df-welcome{
+  color:var(--df-home-text);
+  background:linear-gradient(120deg,var(--df-home-raised),var(--df-home-surface));
+  border:1px solid var(--df-home-border);
+  box-shadow:var(--df-shadow-md);
+}
+.df-home-app .df-welcome h1,.df-home-app .df-section-heading h2,
+.df-home-app .df-category-card h3,.df-home-app .df-feature-strip h2,
+.df-home-app .df-latest h2{color:var(--df-home-text)}
+.df-home-app .df-welcome-copy>p{color:var(--df-home-secondary)}
+.df-home-app .df-eyebrow{color:var(--df-home-action)}
+.df-home-app .df-primary-button{
+  color:var(--df-on-primary);
+  background:var(--df-home-action);
+  border-color:var(--df-home-action);
+}
+.df-home-app .df-primary-button:hover{background:var(--df-home-action-hover)}
+.df-home-app .df-secondary-button{
+  color:var(--df-home-text);
+  background:var(--df-home-raised);
+  border:1px solid var(--df-home-border-strong);
+}
+.df-home-app .df-secondary-button:hover{border-color:var(--df-home-action);color:var(--df-home-action)}
+.df-home-app .df-category-card:hover{
+  border-color:var(--df-home-action);
+  box-shadow:var(--df-shadow-md);
+}
+.df-home-app .df-card-arrow{color:var(--df-home-action)}
+.df-home-app .df-feature-strip{
+  color:var(--df-home-text);
+  background:var(--df-home-raised);
+  border:1px solid var(--df-home-border);
+}
+.df-home-app .df-latest{border-color:var(--df-home-border)}
+.df-home-app .df-home-footer{
+  color:var(--df-home-text);
+  border-color:var(--df-home-border);
+  background:transparent;
+}
+.df-home-app .df-home-footer>div strong{color:var(--df-home-text)}
+.df-home-app .df-mobile-topbar{
+  color:var(--df-home-text);
+  background:color-mix(in srgb,var(--df-home-surface) 94%,transparent);
+  border-color:var(--df-home-border);
+}
+.df-home-app .df-menu-toggle,.df-home-app .df-mobile-about,
+.df-home-app .df-drawer-close{
+  color:var(--df-home-text);
+  background:var(--df-home-raised);
+  border:1px solid var(--df-home-border);
+}
+.df-home-app .df-mobile-drawer{
+  color:var(--df-home-text);
+  background:var(--df-home-surface);
+  border-color:var(--df-home-border);
+  box-shadow:var(--df-shadow-lg);
+}
+.df-home-app .df-mobile-drawer .df-nav-link{color:var(--df-home-secondary)}
+.df-home-app .df-mobile-drawer .df-nav-link:hover{color:var(--df-home-text);background:var(--df-home-action-soft)}
+.df-home-app :is(a,button):focus-visible{outline:3px solid var(--df-home-focus);outline-offset:3px}
+.df-home-app .df-skip-link{background:var(--df-home-action);color:var(--df-on-primary)}
+.df-home-app .df-drawer-layer{background:rgba(8,7,17,.64)}
+.df-home-app .df-orbit{border-color:var(--df-home-border-strong)}
+.df-home-app .df-orbit-core{background:var(--df-home-action-soft);color:var(--df-home-action);border:1px solid var(--df-home-border-strong)}
+.df-home-app .df-orbit-dot{background:var(--df-home-accent)}
+@media(prefers-reduced-motion:reduce){
+  .df-home-app *{scroll-behavior:auto;animation-duration:.01ms;transition-duration:.01ms}
+}

@@ -7,14 +7,15 @@ import Footer from "./Footer";
 export default function RouteChrome({ children }) {
   const pathname = usePathname() || "/";
   const isDFRoute = pathname === "/df" || pathname.startsWith("/df/");
+  const isNewHome = pathname === "/";
 
   return (
     <>
-      {!isDFRoute && <Header />}
+      {!isDFRoute && !isNewHome && <Header />}
       <div className="flex-1 w-full">
-        <div className="ui-route-frame">{children}</div>
+        <div className={isNewHome ? "" : "ui-route-frame"}>{children}</div>
       </div>
-      {!isDFRoute && <Footer />}
+      {!isDFRoute && !isNewHome && <Footer />}
     </>
   );
 }

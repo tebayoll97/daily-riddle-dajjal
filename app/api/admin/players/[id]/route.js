@@ -44,6 +44,31 @@ export async function PATCH(request, { params }) {
       return Response.json({ error: "This player has no linked login account." }, { status: 409 });
     }
 
+    // User Management must never lock an administrator out of the platform.
+    // Admin role changes require a separate, reviewed role-management workflow.
+    if (body.action === "ban") {
+      const { data: targetAdmin, error: adminLookupError } = await supabaseAdmin
+        .from("admin_users")
+        .select("user_id")
+        .eq("user_id", result.player.auth_user_id)
+        .maybeSingle();
+
+      if (adminLookupError) {
+        console.error("Admin target protection lookup error:", adminLookupError);
+        return Response.json(
+          { error: "Unable to verify account privileges. No changes were made." },
+          { status: 500 }
+        );
+      }
+
+      if (targetAdmin) {
+        return Response.json(
+          { error: "Administrator accounts cannot be banned from User Management. Review administrator privileges through the dedicated role-management process." },
+          { status: 409 }
+        );
+      }
+    }
+
     const { error } = await supabaseAdmin.auth.admin.updateUserById(
       result.player.auth_user_id,
       { ban_duration: body.action === "ban" ? "876000h" : "none" }
@@ -67,34 +92,13 @@ export async function DELETE(request, { params }) {
     const result = await getAuthorizedPlayer(request, id);
     if (result.response) return result.response;
 
-    // Scores use a restrictive FK, so remove score history first.
-    const { error: scoresError } = await supabaseAdmin
-      .from("scores")
-      .delete()
-      .eq("player_id", id);
-
-    if (scoresError) {
-      console.error("Admin player score cleanup error:", scoresError);
-      return Response.json({ error: "Unable to remove player score history." }, { status: 500 });
-    }
-
-    // Related game stats and events are configured to cascade on player deletion.
-    const { error: playerError } = await supabaseAdmin
-      .from("players")
-      .delete()
-      .eq("id", id);
-
-    if (playerError) {
-      console.error("Admin player delete error:", playerError);
-      return Response.json({ error: "Unable to delete player profile." }, { status: 500 });
-    }
-
+    // Deletion is intentionally blocked until it can be performed atomically.
+    // The previous multi-step flow could erase scores before a player delete failed.
     return Response.json({
-      success: true,
-      message: "Player profile and game history deleted. The linked Auth login account remains intact.",
-    });
+      error: "Player deletion is temporarily disabled to protect game history. Use ban/unban until an atomic deletion workflow is available.",
+    }, { status: 409 });
   } catch (error) {
-    console.error("Admin player delete error:", error);
+    console.error("Admin player delete guard error:", error);
     return Response.json({ error: "Internal server error." }, { status: 500 });
   }
 }

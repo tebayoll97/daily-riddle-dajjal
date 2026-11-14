@@ -14,8 +14,8 @@ const translations = {
   en: {
     loading: "Loading profile...",
     title: "PLAYER PROFILE",
-    nickname: "Nickname",
-    server: "Server",
+    nickname: "Display Name",
+    server: "State Darkwar",
     joined: "Joined",
     edit: "EDIT PROFILE",
     retry: "TRY AGAIN",
@@ -34,13 +34,17 @@ const translations = {
     security: "ACCOUNT SECURITY",
     securityTitle: "Account Security",
     securityDescription: "Protect your account and game progress.",
+    email: "Login email",
+    provider: "Sign-in method",
+    lastSignIn: "Last sign-in",
+    unknown: "Not available",
     dateLocale: "en-US",
   },
   id: {
     loading: "Memuat profil...",
     title: "PROFIL PEMAIN",
-    nickname: "Nama Pemain",
-    server: "Server",
+    nickname: "Nama Tampilan",
+    server: "State Darkwar",
     joined: "Bergabung",
     edit: "EDIT PROFIL",
     retry: "COBA LAGI",
@@ -59,6 +63,10 @@ const translations = {
     security: "KEAMANAN AKUN",
     securityTitle: "Keamanan Akun",
     securityDescription: "Lindungi akun dan progres permainanmu.",
+    email: "Email login",
+    provider: "Metode masuk",
+    lastSignIn: "Login terakhir",
+    unknown: "Tidak tersedia",
     dateLocale: "id-ID",
   },
 };
@@ -73,6 +81,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [avatarFailed, setAvatarFailed] = useState(false);
+  const [account, setAccount] = useState({ email: "", provider: "", lastSignInAt: null });
 
   useEffect(() => {
     let active = true;
@@ -89,9 +98,16 @@ export default function ProfilePage() {
         const session = sessionData.session;
 
         if (!session) {
-          router.replace("/login");
+          router.replace("/login?next=%2Fprofile");
           return;
         }
+
+        const provider = session.user.app_metadata?.provider || session.user.app_metadata?.providers?.[0] || "";
+        if (active) setAccount({
+          email: session.user.email || "",
+          provider: provider ? provider.toUpperCase() : t.unknown,
+          lastSignInAt: session.user.last_sign_in_at || null,
+        });
 
         const { data, error: playerError } = await supabase
           .from("players")
@@ -107,10 +123,16 @@ export default function ProfilePage() {
         }
 
         const profileResponse = await fetch(`/api/player/${data.id}`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
           cache: "no-store",
         });
 
         const profileResult = await profileResponse.json();
+
+        if (profileResponse.status === 401) {
+          router.replace("/login?next=%2Fprofile");
+          return;
+        }
 
         if (!profileResponse.ok) {
           throw new Error(profileResult.error || t.error);
@@ -198,6 +220,23 @@ export default function ProfilePage() {
         <h1 className="text-3xl font-black mt-3 ui-title">
           {t.title}
         </h1>
+
+        {player.profileIdentityEnabled && !player.username && (
+          <section className="mt-6 rounded-2xl border border-amber-400/30 bg-amber-500/10 p-5 ui-card">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl" aria-hidden="true">✦</span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-black tracking-widest text-amber-300">{language === "id" ? "TASK PROFIL" : "PROFILE TASK"}</p>
+                <h2 className="mt-1 text-lg font-bold text-white">{language === "id" ? "Lengkapi profil pemainmu" : "Complete your player profile"}</h2>
+                <p className="mt-1 text-sm text-gray-300">{language === "id" ? "Tambahkan nama tampilan dan username unik agar identitasmu siap digunakan di leaderboard dan fitur akun." : "Add a display name and unique username to use your identity across leaderboards and account features."}</p>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <span className="text-xs text-amber-200">{language === "id" ? "Username belum diatur" : "Username not set"}</span>
+                  <Link href="/profile/edit" className="shrink-0 rounded-lg bg-amber-400 px-4 py-2 text-xs font-black text-black">{language === "id" ? "LENGKAPI" : "COMPLETE"}</Link>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* PLAYER PROFILE */}
         <div className="mt-8 rounded-2xl border border-purple-500/30 bg-[#151020] p-6 ui-card">
@@ -354,6 +393,17 @@ export default function ProfilePage() {
             <p className="text-sm text-gray-400 mt-1">
               {t.securityDescription}
             </p>
+          </div>
+
+          <div className="rounded-2xl border border-purple-500/20 bg-[#151020] p-4 space-y-3 ui-card">
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-bold tracking-widest text-gray-500">{t.email}</span>
+              <span className="text-sm font-semibold text-white break-all">{account.email || "—"}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 border-t border-purple-500/10 pt-3">
+              <div className="min-w-0"><span className="text-[10px] font-bold tracking-widest text-gray-500">{t.provider}</span><p className="text-xs font-bold text-purple-200 mt-1">{account.provider || t.unknown}</p></div>
+              <div className="min-w-0"><span className="text-[10px] font-bold tracking-widest text-gray-500">{t.lastSignIn}</span><p className="text-xs font-bold text-purple-200 mt-1">{account.lastSignInAt ? new Date(account.lastSignInAt).toLocaleDateString(t.dateLocale) : t.unknown}</p></div>
+            </div>
           </div>
 
           <GoogleAccountLink />

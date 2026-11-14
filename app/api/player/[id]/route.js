@@ -3,6 +3,12 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 export async function GET(request, { params }) {
   try {
     const { id } = await params;
+    const authorization = request.headers.get("authorization") || "";
+    if (!authorization.startsWith("Bearer ")) return Response.json({ error: "Unauthorized" }, { status: 401 });
+    const token = authorization.slice(7);
+    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
+    const user = authData?.user;
+    if (authError || !user) return Response.json({ error: "Invalid session" }, { status: 401 });
     const uuidPattern =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -10,16 +16,34 @@ export async function GET(request, { params }) {
       return Response.json({ error: "Invalid player ID." }, { status: 400 });
     }
 
-    const { data: player, error: playerError } = await supabaseAdmin
+    const basePlayerQuery = () => supabaseAdmin
       .from("players")
-      .select("id, nickname, server_number, created_at, avatar_url")
+      .select("id, auth_user_id, nickname, server_number, created_at, avatar_url, avatar_path")
       .eq("id", id)
       .maybeSingle();
+
+    // Detect migration readiness from the actual schema. Before migration,
+    // fall back to the stable legacy columns without breaking profile access.
+    let { data: player, error: playerError } = await supabaseAdmin
+      .from("players")
+      .select("id, auth_user_id, nickname, server_number, created_at, avatar_url, avatar_path, username, gender, phone_number, birth_date")
+      .eq("id", id)
+      .maybeSingle();
+
+    let profileIdentityEnabled = true;
+    if (playerError && (playerError.code === "42703" || /column .* does not exist/i.test(playerError.message || ""))) {
+      profileIdentityEnabled = false;
+      const fallback = await basePlayerQuery();
+      player = fallback.data;
+      playerError = fallback.error;
+    }
 
     if (playerError) throw playerError;
     if (!player) {
       return Response.json({ error: "Player not found." }, { status: 404 });
     }
+
+    if (player.auth_user_id !== user.id) return Response.json({ error: "Forbidden" }, { status: 403 });
 
     const { data: gameStats, error: statsError } = await supabaseAdmin
       .from("player_game_stats")
@@ -74,9 +98,9 @@ export async function GET(request, { params }) {
     );
 
     return Response.json({
-      player: { ...player, avatar_url: player.avatar_url || null },
+      player: { id: player.id, nickname: player.nickname, profileIdentityEnabled, username: player.username || null, gender: player.gender || null, phone_number: player.phone_number || null, birth_date: player.birth_date || null, server_number: player.server_number, created_at: player.created_at, avatar_url: player.avatar_url || null, avatar_path: player.avatar_path || null },
       stats: { summary, games: stats, activity },
-    });
+    }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     console.error("Player profile API error:", error);
     return Response.json(
