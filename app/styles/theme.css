@@ -220,3 +220,60 @@
   --df-shadow-md: 0 8px 24px rgba(40,32,75,.09);
   --df-shadow-lg: 0 18px 48px rgba(40,32,75,.13);
 }
+
+
+/* Design-system preview: neutralize legacy dark-only surfaces in Light Mode.
+   Keep this scoped to the new foundation page so legacy routes remain unchanged. */
+:root[data-theme="light"] .ui-page {
+  color: var(--df-text);
+}
+:root[data-theme="light"] .ui-page > section {
+  border: 1px solid var(--df-border);
+  border-radius: var(--df-radius-xl);
+  padding: clamp(1rem, 2vw, 1.5rem);
+  background: linear-gradient(145deg, #fff, #f2f1f9) !important;
+  box-shadow: var(--df-shadow-sm);
+}
+:root[data-theme="light"] .ui-page .ui-card,
+:root[data-theme="light"] .ui-page .ui-card .ui-card,
+:root[data-theme="light"] .ui-page .ui-surface,
+:root[data-theme="light"] .ui-page .ui-panel {
+  color: var(--df-text) !important;
+  border-color: var(--df-border) !important;
+  background: var(--df-surface) !important;
+  box-shadow: var(--df-shadow-sm) !important;
+}
+:root[data-theme="light"] .ui-page .ui-heading-h1,
+:root[data-theme="light"] .ui-page .ui-heading-h2,
+:root[data-theme="light"] .ui-page .ui-heading-h3,
+:root[data-theme="light"] .ui-page .ui-heading-h4,
+:root[data-theme="light"] .ui-page h1,
+:root[data-theme="light"] .ui-page h2,
+:root[data-theme="light"] .ui-page h3,
+:root[data-theme="light"] .ui-page h4 {
+  color: var(--df-text) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+:root[data-theme="light"] .ui-page .ui-heading-h1 {
+  padding: 0 !important;
+  border: 0 !important;
+}
+:root[data-theme="light"] .ui-page .ui-heading-h2,
+:root[data-theme="light"] .ui-page .ui-heading-h3,
+:root[data-theme="light"] .ui-page .ui-heading-h4 {
+  border-top: 0 !important;
+  border-right: 0 !important;
+  border-bottom: 0 !important;
+  border-left-color: var(--ui-heading-line) !important;
+}
+:root[data-theme="light"] .ui-page .ui-prose,
+:root[data-theme="light"] .ui-page .ui-subtitle,
+:root[data-theme="light"] .ui-page .ui-caption,
+:root[data-theme="light"] .ui-page .ui-field-help,
+:root[data-theme="light"] .ui-page .ui-dialog-body {
+  color: var(--df-text-secondary) !important;
+}
+:root[data-theme="light"] .ui-page .ui-eyebrow {
+  color: #6848a7 !important;
+}
