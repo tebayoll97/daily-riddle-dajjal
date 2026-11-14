@@ -425,3 +425,13 @@ When requested, implement the account profile experience with display name, uniq
 - Current staged work: `feature/tools-navigation`, containing the Tools / Alat sidebar entry, bilingual Wedding Invitation Builder link to `/df/wedding`, and the work/navigation documentation. It is not merged into `main` and has not been preview-tested.
 - While Vercel build quota is exhausted, do not create previews, poll deployment/build status, or claim build/QA success. Continue safe source and documentation work. Resume build and responsive/accessibility QA only when quota is expected to recover.
 - A feature branch may be merged only through the approved release workflow after source review and required checks. A merge is not itself permission to promote or alter production.
+
+
+## 34. Admin User Management lookup concurrency — 2026-11-14
+
+- The User Management player directory previously launched up to 50 Supabase Auth Admin `getUserById` calls simultaneously for one 50-player page.
+- `app/api/admin/players/route.js` now uses a bounded worker helper with a maximum of 8 concurrent Auth lookups per request.
+- Player result ordering, pagination, endpoint response fields, administrator verification, and existing Auth lookup fallback behavior are preserved.
+- Source commit: `63313ea508ad3210668277d78da063c3a14b6f4f`.
+- GitHub source re-fetch checks confirm the concurrency cap and response contract. This is not a substitute for lint/build, performance measurement, or runtime QA; those remain pending until Vercel quota recovery.
+- No merge to `main`, production deployment, live database change, or player data mutation occurred.
