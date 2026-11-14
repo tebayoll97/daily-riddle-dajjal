@@ -1,0 +1,7 @@
+/* Reusable component primitives. Keep page-specific styling in styles/pages. */
+.ui-card{min-width:0;border:1px solid var(--df-color-border);border-radius:var(--df-radius-lg);background:linear-gradient(145deg,rgba(22,17,34,.96),rgba(13,12,23,.96));box-shadow:0 7px 22px rgba(0,0,0,.12),inset 0 1px rgba(255,255,255,.025)}
+.ui-card>*{min-width:0}
+.ui-button{min-height:42px;display:inline-flex;align-items:center;justify-content:center;gap:.75rem;padding:.65rem 1rem;border:1px solid transparent;border-radius:var(--df-radius-sm);font-weight:800;text-decoration:none;transition:transform var(--df-duration-fast) var(--df-motion-standard),background var(--df-duration-fast),border-color var(--df-duration-fast)}
+.ui-button:active{transform:scale(.985)}
+.ui-button-primary{background:var(--df-gradient-brand);color:#fff}
+.ui-button-secondary{border-color:var(--df-color-border);background:rgba(255,255,255,.025);color:var(--df-color-text)}
