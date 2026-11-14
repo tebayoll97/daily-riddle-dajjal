@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { useLanguage } from "./LanguageProvider";
 import { usePathname } from "next/navigation";
-import { stripLocalePrefix } from "@/lib/localePath";
+import { stripLocalePrefix, withLocalePrefix } from "@/lib/localePath";
 
 const translations = {
   en: {
@@ -34,10 +34,10 @@ export default function Footer() {
   const t = translations[language] || translations.en;
 
   const navLinks = [
-    { label: t.home, href: "/" },
-    { label: t.play, href: "/games" },
-    { label: t.ranking, href: "/leaderboard" },
-    { label: t.profile, href: "/profile" },
+    { label: t.home, href: withLocalePrefix("/", language) },
+    { label: t.play, href: withLocalePrefix("/games", language) },
+    { label: t.ranking, href: withLocalePrefix("/leaderboard", language) },
+    { label: t.profile, href: withLocalePrefix("/profile", language) },
   ];
 
   return (
@@ -66,7 +66,7 @@ export default function Footer() {
           {/* Character Links */}
           <div className="flex items-center gap-3 px-5 py-2.5 rounded-full border border-purple-500/20 bg-purple-500/5">
             <Link
-              href="/characters/dajjal"
+              href={withLocalePrefix("/characters/dajjal", language)}
               className="text-purple-300 hover:text-white transition font-bold text-sm"
             >
               †Ðαjjαし•†
@@ -75,7 +75,7 @@ export default function Footer() {
             <span className="text-purple-500/50 text-xs">×</span>
 
             <Link
-              href="/characters/veylora"
+              href={withLocalePrefix("/characters/veylora", language)}
               className="text-purple-300 hover:text-white transition font-bold text-sm"
             >
               †Veyしorα•†
