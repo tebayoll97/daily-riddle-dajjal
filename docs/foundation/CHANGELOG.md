@@ -49,3 +49,13 @@
 - Hardened the player profile API: it now requires a valid bearer session, verifies that the requested player belongs to that authenticated user, omits the internal auth user ID from the response, and disables response caching.
 - Updated the profile page to send its session token and the edit page to return unauthenticated visitors to login.
 - Status: committed to the feature branch; build, interactive auth-flow, responsive, and visual QA remain pending. No production changes.
+
+
+## Command Master v2.0 — incremental releases and command registry
+
+- Established `/command-master` as the development command and added dedicated `/command-master-migration`, `/command-master-audit`, and `/command-master-status` operating modes.
+- Defined a gated release-readiness workflow covering branch scope/divergence, build and tests, exact-commit preview QA, database compatibility, recovery planning, explicit release approval, and post-release verification.
+- Clarified that Git merge, Supabase database migration, and Vercel production promotion are separate operations.
+- Adopted incremental, independently usable releases with versioning, release notes, migration-state tracking, and safe synchronization of the development branch after each release.
+- Production and destructive operations remain blocked until explicit, release-specific owner approval.
+- Status: documentation committed to `redesign/dajjalfamily-home` only. No merge to `main`, production deployment, or Supabase database change.
