@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { stripLocalePrefix } from "@/lib/localePath";
 
 import { supabaseAdminClient } from "@/lib/supabaseAdminClient";
 import { useLanguage } from "./LanguageProvider";
@@ -36,7 +37,7 @@ const translations = {
 };
 
 export default function Header() {
-  const pathname = usePathname();
+  const pathname = stripLocalePrefix(usePathname() || "/");
   const { language, setLanguage } = useLanguage();
 
   const [isAdmin, setIsAdmin] = useState(false);
