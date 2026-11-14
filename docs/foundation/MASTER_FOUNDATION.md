@@ -2,8 +2,8 @@
 # MASTER WEBSITE FOUNDATION
 
 **Document ID:** DF-MF-001  
-**Version:** 1.0  
-**Status:** Approved  
+**Version:** 1.1  
+**Status:** Approved — v1.1  
 **Project:** Dajjal Family  
 **Primary Domain:** https://dajjalfamily.com  
 **Tagline:** One Family. Many Possibilities.
@@ -615,3 +615,58 @@ Dajjal Family harus berkembang sebagai satu ekosistem digital dengan identitas, 
 Setiap keputusan desain, teknis, konten, dan operasional harus mendukung tujuan jangka panjang tersebut.
 
 **One Family. Many Possibilities.**
+
+
+# 21. ACCOUNT-BASED PLATFORM WITH PROGRESSIVE LOGIN
+
+**Status: Officially approved — November 14, 2026**
+
+Dajjal Family adopts an **Account-Based Platform with Progressive Login** as the official account and access model. A central account is the durable identity across the ecosystem, but authentication must be requested only when a feature genuinely needs an account.
+
+## 21.1 Core principles
+- Public discovery comes first: visitors can browse public pages, the game catalogue, public invitations, and other explicitly public content without signing in.
+- Progressive authentication: request sign-in at the moment a visitor attempts an account-dependent action, and explain the concrete benefit.
+- One central identity: Supabase Auth identifies the person across Dajjal Family products. Product permissions and entitlements remain separately scoped.
+- Guest continuity: where anonymous/guest play is supported, preserve the same Auth identity and associated progress when the user explicitly links a provider. Never silently merge two identities.
+- Data minimization: collect only information required for a feature, explain its purpose, and provide a practical account/data deletion path subject to legal and integrity requirements.
+- Secure by default: server-side authorization and ownership checks are mandatory. Client-side UI hiding is never authorization.
+
+## 21.2 Access levels
+
+**Public — no login**
+- Homepage, public category and product pages, public game catalogue, public articles/content, public wedding invitations, and public previews.
+- Public/demo/mini games that do not persist personal progress, submit authenticated competition results, or modify an account wallet.
+- Public information must not expose private account or operational data.
+
+**Account — login required at the point of use**
+- Persistent game progress and cross-device synchronization.
+- Player profile, personal statistics, achievements, and account history.
+- Leaderboards, ranked competition, and authenticated result submission.
+- Wallets, coins, rewards, purchases, entitlements, and other account-bound benefits.
+- Social features or saved content that require a stable owner identity.
+
+**Administrative — explicit server-verified permission**
+- User/account management, moderation, content/game management, analytics with restricted data, financial/reward operations, and audit records.
+- Admin permission is independent of ordinary login and must be checked on every privileged server operation.
+
+## 21.3 Identity and data boundaries
+- Supabase Auth user ID is the canonical authentication identity.
+- The central `players.id` is the universal Player ID for gaming features; resolve it from the verified Auth identity on the server.
+- Product/game data remains scoped to its owner and product/game identifier.
+- Authentication, authorization, subscription/entitlement, and product-specific roles are separate concepts.
+- Never trust client-supplied user IDs, player IDs, roles, scores, wallet balances, or entitlements.
+- Preserve existing accounts, Guest identities, Player IDs, game progress, invitation ownership, and wallet balances during migration.
+
+## 21.4 Privacy and lifecycle
+- Ask for only the data needed for the selected feature.
+- State why required data is collected and how it is used.
+- Do not expose email, Auth IDs, tokens, private profile fields, or cross-product data through public APIs.
+- Provide account deletion and data export/retention handling appropriate to the product and applicable obligations.
+- Keep security, abuse-prevention, and financial-integrity records only as justified and documented.
+
+## 21.5 Rollout and release gates
+Implement incrementally: (1) identity and account policy contract, (2) feature access classification and shared authorization, (3) game and product integration, (4) privacy, analytics and lifecycle controls, and (5) security, regression and usability QA.
+- Do not impose a global login wall.
+- Do not force Google as the only provider unless a specific feature has a documented, approved provider requirement.
+- Do not introduce destructive schema changes or alter production data as part of policy adoption.
+- Database migrations, production releases, and irreversible account merges require separate review and explicit approval.
