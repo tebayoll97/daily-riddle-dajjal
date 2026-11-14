@@ -1,40 +1,38 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
+
+import { createContext, useContext, useState } from "react";
 
 const LanguageContext = createContext(null);
-const STORAGE_KEY = "daily-riddle-language";
+const LOCALE_COOKIE = "df-locale";
 
-function detectBrowserLanguage(fallback = "en") {
-  if (typeof navigator === "undefined") return fallback;
-  const preferences = [...(navigator.languages || []), navigator.language].filter(Boolean);
-  const detected = preferences.find((value) => value.toLowerCase().startsWith("id") || value.toLowerCase().startsWith("en"));
-  if (!detected) return fallback;
-  return detected.toLowerCase().startsWith("id") ? "id" : "en";
-}
+export function LanguageProvider({ children, initialLanguage = "id" }) {
+  const language = initialLanguage === "en" ? "en" : "id";
+  const [currentLanguage, setCurrentLanguage] = useState(language);
 
-export function LanguageProvider({ children, initialLanguage = "en" }) {
-  const fallback = initialLanguage === "id" ? "id" : "en";
-  const [language, setLanguageState] = useState(fallback);
-  const [ready, setReady] = useState(false);
+  function setLanguage(nextLanguage) {
+    if (nextLanguage !== "en" && nextLanguage !== "id") return;
+    if (nextLanguage === currentLanguage) return;
 
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    const next = saved === "en" || saved === "id" ? saved : detectBrowserLanguage(fallback);
-    setLanguageState(next);
-    setReady(true);
-  }, [fallback]);
+    document.cookie = `${LOCALE_COOKIE}=${nextLanguage}; Path=/; Max-Age=31536000; SameSite=Lax`;
+    window.localStorage.setItem("daily-riddle-language", nextLanguage);
 
-  useEffect(() => {
-    document.documentElement.lang = language;
-  }, [language]);
+    const currentPath = window.location.pathname || "/";
+    const segments = currentPath.split("/");
+    const currentLocale = segments[1] === "id" || segments[1] === "en" ? segments[1] : null;
+    const pathWithoutLocale = currentLocale
+      ? "/" + segments.slice(2).join("/")
+      : currentPath;
+    const destinationPath = pathWithoutLocale === "/" ? `/${nextLanguage}` : `/${nextLanguage}${pathWithoutLocale}`;
 
-  const setLanguage = (next) => {
-    if (next !== "en" && next !== "id") return;
-    setLanguageState(next);
-    localStorage.setItem(STORAGE_KEY, next);
-  };
+    setCurrentLanguage(nextLanguage);
+    window.location.assign(`${destinationPath}${window.location.search}${window.location.hash}`);
+  }
 
-  return <LanguageContext.Provider value={{ language, setLanguage, ready }}>{children}</LanguageContext.Provider>;
+  return (
+    <LanguageContext.Provider value={{ language: currentLanguage, setLanguage, ready: true }}>
+      {children}
+    </LanguageContext.Provider>
+  );
 }
 
 export function useLanguage() {
