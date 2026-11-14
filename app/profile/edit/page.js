@@ -181,7 +181,7 @@ export default function EditProfilePage() {
       return;
     }
 
-    if (cleanPhone && !/^\\+[1-9][0-9]{7,14}$/.test(cleanPhone)) {
+    if (cleanPhone && !/^\+[1-9][0-9]{7,14}$/.test(cleanPhone)) {
       setError(isID ? "Nomor HP gunakan format internasional, contoh +628123456789." : "Use international phone format, e.g. +628123456789.");
       return;
     }
