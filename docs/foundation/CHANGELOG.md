@@ -88,3 +88,12 @@
 - Established Supabase Auth as canonical identity and `players.id` as the universal gaming Player ID, with product/game data boundaries and preservation of existing Guest/account progress.
 - Added privacy, data-minimization, account-lifecycle, and phased rollout requirements.
 - Status: policy documentation committed to the development branch only. Application migration, database changes, production deployment, and release approval remain separate steps.
+
+
+## Progressive Login — Phase 2 access inventory
+
+- Audited current public, account-required, and admin-only routes and documented their observed behavior in `docs/MASTER_ACCOUNT_INTEGRATION.md`.
+- Confirmed public Game Library browsing, public mini-game play, public wedding invitations, protected profile, and separate admin authorization.
+- Identified the Daily Riddle guest-flow gap and recorded the safe prerequisite: provision/resolve guest player context and verify non-persistent attempts before relaxing the login prompt.
+- Retained MAMAH NGAMUK account requirement for persistent wallet, best distance, and leaderboard.
+- Status: access classification complete on the development branch; application-level guest-flow migration remains pending. No database or production changes.
