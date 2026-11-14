@@ -196,11 +196,9 @@ export async function DELETE(request, { params }) {
   try {
     const { id } = await params;
 
-    if (!id) {
-      return Response.json(
-        { error: "Riddle ID is required." },
-        { status: 400 }
-      );
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidPattern.test(String(id || ""))) {
+      return Response.json({ error: "Invalid riddle ID." }, { status: 400 });
     }
 
     const { data, error } = await supabaseAdmin
