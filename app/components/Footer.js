@@ -30,7 +30,7 @@ const translations = {
 export default function Footer() {
   const pathname = stripLocalePrefix(usePathname() || "/");
   const { language } = useLanguage();
-  if (pathname?.startsWith("/mini-game/") || pathname?.startsWith("/games/mamah-ngamuk")) return null;
+  if (pathname?.startsWith("/games/run-jump") || pathname?.startsWith("/games/mamah-ngamuk")) return null;
   const t = translations[language] || translations.en;
 
   const navLinks = [
