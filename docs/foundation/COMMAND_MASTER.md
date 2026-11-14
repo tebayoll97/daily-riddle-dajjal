@@ -302,3 +302,15 @@ Report the verified current branch and HEAD, working changes if available, lates
 - No merge to `main`, production deployment, or production database change without the release-specific approval required by the parent charter.
 
 **Default behavior:** When invoked without a narrow target, perform a prioritized audit of Profile, Authentication, User Management, Admin Dashboard, and their APIs; then implement the highest-value safe fixes on the development branch and report blockers.
+
+## Account profile expansion and multi-identifier login
+
+When requested, implement the account profile experience with display name, unique alphanumeric username, optional gender, verified phone number, birth date, and optional Darkwar state number. Keep existing `players.id` and all linked game data stable.
+
+- Add Profile to primary navigation before Home.
+- Show a profile-completion task after Google sign-in until required public identity fields are complete.
+- Login supports email/password, username/password, and verified phone/password only through a trusted server-side alias resolution flow; retain direct Google OAuth.
+- Store passwords only in Supabase Auth. Never store passwords or confirmation values in application tables.
+- Keep phone, birth date, gender, email, and account metadata private. Public profile/leaderboard payloads use an explicit allowlist.
+- Do not reveal account email from username/phone lookup, do not silently merge identities, and rate-limit credential attempts.
+- Prepare and review additive migrations before applying them. No production migration, Auth configuration change, or release without the required explicit approval and QA.
