@@ -14,8 +14,8 @@ const translations = {
   en: {
     loading: "Loading profile...",
     title: "PLAYER PROFILE",
-    nickname: "Nickname",
-    server: "Server",
+    nickname: "Display Name",
+    server: "State Darkwar",
     joined: "Joined",
     edit: "EDIT PROFILE",
     retry: "TRY AGAIN",
@@ -43,8 +43,8 @@ const translations = {
   id: {
     loading: "Memuat profil...",
     title: "PROFIL PEMAIN",
-    nickname: "Nama Pemain",
-    server: "Server",
+    nickname: "Nama Tampilan",
+    server: "State Darkwar",
     joined: "Bergabung",
     edit: "EDIT PROFIL",
     retry: "COBA LAGI",
@@ -220,6 +220,23 @@ export default function ProfilePage() {
         <h1 className="text-3xl font-black mt-3 ui-title">
           {t.title}
         </h1>
+
+        {!player.username && (
+          <section className="mt-6 rounded-2xl border border-amber-400/30 bg-amber-500/10 p-5 ui-card">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl" aria-hidden="true">✦</span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-black tracking-widest text-amber-300">{language === "id" ? "TASK PROFIL" : "PROFILE TASK"}</p>
+                <h2 className="mt-1 text-lg font-bold text-white">{language === "id" ? "Lengkapi profil pemainmu" : "Complete your player profile"}</h2>
+                <p className="mt-1 text-sm text-gray-300">{language === "id" ? "Tambahkan nama tampilan dan username unik agar identitasmu siap digunakan di leaderboard dan fitur akun." : "Add a display name and unique username to use your identity across leaderboards and account features."}</p>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <span className="text-xs text-amber-200">{language === "id" ? "Username belum diatur" : "Username not set"}</span>
+                  <Link href="/profile/edit" className="shrink-0 rounded-lg bg-amber-400 px-4 py-2 text-xs font-black text-black">{language === "id" ? "LENGKAPI" : "COMPLETE"}</Link>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* PLAYER PROFILE */}
         <div className="mt-8 rounded-2xl border border-purple-500/30 bg-[#151020] p-6 ui-card">
