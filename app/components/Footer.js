@@ -52,7 +52,7 @@ export default function Footer() {
 
           {/* Logo */}
           <Link
-            href="/"
+            href={withLocalePrefix("/", language)}
             className="text-xl font-black tracking-[0.12em] text-white hover:opacity-80 transition"
           >
             DAJJAL <span className="text-purple-400">& VEYLORA</span>
