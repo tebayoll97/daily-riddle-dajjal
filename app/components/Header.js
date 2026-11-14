@@ -184,6 +184,11 @@ export default function Header() {
 
   const navLinks = [
     {
+      name: t.profile,
+      href: "/profile",
+      icon: "♙",
+    },
+    {
       name: t.home,
       href: "/",
       icon: "⌂",
@@ -321,7 +326,7 @@ export default function Header() {
         {/* MAIN NAVIGATION */}
         <nav
           className={`grid border-t border-purple-500/10 ${
-            isAdmin ? "grid-cols-4" : "grid-cols-3"
+            isAdmin ? "grid-cols-5" : "grid-cols-4"
           }`}
         >
           {navLinks.map((link) => {
