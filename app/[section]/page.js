@@ -22,8 +22,8 @@ export async function generateMetadata({ params }) {
   return {
     title: titles[section],
     description: descriptions[section],
-    robots: { index: false, follow: true },
-    alternates: { canonical: `https://dajjalfamily.com/${section}/` },
+    robots: { index: true, follow: true },
+    alternates: { canonical: `https://dajjalfamily.com/${section}` },
   };
 }
 
