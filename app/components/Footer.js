@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { useLanguage } from "./LanguageProvider";
 import { usePathname } from "next/navigation";
+import { stripLocalePrefix } from "@/lib/localePath";
 
 const translations = {
   en: {
@@ -27,7 +28,7 @@ const translations = {
 };
 
 export default function Footer() {
-  const pathname = usePathname();
+  const pathname = stripLocalePrefix(usePathname() || "/");
   const { language } = useLanguage();
   if (pathname?.startsWith("/mini-game/") || pathname?.startsWith("/games/mamah-ngamuk")) return null;
   const t = translations[language] || translations.en;
