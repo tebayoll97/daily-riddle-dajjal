@@ -107,6 +107,10 @@ export async function GET(request) {
       playerList.map(async (player) => {
         let accountType = "UNKNOWN";
         let isBanned = false;
+        let authEmail = null;
+        let authCreatedAt = null;
+        let lastSignInAt = null;
+        let authUserExists = false;
 
         if (player.auth_user_id) {
           const { data, error } =
@@ -116,6 +120,10 @@ export async function GET(request) {
 
           if (!error && data?.user) {
             const user = data.user;
+            authUserExists = true;
+            authEmail = user.email || null;
+            authCreatedAt = user.created_at || null;
+            lastSignInAt = user.last_sign_in_at || null;
             isBanned = Boolean(user.banned_until && new Date(user.banned_until).getTime() > Date.now());
             const providers =
               user.app_metadata?.providers || [];
@@ -143,12 +151,15 @@ export async function GET(request) {
 
         return {
           id: player.id,
-          authUserId: player.auth_user_id,
           nickname: player.nickname,
           serverNumber: player.server_number,
           avatarUrl: player.avatar_url,
           createdAt: player.created_at,
           accountType,
+          authUserExists,
+          authEmail,
+          authCreatedAt,
+          lastSignInAt,
           isBanned,
           totalPoints: stats.totalPoints,
           gamesPlayed: stats.gamesPlayed,
