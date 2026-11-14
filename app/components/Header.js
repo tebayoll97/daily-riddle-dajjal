@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { stripLocalePrefix } from "@/lib/localePath";
+import { stripLocalePrefix, withLocalePrefix } from "@/lib/localePath";
 
 import { supabaseAdminClient } from "@/lib/supabaseAdminClient";
 import { useLanguage } from "./LanguageProvider";
@@ -186,22 +186,26 @@ export default function Header() {
   const navLinks = [
     {
       name: t.profile,
-      href: "/profile",
+      route: "/profile",
+      href: withLocalePrefix("/profile", language),
       icon: "♙",
     },
     {
       name: t.home,
-      href: "/",
+      route: "/",
+      href: withLocalePrefix("/", language),
       icon: "⌂",
     },
     {
       name: t.play,
-      href: "/games",
+      route: "/games",
+      href: withLocalePrefix("/games", language),
       icon: "✦",
     },
     {
       name: t.ranking,
-      href: "/leaderboard",
+      route: "/leaderboard",
+      href: withLocalePrefix("/leaderboard", language),
       icon: "♛",
     },
   ];
@@ -209,18 +213,15 @@ export default function Header() {
   if (isAdmin) {
     navLinks.push({
       name: t.admin,
-      href: "/admin",
+      route: "/admin",
+      href: withLocalePrefix("/admin", language),
       icon: "⚙",
     });
   }
 
-  function isActive(href) {
-    if (href === "/") return pathname === "/";
-
-    return (
-      pathname === href ||
-      pathname.startsWith(`${href}/`)
-    );
+  function isActive(route) {
+    if (route === "/") return pathname === "/";
+    return pathname === route || pathname.startsWith(`${route}/`);
   }
 
   const iconButton =
@@ -280,7 +281,7 @@ export default function Header() {
 
             {/* SETTINGS */}
             <Link
-              href="/settings"
+              href={withLocalePrefix("/settings", language)}
               aria-label={t.settings}
               title={t.settings}
               className={`${iconButton} ${
@@ -331,7 +332,7 @@ export default function Header() {
           }`}
         >
           {navLinks.map((link) => {
-            const active = isActive(link.href);
+            const active = isActive(link.route);
 
             return (
               <Link
