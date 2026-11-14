@@ -228,6 +228,8 @@ export default function EditProfilePage() {
     setSaving(true);
 
     let uploadedPath = null;
+    let profileSaved = false;
+    let savedProfile = null;
 
     try {
       const { data: sessionData, error: sessionError } =
@@ -309,10 +311,17 @@ export default function EditProfilePage() {
         );
       }
 
-      if (newPassword) {
-        const { error: passwordError } = await supabase.auth.updateUser({ password: newPassword });
-        if (passwordError) throw passwordError;
-      }
+      // The profile row now references the new avatar (if one was uploaded).
+      // From this point onward, never roll back that object as a side effect of
+      // a later password-update failure.
+      profileSaved = true;
+      savedProfile = {
+        avatarUrl: newAvatarUrl,
+        avatarPath: newAvatarPath,
+        nickname: cleanNickname,
+        username: cleanUsername.toLowerCase(),
+        serverNumber: serverNumber.trim() ? String(cleanServer) : "",
+      };
 
       if (
         avatarPath &&
@@ -321,6 +330,11 @@ export default function EditProfilePage() {
         await supabase.storage
           .from("avatars")
           .remove([avatarPath]);
+      }
+
+      if (newPassword) {
+        const { error: passwordError } = await supabase.auth.updateUser({ password: newPassword });
+        if (passwordError) throw passwordError;
       }
 
       setAvatarUrl(newAvatarUrl || "");
@@ -339,19 +353,41 @@ export default function EditProfilePage() {
         router.replace("/profile");
       }, 1800);
     } catch (err) {
-      if (uploadedPath) {
-        await supabase.storage
-          .from("avatars")
-          .remove([uploadedPath]);
+      if (!profileSaved && uploadedPath) {
+        // The database did not adopt this upload, so it is safe to clean up.
+        try {
+          await supabase.storage
+            .from("avatars")
+            .remove([uploadedPath]);
+        } catch (cleanupError) {
+          console.error("Unable to clean up unused avatar upload:", cleanupError);
+        }
       }
 
-      setError(
-        err.code === "23505"
-          ? isID
-            ? "Nama, username, atau nomor HP sudah digunakan. Periksa kembali."
-            : "Display name, username, or phone number is already in use."
-          : err.message
-      );
+      if (profileSaved && savedProfile) {
+        // Keep the UI aligned with the already-committed profile. Password
+        // failure is a separate partial-success outcome, not a profile rollback.
+        setAvatarUrl(savedProfile.avatarUrl || "");
+        setAvatarPath(savedProfile.avatarPath || "");
+        setNickname(savedProfile.nickname);
+        setUsername(savedProfile.username);
+        setServerNumber(savedProfile.serverNumber);
+        clearPreview();
+        setRemoveAvatar(false);
+        setError(
+          isID
+            ? "Profil berhasil disimpan, tetapi kata sandi gagal diperbarui. Periksa kata sandi dan coba lagi."
+            : "Profile was saved, but the password could not be updated. Check the password and try again."
+        );
+      } else {
+        setError(
+          err.code === "23505"
+            ? isID
+              ? "Nama, username, atau nomor HP sudah digunakan. Periksa kembali."
+              : "Display name, username, or phone number is already in use."
+            : err.message
+        );
+      }
     } finally {
       setSaving(false);
     }
