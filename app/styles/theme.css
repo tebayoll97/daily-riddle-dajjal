@@ -277,3 +277,15 @@
 :root[data-theme="light"] .ui-page .ui-eyebrow {
   color: #6848a7 !important;
 }
+
+/* Homepage semantic surface mapping. Scoped so legacy routes are unaffected. */
+:root[data-theme="light"] .df-home-app{
+  --df-home-bg:var(--df-bg);
+  --df-home-surface:var(--df-surface);
+  --df-home-raised:var(--df-surface-raised);
+  --df-home-line:var(--df-border);
+  --df-home-text:var(--df-text);
+  --df-home-muted:var(--df-text-secondary);
+}
+:root[data-theme="light"] .df-home-app .df-skip-link{background:var(--df-primary);color:var(--df-on-primary)}
+:root[data-theme="light"] .df-home-app :is(a,button):focus-visible{outline-color:var(--df-focus)}
