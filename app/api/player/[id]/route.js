@@ -3,6 +3,12 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 export async function GET(request, { params }) {
   try {
     const { id } = await params;
+    const authorization = request.headers.get("authorization") || "";
+    if (!authorization.startsWith("Bearer ")) return Response.json({ error: "Unauthorized" }, { status: 401 });
+    const token = authorization.slice(7);
+    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
+    const user = authData?.user;
+    if (authError || !user) return Response.json({ error: "Invalid session" }, { status: 401 });
     const uuidPattern =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -12,7 +18,7 @@ export async function GET(request, { params }) {
 
     const { data: player, error: playerError } = await supabaseAdmin
       .from("players")
-      .select("id, nickname, server_number, created_at, avatar_url")
+      .select("id, auth_user_id, nickname, server_number, created_at, avatar_url")
       .eq("id", id)
       .maybeSingle();
 
@@ -20,6 +26,8 @@ export async function GET(request, { params }) {
     if (!player) {
       return Response.json({ error: "Player not found." }, { status: 404 });
     }
+
+    if (player.auth_user_id !== user.id) return Response.json({ error: "Forbidden" }, { status: 403 });
 
     const { data: gameStats, error: statsError } = await supabaseAdmin
       .from("player_game_stats")
@@ -74,7 +82,7 @@ export async function GET(request, { params }) {
     );
 
     return Response.json({
-      player: { ...player, avatar_url: player.avatar_url || null },
+      player: { id: player.id, nickname: player.nickname, server_number: player.server_number, created_at: player.created_at, avatar_url: player.avatar_url || null },
       stats: { summary, games: stats, activity },
     });
   } catch (error) {

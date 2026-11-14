@@ -107,6 +107,7 @@ export default function ProfilePage() {
         }
 
         const profileResponse = await fetch(`/api/player/${data.id}`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
           cache: "no-store",
         });
 

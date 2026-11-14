@@ -36,15 +36,16 @@ export default function EditProfilePage() {
     setError("");
 
     try {
-      const { data: sessionData } =
+      const { data: sessionData, error: sessionError } =
         await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
 
       if (!isActive()) return;
 
       const user = sessionData?.session?.user;
 
       if (!user) {
-        router.push("/");
+        router.replace("/login?next=%2Fprofile%2Fedit");
         return;
       }
 
