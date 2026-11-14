@@ -30,3 +30,12 @@
 - Kept existing page destinations, categories, bilingual copy, and legacy route styling intact.
 - The approved Master Foundation remains the governing standard; the visual Design System remains Draft pending owner review.
 - Status: implementation committed to the preview branch; build and manual visual/keyboard QA remain required.
+
+## Command Master v1.1 — Autonomous product discovery
+
+- Added a mandate to independently research category leaders, competitor patterns, user expectations, technical standards, and market trends before major product builds.
+- Added end-to-end feature mapping and journey checklists so important menus, settings, management flows, and user-facing states are not omitted.
+- Established sensible-default execution: do not ask the owner to specify routine product/design details; ask only for genuinely blocking owner-only decisions or high-impact irreversible trade-offs.
+- Added a wedding-builder example covering templates, customization, event information, schedule, venue/maps, media, RSVP, guestbook, gifts, preview, drafts, publishing, sharing, management, privacy, accessibility, mobile, localization, and future analytics/monetization.
+- Added /command-master as the owner's shorthand to load and execute the current Command Master and related foundation documents, subject to security and production release safeguards.
+- Research claims must distinguish verified findings, common patterns, and recommendations; no claim of exhaustive web crawling or certainty beyond available evidence.
