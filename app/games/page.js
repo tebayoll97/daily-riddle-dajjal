@@ -6,6 +6,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { getPlayerContext } from "@/lib/playerAccount";
 import { useLanguage } from "../components/LanguageProvider";
+import { withLocalePrefix } from "@/lib/localePath";
 
 const translations = {
   en: {
@@ -230,7 +231,7 @@ export default function GamesPage() {
                   <p className="mt-3 text-sm leading-relaxed text-gray-300">{language === "id" ? "Lari sejauh mungkin, lompat melewati rintangan, dan pecahkan rekor jarakmu. Bisa dimainkan tanpa login." : "Run as far as you can, jump over obstacles, and beat your distance record. Play without signing in."}</p>
                   <p className="mt-2 text-[10px] font-bold tracking-wider text-cyan-200/80">PUBLIC ARCADE · NO LOGIN REQUIRED</p>
                 </div>
-                <Link href="/games/run-jump" className="w-full shrink-0 rounded-xl bg-cyan-700 px-7 py-4 text-center text-sm font-black tracking-wider transition hover:bg-cyan-600 sm:w-auto">{language === "id" ? "MAIN SEKARANG" : "PLAY NOW"}</Link>
+                <Link href={withLocalePrefix("/games/run-jump", language)} className="w-full shrink-0 rounded-xl bg-cyan-700 px-7 py-4 text-center text-sm font-black tracking-wider transition hover:bg-cyan-600 sm:w-auto">{language === "id" ? "MAIN SEKARANG" : "PLAY NOW"}</Link>
               </div>
             </div>
           </article>
