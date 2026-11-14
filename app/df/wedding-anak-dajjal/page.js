@@ -27,6 +27,13 @@ const words = {
     scheduleText: "Reception details and schedule will be announced soon.",
     rsvp: "Kindly Respond",
     rsvpText: "Let us know if you can join the celebration.",
+    invitedName: "Name on invitation (optional)",
+    attendance: "Will you attend?",
+    yes: "Joyfully attending",
+    no: "Unable to attend",
+    guestCount: "Number of guests",
+    rsvpSend: "SEND RSVP",
+    rsvpSuccess: "Thank you. Your RSVP has been received.",
     name: "Your name",
     guests: "Number of guests",
     attendance: "Will you attend?",
@@ -70,6 +77,13 @@ const words = {
     scheduleText: "Informasi resepsi dan susunan acara akan diumumkan segera.",
     rsvp: "Konfirmasi Kehadiran",
     rsvpText: "Beri tahu kami apakah Anda dapat hadir di perayaan ini.",
+    invitedName: "Nama pada undangan (opsional)",
+    attendance: "Apakah Anda akan hadir?",
+    yes: "Dengan senang hati hadir",
+    no: "Maaf, belum bisa hadir",
+    guestCount: "Jumlah tamu",
+    rsvpSend: "KIRIM RSVP",
+    rsvpSuccess: "Terima kasih. Konfirmasi kehadiran Anda sudah diterima.",
     name: "Nama Anda",
     guests: "Jumlah tamu",
     attendance: "Apakah Anda akan hadir?",
@@ -111,6 +125,8 @@ export default function WeddingInvitationPage({ invitationSlug = "anak-dajjal-ma
   const [guestbookEntries, setGuestbookEntries] = useState([]);
   const [guestbookStatus, setGuestbookStatus] = useState("");
   const [guestbookLoading, setGuestbookLoading] = useState(false);
+  const [rsvpLoading, setRsvpLoading] = useState(false);
+  const [rsvpStatus, setRsvpStatus] = useState("");
   const [musicOn, setMusicOn] = useState(false);
   const [copied, setCopied] = useState(false);
   const audioRef = useRef(null);
@@ -128,6 +144,10 @@ export default function WeddingInvitationPage({ invitationSlug = "anak-dajjal-ma
       setInvitationId(id);
       setEventInfo({
         ...profile,
+        rsvp_enabled: profile.rsvp_enabled === true,
+        guestbook_enabled: profile.guestbook_enabled === true,
+      setEventInfo({
+        ...profile,
         invitation_title: publicData.invitation.title,
         couple_photo_url: profile.main_photo_url,
         schedule: Array.isArray(profile.event_schedule) ? profile.event_schedule.join(" · ") : "",
@@ -137,9 +157,11 @@ export default function WeddingInvitationPage({ invitationSlug = "anak-dajjal-ma
         venue: profile.venue,
       });
       if (Array.isArray(profile.gallery_urls)) setGalleryItems(profile.gallery_urls.map((url,index)=>({id:index,title:"",image_url:url})));
-      const messagesResult = await supabase.from("df_guestbook").select("id, guest_name, message, created_at").eq("invitation_id", id).eq("is_approved", true).order("created_at", { ascending: false }).limit(30);
-      if (!active) return;
-      if (messagesResult.data) setGuestbookEntries(messagesResult.data);
+      if (profile.guestbook_enabled === true) {
+        const messagesResult = await supabase.from("df_guestbook").select("id, guest_name, message, created_at").eq("invitation_id", id).eq("is_approved", true).order("created_at", { ascending: false }).limit(30);
+        if (!active) return;
+        if (messagesResult.data) setGuestbookEntries(messagesResult.data);
+      }
     }
     loadWeddingData();
     return () => { active = false; };
@@ -172,16 +194,57 @@ export default function WeddingInvitationPage({ invitationSlug = "anak-dajjal-ma
     setGuestbookStatus("");
     const form = event.currentTarget;
     const data = new FormData(form);
-    const { error } = await supabase.from("df_guestbook").insert({
-      guest_name: String(data.get("guestbook_name") || "").trim(),
-      message: String(data.get("guestbook_message") || "").trim(),
-      language,
-      invitation_id: invitationId,
-    });
+    try {
+      const response = await fetch("/api/wedding/guestbook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug: invitationSlug,
+          guest_name: String(data.get("guestbook_name") || "").trim(),
+          message: String(data.get("guestbook_message") || "").trim(),
+          language,
+          website: String(data.get("website") || ""),
+        }),
+      });
+      if (!response.ok) throw new Error("Guestbook submission failed");
+    } catch {
+      setGuestbookLoading(false);
+      setGuestbookStatus("error");
+      return;
+    }
     setGuestbookLoading(false);
-    if (error) { setGuestbookStatus("error"); return; }
     form.reset();
     setGuestbookStatus("success");
+  };
+
+  const submitRsvp = async (event) => {
+    event.preventDefault();
+    setRsvpLoading(true);
+    setRsvpStatus("");
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    try {
+      const response = await fetch("/api/wedding/rsvp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug: invitationSlug,
+          guest_name: String(data.get("guest_name") || "").trim(),
+          invited_name: String(data.get("invited_name") || "").trim(),
+          guest_count: Number(data.get("guest_count")),
+          attendance: String(data.get("attendance") || ""),
+          language,
+          website: String(data.get("website") || ""),
+        }),
+      });
+      if (!response.ok) throw new Error("RSVP submission failed");
+      form.reset();
+      setRsvpStatus("success");
+    } catch {
+      setRsvpStatus("error");
+    } finally {
+      setRsvpLoading(false);
+    }
   };
 
   const toggleMusic = async () => {
@@ -291,6 +354,29 @@ export default function WeddingInvitationPage({ invitationSlug = "anak-dajjal-ma
             <div className="wedding-note">{t.schedule}<p>{eventInfo?.schedule || t.scheduleText}</p></div>
           </section>
 
+          {eventInfo?.rsvp_enabled && (
+            <section className="wedding-section wedding-rsvp" data-aos="fade-left">
+              <p className="wedding-kicker">KINDLY RESPOND</p>
+              <h2 className="wedding-section-heading">{t.rsvp}</h2>
+              <p className="section-copy">{t.rsvpText}</p>
+              <form className="wedding-form" onSubmit={submitRsvp}>
+                <label>{t.name}<input required name="guest_name" maxLength="100" placeholder={t.name} /></label>
+                <label>{t.invitedName}<input name="invited_name" maxLength="100" placeholder={t.invitedName} /></label>
+                <label>{t.guestCount}<input required type="number" name="guest_count" min="1" max="10" defaultValue="1" /></label>
+                <label>{t.attendance}
+                  <select required name="attendance" defaultValue="yes">
+                    <option value="yes">{t.yes}</option>
+                    <option value="no">{t.no}</option>
+                  </select>
+                </label>
+                <label className="sr-only" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label>
+                <button className="wedding-primary" type="submit" disabled={rsvpLoading}>{rsvpLoading ? t.sending : t.rsvpSend}</button>
+                {rsvpStatus && <p className="form-notice" role="status">{rsvpStatus === "success" ? t.rsvpSuccess : t.submitError}</p>}
+              </form>
+            </section>
+          )}
+
+          {eventInfo?.guestbook_enabled && (
           <section className="wedding-section wedding-guestbook" data-aos="fade-right">
             <p className="wedding-kicker">WORDS FROM THE HEART</p>
             <h2 className="wedding-section-heading">{t.guestbook}</h2>
@@ -298,6 +384,7 @@ export default function WeddingInvitationPage({ invitationSlug = "anak-dajjal-ma
             <form className="wedding-form" onSubmit={submitGuestbook}>
               <label>{t.name}<input required name="guestbook_name" maxLength="100" placeholder={t.name} /></label>
               <label>{t.message}<textarea required name="guestbook_message" rows="4" maxLength="500" placeholder={t.message} /></label>
+              <label className="sr-only" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label>
               <button className="wedding-primary" type="submit" disabled={guestbookLoading}>{guestbookLoading ? t.sending : t.sign}</button>
               {guestbookStatus && <p className="form-notice" role="status">{guestbookStatus === "success" ? t.guestbookSuccess : t.submitError}</p>}
             </form>
@@ -305,6 +392,7 @@ export default function WeddingInvitationPage({ invitationSlug = "anak-dajjal-ma
             {guestbookEntries.length > 0 && <div className="approved-messages">{guestbookEntries.map((entry) => <article key={entry.id}><strong>{entry.guest_name}</strong><p>{entry.message}</p></article>)}</div>}
             
           </section>
+          )}
 
           <section className="wedding-share" data-aos="fade-left">
             <p className="wedding-kicker">SPREAD THE JOY</p>
