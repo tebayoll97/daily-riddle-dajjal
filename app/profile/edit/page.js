@@ -296,17 +296,17 @@ export default function EditProfilePage() {
 
       if (updateError) throw updateError;
 
-      if (newPassword) {
-        const { error: passwordError } = await supabase.auth.updateUser({ password: newPassword });
-        if (passwordError) throw passwordError;
-      }
-
       if (!updatedPlayer) {
         throw new Error(
           isID
             ? "Profil tidak berhasil diperbarui. Muat ulang halaman lalu coba lagi."
             : "Profile was not updated. Reload the page and try again."
         );
+      }
+
+      if (newPassword) {
+        const { error: passwordError } = await supabase.auth.updateUser({ password: newPassword });
+        if (passwordError) throw passwordError;
       }
 
       if (
