@@ -39,7 +39,9 @@ const translations = {
     guestFilter: "GUEST",
     googleFilter: "GOOGLE",
     other: "OTHER",
-    playerList: "PLAYER DIRECTORY",
+    activeFilter: "ACTIVE",
+    bannedFilter: "BANNED",
+    playerList: "USER DIRECTORY",
     found: "players found",
     noPlayers: "No players found.",
     noResults: "Try another nickname or filter.",
@@ -100,7 +102,9 @@ const translations = {
     guestFilter: "GUEST",
     googleFilter: "GOOGLE",
     other: "LAINNYA",
-    playerList: "DAFTAR PEMAIN",
+    activeFilter: "AKTIF",
+    bannedFilter: "DIBLOKIR",
+    playerList: "DAFTAR PENGGUNA",
     found: "pemain ditemukan",
     noPlayers: "Pemain tidak ditemukan.",
     noResults: "Coba nickname atau filter lainnya.",
@@ -131,7 +135,7 @@ const translations = {
   },
 };
 
-const filters = ["ALL", "GUEST", "GOOGLE", "OTHER"];
+const filters = ["ALL", "GUEST", "GOOGLE", "OTHER", "ACTIVE", "BANNED"];
 
 function formatDate(date, language) {
   if (!date) return "-";
@@ -363,6 +367,8 @@ export default function AdminPlayersPage() {
 
   const filteredPlayers = players.filter((player) => {
     if (filter === "ALL") return true;
+    if (filter === "BANNED") return player.isBanned;
+    if (filter === "ACTIVE") return !player.isBanned;
     if (filter === "OTHER") {
       return (
         player.accountType === "OTHER" ||
@@ -533,6 +539,8 @@ export default function AdminPlayersPage() {
                 GUEST: t.guestFilter,
                 GOOGLE: t.googleFilter,
                 OTHER: t.other,
+                ACTIVE: t.activeFilter,
+                BANNED: t.bannedFilter,
               };
 
               return (
@@ -715,6 +723,7 @@ export default function AdminPlayersPage() {
                       <th className="px-4 py-4">{t.points}</th>
                       <th className="px-4 py-4">{t.games}</th>
                       <th className="px-4 py-4">{t.joined}</th>
+                      <th className="px-4 py-4">{t.lastSignIn}</th>
                       <th className="px-4 py-4">STATUS</th>
                       <th className="px-4 py-4">ACTIONS</th>
                     </tr>
@@ -771,6 +780,9 @@ export default function AdminPlayersPage() {
 
                         <td className="px-4 py-4 text-xs text-gray-400">
                           {formatDate(player.createdAt, language)}
+                        </td>
+                        <td className="px-4 py-4 text-xs text-gray-400">
+                          {player.lastSignInAt ? formatDate(player.lastSignInAt, language) : t.never}
                         </td>
                         <td className="px-4 py-4">
                           <span className={`text-[9px] font-black rounded-full px-2 py-1 border ${player.isBanned ? "border-red-500/30 bg-red-500/10 text-red-300" : "border-green-500/20 bg-green-500/10 text-green-300"}`}>
