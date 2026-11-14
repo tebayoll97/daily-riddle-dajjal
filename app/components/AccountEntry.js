@@ -57,6 +57,6 @@ export default function AccountEntry() {
     className="inline-flex min-w-10 h-10 items-center justify-center gap-2 rounded-xl border border-purple-500/30 bg-purple-500/10 px-2.5 text-sm font-semibold text-purple-200 transition hover:border-purple-400/60 hover:bg-purple-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300">
     {player?.avatar_url ? <img src={player.avatar_url} alt="" className="h-6 w-6 rounded-full object-cover" /> :
       <span className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-500/20 text-xs font-black" aria-hidden="true">{status === "signed-in" ? initials : "♙"}</span>}
-    <span className="max-w-28 truncate text-xs sm:max-w-36">{label}</span>
+    <span className="hidden max-w-36 truncate text-xs sm:inline">{label}</span>
   </Link>;
 }
