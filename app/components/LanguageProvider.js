@@ -1,20 +1,18 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext } from "react";
 
 const LanguageContext = createContext(null);
 const LOCALE_COOKIE = "df-locale";
 
 export function LanguageProvider({ children, initialLanguage = "id" }) {
   const language = initialLanguage === "en" ? "en" : "id";
-  const [currentLanguage, setCurrentLanguage] = useState(language);
 
   function setLanguage(nextLanguage) {
     if (nextLanguage !== "en" && nextLanguage !== "id") return;
     if (nextLanguage === currentLanguage) return;
 
     document.cookie = `${LOCALE_COOKIE}=${nextLanguage}; Path=/; Max-Age=31536000; SameSite=Lax`;
-    window.localStorage.setItem("daily-riddle-language", nextLanguage);
 
     const currentPath = window.location.pathname || "/";
     const segments = currentPath.split("/");
@@ -24,12 +22,11 @@ export function LanguageProvider({ children, initialLanguage = "id" }) {
       : currentPath;
     const destinationPath = pathWithoutLocale === "/" ? `/${nextLanguage}` : `/${nextLanguage}${pathWithoutLocale}`;
 
-    setCurrentLanguage(nextLanguage);
     window.location.assign(`${destinationPath}${window.location.search}${window.location.hash}`);
   }
 
   return (
-    <LanguageContext.Provider value={{ language: currentLanguage, setLanguage, ready: true }}>
+    <LanguageContext.Provider value={{ language, setLanguage, ready: true }}>
       {children}
     </LanguageContext.Provider>
   );
