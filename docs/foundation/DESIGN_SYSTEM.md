@@ -414,3 +414,19 @@ A shared component is design-system compliant when:
 **Design principle:** One visual language. Many product experiences.
 
 **Parent standard:** MASTER FOUNDATION DAJJAL FAMILY v1.0.
+
+
+# 16. IMPLEMENTATION STATUS
+
+The following direction has been selected for the Dajjal Family visual identity:
+- Purple `#A855F7`, Indigo `#6366F1`, and Cyan `#22D3EE` as the brand palette.
+- Dark and Light semantic theme palettes.
+- Inter-first system typography.
+- A 4 px spacing base.
+- Semantic design tokens as the component styling interface.
+
+Initial semantic tokens have been added to `app/styles/tokens.css`, with Light Mode semantic overrides in `app/styles/theme.css`. Existing legacy token names and page-specific CSS must be preserved during gradual migration.
+
+Shared component inventory and behavior contracts are documented in `COMPONENT_CATALOG.md`.
+
+This document remains **Draft — Pending Approval** until typography, layout, component rules, and implementation review have been completed. Token creation alone does not mean every existing page has adopted the Design System.
