@@ -18,7 +18,7 @@ export async function GET(request, { params }) {
 
     const { data: player, error: playerError } = await supabaseAdmin
       .from("players")
-      .select("id, auth_user_id, nickname, username, gender, phone_number, birth_date, server_number, created_at, avatar_url")
+      .select("id, auth_user_id, nickname, server_number, created_at, avatar_url")
       .eq("id", id)
       .maybeSingle();
 
@@ -82,7 +82,7 @@ export async function GET(request, { params }) {
     );
 
     return Response.json({
-      player: { id: player.id, nickname: player.nickname, username: player.username || null, gender: player.gender || null, phone_number: player.phone_number || null, birth_date: player.birth_date || null, server_number: player.server_number, created_at: player.created_at, avatar_url: player.avatar_url || null },
+      player: { id: player.id, nickname: player.nickname, username: null, gender: null, phone_number: null, birth_date: null, server_number: player.server_number, created_at: player.created_at, avatar_url: player.avatar_url || null },
       stats: { summary, games: stats, activity },
     }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
