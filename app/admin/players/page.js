@@ -707,12 +707,7 @@ export default function AdminPlayersPage() {
                               >
                                 {player.isBanned ? t.unban : t.ban}
                               </button>
-                              <button
-                                onClick={() => openPlayerAction(player, "delete")}
-                                className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[10px] font-bold text-red-300 active:scale-[0.98] transition"
-                              >
-                                {t.delete}
-                              </button>
+
                             </div>
                           </div>
                         </div>
@@ -808,12 +803,7 @@ export default function AdminPlayersPage() {
                             >
                               {player.isBanned ? t.unban : t.ban}
                             </button>
-                            <button
-                              onClick={() => openPlayerAction(player, "delete")}
-                              className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[10px] font-bold text-red-300 whitespace-nowrap"
-                            >
-                              {t.delete}
-                            </button>
+
                           </div>
                         </td>
                       </tr>
