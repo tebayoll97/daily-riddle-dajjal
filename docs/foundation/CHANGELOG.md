@@ -97,3 +97,12 @@
 - Identified the Daily Riddle guest-flow gap and recorded the safe prerequisite: provision/resolve guest player context and verify non-persistent attempts before relaxing the login prompt.
 - Retained MAMAH NGAMUK account requirement for persistent wallet, best distance, and leaderboard.
 - Status: access classification complete on the development branch; application-level guest-flow migration remains pending. No database or production changes.
+
+
+## Command Master v2.2 — Admin and Account Management subcommand
+
+- Added `/command-master-admin` to the official subcommand registry.
+- Defined end-to-end scope across authentication, Progressive Login, user profiles, account lifecycle, Admin Dashboard, User Management, roles/permissions, moderation, privacy, and audit logs.
+- Explicitly inherited the complete parent Command Master mandate, security controls, data-preservation requirements, QA standards, and production approval gates.
+- Added safeguards for Guest/provider identity linking, least privilege, destructive account actions, last-admin protection, and server-side authorization.
+- Status: command charter committed to the development branch; no application, database, or production changes were made by this documentation update.
