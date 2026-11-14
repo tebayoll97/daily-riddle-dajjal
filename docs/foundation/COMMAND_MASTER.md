@@ -217,7 +217,7 @@ Report the verified current branch and HEAD, working changes if available, lates
 - The player profile now displays the signed-in account email, authentication provider, and last sign-in timestamp from the current Supabase Auth session. Existing profile ownership checks and server-side activity retrieval remain in place.
 - The admin dashboard module is labeled User Management. The existing `/admin/players` route remains stable for compatibility and now presents linked login email, provider/account type, last sign-in, player profile, server, scores, sessions, ban state, and guest/Google/other plus active/banned filters.
 - Admin player API responses no longer expose the internal Supabase Auth user ID. The API distinguishes a missing profile-to-auth link from an Auth lookup that could not be completed.
-- Ban/unban and player-profile deletion remain server-side admin actions. Deleting a player profile removes the player profile and dependent game history; it does NOT delete the linked Supabase Auth login. The UI confirmation and success feedback must preserve this distinction.
+- Ban/unban remain server-side admin actions. Player-profile deletion is currently disabled in the API with HTTP 409 until an atomic deletion workflow is implemented; do not describe it as an available admin action. When deletion is eventually enabled, it must preserve the distinction between the player profile/game history and the linked Supabase Auth login.
 - Scope limitation: the current User Management directory is based on rows in `players`; standalone Supabase Auth users without a player profile are not yet included. A complete all-Auth-users directory requires a separately paginated and carefully rate-limited Auth-user discovery design.
 - Verification status: implementation committed to the development branch. Preview build and interactive QA are blocked while Vercel reports the deployment build-rate limit. Do not claim this phase fully QA-complete until a deployment for the exact latest commit is READY and profile/admin journeys are tested. No production release or Supabase schema changes.
 
@@ -314,3 +314,9 @@ When requested, implement the account profile experience with display name, uniq
 - Keep phone, birth date, gender, email, and account metadata private. Public profile/leaderboard payloads use an explicit allowlist.
 - Do not reveal account email from username/phone lookup, do not silently merge identities, and rate-limit credential attempts.
 - Prepare and review additive migrations before applying them. No production migration, Auth configuration change, or release without the required explicit approval and QA.
+
+## 22. Admin User Management safety update (2026-11-14)
+- The player ban API now checks the target account against `admin_users` before applying a ban. Administrator accounts are rejected with HTTP 409 through the player-management endpoint to prevent accidental administrator lockout.
+- If the administrator lookup fails, the API fails closed and makes no account change.
+- This guard does not implement role revocation or demotion. Administrator role lifecycle must be handled through a separately reviewed workflow that protects the last effective administrator.
+- Verification status: source change committed to `redesign/dajjalfamily-home`; build, API-level tests, and exact-commit preview QA remain pending.
