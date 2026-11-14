@@ -36,3 +36,9 @@
 .ui-dialog-backdrop{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:1rem;background:rgba(4,3,10,.68);backdrop-filter:blur(6px)}
 .ui-dialog{width:min(100%,32rem);max-height:min(85dvh,48rem);overflow:auto;border:1px solid var(--df-border-strong);border-radius:var(--df-radius-xl);background:var(--df-surface);color:var(--df-text);box-shadow:var(--df-shadow-lg)}
 @media(prefers-reduced-motion:reduce){.ui-button,.ui-card-interactive{transition:none}.ui-card-interactive:hover{transform:none}}
+
+.ui-button-spinner{width:1em;height:1em;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:ui-spin .7s linear infinite}
+.ui-alert-title{display:block;margin-bottom:.2rem;color:var(--df-text)}
+.ui-field-error{margin-top:var(--df-space-1);color:var(--df-danger);font-size:var(--df-text-sm)}
+@keyframes ui-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.ui-button-spinner{animation:none;border-right-color:currentColor}}
