@@ -90,4 +90,4 @@
   --df-breakpoint-tablet: 1024px;
 }
 
-/* Backward-compatible aliases for existing components. */
+/* Existing legacy token names remain available during gradual migration. */
