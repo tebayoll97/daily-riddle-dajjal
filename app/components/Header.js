@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 
 import { supabaseAdminClient } from "@/lib/supabaseAdminClient";
 import { useLanguage } from "./LanguageProvider";
+import ThemeToggle from "./ThemeToggle";
 
 import audioEngine from "@/lib/audio/AudioEngine";
 import {
@@ -267,6 +268,8 @@ export default function Header() {
                 {musicEnabled ? "♫" : "♪"}
               </span>
             </button>
+
+            <ThemeToggle />
 
             {/* SETTINGS */}
             <Link
