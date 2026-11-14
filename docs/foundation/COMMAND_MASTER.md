@@ -121,6 +121,7 @@ Be direct and honest. Separate verified facts from hypotheses. Never invent metr
 - Continue reviewing admin routes, invitation ownership/publish/delete flows, guestbook/RSVP public policies, storage policies, and private profile data exposure.
 - Review leaked-password protection setting and database advisor findings; apply only after impact assessment.
 - Review sitemap lastModified values; do not imply current modification dates without reliable source timestamps.
+- Wedding guest interaction follow-up: the public invitation response must include feature flags; guestbook and RSVP submissions must validate active invitation and enabled feature server-side. RSVP records must be associated with invitation IDs. The migration `202611140001_secure_wedding_guest_submissions.sql` is staged on the feature branch but must not be applied to production without explicit release authorization. Public direct INSERT policies are removed by that migration; server-side service-role endpoints become the supported submission path. Rate limiting still requires a durable edge/database-backed control before production.
 
 ## 15. Autonomous product discovery and complete execution
 The owner may not know the full feature set, terminology, or best practices for a product. Do not transfer product-discovery work back to the owner unnecessarily.
