@@ -134,3 +134,19 @@ Every substantial shared component should document:
 - Record documented exceptions.
 
 **Principle:** Shared components create consistency without forcing every product experience to look identical.
+
+
+# 11. INITIAL CSS PRIMITIVE IMPLEMENTATION
+
+The first opt-in CSS primitives are available in `app/styles/components.css`:
+
+- Buttons: `.ui-button`, `.ui-button-primary`, `.ui-button-secondary`, `.ui-button-ghost`, `.ui-button-danger`, `.ui-button-sm`, `.ui-button-lg`.
+- Cards: `.ui-card`, `.ui-card-interactive`.
+- Forms: `.ui-field-label`, `.ui-field-help`, `.ui-input`, `.ui-select`, `.ui-textarea`.
+- Feedback: `.ui-badge` with semantic status variants; `.ui-alert` with semantic status variants.
+- Icon action: `.ui-icon-button`.
+- Dialog visual shell: `.ui-dialog-backdrop`, `.ui-dialog`.
+
+These are styling primitives, not complete React components. Dialog focus trapping, Escape handling, focus restoration, form validation, loading behavior, and business logic must be implemented in the corresponding accessible component. Do not infer those behaviors from CSS classes.
+
+All primitives consume semantic tokens and are opt-in. Apply only to new UI or a page explicitly selected for migration. Review in both themes and at mobile widths before wider adoption.
