@@ -101,6 +101,10 @@ export async function POST(request) {
       );
     }
 
+    if (is_active !== undefined && typeof is_active !== "boolean") {
+      return Response.json({ error: "Invalid active status." }, { status: 400 });
+    }
+
     const cleanPoints = Number(points ?? 100);
 
     if (
