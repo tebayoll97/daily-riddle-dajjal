@@ -115,3 +115,15 @@
 - Documented password handling through Supabase Auth only, username/phone privacy, and public/private profile field boundaries.
 - Remaining: implement profile form and completion task, secure identifier-login flow, Auth password setup, API field allowlists, uniqueness/error handling, and end-to-end QA.
 - No Supabase schema changes, Auth configuration changes, production changes, or deployment were made.
+
+
+## Game route consolidation — 2026-11-15
+
+- Consolidated the public game catalogue under the single library route `/games`.
+- Moved Dajjal Family Jump implementation from `app/mini-game/run-jump` to `app/games/run-jump`.
+- Moved shared arcade styling to `app/games/arcade-master.css`.
+- Added Dajjal Family Jump to the main Game Library; removed the secondary Mini Games catalogue.
+- Kept legacy `/mini-game` and `/mini-game/run-jump` URLs as redirects to canonical routes.
+- Kept MAMAH NGAMUK static assets under `public/mini-game`; they are still referenced and were not deleted.
+- Daily Riddle files and features were intentionally left untouched pending a separate explicit removal instruction.
+- Runtime/build verification is pending; no deployment was attempted while the Vercel deployment quota restriction remains in effect.
