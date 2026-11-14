@@ -1,25 +1,25 @@
-import { NextResponse } from "next/server";
+const origin = "https://dajjalfamily.com";
 
 export default function robots() {
-  const origin = "https://dajjalfamily.com";
-  return new NextResponse(
-    `User-agent: *
-Allow: /
-Disallow: /admin/
-Disallow: /api/
-Disallow: /profile/
-Disallow: /settings/
-Disallow: /login
-Disallow: /register
-Disallow: /design-system
-Disallow: /character-test
-Disallow: /df/wedding/dashboard
-Disallow: /df/wedding/create
-Disallow: /df/wedding/preview
-
-Sitemap: ${origin}/sitemap.xml
-Host: ${origin}
-`,
-    { headers: { "Content-Type": "text/plain; charset=utf-8" } }
-  );
+  return {
+    rules: {
+      userAgent: "*",
+      allow: "/",
+      disallow: [
+        "/admin/",
+        "/api/",
+        "/profile/",
+        "/settings/",
+        "/login",
+        "/register",
+        "/design-system",
+        "/character-test",
+        "/df/wedding/dashboard",
+        "/df/wedding/create",
+        "/df/wedding/preview",
+      ],
+    },
+    sitemap: `${origin}/sitemap.xml`,
+    host: origin,
+  };
 }
