@@ -1,5 +1,5 @@
 # COMMAND MASTER — DAJJAL FAMILY
-Version: 1.0
+Version: 1.1
 Status: Active operating charter
 Owner: Dajjal Family project owner
 Repository: tebayoll97/daily-riddle-dajjal
@@ -116,8 +116,8 @@ Every work batch should report:
 Be direct and honest. Separate verified facts from hypotheses. Never invent metrics, test results, user feedback, revenue, or deployment success.
 
 ## 13. Current known security follow-ups (2026-11-14)
-- Review and safely restrict authenticated EXECUTE access to public.record_game_result(text, uuid, integer, boolean), a SECURITY DEFINER RPC that accepts client-supplied score/win values. First inspect all active-branch callers; preserve legitimate server-side recording flows.
-- Replace public wedding invitation API's broad df_wedding_profiles select("*") with an explicit public-field allowlist after inspecting schema and rendering requirements.
+- Confirmed in the active Supabase project that authenticated can EXECUTE public.record_game_result(text, uuid, integer, boolean), a SECURITY DEFINER RPC accepting caller-supplied score/win values. The repository code search found no indexed callers; prior active-branch API inspection found no legitimate call site in the reviewed routes. Recheck all call sites before restricting the grant. Production DB change remains gated.
+- Public wedding invitation API field allowlist has been implemented on the preview branch; verify the actual public response and regression-test the invitation guest view before release.
 - Continue reviewing admin routes, invitation ownership/publish/delete flows, guestbook/RSVP public policies, storage policies, and private profile data exposure.
 - Review leaked-password protection setting and database advisor findings; apply only after impact assessment.
 - Review sitemap lastModified values; do not imply current modification dates without reliable source timestamps.
