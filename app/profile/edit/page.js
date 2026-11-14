@@ -7,8 +7,6 @@ import { supabase } from "@/lib/supabase";
 import { useLanguage } from "@/app/components/LanguageProvider";
 import GameCharacter from "@/lib/GameCharacter";
 
-// Extended identity fields stay gated until the approved Supabase migration is applied.
-const EXTENDED_PROFILE_FIELDS_ENABLED = false;
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -21,6 +19,7 @@ export default function EditProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [player, setPlayer] = useState(null);
+  const [profileIdentityEnabled, setProfileIdentityEnabled] = useState(false);
 
   const [nickname, setNickname] = useState("");
   const [username, setUsername] = useState("");
@@ -58,24 +57,30 @@ export default function EditProfilePage() {
         return;
       }
 
-      const { data, error: profileError } = await supabase
+      const { data: playerRef, error: playerRefError } = await supabase
         .from("players")
-        .select("id, nickname, server_number, avatar_url, avatar_path")
+        .select("id")
         .eq("auth_user_id", user.id)
         .maybeSingle();
 
       if (!isActive()) return;
-      if (profileError) throw profileError;
-
-      if (!data) {
-        throw new Error(
-          isID
-            ? "Profil pemain tidak ditemukan."
-            : "Player profile not found."
-        );
+      if (playerRefError) throw playerRefError;
+      if (!playerRef) {
+        throw new Error(isID ? "Profil pemain tidak ditemukan." : "Player profile not found.");
       }
 
+      const response = await fetch(`/api/player/${playerRef.id}`, {
+        headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
+        cache: "no-store",
+      });
+      const result = await response.json();
+      if (!response.ok || !result.player) {
+        throw new Error(result.error || (isID ? "Gagal memuat profil." : "Unable to load profile."));
+      }
+
+      const data = result.player;
       setPlayer(data);
+      setProfileIdentityEnabled(Boolean(data.profileIdentityEnabled));
       setNickname(data.nickname || "");
       setUsername(data.username || "");
       setGender(data.gender || "");
@@ -179,7 +184,7 @@ export default function EditProfilePage() {
       return;
     }
 
-    if (EXTENDED_PROFILE_FIELDS_ENABLED && !/^[A-Za-z0-9]{3,20}$/.test(cleanUsername)) {
+    if (profileIdentityEnabled && !/^[A-Za-z0-9]{3,20}$/.test(cleanUsername)) {
       setError(isID ? "Username harus 3–20 karakter, hanya huruf dan angka." : "Username must be 3–20 characters using letters and numbers only.");
       return;
     }
