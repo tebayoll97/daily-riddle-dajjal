@@ -10,7 +10,7 @@ export function LanguageProvider({ children, initialLanguage = "id" }) {
 
   function setLanguage(nextLanguage) {
     if (nextLanguage !== "en" && nextLanguage !== "id") return;
-    if (nextLanguage === currentLanguage) return;
+    if (nextLanguage === language) return;
 
     document.cookie = `${LOCALE_COOKIE}=${nextLanguage}; Path=/; Max-Age=31536000; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`;
 
