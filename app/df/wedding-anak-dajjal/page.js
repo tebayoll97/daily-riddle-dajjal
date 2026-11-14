@@ -28,12 +28,8 @@ const words = {
     rsvp: "Kindly Respond",
     rsvpText: "Let us know if you can join the celebration.",
     invitedName: "Name on invitation (optional)",
-    attendance: "Will you attend?",
-    yes: "Joyfully attending",
-    no: "Unable to attend",
     guestCount: "Number of guests",
     rsvpSend: "SEND RSVP",
-    rsvpSuccess: "Thank you. Your RSVP has been received.",
     name: "Your name",
     guests: "Number of guests",
     attendance: "Will you attend?",
@@ -78,12 +74,8 @@ const words = {
     rsvp: "Konfirmasi Kehadiran",
     rsvpText: "Beri tahu kami apakah Anda dapat hadir di perayaan ini.",
     invitedName: "Nama pada undangan (opsional)",
-    attendance: "Apakah Anda akan hadir?",
-    yes: "Dengan senang hati hadir",
-    no: "Maaf, belum bisa hadir",
     guestCount: "Jumlah tamu",
     rsvpSend: "KIRIM RSVP",
-    rsvpSuccess: "Terima kasih. Konfirmasi kehadiran Anda sudah diterima.",
     name: "Nama Anda",
     guests: "Jumlah tamu",
     attendance: "Apakah Anda akan hadir?",
@@ -146,8 +138,6 @@ export default function WeddingInvitationPage({ invitationSlug = "anak-dajjal-ma
         ...profile,
         rsvp_enabled: profile.rsvp_enabled === true,
         guestbook_enabled: profile.guestbook_enabled === true,
-      setEventInfo({
-        ...profile,
         invitation_title: publicData.invitation.title,
         couple_photo_url: profile.main_photo_url,
         schedule: Array.isArray(profile.event_schedule) ? profile.event_schedule.join(" · ") : "",
@@ -369,7 +359,7 @@ export default function WeddingInvitationPage({ invitationSlug = "anak-dajjal-ma
                     <option value="no">{t.no}</option>
                   </select>
                 </label>
-                <label className="sr-only" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label>
+                <label aria-hidden="true" style={{ position: "absolute", left: "-10000px" }}>Website<input name="website" tabIndex={-1} autoComplete="off" /></label>
                 <button className="wedding-primary" type="submit" disabled={rsvpLoading}>{rsvpLoading ? t.sending : t.rsvpSend}</button>
                 {rsvpStatus && <p className="form-notice" role="status">{rsvpStatus === "success" ? t.rsvpSuccess : t.submitError}</p>}
               </form>
