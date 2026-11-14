@@ -142,15 +142,14 @@
 }
 :root[data-theme="light"] .ui-frame-h2,
 :root[data-theme="light"] .ui-frame-h3,
-:root[data-theme="light"] .ui-frame-h4,
-:root[data-theme="light"] .ui-card {
+:root[data-theme="light"] .ui-frame-h4 {
   color: #242039 !important;
   border-color: rgba(91,76,145,.16) !important;
   background: linear-gradient(145deg,#fff,#f3f2f9) !important;
   box-shadow: 0 7px 22px rgba(40,32,75,.06) !important;
 }
 :root[data-theme="light"] .ui-title,
-:root[data-theme="light"] main h1:not(.welcome-title) {
+:root[data-theme="light"] main h1:not(.welcome-title):not(.ui-heading-h1) {
   color: #211a37 !important;
   background: linear-gradient(110deg,#eee9f8,#eaf0f8 72%) !important;
   border-color: rgba(104,72,167,.22) !important;
