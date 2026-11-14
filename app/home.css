@@ -23,3 +23,12 @@
 .df-coming-soon{color:#b6a1ff;font-size:9px;font-weight:850;letter-spacing:.2em}
 .df-section-page-panel h2{margin:13px 0 8px;font-size:clamp(22px,4vw,32px);letter-spacing:-.04em}
 .df-section-page-panel p{max-width:620px;margin:0 0 23px;color:#9998ad;font-size:13px;line-height:1.8}
+
+
+/* Language selector */
+.df-header-actions{display:flex;align-items:center;gap:18px}
+.df-language-switch{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--df-muted,#8b91a0);white-space:nowrap}
+.df-language-switch button{border:0;background:transparent;color:inherit;padding:5px 3px;cursor:pointer;font:inherit;opacity:.68}
+.df-language-switch button.active{color:var(--df-accent,#b9a2ff);opacity:1}
+.df-language-switch button:focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:4px}
+@media(max-width:900px){.df-content-topbar .df-language-switch{display:none}.df-mobile-topbar .df-language-switch{margin-left:auto}.df-header-actions{gap:10px}}
