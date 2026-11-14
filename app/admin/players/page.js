@@ -9,19 +9,24 @@ import { useLanguage } from "@/app/components/LanguageProvider";
 const translations = {
   en: {
     checking: "Verifying administrator...",
-    title: "PLAYER",
+    title: "USER",
     titleAccent: "MANAGEMENT",
-    subtitle: "Manage player accounts and monitor activity.",
+    subtitle: "Manage account access, player profiles, and game activity.",
     back: "BACK TO DASHBOARD",
     ban: "BAN PLAYER",
     unban: "UNBAN",
-    delete: "DELETE PLAYER",
+    delete: "DELETE PROFILE",
+    email: "EMAIL",
+    lastSignIn: "LAST SIGN-IN",
+    authMissing: "LOGIN ACCOUNT NOT FOUND",
+    never: "Never",
+    deleteNote: "This removes the player profile and game history only. The login account remains.",
     banned: "BANNED",
     active: "ACTIVE",
     actionTitle: "PLAYER ACTION",
     banConfirm: "Ban this player from signing in?",
     unbanConfirm: "Restore this player's access?",
-    deleteConfirm: "Permanently delete this player's game profile and score history? This cannot be undone.",
+    deleteConfirm: "Permanently delete this player's game profile and score history? The linked login account will remain. This cannot be undone.",
     cancel: "CANCEL",
     confirm: "CONFIRM",
     processing: "PROCESSING...",
@@ -67,18 +72,23 @@ const translations = {
   id: {
     checking: "Memverifikasi administrator...",
     title: "MANAJEMEN",
-    titleAccent: "PEMAIN",
-    subtitle: "Kelola akun pemain dan pantau aktivitas permainan.",
+    titleAccent: "PENGGUNA",
+    subtitle: "Kelola akses akun, profil pemain, dan aktivitas permainan.",
     back: "KEMBALI KE DASHBOARD",
     ban: "BLOKIR PEMAIN",
     unban: "BUKA BLOKIR",
-    delete: "HAPUS PEMAIN",
+    delete: "HAPUS PROFIL",
+    email: "EMAIL",
+    lastSignIn: "LOGIN TERAKHIR",
+    authMissing: "AKUN LOGIN TIDAK DITEMUKAN",
+    never: "Belum pernah",
+    deleteNote: "Tindakan ini hanya menghapus profil pemain dan riwayat game. Akun login tetap ada.",
     banned: "DIBLOKIR",
     active: "AKTIF",
     actionTitle: "TINDAKAN PEMAIN",
     banConfirm: "Blokir pemain ini agar tidak bisa masuk?",
     unbanConfirm: "Pulihkan akses pemain ini?",
-    deleteConfirm: "Hapus permanen profil permainan dan seluruh riwayat skor pemain ini? Tindakan ini tidak dapat dibatalkan.",
+    deleteConfirm: "Hapus permanen profil permainan dan seluruh riwayat skor pemain ini? Akun login yang terhubung tetap ada. Tindakan ini tidak dapat dibatalkan.",
     cancel: "BATAL",
     confirm: "KONFIRMASI",
     processing: "MEMPROSES...",
@@ -616,8 +626,9 @@ export default function AdminPlayersPage() {
                             {player.nickname || "Unnamed Player"}
                           </p>
                           <p className="text-[11px] text-gray-400 mt-0.5">
-                            {t.server} {player.serverNumber || "-"}
+                            {player.authEmail || (player.authUserExists ? t.unknownLabel : t.authMissing)}
                           </p>
+                          <p className="text-[10px] text-gray-500 mt-0.5">{t.server} {player.serverNumber || "-"}</p>
                         </div>
 
                         <span className={`shrink-0 rounded-full border px-2 py-1 text-[9px] font-black ${accountStyle(player.accountType)}`}>
@@ -643,6 +654,10 @@ export default function AdminPlayersPage() {
                             {t.details}
                           </p>
 
+                          <div className="mb-2 rounded-lg bg-black/20 p-2.5 space-y-2">
+                            <div><p className="text-[9px] text-gray-500 font-bold">{t.email}</p><p className="text-xs text-white break-all mt-1">{player.authEmail || "—"}</p></div>
+                            <div><p className="text-[9px] text-gray-500 font-bold">{t.lastSignIn}</p><p className="text-xs text-white mt-1">{player.lastSignInAt ? formatDate(player.lastSignInAt, language) : t.never}</p></div>
+                          </div>
                           <div className="grid grid-cols-3 gap-2 rounded-lg bg-black/20 p-2.5">
                             <div className="min-w-0">
                               <p className="text-[9px] text-gray-500 font-bold">{t.points}</p>
@@ -696,6 +711,7 @@ export default function AdminPlayersPage() {
                   <thead className="bg-purple-500/5 border-b border-purple-500/20">
                     <tr className="text-[10px] text-purple-300 tracking-wider">
                       <th className="px-5 py-4">PLAYER</th>
+                      <th className="px-4 py-4">{t.email}</th>
                       <th className="px-4 py-4">{t.account}</th>
                       <th className="px-4 py-4">{t.server}</th>
                       <th className="px-4 py-4">{t.points}</th>
@@ -725,11 +741,15 @@ export default function AdminPlayersPage() {
                                 "👤"
                               )}
                             </div>
-                            <span className="font-bold text-sm">
-                              {player.nickname || "Unnamed Player"}
-                            </span>
+                            <div className="min-w-0">
+                              <span className="font-bold text-sm block">
+                                {player.nickname || "Unnamed Player"}
+                              </span>
+                            </div>
                           </div>
                         </td>
+
+                        <td className="px-4 py-4 text-xs text-gray-300 break-all max-w-56">{player.authEmail || "—"}</td>
 
                         <td className="px-4 py-4">
                           <span
