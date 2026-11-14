@@ -396,3 +396,10 @@ When requested, implement the account profile experience with display name, uniq
 - Live privilege verification confirms anon has no SELECT/INSERT; authenticated has SELECT but no INSERT, DELETE, TRUNCATE, or TRIGGER; authenticated can update the four profile columns but cannot update id, created_at, or auth_user_id.
 - This intentionally defers future username/gender/phone/birth_date browser writes until a separate reviewed migration grants only those specific columns after the identity schema is approved. The identity migration remains deferred.
 - No player rows or linked game data were changed. This was a grants-only change; no table data was modified.
+
+## 31. Legacy game-result RPC access hardening — 2026-11-14
+
+- Production Supabase migration 20261114133923_revoke_legacy_record_game_result_rpc is applied and mirrored in the repository.
+- Review of the live SECURITY DEFINER function confirmed it requires auth.uid(), resolves the caller's own player row, validates the active game/session/score fields, and writes an idempotent game_result_events row. However, no current application source calls this generic RPC; current result flows use dedicated server APIs/RPCs.
+- The migration revokes EXECUTE from PUBLIC, anon, and authenticated while preserving the function definition for recovery/compatibility. Live has_function_privilege checks confirm anon and authenticated cannot execute it.
+- Supabase Security Advisor no longer reports the authenticated SECURITY DEFINER RPC finding. Remaining warnings include leaked-password protection disabled and anonymous-sign-in policy warnings; inspect those in the context of the intentional Guest account model rather than blindly removing required own-row policies.
