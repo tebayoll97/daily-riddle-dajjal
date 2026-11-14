@@ -1,11 +1,12 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { stripLocalePrefix } from "@/lib/localePath";
 import Header from "./Header";
 import Footer from "./Footer";
 
 export default function RouteChrome({ children }) {
-  const pathname = usePathname() || "/";
+  const pathname = stripLocalePrefix(usePathname() || "/");
   const isDFRoute = pathname === "/df" || pathname.startsWith("/df/");
   const isNewHome = pathname === "/";
 

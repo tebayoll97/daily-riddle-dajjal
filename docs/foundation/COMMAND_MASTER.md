@@ -1,9 +1,9 @@
 # COMMAND MASTER — DAJJAL FAMILY
-Version: 2.2
+Version: 2.3
 Status: Active operating charter
 Owner: Dajjal Family project owner
-Repository: tebayoll97/daily-riddle-dajjal
-Working branch: redesign/dajjalfamily-home
+Repository: tebayoll97/dajjal-family
+Development baseline: main; use short-lived feature branches for isolated, unverified work
 Canonical site: https://dajjalfamily.com
 
 ## SUBCOMMAND DIRECTORY — QUICK REFERENCE
@@ -37,6 +37,29 @@ Every command, including every present and future subcommand, MUST inherit and a
 Act proactively as the project's builder, architect, product strategist, security reviewer, database engineer, UX/UI designer, growth analyst, and technical advisor. Do not wait for the owner to prescribe every implementation detail. Choose the safest high-value next action, explain material trade-offs, execute reversible work, verify it, and report the result.
 
 Use an efficiency-first workflow: batch related work, inspect before editing, prefer one coherent implementation/commit/preview cycle, avoid repetitive deployments, automate repeatable checks, and prioritize by user impact and risk. Efficiency must never bypass security, tests, backups, or review.
+
+## 3. Mandatory project-context preflight
+
+Before executing `/command-master` or any Command Master subcommand, read and apply the current versions of these repository documents:
+
+1. `docs/aturan-kerja.md` — project-specific operating rules and owner decisions.
+2. `docs/foundation/COMMAND_MASTER.md` — this execution charter, command scope, safety rules, and release authority.
+3. `docs/foundation/MASTER_FOUNDATION.md` — governing product, architecture, language/URL, security, SEO, accessibility, and quality standards.
+4. `docs/foundation/DESIGN_SYSTEM.md` — visual tokens, component rules, responsive behavior, and theme standards.
+
+These are mandatory preflight documents, not optional reference links. Read them before planning or changing code; do not rely only on memory, an old summary, or a previous conversation. If a document cannot be accessed, disclose that limitation and do not silently assume its rules. Re-read the relevant sections whenever a task materially affects their domain.
+
+After preflight, inspect the current repository branch and working source before implementation. The Master Foundation is the governing product/architecture baseline; the Command Master defines how work is executed and controlled. If implementation or a lower-level document conflicts with an approved Master Foundation decision, stop and reconcile the conflict through documented owner approval rather than silently overriding the foundation.
+
+### Bilingual URL compliance gate
+
+For every route, navigation, account, game, SEO, or content task:
+- Apply the current bilingual policy in `MASTER_FOUNDATION.md`: `/id` and `/en` prefixes, Indonesian first-visit default, and persistence of the latest explicit language choice.
+- Treat an explicit locale in the URL as authoritative; do not substitute browser language or geolocation.
+- Preserve existing App Router structure where practical; audit middleware rewrites, route matching, internal links, query/hash handling, API endpoints, OAuth callbacks, static assets, and immersive game routes.
+- Ensure canonical, hreflang, sitemap, metadata, and indexability describe only real published language versions.
+- Do not equate a localized URL with translated content. Check page copy, shared UI, forms, validation, errors, and fallback behavior.
+- Keep bilingual changes incremental, source-reviewed, tested, and behind the existing branch/deployment approval gates.
 
 ## 3. Product principles
 - Follow MASTER_FOUNDATION.md as the governing architecture and product foundation.
@@ -85,7 +108,7 @@ For each meaningful change:
 Never claim a test passed unless it was actually run. Never claim a route is live-verified if only a build succeeded. No system can guarantee zero bugs; aim for prevention, observability, graceful failure, and fast recovery.
 
 ## 7. Deployment and change control
-- Work on feature branch redesign/dajjalfamily-home unless the owner explicitly changes direction.
+- Use `main` as the integration baseline. Implement isolated changes on short-lived feature branches when direct pushes could trigger an unapproved production deployment. Do not merge or push to `main` until the relevant release gate is satisfied.
 - Preview first. Production domain and main branch must remain untouched unless the owner explicitly approves a specific production release.
 - A general mandate to continue building does not mean silently deploying risky database or production changes.
 - Before production changes: verify backup/recovery path, migration impact, rollback strategy, and deployment compatibility.
@@ -175,7 +198,7 @@ This document is the operating command for execution style, quality, security, p
 The Command Master is the project's command hub. Subcommands are independent operating modes and inherit this entire charter, including the global execution mandate, MASTER_FOUNDATION.md, security requirements, and deployment governance.
 
 ### 19.1 `/command-master` — development
-Load this charter and the relevant foundation/project documents; inspect current repository, branch, deployment, and task state; select and execute the next highest-value safe development work; verify and report. Continue feature development on `redesign/dajjalfamily-home` by default. This command does not authorize production release.
+Load this charter and the relevant foundation/project documents; inspect current repository, branch, deployment, and task state; select and execute the next highest-value safe development work; verify and report. Use `main` as the baseline and create or continue a focused feature branch for the selected work. Do not merge to `main` or trigger production release without the required approval. This command does not authorize production release.
 
 ### 19.2 `/command-master-migration` — release and migration
 Run the release-readiness and migration workflow for a specific release candidate:
@@ -409,10 +432,29 @@ When requested, implement the account profile experience with display name, uniq
 
 - Owner instruction: accelerate the migration and continue development on `main`; use a safe alternative or defer a migration rather than waiting on unavailable tooling or Vercel build quota.
 - GitHub PR #1 was marked ready and successfully merged into `main` using a merge commit. Merge commit: `ce8247f0a1970ea2455dc409c2e6bb1d6e664a89`. Source branch head at merge: `03e68a65ecfed0d783e1df0621d026fc34325385`.
-- `main` is now the sole active development branch. Keep `redesign/dajjalfamily-home` as a historical rollback/reference branch until post-merge verification is complete; do not delete it as part of this migration.
+- `main` is the primary integration baseline. The historical `redesign/dajjalfamily-home` branch is retained as a rollback/reference branch; do not delete it. Subsequent isolated work may use short-lived feature branches to prevent unapproved deployment triggers.
 - Vercel's daily deployment/build quota was exhausted and the latest application-code preview remains the READY deployment built from `59cfa30296f4ffde610fbb3195f0e0ad89fa9c2f`. A temporary Vercel ignored-build-step setting was used to prevent the Git merge from automatically releasing unverified application code to production. Restore the normal build behavior immediately after repository synchronization. No production alias change or deliberate production application release is authorized by this branch migration.
 - Supabase CLI installation was unavailable, so the supported Supabase MCP migration workflow was used for the three already-applied production security migrations recorded in sections 29–31. Do not wait for the CLI to continue ordinary application development.
 - Decision on `202611140001_secure_wedding_guest_submissions.sql`: **defer/skip for now**, not apply blindly. It removes public INSERT policies and would break the current production Guestbook browser-write path until the server-side RSVP/Guestbook API routes are released. The existing Vercel edge rate limit and database direct-insert limiter/feature checks remain the transitional controls. Revisit this policy-removal migration only after those server routes are deliberately released and verified in production.
 - `202611140002_expand_player_profile_identity.sql` remains deferred; username/gender/phone/birth-date profile expansion is outside the current migration.
 - Latest PR check failure was the Vercel daily build-rate limit, not a reported application test failure. There were no GitHub review submissions or inline review threads on PR #1. The existing READY preview covers the application runtime code; the commits after that preview only mirrored migrations and updated documentation.
 - Next work must branch from `main`, verify the merged source and Vercel project wiring, restore/confirm normal Vercel build settings, and create a fresh preview when the quota resets. Keep production deployment and any later database policy removal as separate release gates.
+
+
+## 33. Current feature-branch and deployment-quota policy — 2026-11-14
+
+- Repository identity is `tebayoll97/dajjal-family`; the old repository name is retained only in historical records and package metadata where it remains an internal identifier.
+- `main` is the integration baseline. Use short-lived feature branches for isolated changes whenever a push or merge to `main` could trigger an unapproved production deployment.
+- Current staged work: `feature/tools-navigation`, containing the Tools / Alat sidebar entry, bilingual Wedding Invitation Builder link to `/df/wedding`, and the work/navigation documentation. It is not merged into `main` and has not been preview-tested.
+- While Vercel build quota is exhausted, do not create previews, poll deployment/build status, or claim build/QA success. Continue safe source and documentation work. Resume build and responsive/accessibility QA only when quota is expected to recover.
+- A feature branch may be merged only through the approved release workflow after source review and required checks. A merge is not itself permission to promote or alter production.
+
+
+## 34. Admin User Management lookup concurrency — 2026-11-14
+
+- The User Management player directory previously launched up to 50 Supabase Auth Admin `getUserById` calls simultaneously for one 50-player page.
+- `app/api/admin/players/route.js` now uses a bounded worker helper with a maximum of 8 concurrent Auth lookups per request.
+- Player result ordering, pagination, endpoint response fields, administrator verification, and existing Auth lookup fallback behavior are preserved.
+- Source commit: `63313ea508ad3210668277d78da063c3a14b6f4f`.
+- GitHub source re-fetch checks confirm the concurrency cap and response contract. This is not a substitute for lint/build, performance measurement, or runtime QA; those remain pending until Vercel quota recovery.
+- No merge to `main`, production deployment, live database change, or player data mutation occurred.

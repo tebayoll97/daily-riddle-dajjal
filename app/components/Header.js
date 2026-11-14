@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { stripLocalePrefix, withLocalePrefix } from "@/lib/localePath";
 
 import { supabaseAdminClient } from "@/lib/supabaseAdminClient";
 import { useLanguage } from "./LanguageProvider";
@@ -36,7 +37,7 @@ const translations = {
 };
 
 export default function Header() {
-  const pathname = usePathname();
+  const pathname = stripLocalePrefix(usePathname() || "/");
   const { language, setLanguage } = useLanguage();
 
   const [isAdmin, setIsAdmin] = useState(false);
@@ -185,22 +186,26 @@ export default function Header() {
   const navLinks = [
     {
       name: t.profile,
-      href: "/profile",
+      route: "/profile",
+      href: withLocalePrefix("/profile", language),
       icon: "♙",
     },
     {
       name: t.home,
-      href: "/",
+      route: "/",
+      href: withLocalePrefix("/", language),
       icon: "⌂",
     },
     {
       name: t.play,
-      href: "/games",
+      route: "/games",
+      href: withLocalePrefix("/games", language),
       icon: "✦",
     },
     {
       name: t.ranking,
-      href: "/leaderboard",
+      route: "/leaderboard",
+      href: withLocalePrefix("/leaderboard", language),
       icon: "♛",
     },
   ];
@@ -208,18 +213,15 @@ export default function Header() {
   if (isAdmin) {
     navLinks.push({
       name: t.admin,
-      href: "/admin",
+      route: "/admin",
+      href: withLocalePrefix("/admin", language),
       icon: "⚙",
     });
   }
 
-  function isActive(href) {
-    if (href === "/") return pathname === "/";
-
-    return (
-      pathname === href ||
-      pathname.startsWith(`${href}/`)
-    );
+  function isActive(route) {
+    if (route === "/") return pathname === "/";
+    return pathname === route || pathname.startsWith(`${route}/`);
   }
 
   const iconButton =
@@ -237,7 +239,7 @@ export default function Header() {
 
           {/* BRAND */}
           <Link
-            href="/"
+            href={withLocalePrefix("/", language)}
             className="min-w-0 flex flex-col"
           >
             <span className={`font-black tracking-wide text-white leading-tight transition-all duration-300 ${isCompact ? "text-xs sm:text-sm" : "text-sm sm:text-base"}`}>
@@ -279,7 +281,7 @@ export default function Header() {
 
             {/* SETTINGS */}
             <Link
-              href="/settings"
+              href={withLocalePrefix("/settings", language)}
               aria-label={t.settings}
               title={t.settings}
               className={`${iconButton} ${
@@ -330,7 +332,7 @@ export default function Header() {
           }`}
         >
           {navLinks.map((link) => {
-            const active = isActive(link.href);
+            const active = isActive(link.route);
 
             return (
               <Link

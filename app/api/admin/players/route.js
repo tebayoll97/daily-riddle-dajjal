@@ -4,6 +4,29 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
 
+const AUTH_LOOKUP_CONCURRENCY = 8;
+
+async function mapWithConcurrency(items, concurrency, mapper) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  const workerCount = Math.min(concurrency, items.length);
+
+  await Promise.all(
+    Array.from({ length: workerCount }, async () => {
+      while (true) {
+        const currentIndex = nextIndex;
+        nextIndex += 1;
+
+        if (currentIndex >= items.length) return;
+
+        results[currentIndex] = await mapper(items[currentIndex]);
+      }
+    })
+  );
+
+  return results;
+}
+
 export async function GET(request) {
   try {
     // 1. Verify administrator
@@ -103,8 +126,10 @@ export async function GET(request) {
     }
 
     // 5. Identify account providers from Supabase Auth
-    const enrichedPlayers = await Promise.all(
-      playerList.map(async (player) => {
+    const enrichedPlayers = await mapWithConcurrency(
+      playerList,
+      AUTH_LOOKUP_CONCURRENCY,
+      async (player) => {
         let accountType = "UNKNOWN";
         let isBanned = false;
         let authEmail = null;
@@ -162,7 +187,7 @@ export async function GET(request) {
           totalPoints: stats.totalPoints,
           gamesPlayed: stats.gamesPlayed,
         };
-      })
+      }
     );
 
     // 6. Return paginated result

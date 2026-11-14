@@ -2,8 +2,8 @@
 # MASTER WEBSITE FOUNDATION
 
 **Document ID:** DF-MF-001  
-**Version:** 1.1  
-**Status:** Approved — v1.1  
+**Version:** 1.2  
+**Status:** Approved — v1.2  
 **Project:** Dajjal Family  
 **Primary Domain:** https://dajjalfamily.com  
 **Tagline:** One Family. Many Possibilities.
@@ -123,65 +123,83 @@ Prioritaskan penggunaan shared components sebelum membuat komponen duplikat.
 # 3. GLOBAL LANGUAGE AND URL ARCHITECTURE
 
 ## 3.1 Supported languages
+- Bahasa Indonesia (`id`).
+- English (`en`).
 
-- English (EN).
-- Bahasa Indonesia (ID).
+## 3.2 Official localized URL structure
 
-## 3.2 URL structure
-
-Gunakan URL prefix sebagai standar resmi:
-
-**English**
-- /en/
-- /en/gaming/
-- /en/knowledge/
-- /en/blog/
+Every user-facing website route must use a language prefix:
 
 **Bahasa Indonesia**
-- /id/
-- /id/gaming/
-- /id/knowledge/
-- /id/blog/
+- `/id`
+- `/id/games`
+- `/id/knowledge`
+- `/id/blog`
 
-Setiap halaman yang memiliki versi terjemahan harus memiliki hubungan bahasa yang jelas.
+**English**
+- `/en`
+- `/en/games`
+- `/en/knowledge`
+- `/en/blog`
 
-## 3.3 Language detection
+Rules:
+- The language prefix is part of the public URL contract and must be used consistently for homepage, feature pages, content pages, account pages, and other UI routes.
+- Keep the existing Next.js App Router directory structure unless a separately reviewed architecture change requires moving it. Middleware may rewrite a localized URL internally to the existing route; URL localization does not require duplicating every route directory.
+- API endpoints remain unprefixed under `/api/*`. OAuth/auth callback endpoints and static assets must be explicitly excluded from locale redirects/rewrites where their contracts require the original path.
+- Legacy unprefixed UI URLs must temporarily redirect with HTTP 307 to the matching localized URL. Do not use permanent redirects until the migration and SEO behavior have been reviewed.
+- Query parameters must be preserved through route redirects and language changes. Client-side language switching must also preserve the current page and URL hash when a matching translated route exists.
 
-Prioritas:
-1. Preferensi bahasa yang disimpan pengguna.
-2. Bahasa browser/perangkat.
-3. Negara sebagai fallback.
-4. English sebagai fallback terakhir.
+## 3.3 Default language and preference priority
 
-Pilihan manual pengguna harus diprioritaskan daripada hasil deteksi otomatis.
+The official product behavior is:
+1. An explicit supported locale in the URL (`/id` or `/en`) is authoritative for that request.
+2. When a visitor opens an unprefixed UI URL, use the latest valid explicit language choice stored in the `df-locale` preference cookie.
+3. If no valid preference exists, default to Bahasa Indonesia (`id`).
 
-## 3.4 Language switching
+Additional rules:
+- Do not use browser language, device language, IP geolocation, or country as an automatic first-visit override. First-time visitors default to Indonesian.
+- When a visitor explicitly opens a localized URL or changes language using the language control, persist that choice in the `df-locale` cookie for one year.
+- An explicit `/id` or `/en` URL updates the saved preference so subsequent unprefixed entry points follow the latest explicit choice.
+- Invalid or unsupported cookie values must safely fall back to `id`.
+- The URL locale and server-provided locale context must agree. Do not let a stale client preference override an explicit URL prefix.
 
-- Pengguna dapat berpindah bahasa kapan saja.
-- Pilihan manual disimpan.
-- Pergantian bahasa mempertahankan halaman yang sedang dibuka jika terjemahannya tersedia.
-- Jika pasangan halaman tidak tersedia, arahkan ke halaman yang relevan.
-- Seluruh komponen global wajib mendukung EN dan ID.
-- Hindari teks antarmuka yang tercampur tanpa alasan.
+## 3.4 Language switching and incomplete translations
+
+- Users may switch between Indonesian and English at any time.
+- When the corresponding translated page exists, switching language must keep the user on the equivalent page, preserving query parameters and hash.
+- If an equivalent page does not exist, navigate to the closest relevant page in the selected language; do not generate a broken URL.
+- Every shared navigation component, route detector, account entry point, and immersive experience must work with both locale prefixes.
+- Do not claim a page is translated merely because its URL has a locale prefix. Page content, labels, metadata, forms, validation, and error states must be translated or use a documented fallback.
+- Until English copy is ready, use the documented Indonesian fallback or a clear availability message. Never show untranslated mixed-language UI without a deliberate reason.
 
 ## 3.5 Translation architecture
 
-- Gunakan translation dictionary terpusat.
-- Gunakan key yang konsisten.
-- Pisahkan teks UI dari konten.
-- Hindari terjemahan tersebar di banyak komponen.
-- Sediakan fallback untuk terjemahan yang belum tersedia.
+- Use translation dictionaries or a centralized content model with stable keys.
+- Keep UI copy separate from business logic and page structure.
+- Reuse consistent translation keys for shared components.
+- Provide a predictable fallback for missing keys; Indonesian is the product's default fallback.
+- Keep content translations paired by stable content/page identity rather than assuming every slug is identical across languages.
+- Translation changes must be reviewed for meaning, clarity, and consistency, not only literal wording.
 
 ## 3.6 Multilingual SEO
 
-- Setiap versi bahasa memiliki URL canonical sendiri.
-- Gunakan hreflang untuk pasangan halaman yang benar-benar tersedia.
-- Sitemap harus memuat URL bahasa yang benar.
-- Hindari duplicate content.
-- Jangan menggunakan redirect otomatis yang menghalangi crawler atau pengguna mengakses versi bahasa lain.
-- Pertahankan route lama melalui strategi redirect yang terencana.
+- Each published language version must have its own localized canonical URL.
+- Add `hreflang` only for language versions that genuinely exist and are accessible; do not advertise missing or untranslated pages as valid alternates.
+- Include only valid, indexable, published localized URLs in the sitemap. Do not manufacture a second language URL for a page that does not exist in that language.
+- Metadata, Open Graph URLs, structured data, internal links, and breadcrumbs must use the correct localized URL.
+- Private, authenticated, admin, and sensitive pages must follow the appropriate noindex policy; robots directives are not access control.
+- Keep API routes, callbacks, assets, and non-page resources out of the public page sitemap.
+- Avoid duplicate content and redirect chains. Prefer direct locale-aware internal links as pages are migrated.
+- Keep redirects temporary during migration and review permanent redirect policy separately.
 
-Migrasi URL bahasa dilakukan bertahap setelah audit route dan dependensi website.
+## 3.7 Incremental migration and compatibility
+
+- Apply localized routing incrementally on a dedicated branch and audit all existing routes before release.
+- Preserve existing App Router page files and feature behavior wherever possible; use middleware rewrite rather than mass-moving route directories when that is the safer design.
+- Audit homepage, games, mini-games, account/profile, admin, wedding experiences, OAuth callbacks, API routes, and static assets.
+- Test first visit, saved ID preference, saved EN preference, explicit locale URLs, deep links, query/hash preservation, language switching, and legacy unprefixed URLs.
+- Do not deploy or merge the migration to production until route, security, SEO, responsive, and regression checks pass and the release is explicitly authorized.
+
 
 # 4. APPLICATION ARCHITECTURE
 
