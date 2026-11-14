@@ -221,7 +221,7 @@ export default function ProfilePage() {
           {t.title}
         </h1>
 
-        {!player.username && (
+        {player.profileIdentityEnabled && !player.username && (
           <section className="mt-6 rounded-2xl border border-amber-400/30 bg-amber-500/10 p-5 ui-card">
             <div className="flex items-start gap-3">
               <span className="text-2xl" aria-hidden="true">✦</span>
