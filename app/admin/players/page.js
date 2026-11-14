@@ -20,7 +20,6 @@ const translations = {
     lastSignIn: "LAST SIGN-IN",
     authMissing: "LOGIN ACCOUNT NOT FOUND",
     never: "Never",
-    deleteNote: "This removes the player profile and game history only. The login account remains.",
     banned: "BANNED",
     active: "ACTIVE",
     actionTitle: "PLAYER ACTION",
@@ -82,7 +81,6 @@ const translations = {
     lastSignIn: "LOGIN TERAKHIR",
     authMissing: "AKUN LOGIN TIDAK DITEMUKAN",
     never: "Belum pernah",
-    deleteNote: "Tindakan ini hanya menghapus profil pemain dan riwayat game. Akun login tetap ada.",
     banned: "DIBLOKIR",
     active: "AKTIF",
     actionTitle: "TINDAKAN PEMAIN",
@@ -626,7 +624,7 @@ export default function AdminPlayersPage() {
                             {player.nickname || "Unnamed Player"}
                           </p>
                           <p className="text-[11px] text-gray-400 mt-0.5">
-                            {player.authEmail || (player.authUserExists ? t.unknownLabel : t.authMissing)}
+                            {player.authEmail || (player.hasAuthLink ? t.unknownLabel : t.authMissing)}
                           </p>
                           <p className="text-[10px] text-gray-500 mt-0.5">{t.server} {player.serverNumber || "-"}</p>
                         </div>
