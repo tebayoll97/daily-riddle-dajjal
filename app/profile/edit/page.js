@@ -7,6 +7,9 @@ import { supabase } from "@/lib/supabase";
 import { useLanguage } from "@/app/components/LanguageProvider";
 import GameCharacter from "@/lib/GameCharacter";
 
+// Extended identity fields stay gated until the approved Supabase migration is applied.
+const EXTENDED_PROFILE_FIELDS_ENABLED = false;
+
 export default function EditProfilePage() {
   const router = useRouter();
   const { language } = useLanguage();
@@ -57,7 +60,7 @@ export default function EditProfilePage() {
 
       const { data, error: profileError } = await supabase
         .from("players")
-        .select("id, nickname, username, gender, phone_number, birth_date, server_number, avatar_url, avatar_path")
+        .select("id, nickname, server_number, avatar_url, avatar_path")
         .eq("auth_user_id", user.id)
         .maybeSingle();
 
@@ -276,10 +279,12 @@ export default function EditProfilePage() {
         .from("players")
         .update({
           nickname: cleanNickname,
-          username: cleanUsername.toLowerCase(),
-          gender: gender || null,
-          phone_number: cleanPhone || null,
-          birth_date: birthDate || null,
+          ...(EXTENDED_PROFILE_FIELDS_ENABLED ? {
+            username: cleanUsername.toLowerCase(),
+            gender: gender || null,
+            phone_number: cleanPhone || null,
+            birth_date: birthDate || null,
+          } : {}),
           server_number: serverNumber.trim() ? cleanServer : null,
           avatar_url: newAvatarUrl,
           avatar_path: newAvatarPath,
