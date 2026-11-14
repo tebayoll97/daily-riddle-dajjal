@@ -24,6 +24,10 @@ export function LanguageProvider({ children, initialLanguage = "en" }) {
     setReady(true);
   }, [fallback]);
 
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   const setLanguage = (next) => {
     if (next !== "en" && next !== "id") return;
     setLanguageState(next);
