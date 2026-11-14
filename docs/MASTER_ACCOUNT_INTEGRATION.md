@@ -73,18 +73,46 @@ Wallet balances and ledger history are readable only by the owning authenticated
 Use a distinct `game_id` for each mini-game. A coin earned in one game must not alter another game's wallet. The initial currency code is `coin`, but the schema supports additional game-specific currency codes.
 
 
-## Account access policy (November 2026)
+## Official platform access policy — Account-Based Platform with Progressive Login (November 14, 2026)
 
-- Mini Games are instant-play experiences and do not require authentication. They must not write permanent player records, game scores, wallet balances, or leaderboard results.
-- Games are account-based experiences. A verified Google login is required before gameplay begins.
-- The Game Library remains publicly viewable. Authentication is required only when the player chooses to launch an account-based game.
-- Google login automatically provisions one players row on first successful login. The initial nickname is derived from the email local-part (the text before @); if occupied, a short unique suffix is added.
-- Nickname is editable but never required to be changed. A blank nickname field means keep the current nickname.
-- Server number is optional and may remain NULL until the player chooses to set it in Edit Profile.
-- Profile photo defaults to the Google avatar when available and can be changed in Edit Profile.
-- The trusted provisioning endpoint validates the Supabase access token and Google identity before creating a player.
-- Existing Player IDs and game progress must remain unchanged when this policy is introduced.
-- Do not merge anonymous Guest identities into a different Google account. Existing Guest linking must retain the same Auth user and Player ID if the player explicitly links Google.
-- Enforce Google identity checks in server routes; never rely on client-side hiding alone.
-- Direct browser SELECT access to leaderboard/statistics/wallet/result tables and the global leaderboard view remains revoked. Server APIs use service-role access only after verifying the bearer token and Google identity.
-- MAMAH NGAMUK best distance remains in player_game_stats.best_distance, scoped to the player and game. It is not stored in localStorage.
+This policy supersedes any earlier rule in this document that requires Google login before all main-game launches. Authentication is progressive and based on the capability being used, not a blanket gate.
+
+### Public access — no login
+- Homepage, public content, game catalogue, public wedding invitations and previews.
+- Supported demo/mini games that do not persist personal progress, submit authenticated competition results, or mutate an account wallet.
+- Browsing a game description or preview must not trigger an authentication redirect.
+
+### Account access — authenticate when needed
+Require a valid account session when a visitor chooses to use:
+- Persistent progress or cross-device synchronization.
+- Player profile, personal statistics, achievements, or saved history.
+- Leaderboards, ranked competition, or authenticated result submission.
+- Wallet, coins, rewards, purchases, entitlements, or other account-bound value.
+- Social/saved features that require a stable owner identity.
+
+Do not interrupt a public browsing journey with a login wall. Explain the benefit at the point the user requests an account-dependent action.
+
+### Administrative access
+Admin capabilities require a separate server-side permission check on every privileged operation. A logged-in user is not automatically an administrator.
+
+### Canonical identity and ownership
+- Supabase Auth user ID is the authentication identity.
+- `players.id` is the universal gaming Player ID and must be resolved from the verified Auth identity on the server.
+- Product/game records remain scoped by owner and product/game ID.
+- Never trust client-supplied IDs, roles, scores, wallet balances, or entitlements.
+- Never silently merge two Auth identities. Explicit Guest-to-provider linking must preserve the same Auth user and Player ID. If the provider identity belongs to another account, stop and require the user to sign into that account; do not auto-merge or reassign data.
+
+### Privacy and migration
+- Collect the minimum data needed and explain its purpose.
+- Public APIs expose only explicitly approved public fields; never expose Auth IDs, emails, tokens, or private metadata.
+- Preserve existing Auth accounts, Guest identities, Player IDs, game progress, invitation ownership, and wallet balances.
+- No blanket account migration, destructive schema change, production data change, or production release is authorized by this policy alone.
+
+### Required phased rollout
+1. Establish the policy and identity contract.
+2. Inventory features and classify public/account/admin access; create shared server-side authorization contracts.
+3. Migrate each game/product incrementally and test ownership, Guest linking, and return paths.
+4. Add privacy notices, account lifecycle, data minimization, and privacy-safe analytics.
+5. Complete security, accessibility, mobile, localization, regression, and preview QA before release.
+
+Existing implementations must be audited against this policy before being changed. A policy statement does not mean every current route has already been migrated.
