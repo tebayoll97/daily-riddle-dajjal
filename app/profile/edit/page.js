@@ -323,18 +323,24 @@ export default function EditProfilePage() {
         serverNumber: serverNumber.trim() ? String(cleanServer) : "",
       };
 
-      if (
-        avatarPath &&
-        avatarPath !== newAvatarPath
-      ) {
-        await supabase.storage
-          .from("avatars")
-          .remove([avatarPath]);
-      }
-
       if (newPassword) {
         const { error: passwordError } = await supabase.auth.updateUser({ password: newPassword });
         if (passwordError) throw passwordError;
+      }
+
+      // Old-avatar cleanup is best-effort and must not turn a successful
+      // profile/password save into a misleading failure state.
+      if (avatarPath && avatarPath !== newAvatarPath) {
+        try {
+          const { error: removeError } = await supabase.storage
+            .from("avatars")
+            .remove([avatarPath]);
+          if (removeError) {
+            console.error("Unable to remove previous avatar:", removeError);
+          }
+        } catch (removeError) {
+          console.error("Unable to remove previous avatar:", removeError);
+        }
       }
 
       setAvatarUrl(newAvatarUrl || "");
