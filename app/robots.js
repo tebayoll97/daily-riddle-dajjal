@@ -1,6 +1,6 @@
 const origin = "https://dajjalfamily.com";
 
-const privatePaths = [
+const privatePathPrefixes = [
   "/admin",
   "/profile",
   "/settings",
@@ -8,12 +8,15 @@ const privatePaths = [
   "/register",
   "/design-system",
   "/character-test",
-  "/df/wedding",
+  "/df/wedding/",
 ];
+
+const privateExactPaths = ["/df/wedding"];
 
 const disallow = [
   "/api",
-  ...privatePaths.flatMap((path) => [path, `/id${path}`, `/en${path}`]),
+  ...privatePathPrefixes.flatMap((path) => [path, `/id${path}`, `/en${path}`]),
+  ...privateExactPaths.flatMap((path) => [`${path}$`, `/id${path}$`, `/en${path}$`]),
 ];
 
 export default function robots() {
