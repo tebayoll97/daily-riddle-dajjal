@@ -23,11 +23,11 @@ Next.js middleware rewrites the locale-prefixed URL internally to the existing A
 The client language switch writes the preference cookie and navigates to the same path under the selected locale. Existing internal links without locale prefixes remain functional through temporary middleware redirects while pages are migrated to locale-aware links. The language provider compares a requested locale with its current context value before navigating. Shared route chrome, header, and footer normalize the active pathname by removing an optional locale prefix, so home/DF/game layout detection and active navigation work under both `/id/...` and `/en/...` URLs.
 
 ## SEO and privacy
-- The root layout supplies locale-aware canonical and alternate-language URLs for the current localized path.
+- The root layout supplies a locale-aware canonical URL for the current localized path. Language alternates (`hreflang`) are declared only by page metadata after both language versions have been verified as published; they are not inherited globally by private, game, or untranslated routes.
 - Page-specific hardcoded unprefixed canonicals were removed from the leaderboard and mini-game layouts so they inherit the locale-aware root canonical.
 - Private account/admin/settings and wedding-builder paths receive `noindex,nofollow` metadata from the root layout.
 - `robots.txt` disallows private paths in both unprefixed and localized forms. This is crawler guidance only; server-side authentication and authorization remain the actual access controls.
-- Sitemap emits both locale variants for the currently enumerated public routes only.
+- Sitemap emits both locale variants only for the enumerated public routes whose page content is implemented in both languages: homepage, section landing pages, Game Library, DF home, and the public wedding invitation.
 - Do not claim full localized SEO coverage until metadata, translated content, and sitemap route validity have been audited for every public page.
 
 ## Deferred / QA required
