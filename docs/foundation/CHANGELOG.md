@@ -67,3 +67,13 @@
 - Made the global master mandate explicitly binding on every current and future subcommand: expert-level ownership, proactive decision-making, concise and efficient communication, and maximum practical results.
 - Clarified that confidence must remain evidence-based and cannot override security, verification, or production approval safeguards.
 - Status: documentation committed to `redesign/dajjalfamily-home` only. No merge to `main`, production deployment, or Supabase database change.
+
+
+## Profile and User Management — Development implementation
+
+- Added login email, authentication provider, and last sign-in details to the player's Account Security area.
+- Upgraded the existing admin Player Management module into User Management without changing its route, preserving compatibility.
+- Added linked account email and last sign-in information, active/banned filters, clearer profile-only deletion messaging, and success feedback for ban/unban/delete actions.
+- Removed the internal Supabase Auth user ID from the admin player-list API response and distinguished missing Auth links from failed Auth lookups.
+- Scope: directory currently lists player profiles and their linked login accounts; standalone Auth users without player profiles remain outside this directory.
+- Status: committed to `redesign/dajjalfamily-home`; preview build and interactive QA remain blocked by Vercel build-rate limiting. No production release or database schema change.
