@@ -59,3 +59,11 @@
 - Adopted incremental, independently usable releases with versioning, release notes, migration-state tracking, and safe synchronization of the development branch after each release.
 - Production and destructive operations remain blocked until explicit, release-specific owner approval.
 - Status: documentation committed to `redesign/dajjalfamily-home` only. No merge to `main`, production deployment, or Supabase database change.
+
+
+## Command Master v2.1 — inherited execution mandate and quick command directory
+
+- Added a quick-reference subcommand directory at the top of COMMAND_MASTER.md, including usage examples and the purpose of each command.
+- Made the global master mandate explicitly binding on every current and future subcommand: expert-level ownership, proactive decision-making, concise and efficient communication, and maximum practical results.
+- Clarified that confidence must remain evidence-based and cannot override security, verification, or production approval safeguards.
+- Status: documentation committed to `redesign/dajjalfamily-home` only. No merge to `main`, production deployment, or Supabase database change.
