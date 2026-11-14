@@ -366,3 +366,13 @@ When requested, implement the account profile experience with display name, uniq
 - Source commits: `34301b7d8fc55b7b15fe0477eeec52b730a3d7d2`, `ba4cfa20d9de15d5ed8eb2c992c34122147402d7`, and `b670431d81ac77db172c5d90bc9215b7f0681e39`.
 - These are source-only changes. Build, API tests, and interactive QA remain pending; no database migration, production deployment, or main-branch change was made.
 - Follow-up audit item: profile save currently combines profile update and optional password update in one flow. Review partial-failure handling so a successful profile write is not reported as a complete failure or followed by deletion of an avatar now referenced by the saved profile.
+
+## 28. Daily Riddle product direction — paused (2026-11-14)
+
+- Product decision from the owner: pause further development of The Daily Riddle. It may later be removed or replaced with a game that users are more likely to play.
+- Until that product decision is finalized, do not spend additional development time on Daily Riddle features, content tooling, balancing, or new gameplay improvements.
+- Do not delete the `riddles`/`scores` data, database tables, RPCs, API routes, or historical player results yet. They may be needed for migration, reporting, or a future replacement; destructive cleanup requires a separate reviewed plan and explicit approval.
+- Existing source-level validation hardening already committed remains in place; it does not mean the game is being actively developed.
+- The current Games Library still renders a Daily Riddle card and `/game` remains routable. Clarify whether “stop” means pause development only or also hide/disable public access before changing public UI or route behavior.
+- Keep the current focus on Admin and Profile, plus the existing arcade games. Evaluate replacement game candidates separately using actual player interest/retention evidence rather than assuming which genre will perform best.
+- No public visibility, routing, database, or production change was made as part of this pause decision.
