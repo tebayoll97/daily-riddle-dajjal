@@ -1,5 +1,5 @@
 # COMMAND MASTER — DAJJAL FAMILY
-Version: 2.2
+Version: 2.3
 Status: Active operating charter
 Owner: Dajjal Family project owner
 Repository: tebayoll97/dajjal-family
@@ -37,6 +37,29 @@ Every command, including every present and future subcommand, MUST inherit and a
 Act proactively as the project's builder, architect, product strategist, security reviewer, database engineer, UX/UI designer, growth analyst, and technical advisor. Do not wait for the owner to prescribe every implementation detail. Choose the safest high-value next action, explain material trade-offs, execute reversible work, verify it, and report the result.
 
 Use an efficiency-first workflow: batch related work, inspect before editing, prefer one coherent implementation/commit/preview cycle, avoid repetitive deployments, automate repeatable checks, and prioritize by user impact and risk. Efficiency must never bypass security, tests, backups, or review.
+
+## 3. Mandatory project-context preflight
+
+Before executing `/command-master` or any Command Master subcommand, read and apply the current versions of these repository documents:
+
+1. `docs/aturan-kerja.md` — project-specific operating rules and owner decisions.
+2. `docs/foundation/COMMAND_MASTER.md` — this execution charter, command scope, safety rules, and release authority.
+3. `docs/foundation/MASTER_FOUNDATION.md` — governing product, architecture, language/URL, security, SEO, accessibility, and quality standards.
+4. `docs/foundation/DESIGN_SYSTEM.md` — visual tokens, component rules, responsive behavior, and theme standards.
+
+These are mandatory preflight documents, not optional reference links. Read them before planning or changing code; do not rely only on memory, an old summary, or a previous conversation. If a document cannot be accessed, disclose that limitation and do not silently assume its rules. Re-read the relevant sections whenever a task materially affects their domain.
+
+After preflight, inspect the current repository branch and working source before implementation. The Master Foundation is the governing product/architecture baseline; the Command Master defines how work is executed and controlled. If implementation or a lower-level document conflicts with an approved Master Foundation decision, stop and reconcile the conflict through documented owner approval rather than silently overriding the foundation.
+
+### Bilingual URL compliance gate
+
+For every route, navigation, account, game, SEO, or content task:
+- Apply the current bilingual policy in `MASTER_FOUNDATION.md`: `/id` and `/en` prefixes, Indonesian first-visit default, and persistence of the latest explicit language choice.
+- Treat an explicit locale in the URL as authoritative; do not substitute browser language or geolocation.
+- Preserve existing App Router structure where practical; audit middleware rewrites, route matching, internal links, query/hash handling, API endpoints, OAuth callbacks, static assets, and immersive game routes.
+- Ensure canonical, hreflang, sitemap, metadata, and indexability describe only real published language versions.
+- Do not equate a localized URL with translated content. Check page copy, shared UI, forms, validation, errors, and fallback behavior.
+- Keep bilingual changes incremental, source-reviewed, tested, and behind the existing branch/deployment approval gates.
 
 ## 3. Product principles
 - Follow MASTER_FOUNDATION.md as the governing architecture and product foundation.
