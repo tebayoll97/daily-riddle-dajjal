@@ -23,7 +23,7 @@ export function middleware(request) {
 
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-df-locale", locale);
-    requestHeaders.set("x-df-path", pathname);
+    requestHeaders.set("x-df-path", localizedPath);
 
     const response = NextResponse.rewrite(destination, {
       request: { headers: requestHeaders },
