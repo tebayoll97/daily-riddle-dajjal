@@ -320,3 +320,10 @@ When requested, implement the account profile experience with display name, uniq
 - If the administrator lookup fails, the API fails closed and makes no account change.
 - This guard does not implement role revocation or demotion. Administrator role lifecycle must be handled through a separately reviewed workflow that protects the last effective administrator.
 - Verification status: source change committed to `redesign/dajjalfamily-home`; build, API-level tests, and exact-commit preview QA remain pending.
+
+## 23. Authentication security audit — login attempt controls (2026-11-14)
+- The public `/login` and `/admin/login` pages currently call Supabase `signInWithPassword` directly from browser clients. `/register` redirects to `/login`; no separate password sign-up page is active.
+- No application-owned, durable failed-password-attempt counter or lockout policy is currently implemented in the database or application code.
+- Supabase Auth provides its own endpoint-level rate limiting and CAPTCHA support. These platform controls are useful defense-in-depth, but must not be represented as a verified per-account failed-password lockout policy for this application. See [Supabase Auth rate limits](https://supabase.com/docs/guides/auth/rate-limits).
+- Before adding username or phone alias login, implement a shared server-side password-login flow and a durable, atomic limiter that covers both public and admin password sign-in paths. Avoid process-memory counters on Vercel; never store raw passwords, raw identifiers, or raw IP addresses in limiter records/logs.
+- Implementation is intentionally pending: the current connected workflow does not provide a local Supabase CLI migration-creation step. Do not mutate the active database or fabricate a migration version/name to bypass the migration workflow. No custom limiter migration has been applied.
