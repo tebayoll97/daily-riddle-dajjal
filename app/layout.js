@@ -6,6 +6,22 @@ import { ThemeProvider } from "./components/ThemeProvider";
 import { headers } from "next/headers";
 
 const ORIGIN = "https://dajjalfamily.com";
+const NO_INDEX_PATHS = [
+  "/admin",
+  "/profile",
+  "/settings",
+  "/login",
+  "/register",
+  "/design-system",
+  "/character-test",
+  "/df/wedding",
+];
+
+function isPrivatePath(pathname) {
+  return NO_INDEX_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`)
+  );
+}
 
 export async function generateMetadata() {
   const requestHeaders = await headers();
@@ -19,6 +35,7 @@ export async function generateMetadata() {
     description: "Explore Dajjal Family, a growing digital ecosystem for gaming, knowledge, articles, digital products, business, and community.",
     applicationName: "Dajjal Family",
     keywords: ["Dajjal Family", "digital ecosystem", "online games", "digital products", "knowledge and learning", "digital community"],
+    ...(isPrivatePath(pathname) ? { robots: { index: false, follow: false } } : {}),
     alternates: {
       canonical: `${ORIGIN}${localizedPath}`,
       languages: {
