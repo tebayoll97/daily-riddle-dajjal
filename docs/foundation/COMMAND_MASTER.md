@@ -357,3 +357,12 @@ When requested, implement the account profile experience with display name, uniq
 - Profile editor fix committed as `3ed8189ea20cd2dec9d9c18435fde0b4c9470c54`: six references to an undefined schema-readiness identifier now use the existing `profileIdentityEnabled` state from the authenticated profile API.
 - Admin riddle update API fix committed as `f48929986e69361c9e6090813df9719d4a9b0b62`: PATCH now validates the JSON body shape, UUID format, required field types, accepted-answer array item types/counts, and maximum question/hint/answer lengths before database writes. Invalid input returns HTTP 400 instead of falling into an internal error path or accepting unbounded arrays.
 - These changes are source-level fixes only. Build, API behavior tests, and interactive profile/admin preview QA are still pending. No database migration, Auth setting, production deployment, or main-branch change was made.
+
+## 27. Admin riddle creation and deletion validation (2026-11-14)
+
+- Aligned `app/api/admin/riddles/create/route.js` with the stricter update API: accepted-answer arrays now reject non-string items instead of silently filtering them, while retaining the 1–30 item and 120-character bounds after normalization.
+- The create API now rejects a non-boolean `is_active` value when supplied; omission still defaults to active.
+- Added UUID-format validation to the riddle DELETE route before querying Supabase, matching the identifier validation already used by PATCH.
+- Source commits: `34301b7d8fc55b7b15fe0477eeec52b730a3d7d2`, `ba4cfa20d9de15d5ed8eb2c992c34122147402d7`, and `b670431d81ac77db172c5d90bc9215b7f0681e39`.
+- These are source-only changes. Build, API tests, and interactive QA remain pending; no database migration, production deployment, or main-branch change was made.
+- Follow-up audit item: profile save currently combines profile update and optional password update in one flow. Review partial-failure handling so a successful profile write is not reported as a complete failure or followed by deletion of an avatar now referenced by the saved profile.
