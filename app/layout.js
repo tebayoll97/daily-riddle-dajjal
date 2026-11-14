@@ -1,5 +1,4 @@
 import "./globals.css";
-import "./home.css";
 import RouteChrome from "./components/RouteChrome";
 import GlobalAudioController from "./components/GlobalAudioController";
 import { LanguageProvider } from "./components/LanguageProvider";
