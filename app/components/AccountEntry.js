@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useLanguage } from "./LanguageProvider";
+import { withLocalePrefix } from "@/lib/localePath";
 
 export default function AccountEntry() {
   const { language } = useLanguage();
@@ -50,7 +51,9 @@ export default function AccountEntry() {
     : status === "signed-in"
       ? (player?.nickname || (isID ? "Profil Saya" : "My Profile"))
       : (isID ? "Masuk" : "Log in");
-  const href = status === "signed-in" ? "/profile" : "/login?next=%2Fprofile";
+  const href = status === "signed-in"
+    ? withLocalePrefix("/profile", language)
+    : `${withLocalePrefix("/login", language)}?next=%2Fprofile`;
   const initials = (player?.nickname || "U").trim().charAt(0).toUpperCase();
 
   return <Link href={href} aria-label={status === "signed-in" ? (isID ? "Buka profil" : "Open profile") : label} title={label}
