@@ -1,9 +1,9 @@
 # COMMAND MASTER — DAJJAL FAMILY
-Version: 2.3
+Version: 2.4
 Status: Active operating charter
 Owner: Dajjal Family project owner
 Repository: tebayoll97/dajjal-family
-Development baseline: main; use short-lived feature branches for isolated, unverified work
+Development baseline: main; routine implementation and direct web validation happen on main
 Canonical site: https://dajjalfamily.com
 
 ## SUBCOMMAND DIRECTORY — QUICK REFERENCE
@@ -59,7 +59,7 @@ For every route, navigation, account, game, SEO, or content task:
 - Preserve existing App Router structure where practical; audit middleware rewrites, route matching, internal links, query/hash handling, API endpoints, OAuth callbacks, static assets, and immersive game routes.
 - Ensure canonical, hreflang, sitemap, metadata, and indexability describe only real published language versions.
 - Do not equate a localized URL with translated content. Check page copy, shared UI, forms, validation, errors, and fallback behavior.
-- Keep bilingual changes incremental, source-reviewed, tested, and behind the existing branch/deployment approval gates.
+- Keep bilingual changes incremental, source-reviewed, and tested. Use the current owner-approved main/production workflow; do not introduce a feature branch unless isolation is materially needed or explicitly requested.
 
 ## 3. Product principles
 - Follow MASTER_FOUNDATION.md as the governing architecture and product foundation.
@@ -102,18 +102,19 @@ For each meaningful change:
 5. Run relevant lint, type/build, unit/integration, and route-level checks available.
 6. Review diff for secrets, unintended files, regressions, and accessibility.
 7. Commit with a descriptive message.
-8. Deploy a preview and verify the relevant behavior.
+8. Deploy to the current owner-approved target (currently Production from `main`) and verify the relevant behavior in the live website; if deployment is blocked, report it explicitly and do not claim live verification.
 9. Record the outcome, remaining risks, and next action.
 
 Never claim a test passed unless it was actually run. Never claim a route is live-verified if only a build succeeded. No system can guarantee zero bugs; aim for prevention, observability, graceful failure, and fast recovery.
 
 ## 7. Deployment and change control
-- Use `main` as the integration baseline. Implement isolated changes on short-lived feature branches when direct pushes could trigger an unapproved production deployment. Do not merge or push to `main` until the relevant release gate is satisfied.
-- Preview first. Production domain and main branch must remain untouched unless the owner explicitly approves a specific production release.
-- A general mandate to continue building does not mean silently deploying risky database or production changes.
-- Before production changes: verify backup/recovery path, migration impact, rollback strategy, and deployment compatibility.
-- Never merge to main, promote a production deployment, or run destructive production database operations without explicit release authorization.
-- Keep changes small enough to diagnose and revert, but batch related safe improvements into coherent releases.
+- `main` is the active working and integration branch. Routine application implementation, commits, and direct web validation are performed on `main`; do not create feature branches by default.
+- The owner explicitly authorized on 2026-11-15 routine application-code deployment from `main` to the Production website for direct browser testing while the site has no expected visitors. Treat this as the current default release workflow until the owner changes it.
+- Use a separate branch only when the owner requests isolation or when a material risk makes direct work on `main` unsafe; explain the reason and merge it back after verification.
+- This standing authorization covers application code and documentation only. It does not authorize production database migrations or destructive data changes, secret rotation, domain/DNS changes, billing/plan changes, or security-sensitive production configuration changes.
+- Before any production database or destructive operation: verify backup/recovery path, migration impact, rollback strategy, and obtain explicit authorization for that operation.
+- Keep changes small enough to diagnose and revert, batch related safe improvements, and verify the live website after each successful production deployment.
+- If Vercel or another release dependency blocks deployment, do not claim the website is updated; report the exact blocker and continue safe source work on `main`.
 
 ## 8. Product, marketing, and monetization
 - Build around real user needs and validated demand.
