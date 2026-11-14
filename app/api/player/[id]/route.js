@@ -18,7 +18,7 @@ export async function GET(request, { params }) {
 
     const basePlayerQuery = () => supabaseAdmin
       .from("players")
-      .select("id, auth_user_id, nickname, server_number, created_at, avatar_url")
+      .select("id, auth_user_id, nickname, server_number, created_at, avatar_url, avatar_path")
       .eq("id", id)
       .maybeSingle();
 
@@ -26,7 +26,7 @@ export async function GET(request, { params }) {
     // fall back to the stable legacy columns without breaking profile access.
     let { data: player, error: playerError } = await supabaseAdmin
       .from("players")
-      .select("id, auth_user_id, nickname, server_number, created_at, avatar_url, username, gender, phone_number, birth_date")
+      .select("id, auth_user_id, nickname, server_number, created_at, avatar_url, avatar_path, username, gender, phone_number, birth_date")
       .eq("id", id)
       .maybeSingle();
 
@@ -98,7 +98,7 @@ export async function GET(request, { params }) {
     );
 
     return Response.json({
-      player: { id: player.id, nickname: player.nickname, profileIdentityEnabled, username: player.username || null, gender: player.gender || null, phone_number: player.phone_number || null, birth_date: player.birth_date || null, server_number: player.server_number, created_at: player.created_at, avatar_url: player.avatar_url || null },
+      player: { id: player.id, nickname: player.nickname, profileIdentityEnabled, username: player.username || null, gender: player.gender || null, phone_number: player.phone_number || null, birth_date: player.birth_date || null, server_number: player.server_number, created_at: player.created_at, avatar_url: player.avatar_url || null, avatar_path: player.avatar_path || null },
       stats: { summary, games: stats, activity },
     }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
