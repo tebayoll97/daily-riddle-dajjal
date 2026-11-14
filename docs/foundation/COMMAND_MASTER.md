@@ -1,5 +1,5 @@
 # COMMAND MASTER — DAJJAL FAMILY
-Version: 2.1
+Version: 2.2
 Status: Active operating charter
 Owner: Dajjal Family project owner
 Repository: tebayoll97/daily-riddle-dajjal
@@ -16,6 +16,7 @@ All commands below inherit the complete Command Master charter and its global ex
 | `/command-master-migration` | Prepare or perform a versioned release from redesign to main/production | Release audit, branch comparison, tests, preview QA, database migration review, release plan, approval gate, deployment, and post-release verification. |
 | `/command-master-audit` | Inspect quality, security, performance, UX, or architecture | Evidence-based audit, risk ranking, recommendations, and safe development-branch fixes when appropriate. |
 | `/command-master-status` | Ask where the project stands | Retrieve and report current branch/commit, deployments, release version, work progress, blockers, and next action. |
+| `/command-master-admin` | Build, manage, audit, or improve account/profile/admin experiences | End-to-end ownership of authentication UX, profiles, account lifecycle, User Management, admin dashboard, roles/permissions, moderation, privacy, audit trails, and admin APIs.
 
 **Usage:** Send the command as the leading instruction, followed by an optional target or focus. Example: `/command-master-audit` or `/command-master-migration — prepare release v1.0`. If no focus is supplied, the command selects the most useful safe scope from the current project state. The migration command does not release to production without specific approval.
 
@@ -241,3 +242,63 @@ Report the verified current branch and HEAD, working changes if available, lates
 - Identified Daily Riddle as the primary progressive-login gap: answer API has a non-persistent guest response branch, but launch flow and daily-riddle API still depend on a resolvable player profile.
 - Do not remove the Daily Riddle login prompt until guest identity/profile provisioning and the full guest attempt flow are verified.
 - Status: access inventory documented on the development branch. Shared authorization and guest-flow implementation remain the next code phase; no production or database changes.
+
+
+## 18. Subcommand — /command-master-admin
+
+**Mission:** Own the complete Dajjal Family account, profile, and administration domain. This includes the user-facing account experience and the privileged tools used to operate the platform.
+
+**Inheritance:** This subcommand inherits the entire global execution mandate, product principles, security rules, data-preservation requirements, workflow, testing standards, and deployment governance from this Command Master. It narrows the domain only; it never weakens the parent command's standards or approval gates.
+
+### Scope of responsibility
+
+1. **Authentication and identity**
+   - Supabase Auth flows: sign-in, sign-up where applicable, Guest/anonymous identity, provider linking, session handling, recovery, logout, and safe return paths.
+   - Progressive Login enforcement: public browsing remains public; ask for authentication only when an account-dependent capability is requested.
+   - Preserve identity continuity and prevent silent account merges or duplicate player identities.
+
+2. **User profile and account center**
+   - Profile overview, edit profile, avatar/media upload, nickname, account security, provider status, session information, preferences, privacy controls, and account lifecycle.
+   - Ensure profile data is owned by the authenticated user and private fields are never exposed publicly.
+   - Keep the profile experience consistent across mobile/desktop, EN/ID, and Dark/Light themes.
+
+3. **Admin dashboard and User Management**
+   - Admin overview, user directory, search/filter/sort/pagination, account details, player-to-Auth identity mapping, account status, ban/unban, profile actions, and safe deletion workflows.
+   - Clearly distinguish player profiles from Auth-only accounts and from banned/deactivated states.
+   - Protect admins from self-lockout and prevent removal/demotion of the last effective administrator without an approved recovery path.
+
+4. **Roles, permissions, and access control**
+   - Design least-privilege roles and product-scoped permissions.
+   - Verify every privileged action on the server; never trust a client role, hidden button, or UI route as authorization.
+   - Separate authentication, authorization, product entitlements, and subscription state.
+
+5. **Moderation, security, and operations**
+   - Admin audit logs for sensitive actions, reason capture where appropriate, abuse controls, rate limiting, account investigation, and safe operational workflows.
+   - Avoid exposing email, Auth IDs, tokens, private profile data, or security metadata beyond authorized admin contexts.
+   - Require explicit confirmation for destructive or high-impact actions and provide clear outcome feedback.
+
+6. **Privacy and account lifecycle**
+   - Data minimization, purpose notices, export/deletion requests, retention rules, account closure, and safe handling of game/invitation ownership and financial/reward records.
+   - Never erase or reassign linked data casually; use reviewed retention and deletion policies.
+
+### Required execution workflow
+
+- Inspect current routes, APIs, database schema/RLS, Supabase Auth behavior, and existing account/admin components before editing.
+- Map each feature to Public, Account, or Admin access under the Progressive Login standard.
+- Identify data ownership, threat model, destructive effects, and migration/rollback requirements.
+- Prefer shared, reusable server-side authorization and validation helpers.
+- Implement incrementally on the approved development branch; preserve existing routes and identities.
+- Verify API authorization, ownership boundaries, Guest/provider linking, pagination, error states, mobile, keyboard accessibility, both themes, and both languages as relevant.
+- Update account integration docs, API/schema documentation, and changelog with each meaningful change.
+- Report implementation separately from build status, preview QA, database migration status, and production release status.
+
+### Non-negotiable safeguards
+
+- Never expose service-role credentials or trust browser-supplied user/player IDs, roles, permissions, or account status.
+- Never silently merge Auth identities or overwrite an existing account's player mapping.
+- Never perform bulk bans, account deletion, identity reassignment, privilege escalation, production data mutation, or schema migration without appropriate review and explicit approval.
+- Keep admin APIs server-verified and deny by default.
+- Protect the last administrator and provide recovery planning before changing admin membership.
+- No merge to `main`, production deployment, or production database change without the release-specific approval required by the parent charter.
+
+**Default behavior:** When invoked without a narrow target, perform a prioritized audit of Profile, Authentication, User Management, Admin Dashboard, and their APIs; then implement the highest-value safe fixes on the development branch and report blockers.
