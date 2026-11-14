@@ -341,3 +341,12 @@ When requested, implement the account profile experience with display name, uniq
   - RLS-enabled tables with no policies include `df_wedding_profiles`, `player_game_stats`, `riddles`, and `scores`. Confirm intended access paths and grants before adding policies; service-role-only access may be deliberate for some tables.
   - The advisor flags several `TO authenticated` policies as anonymous-access warnings. For admin tables, the inspected policies additionally check the caller's exact `auth.uid()` against `admin_users`; do not interpret the generic warning alone as proof of an anonymous user gaining admin rights.
 - No database schema, policy, Auth setting, or production change was made during this review. The next database task is to apply and verify the already-drafted wedding submission migration through the proper migration workflow, then review the RPC and Auth password-security settings. No username/phone login work is in scope while deferred.
+
+
+## 25. Profile editor readiness bug fix (2026-11-14)
+
+- Fixed six stale references to the undefined `EXTENDED_PROFILE_FIELDS_ENABLED` identifier in `app/profile/edit/page.js`.
+- The profile editor now uses the existing `profileIdentityEnabled` state returned from the authenticated player profile API to gate the username, gender, phone, and birth-date controls and payload fields.
+- This preserves the intended compatibility behavior: legacy database schemas continue to support stable profile fields, while extended identity fields remain disabled until the required database columns are present.
+- No username or phone login was implemented or enabled. No database migration or Auth configuration was changed.
+- Source commit: `3ed8189ea20cd2dec9d9c18435fde0b4c9470c54`. Vercel build and interactive profile QA are pending.
