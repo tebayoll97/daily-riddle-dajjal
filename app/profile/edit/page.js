@@ -284,7 +284,7 @@ export default function EditProfilePage() {
         .from("players")
         .update({
           nickname: cleanNickname,
-          ...(EXTENDED_PROFILE_FIELDS_ENABLED ? {
+          ...(profileIdentityEnabled ? {
             username: cleanUsername.toLowerCase(),
             gender: gender || null,
             phone_number: cleanPhone || null,
@@ -470,13 +470,13 @@ export default function EditProfilePage() {
 
             <div>
               <label className="block text-sm text-gray-300 mb-2">Username</label>
-              <input required={EXTENDED_PROFILE_FIELDS_ENABLED} disabled={!EXTENDED_PROFILE_FIELDS_ENABLED} type="text" minLength={3} maxLength={20} pattern="[A-Za-z0-9]{3,20}" autoCapitalize="none" value={username} onChange={(e) => setUsername(e.target.value.replace(/[^A-Za-z0-9]/g, ""))} className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500" />
+              <input required={profileIdentityEnabled} disabled={!profileIdentityEnabled} type="text" minLength={3} maxLength={20} pattern="[A-Za-z0-9]{3,20}" autoCapitalize="none" value={username} onChange={(e) => setUsername(e.target.value.replace(/[^A-Za-z0-9]/g, ""))} className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500" />
               <p className="mt-1 text-xs text-gray-500">{isID ? "Fitur username akan tersedia setelah pembaruan database." : "Username will be available after the database update."}</p>
             </div>
 
             <div>
               <label className="block text-sm text-gray-300 mb-2">{isID ? "Jenis Kelamin (Opsional)" : "Gender (Optional)"}</label>
-              <select disabled={!EXTENDED_PROFILE_FIELDS_ENABLED} value={gender} onChange={(e) => setGender(e.target.value)} className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500">
+              <select disabled={!profileIdentityEnabled} value={gender} onChange={(e) => setGender(e.target.value)} className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500">
                 <option value="">{isID ? "Pilih" : "Select"}</option>
                 <option value="male">{isID ? "Laki-laki" : "Male"}</option>
                 <option value="female">{isID ? "Wanita" : "Female"}</option>
@@ -485,13 +485,13 @@ export default function EditProfilePage() {
 
             <div>
               <label className="block text-sm text-gray-300 mb-2">{isID ? "Nomor HP (Opsional)" : "Phone Number (Optional)"}</label>
-              <input disabled={!EXTENDED_PROFILE_FIELDS_ENABLED} type="tel" inputMode="tel" placeholder="+628123456789" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9+]/g, ""))} className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500" />
+              <input disabled={!profileIdentityEnabled} type="tel" inputMode="tel" placeholder="+628123456789" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9+]/g, ""))} className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500" />
               <p className="mt-1 text-xs text-gray-500">{isID ? "Gunakan format internasional. Verifikasi diperlukan sebelum dipakai untuk login." : "Use international format. Verification is required before using it to sign in."}</p>
             </div>
 
             <div>
               <label className="block text-sm text-gray-300 mb-2">{isID ? "Tanggal Lahir (Opsional)" : "Date of Birth (Optional)"}</label>
-              <input disabled={!EXTENDED_PROFILE_FIELDS_ENABLED} type="date" max={new Date().toISOString().slice(0, 10)} value={birthDate} onChange={(e) => setBirthDate(e.target.value)} className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500" />
+              <input disabled={!profileIdentityEnabled} type="date" max={new Date().toISOString().slice(0, 10)} value={birthDate} onChange={(e) => setBirthDate(e.target.value)} className="w-full rounded-xl border border-purple-500/20 bg-black/30 px-4 py-3 text-white outline-none focus:border-purple-500" />
             </div>
 
             <div className="rounded-xl border border-purple-500/20 bg-black/20 p-4 space-y-3">
