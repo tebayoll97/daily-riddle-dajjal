@@ -350,3 +350,10 @@ When requested, implement the account profile experience with display name, uniq
 - This preserves the intended compatibility behavior: legacy database schemas continue to support stable profile fields, while extended identity fields remain disabled until the required database columns are present.
 - No username or phone login was implemented or enabled. No database migration or Auth configuration was changed.
 - Source commit: `3ed8189ea20cd2dec9d9c18435fde0b4c9470c54`. Vercel build and interactive profile QA are pending.
+
+
+## 26. Profile and admin input-validation fixes (2026-11-14)
+
+- Profile editor fix committed as `3ed8189ea20cd2dec9d9c18435fde0b4c9470c54`: six references to an undefined schema-readiness identifier now use the existing `profileIdentityEnabled` state from the authenticated profile API.
+- Admin riddle update API fix committed as `f48929986e69361c9e6090813df9719d4a9b0b62`: PATCH now validates the JSON body shape, UUID format, required field types, accepted-answer array item types/counts, and maximum question/hint/answer lengths before database writes. Invalid input returns HTTP 400 instead of falling into an internal error path or accepting unbounded arrays.
+- These changes are source-level fixes only. Build, API behavior tests, and interactive profile/admin preview QA are still pending. No database migration, Auth setting, production deployment, or main-branch change was made.
