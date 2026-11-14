@@ -116,3 +116,36 @@ Admin capabilities require a separate server-side permission check on every priv
 5. Complete security, accessibility, mobile, localization, regression, and preview QA before release.
 
 Existing implementations must be audited against this policy before being changed. A policy statement does not mean every current route has already been migrated.
+
+
+## Current feature access inventory — Phase 2 baseline (November 14, 2026)
+
+This is an implementation inventory, not a claim that all routes have passed end-to-end QA.
+
+| Feature / route | Intended access under Progressive Login | Current observed implementation | Migration note |
+|---|---|---|---|
+| Homepage and public content | Public | Public routes | Preserve public discovery. |
+| `/games` game catalogue | Public | Catalogue loads without an account | Keep browsing public; request login only from a feature launch that needs persistent identity. |
+| `/mini-game` and `/mini-game/run-jump` | Public demo/mini game | Runs in browser and stores best score in localStorage | Remains public; local device-only score is not a cross-device account record. |
+| Public wedding invitation `/df/...` | Public | Public invitation rendering; RSVP/guestbook are feature-flagged | Keep guest access; protect owner/editor management separately. |
+| `/profile` and `/profile/edit` | Account | Login required | Correct: personal profile and account data require identity. |
+| `/admin/**` | Admin | Admin login and server-side admin checks | Continue validating every privileged API operation, not only page access. |
+| `/games/mamah-ngamuk` | Account for persistent wallet/best distance and leaderboard | Game launch currently prompts for Google; result API requires Google identity; GET has a guest/non-Google fallback | Account gate is justified for saving coins and best distance. Review whether guest demo gameplay can be offered without persisting results in a later game-specific change. |
+| Daily Riddle `/game` | Public/guest play; account for saved progress and competition | Game Library currently redirects non-Google users to `/login`; answer API already has a non-Google, non-persistent response branch, while daily-riddle APIs still resolve a player profile | Known progressive-login gap. Do not simply remove the login redirect until anonymous identity/profile provisioning and API ownership behavior are verified end-to-end. |
+
+### Phase 2 findings and implementation constraints
+
+1. The public Game Library and public mini-game routes already follow the no-login discovery principle.
+2. MAMAH NGAMUK's Google requirement is currently tied to persistent coins, best distance, and ranked leaderboard behavior. This is a feature-level requirement, not a platform-wide login rule.
+3. Daily Riddle contains partial guest-result logic in its answer API, but the launch flow and daily-riddle data API still require a resolvable player profile. The safe next implementation is to complete guest identity/profile provisioning and test the entire guest attempt flow before removing the login prompt.
+4. The current `resolveAuthenticatedPlayer()` verifies a Supabase bearer token and resolves the universal Player ID from `auth_user_id`. It is a useful foundation for account-owned APIs; public APIs should not be made to require it merely by convention.
+5. The current admin user directory lists player profiles with linked Auth accounts; standalone Auth-only users are not yet included. This remains a separate User Management scope item.
+6. Avoid treating localStorage-only demo scores as authoritative account progress. If a game later adds cloud saves, wallet rewards, or ranked competition, move those writes behind authenticated server APIs.
+
+### Next implementation sequence
+
+- **Phase 2A — Shared access contracts:** define reusable server-side account/admin guards and public/account/admin feature metadata without weakening existing route checks.
+- **Phase 2B — Daily Riddle guest path:** provision and resolve anonymous player context safely, keep guest results non-persistent, and require account linking/login only when the user opts to save progress or compete.
+- **Phase 2C — Account-game consistency:** retain MAMAH NGAMUK account requirements for persistence; assess optional no-save guest demo separately.
+- **Phase 2D — Lifecycle and privacy:** notices, account linking/upgrade, deletion/export workflow, and privacy-safe analytics.
+- Each phase requires route/API tests and preview QA. No production database changes are implied by this plan.
