@@ -30,6 +30,9 @@ const translations = {
     confirm: "CONFIRM",
     processing: "PROCESSING...",
     actionError: "Unable to complete this action.",
+    actionSuccessBan: "Login access has been blocked.",
+    actionSuccessUnban: "Login access has been restored.",
+    actionSuccessDelete: "Player profile and game history deleted. The login account remains.",
     logout: "SIGN OUT",
     total: "TOTAL PLAYERS",
     guest: "GUESTS ON THIS PAGE",
@@ -93,6 +96,9 @@ const translations = {
     confirm: "KONFIRMASI",
     processing: "MEMPROSES...",
     actionError: "Tindakan tidak dapat diselesaikan.",
+    actionSuccessBan: "Akses login berhasil diblokir.",
+    actionSuccessUnban: "Akses login berhasil dipulihkan.",
+    actionSuccessDelete: "Profil pemain dan riwayat game dihapus. Akun login tetap ada.",
     logout: "KELUAR",
     total: "TOTAL PEMAIN",
     guest: "GUEST DI HALAMAN INI",
@@ -174,6 +180,7 @@ export default function AdminPlayersPage() {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -329,6 +336,7 @@ export default function AdminPlayersPage() {
     if (!actionTarget || !actionType || actionLoading) return;
     setActionLoading(true);
     setError("");
+    setSuccess("");
 
     try {
       const { data: { session }, error: sessionError } =
@@ -357,6 +365,7 @@ export default function AdminPlayersPage() {
 
       setActionTarget(null);
       setActionType(null);
+      setSuccess(actionType === "delete" ? t.actionSuccessDelete : actionType === "ban" ? t.actionSuccessBan : t.actionSuccessUnban);
       await loadPlayers();
     } catch (err) {
       setError(err.message || t.actionError);
@@ -506,6 +515,8 @@ export default function AdminPlayersPage() {
             </p>
           </div>
         </section>
+
+        {success && <div role="status" className="mt-4 rounded-xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{success}</div>}
 
         {/* SEARCH */}
         <section className="mt-5 sm:mt-8 rounded-xl sm:rounded-2xl border border-purple-500/20 bg-[#151020] p-3 sm:p-5 ui-card">
