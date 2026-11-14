@@ -212,3 +212,15 @@ The native modal dialog provides a top-layer modal, keyboard focus containment, 
 - `SwitchField` is controlled with `checked` and `onChange`; its callback receives the next boolean value.
 
 These controls provide UI semantics and keyboard affordances; product-specific navigation, persistence, authorization, and form validation remain the responsibility of the consuming feature.
+
+
+# 15. DATA DISPLAY REACT API
+
+- `Skeleton`: `variant="text|rect|circle"`, optional `width`, `height`, and `count`; decorative and hidden from assistive technology.
+- `EmptyState`: `title`, `description`, optional `icon` and action node.
+- `ErrorState`: `title`, `description`, optional `onRetry` and `retryLabel`; exposes an alert role.
+- `Pagination`: controlled `page`, `totalPages`, and `onPageChange(nextPage)`; renders a compact page window.
+- `Table`: `columns=[{key,header,render?,align?}]`, `rows`, optional `rowKey`, `caption`, `loading`, `loadingRows`, and `emptyState`. Wide tables scroll horizontally on narrow screens.
+- `Avatar`: `src`, `name`, optional `alt`, and `size="sm|md|lg|xl"`; falls back to initials if the image fails or is absent.
+
+These are presentation primitives. Data fetching, sorting, filtering, pagination state, authorization, and retry operations belong to the consuming feature.

@@ -2,6 +2,8 @@ import { Alert, Badge, Button, Card, TextField } from "../components/ui";
 import ThemeToggle from "../components/ThemeToggle";
 import { DialogPreview } from "../components/ui/DialogPreview";
 import { ControlsPreview } from "../components/ui/ControlsPreview";
+import { Avatar, EmptyState, ErrorState, Pagination, Skeleton, Table } from "../components/ui";
+import { useState } from "react";
 
 export const metadata = {
   title: "Design System Preview | Dajjal Family",
@@ -10,6 +12,9 @@ export const metadata = {
 };
 
 export default function DesignSystemPreviewPage() {
+  const [demoPage, setDemoPage] = useState(2);
+  const demoRows = [{ id: "1", name: "Prisma", type: "Knowledge", status: "Active" }, { id: "2", name: "Dajjal Family", type: "Community", status: "Draft" }];
+  const demoColumns = [{ key: "name", header: "Name" }, { key: "type", header: "Category" }, { key: "status", header: "Status" }];
   return (
     <main className="ui-page" style={{ paddingBlock: "var(--df-space-8)" }}>
       <header className="ui-page-header ui-stack">
@@ -131,6 +136,28 @@ export default function DesignSystemPreviewPage() {
             </Card>
           ))}
         </div>
+      </section>
+
+      <section className="ui-stack" aria-labelledby="data-heading">
+        <div>
+          <p className="ui-eyebrow">08 / DATA DISPLAY</p>
+          <h2 className="ui-heading-h2" id="data-heading">Loading, empty, error and structured data</h2>
+          <p className="ui-subtitle">Shared patterns for data-heavy pages, tables and user identity.</p>
+        </div>
+        <Card className="ui-stack" style={{ padding: "var(--df-space-5)" }}>
+          <p className="ui-eyebrow">SKELETON</p>
+          <div className="ui-cluster"><Skeleton variant="circle" /><div className="ui-stack-sm" style={{ flex: 1 }}><Skeleton width="42%" /><Skeleton width="76%" /></div></div>
+          <p className="ui-eyebrow">EMPTY & ERROR</p>
+          <div className="ui-grid-2">
+            <EmptyState title="No activity yet" description="New activity will appear here." />
+            <ErrorState title="Unable to load" description="Check your connection and retry." onRetry={() => {}} />
+          </div>
+          <p className="ui-eyebrow">AVATARS</p>
+          <div className="ui-cluster"><Avatar name="Prisma" size="sm" /><Avatar name="Dajjal Family" size="md" /><Avatar name="Gaming Universe" size="lg" /><Avatar name="Knowledge" size="xl" /></div>
+          <p className="ui-eyebrow">TABLE & PAGINATION</p>
+          <Table columns={demoColumns} rows={demoRows} caption="Example content inventory" />
+          <Pagination page={demoPage} totalPages={8} onPageChange={setDemoPage} />
+        </Card>
       </section>
 
       <footer className="ui-caption" style={{ paddingBlock: "var(--df-space-4)" }}>
