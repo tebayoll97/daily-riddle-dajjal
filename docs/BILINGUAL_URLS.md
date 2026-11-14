@@ -15,17 +15,20 @@
 - Legacy unprefixed UI routes temporarily redirect to the remembered locale, e.g. `/knowledge` to `/id/knowledge` or `/en/knowledge`.
 - API routes remain unprefixed under `/api`.
 - OAuth callback `/auth/callback` is excluded from locale routing.
+- The middleware applies to existing UI routes without moving their App Router files; API routes remain outside the locale rewrite.
 
 ## Implementation approach
-Next.js middleware rewrites the locale-prefixed URL internally to the existing App Router path. This avoids a large route-tree move and reduces the chance of breaking existing feature routes. Middleware passes the selected locale in the `x-df-locale` request header; the root layout initializes the language provider and HTML `lang` from that value.
+Next.js middleware rewrites the locale-prefixed URL internally to the existing App Router path. This avoids a large route-tree move and reduces the chance of breaking existing feature routes. Middleware passes the selected locale in the `x-df-locale` request header and normalized path in `x-df-path`; the root layout initializes the language provider and HTML `lang` from those values.
 
-The client language switch writes the preference cookie and navigates to the same path under the selected locale. Existing internal links without locale prefixes remain functional through temporary middleware redirects while pages are migrated to locale-aware links.
+The client language switch writes the preference cookie and navigates to the same path under the selected locale. Existing internal links without locale prefixes remain functional through temporary middleware redirects while pages are migrated to locale-aware links. The language provider compares a requested locale with its current context value before navigating.
 
-## SEO
-- Homepage and section pages publish locale-specific canonical URLs.
-- Homepage and section pages publish `id`, `en`, and `x-default` alternate links.
-- Sitemap emits both locale variants for each currently listed public route.
-- Do not claim full localized SEO coverage until metadata on the remaining public pages has been audited.
+## SEO and privacy
+- The root layout supplies locale-aware canonical and alternate-language URLs for the current localized path.
+- Page-specific hardcoded unprefixed canonicals were removed from the leaderboard and mini-game layouts so they inherit the locale-aware root canonical.
+- Private account/admin/settings and wedding-builder paths receive `noindex,nofollow` metadata from the root layout.
+- `robots.txt` disallows private paths in both unprefixed and localized forms. This is crawler guidance only; server-side authentication and authorization remain the actual access controls.
+- Sitemap emits both locale variants for the currently enumerated public routes only.
+- Do not claim full localized SEO coverage until metadata, translated content, and sitemap route validity have been audited for every public page.
 
 ## Deferred / QA required
 - Run ESLint and production build when Vercel quota permits.
