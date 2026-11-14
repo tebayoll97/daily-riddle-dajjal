@@ -106,3 +106,12 @@
 - Explicitly inherited the complete parent Command Master mandate, security controls, data-preservation requirements, QA standards, and production approval gates.
 - Added safeguards for Guest/provider identity linking, least privilege, destructive account actions, last-admin protection, and server-side authorization.
 - Status: command charter committed to the development branch; no application, database, or production changes were made by this documentation update.
+
+## 2026-11-14 — Expanded Player Profile and Multi-Identifier Login
+
+- Started `/command-master-admin` implementation for richer player profiles and login by email, username, or verified phone, with Google OAuth retained.
+- Added Profile to the primary navigation immediately before Home.
+- Created a draft additive migration for username, gender, phone number, and birth date. It has not been applied.
+- Documented password handling through Supabase Auth only, username/phone privacy, and public/private profile field boundaries.
+- Remaining: implement profile form and completion task, secure identifier-login flow, Auth password setup, API field allowlists, uniqueness/error handling, and end-to-end QA.
+- No Supabase schema changes, Auth configuration changes, production changes, or deployment were made.
