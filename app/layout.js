@@ -36,13 +36,10 @@ export async function generateMetadata() {
     applicationName: "Dajjal Family",
     keywords: ["Dajjal Family", "digital ecosystem", "online games", "digital products", "knowledge and learning", "digital community"],
     ...(isPrivatePath(pathname) ? { robots: { index: false, follow: false } } : {}),
+    // Canonical is safe to derive for every localized route. hreflang is page-specific:
+    // only pages with verified published translations may declare language alternates.
     alternates: {
       canonical: `${ORIGIN}${localizedPath}`,
-      languages: {
-        id: `${ORIGIN}/id${pathname === "/" ? "" : pathname}`,
-        en: `${ORIGIN}/en${pathname === "/" ? "" : pathname}`,
-        "x-default": `${ORIGIN}/id${pathname === "/" ? "" : pathname}`,
-      },
     },
   };
 }
