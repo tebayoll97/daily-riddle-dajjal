@@ -32,7 +32,7 @@
 | Textarea | Multi-line entry | Default, focus, invalid, disabled |
 | Select | Choose an option | Default, focus, invalid, disabled |
 | Checkbox | Boolean or multi-select choice | Checked, unchecked, indeterminate, disabled |
-| RadioGroup | Single choice | Selected, unselected, disabled |
+| RadioGroup | Single choice | Selected, unselected, disabled |\n| CheckboxField | Boolean choice | Checked, unchecked, disabled |\n| SwitchField | Toggle a setting | On, off, disabled |
 | Switch | Toggle a setting | On, off, disabled |
 | Alert | Communicate a message | Info, success, warning, danger |
 | Dialog | Focused decision or task | Open, closing, confirmation |
@@ -154,7 +154,7 @@ All primitives consume semantic tokens and are opt-in. Apply only to new UI or a
 
 # 12. REACT PRIMITIVE IMPLEMENTATION
 
-Initial reusable React primitives are available under `app/components/ui/`:
+Reusable React primitives are available under `app/components/ui/`:
 - `Button`: action-only button with variants, sizes, loading, and disabled states.
 - `Card`: content surface; interactive styling does not replace semantic link/button behavior.
 - `Badge`: short status/category label.
@@ -200,3 +200,15 @@ import { Dialog } from "@/app/components/ui";
 ```
 
 The native modal dialog provides a top-layer modal, keyboard focus containment, and focus restoration when closed. The component does not implement application-specific confirmation, unsaved-change handling, or server actions. Those remain the responsibility of the consuming feature. Verify behavior in supported browsers before production adoption.
+
+
+# 14. NAVIGATION AND CHOICE CONTROL API
+
+- `Breadcrumbs` accepts `items=[{label, href}]`; the final item is rendered as the current page.
+- `Tabs` is controlled with `tabs`, `value`, and `onChange`. Each tab has `value`, `label`, optional `disabled`, and `content`. Arrow keys move between tabs; Home and End move to the first and last tab.
+- `DropdownMenu` uses the native `details/summary` disclosure pattern. Place semantic links or buttons inside.
+- `CheckboxField` forwards native checkbox props and expects an explicit label.
+- `RadioGroup` accepts `options=[{value,label,disabled?}]`, `name`, `value`, and `onChange`.
+- `SwitchField` is controlled with `checked` and `onChange`; its callback receives the next boolean value.
+
+These controls provide UI semantics and keyboard affordances; product-specific navigation, persistence, authorization, and form validation remain the responsibility of the consuming feature.

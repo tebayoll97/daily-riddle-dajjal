@@ -1,6 +1,7 @@
 import { Alert, Badge, Button, Card, TextField } from "../components/ui";
 import ThemeToggle from "../components/ThemeToggle";
 import { DialogPreview } from "../components/ui/DialogPreview";
+import { ControlsPreview } from "../components/ui/ControlsPreview";
 
 export const metadata = {
   title: "Design System Preview | Dajjal Family",
@@ -104,9 +105,20 @@ export default function DesignSystemPreviewPage() {
         </Card>
       </section>
 
+      <section className="ui-stack" aria-labelledby="controls-heading">
+        <div>
+          <p className="ui-eyebrow">06 / NAVIGATION & CONTROLS</p>
+          <h2 className="ui-heading-h2" id="controls-heading">Reusable navigation and choice controls</h2>
+          <p className="ui-subtitle">Try the tabs, dropdown, checkbox, radio group, and switch using keyboard or touch.</p>
+        </div>
+        <Card className="ui-stack" style={{ padding: "var(--df-space-5)" }}>
+          <ControlsPreview />
+        </Card>
+      </section>
+
       <section className="ui-stack" aria-labelledby="layout-heading">
         <div>
-          <p className="ui-eyebrow">06 / RESPONSIVE LAYOUT</p>
+          <p className="ui-eyebrow">07 / RESPONSIVE LAYOUT</p>
           <h2 className="ui-heading-h2" id="layout-heading">Grid behavior</h2>
           <p className="ui-subtitle">Resize the viewport to review the two-, three-, and four-column grid collapse rules.</p>
         </div>
