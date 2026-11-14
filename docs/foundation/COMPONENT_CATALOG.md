@@ -160,7 +160,7 @@ Initial reusable React primitives are available under `app/components/ui/`:
 - `Badge`: short status/category label.
 - `Alert`: status or alert announcement with semantic role.
 - `TextField`: labeled input/textarea/select wrapper with help and error messaging.
-- `index.js`: named exports for the primitives.
+- `Dialog`: native modal dialog with browser-managed focus containment, Escape handling, and focus restoration.\n- `index.js`: named exports for the primitives.
 
 Example:
 ```jsx
@@ -177,5 +177,26 @@ import { Alert, Badge, Button, Card, TextField } from "@/app/components/ui";
 Implementation notes:
 - The primitives provide presentation and basic semantics, not business logic or server validation.
 - The consuming form must validate input and handle submission.
-- Dialog is intentionally not shipped as a React component until focus trapping, Escape behavior, and focus restoration can be tested.
+- Dialog uses the native HTML dialog element and `showModal()`, allowing the browser to manage modal focus containment and focus restoration. Escape closes by default; set `closeOnEscape={false}` to prevent it. The parent controls the `open` prop and should set it to false in `onClose`. Backdrop closing is opt-in with `closeOnBackdrop`. Always provide a title or an accessible label.
 - Import paths assume the repository's existing `@/*` alias; if an individual feature uses a different alias configuration, use a relative import.
+
+
+# 13. DIALOG REACT API
+
+```jsx
+import { Dialog } from "@/app/components/ui";
+
+<Dialog
+  open={isOpen}
+  onClose={() => setIsOpen(false)}
+  title="Confirm changes"
+  description="Review before continuing."
+  closeOnEscape
+  closeOnBackdrop={false}
+  actions={<Button onClick={() => setIsOpen(false)}>Done</Button>}
+>
+  Dialog content
+</Dialog>
+```
+
+The native modal dialog provides a top-layer modal, keyboard focus containment, and focus restoration when closed. The component does not implement application-specific confirmation, unsaved-change handling, or server actions. Those remain the responsibility of the consuming feature. Verify behavior in supported browsers before production adoption.
