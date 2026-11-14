@@ -150,3 +150,32 @@ The first opt-in CSS primitives are available in `app/styles/components.css`:
 These are styling primitives, not complete React components. Dialog focus trapping, Escape handling, focus restoration, form validation, loading behavior, and business logic must be implemented in the corresponding accessible component. Do not infer those behaviors from CSS classes.
 
 All primitives consume semantic tokens and are opt-in. Apply only to new UI or a page explicitly selected for migration. Review in both themes and at mobile widths before wider adoption.
+
+
+# 12. REACT PRIMITIVE IMPLEMENTATION
+
+Initial reusable React primitives are available under `app/components/ui/`:
+- `Button`: action-only button with variants, sizes, loading, and disabled states.
+- `Card`: content surface; interactive styling does not replace semantic link/button behavior.
+- `Badge`: short status/category label.
+- `Alert`: status or alert announcement with semantic role.
+- `TextField`: labeled input/textarea/select wrapper with help and error messaging.
+- `index.js`: named exports for the primitives.
+
+Example:
+```jsx
+import { Alert, Badge, Button, Card, TextField } from "@/app/components/ui";
+
+<Card className="ui-stack" padding="var(--df-space-4)">
+  <Badge variant="success">Ready</Badge>
+  <TextField label="Display name" name="displayName" required />
+  <Alert variant="info" title="Note">Changes are saved after submission.</Alert>
+  <Button type="submit" loading={isSaving}>Save changes</Button>
+</Card>
+```
+
+Implementation notes:
+- The primitives provide presentation and basic semantics, not business logic or server validation.
+- The consuming form must validate input and handle submission.
+- Dialog is intentionally not shipped as a React component until focus trapping, Escape behavior, and focus restoration can be tested.
+- Import paths assume the repository's existing `@/*` alias; if an individual feature uses a different alias configuration, use a relative import.
