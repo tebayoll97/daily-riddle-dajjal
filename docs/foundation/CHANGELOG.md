@@ -22,3 +22,11 @@
 - Added a keyboard skip link, visible focus indicators, current-page navigation semantics, and accessible labeling for the mobile navigation disclosure.
 - Kept the existing homepage content, destinations, and information architecture intact.
 - Status: preview implementation; visual and keyboard QA in both themes and mobile/desktop remains required before approval.
+
+## Homepage Foundation Compliance — Preview
+
+- Added a dedicated, homepage-scoped compliance layer consuming Master Foundation semantic tokens for the desktop sidebar, mobile header and navigation disclosure, content header, hero, category cards, feature section, latest section, and footer.
+- Unified theme-aware surfaces, text hierarchy, borders, actions, focus indicators, and reduced-motion behavior through shared semantic tokens.
+- Kept existing page destinations, categories, bilingual copy, and legacy route styling intact.
+- The approved Master Foundation remains the governing standard; the visual Design System remains Draft pending owner review.
+- Status: implementation committed to the preview branch; build and manual visual/keyboard QA remain required.
