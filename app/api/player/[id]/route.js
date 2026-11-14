@@ -16,11 +16,27 @@ export async function GET(request, { params }) {
       return Response.json({ error: "Invalid player ID." }, { status: 400 });
     }
 
-    const { data: player, error: playerError } = await supabaseAdmin
+    const basePlayerQuery = () => supabaseAdmin
       .from("players")
       .select("id, auth_user_id, nickname, server_number, created_at, avatar_url")
       .eq("id", id)
       .maybeSingle();
+
+    // Detect migration readiness from the actual schema. Before migration,
+    // fall back to the stable legacy columns without breaking profile access.
+    let { data: player, error: playerError } = await supabaseAdmin
+      .from("players")
+      .select("id, auth_user_id, nickname, server_number, created_at, avatar_url, username, gender, phone_number, birth_date")
+      .eq("id", id)
+      .maybeSingle();
+
+    let profileIdentityEnabled = true;
+    if (playerError && (playerError.code === "42703" || /column .* does not exist/i.test(playerError.message || ""))) {
+      profileIdentityEnabled = false;
+      const fallback = await basePlayerQuery();
+      player = fallback.data;
+      playerError = fallback.error;
+    }
 
     if (playerError) throw playerError;
     if (!player) {
@@ -82,7 +98,7 @@ export async function GET(request, { params }) {
     );
 
     return Response.json({
-      player: { id: player.id, nickname: player.nickname, profileIdentityEnabled: false, username: null, gender: null, phone_number: null, birth_date: null, server_number: player.server_number, created_at: player.created_at, avatar_url: player.avatar_url || null },
+      player: { id: player.id, nickname: player.nickname, profileIdentityEnabled, username: player.username || null, gender: player.gender || null, phone_number: player.phone_number || null, birth_date: player.birth_date || null, server_number: player.server_number, created_at: player.created_at, avatar_url: player.avatar_url || null },
       stats: { summary, games: stats, activity },
     }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
