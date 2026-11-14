@@ -193,3 +193,31 @@
 }
 :root[data-theme="light"] input::placeholder,
 :root[data-theme="light"] textarea::placeholder { color: #89859a; }
+
+
+/* Semantic design tokens for Light Mode. */
+:root[data-theme="light"] {
+  --df-bg: #f5f6fb;
+  --df-surface: #ffffff;
+  --df-surface-raised: #f0eff8;
+  --df-surface-overlay: #ffffff;
+  --df-text: #19172a;
+  --df-text-secondary: #55536a;
+  --df-text-muted: #747188;
+  --df-border: rgba(91,76,145,.18);
+  --df-border-strong: rgba(91,76,145,.28);
+  --df-primary: #6b21a8;
+  --df-primary-hover: #581c87;
+  --df-primary-soft: rgba(107,33,168,.09);
+  --df-secondary: #4f46e5;
+  --df-accent: #0e7490;
+  --df-focus: #6d28d9;
+  --df-success: #15803d;
+  --df-warning: #a16207;
+  --df-danger: #b91c1c;
+  --df-info: #0369a1;
+  --df-on-primary: #ffffff;
+  --df-shadow-sm: 0 2px 8px rgba(40,32,75,.06);
+  --df-shadow-md: 0 8px 24px rgba(40,32,75,.09);
+  --df-shadow-lg: 0 18px 48px rgba(40,32,75,.13);
+}
