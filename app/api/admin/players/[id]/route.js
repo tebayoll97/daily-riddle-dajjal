@@ -44,6 +44,31 @@ export async function PATCH(request, { params }) {
       return Response.json({ error: "This player has no linked login account." }, { status: 409 });
     }
 
+    // User Management must never lock an administrator out of the platform.
+    // Admin role changes require a separate, reviewed role-management workflow.
+    if (body.action === "ban") {
+      const { data: targetAdmin, error: adminLookupError } = await supabaseAdmin
+        .from("admin_users")
+        .select("user_id")
+        .eq("user_id", result.player.auth_user_id)
+        .maybeSingle();
+
+      if (adminLookupError) {
+        console.error("Admin target protection lookup error:", adminLookupError);
+        return Response.json(
+          { error: "Unable to verify account privileges. No changes were made." },
+          { status: 500 }
+        );
+      }
+
+      if (targetAdmin) {
+        return Response.json(
+          { error: "Administrator accounts cannot be banned from User Management. Review administrator privileges through the dedicated role-management process." },
+          { status: 409 }
+        );
+      }
+    }
+
     const { error } = await supabaseAdmin.auth.admin.updateUserById(
       result.player.auth_user_id,
       { ban_duration: body.action === "ban" ? "876000h" : "none" }
