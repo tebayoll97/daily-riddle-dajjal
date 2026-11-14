@@ -44,7 +44,7 @@ export function middleware(request) {
   const destination = request.nextUrl.clone();
   destination.pathname = pathname === "/" ? `/${locale}` : `/${locale}${pathname}`;
 
-  return NextResponse.redirect(destination, 308);
+  return NextResponse.redirect(destination, 307);
 }
 
 export const config = {
