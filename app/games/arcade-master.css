@@ -1,0 +1,133 @@
+/* =========================================================
+   DAJJAL FAMILY — MINI GAME MASTER DESIGN SYSTEM
+   Shared tokens, responsive layout, controls and surfaces.
+   Tailwind handles composition; this file handles consistency.
+   ========================================================= */
+
+:root {
+  --mg-bg: #080711;
+  --mg-panel: #100d1d;
+  --mg-panel-raised: #171226;
+  --mg-panel-deep: #0c0a17;
+  --mg-purple: #a855f7;
+  --mg-purple-bright: #9333ea;
+  --mg-purple-soft: rgba(168,85,247,.18);
+  --mg-line: rgba(168,85,247,.22);
+  --mg-line-strong: rgba(192,132,252,.38);
+  --mg-text: #f7f4ff;
+  --mg-muted: #aaa3b8;
+  --mg-dim: #777184;
+  --mg-radius-card: 22px;
+  --mg-radius-control: 13px;
+  --mg-content-width: 760px;
+  --mg-page-gutter: clamp(12px, 3vw, 24px);
+  --mg-space: clamp(12px, 2vw, 20px);
+  --mg-shadow-card: 0 14px 42px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.025);
+  --mg-focus: 0 0 0 3px rgba(168,85,247,.32);
+}
+
+.mg-page {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100svh;
+  padding-inline: var(--mg-page-gutter);
+  color: var(--mg-text);
+  background: var(--mg-bg);
+  overflow-x: clip;
+}
+.mg-game-layout {
+  width: min(100%, var(--mg-content-width));
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--mg-space);
+}
+.mg-arena {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid var(--mg-line);
+  border-radius: var(--mg-radius-card);
+  background: linear-gradient(145deg,rgba(20,15,32,.98),rgba(12,10,22,.98));
+  box-shadow: var(--mg-shadow-card);
+}
+.mg-panel {
+  min-width: 0;
+  border: 1px solid var(--mg-line);
+  border-radius: 16px;
+  background: linear-gradient(145deg,rgba(23,18,38,.96),rgba(12,10,22,.96));
+}
+.mg-control {
+  min-height: 44px;
+  border: 1px solid var(--mg-line);
+  border-radius: var(--mg-radius-control);
+  transition: transform 180ms ease, background-color 180ms ease,
+    border-color 180ms ease, box-shadow 180ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.mg-control:active { transform: scale(.98); }
+.mg-control:focus-visible { outline: none; box-shadow: var(--mg-focus); }
+.mg-eyebrow {
+  color: #b99af5;
+  font-size: clamp(.62rem, .58rem + .18vw, .72rem);
+  font-weight: 850;
+  letter-spacing: .16em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+.mg-heading {
+  color: var(--mg-text);
+  font-size: clamp(1.35rem, 1.1rem + 1.8vw, 2.2rem);
+  font-weight: 950;
+  line-height: 1.12;
+  letter-spacing: -.035em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.mg-copy {
+  color: var(--mg-muted);
+  font-size: clamp(.82rem, .78rem + .2vw, .96rem);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.mg-game-canvas {
+  display: block;
+  width: 100%;
+  height: clamp(410px, 58svh, 610px);
+  min-height: 410px;
+  max-height: 650px;
+  aspect-ratio: auto;
+  touch-action: manipulation;
+  background: var(--mg-panel-deep);
+  object-fit: fill;
+}
+.mg-page button, .mg-page a { -webkit-tap-highlight-color: transparent; }
+.mg-page :is(button,a,input,select,textarea) { max-width: 100%; }
+
+@media (max-width: 380px) {
+  :root {
+    --mg-page-gutter: 10px;
+    --mg-space: 10px;
+    --mg-radius-card: 18px;
+  }
+  .mg-game-canvas { height: clamp(390px, 56svh, 540px); min-height: 390px; }
+}
+@media (min-width: 641px) and (max-width: 1023px) {
+  :root { --mg-content-width: 820px; --mg-page-gutter: 22px; }
+  .mg-game-canvas { height: clamp(430px, 60svh, 620px); }
+}
+@media (min-width: 1024px) {
+  :root { --mg-content-width: 900px; --mg-page-gutter: 28px; }
+  .mg-game-canvas { height: clamp(460px, 62vh, 680px); }
+  .mg-control:hover { border-color: var(--mg-line-strong); }
+}
+@media (max-height: 700px) and (orientation: landscape) {
+  .mg-game-canvas { height: min(62svh, 430px); min-height: 280px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mg-page *, .mg-page *::before, .mg-page *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
