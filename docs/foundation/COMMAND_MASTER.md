@@ -210,3 +210,12 @@ Report the verified current branch and HEAD, working changes if available, lates
 - Prefer additive and backward-compatible database changes. Use expand-and-contract for changes that span multiple releases: add compatible structures, deploy code that supports old and new forms, backfill/verify, then remove legacy structures only in a separately approved later release.
 - Maintain release notes and migration records. Mark each database migration as staged, applied to preview, applied to production, or rolled back; never imply that a committed migration file has been executed.
 - Production releases remain opt-in and owner-approved, even when the candidate has passed all checks.
+
+
+## 21. Profile and admin user-management implementation follow-up (2026-11-14)
+- The player profile now displays the signed-in account email, authentication provider, and last sign-in timestamp from the current Supabase Auth session. Existing profile ownership checks and server-side activity retrieval remain in place.
+- The admin dashboard module is labeled User Management. The existing `/admin/players` route remains stable for compatibility and now presents linked login email, provider/account type, last sign-in, player profile, server, scores, sessions, ban state, and guest/Google/other plus active/banned filters.
+- Admin player API responses no longer expose the internal Supabase Auth user ID. The API distinguishes a missing profile-to-auth link from an Auth lookup that could not be completed.
+- Ban/unban and player-profile deletion remain server-side admin actions. Deleting a player profile removes the player profile and dependent game history; it does NOT delete the linked Supabase Auth login. The UI confirmation and success feedback must preserve this distinction.
+- Scope limitation: the current User Management directory is based on rows in `players`; standalone Supabase Auth users without a player profile are not yet included. A complete all-Auth-users directory requires a separately paginated and carefully rate-limited Auth-user discovery design.
+- Verification status: implementation committed to the development branch. Preview build and interactive QA are blocked while Vercel reports the deployment build-rate limit. Do not claim this phase fully QA-complete until a deployment for the exact latest commit is READY and profile/admin journeys are tested. No production release or Supabase schema changes.
