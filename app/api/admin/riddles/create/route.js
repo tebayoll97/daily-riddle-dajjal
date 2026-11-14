@@ -54,7 +54,9 @@ export async function POST(request) {
       answers_en.length === 0 ||
       answers_id.length === 0 ||
       answers_en.length > 30 ||
-      answers_id.length > 30
+      answers_id.length > 30 ||
+      answers_en.some((answer) => typeof answer !== "string") ||
+      answers_id.some((answer) => typeof answer !== "string")
     ) {
       return Response.json(
         { error: "At least one accepted answer is required for each language." },
@@ -63,12 +65,10 @@ export async function POST(request) {
     }
 
     const cleanAnswersEn = answers_en
-      .filter((answer) => typeof answer === "string")
       .map((answer) => answer.trim().toLowerCase())
       .filter(Boolean);
 
     const cleanAnswersId = answers_id
-      .filter((answer) => typeof answer === "string")
       .map((answer) => answer.trim().toLowerCase())
       .filter(Boolean);
 
@@ -125,7 +125,7 @@ export async function POST(request) {
         answers_en: [...new Set(cleanAnswersEn)],
         answers_id: [...new Set(cleanAnswersId)],
         points: cleanPoints,
-        is_active: is_active !== false,
+        is_active: is_active ?? true,
         question: question_en.trim(),
         hint: hint_en.trim(),
         answer_hash: "bilingual-answers",
