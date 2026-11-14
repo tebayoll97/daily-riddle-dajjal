@@ -139,3 +139,11 @@ When the owner sends exactly `/command-master` or uses it as the leading instruc
 
 ## 17. Authority and source of truth
 This document is the operating command for execution style, quality, security, product, and growth decisions. MASTER_FOUNDATION.md remains the source of truth for foundational architecture and approved product constraints. DESIGN_SYSTEM.md remains the source of truth for design tokens and component rules. If documents conflict, preserve security and production governance, report the conflict, and update the appropriate document rather than silently overriding it.
+
+
+## 14. Account entry and profile privacy follow-up (2026-11-14)
+- A shared account entry uses the regular player Supabase Auth client (not the separate admin auth storage) to reflect signed-in/signed-out state.
+- The homepage exposes the account entry in desktop and mobile headers. Standard pages expose it in the shared header; immersive game and public wedding invitation layouts remain intentionally focused.
+- The private player profile API must authenticate the bearer token and verify player ownership before returning profile statistics or recent activity. Responses must be marked private and non-cacheable.
+- Profile editing continues to use the player's authenticated session and existing own-profile RLS policies.
+- Build and end-to-end verification remain pending until a safe preview deployment is available.

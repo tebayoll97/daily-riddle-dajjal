@@ -39,3 +39,13 @@
 - Added a wedding-builder example covering templates, customization, event information, schedule, venue/maps, media, RSVP, guestbook, gifts, preview, drafts, publishing, sharing, management, privacy, accessibility, mobile, localization, and future analytics/monetization.
 - Added /command-master as the owner's shorthand to load and execute the current Command Master and related foundation documents, subject to security and production release safeguards.
 - Research claims must distinguish verified findings, common patterns, and recommendations; no claim of exhaustive web crawling or certainty beyond available evidence.
+
+
+## Account experience and profile security — Preview implementation
+
+- Added a shared account entry that reflects Supabase Auth state, displays the player's avatar or nickname when available, and routes signed-out visitors to Google login with a return path.
+- Added the account entry to the standard site header and both desktop and mobile homepage headers; the existing footer profile link remains available.
+- Preserved immersive game and public wedding invitation layouts without injecting account chrome into those focused experiences.
+- Hardened the player profile API: it now requires a valid bearer session, verifies that the requested player belongs to that authenticated user, omits the internal auth user ID from the response, and disables response caching.
+- Updated the profile page to send its session token and the edit page to return unauthenticated visitors to login.
+- Status: committed to the feature branch; build, interactive auth-flow, responsive, and visual QA remain pending. No production changes.
