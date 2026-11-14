@@ -1,5 +1,5 @@
 # COMMAND MASTER — DAJJAL FAMILY
-Version: 1.1
+Version: 2.0
 Status: Active operating charter
 Owner: Dajjal Family project owner
 Repository: tebayoll97/daily-riddle-dajjal
@@ -147,3 +147,45 @@ This document is the operating command for execution style, quality, security, p
 - The private player profile API must authenticate the bearer token and verify player ownership before returning profile statistics or recent activity. Responses must be marked private and non-cacheable.
 - Profile editing continues to use the player's authenticated session and existing own-profile RLS policies.
 - Build and end-to-end verification remain pending until a safe preview deployment is available.
+
+
+## 19. Command Master v2.0 — command registry
+The Command Master is the project's command hub. Subcommands are independent operating modes and inherit this charter, MASTER_FOUNDATION.md, security requirements, and deployment governance.
+
+### 19.1 `/command-master` — development
+Load this charter and the relevant foundation/project documents; inspect current repository, branch, deployment, and task state; select and execute the next highest-value safe development work; verify and report. Continue feature development on `redesign/dajjalfamily-home` by default. This command does not authorize production release.
+
+### 19.2 `/command-master-migration` — release and migration
+Run the release-readiness and migration workflow for a specific release candidate:
+1. Inspect the current branch, HEAD, working tree/commit state, `main`, and the intended release scope. Confirm exactly which commits and files are candidates.
+2. Inspect branch divergence and conflicts; verify that no unrelated or unfinished work is accidentally included.
+3. Run available lint, type, build, unit/integration, and route checks. Record checks that cannot be run.
+4. Verify the preview deployment corresponds to the exact candidate commit; perform route-level, responsive, authentication, authorization, accessibility, and regression QA appropriate to the release.
+5. Review every database migration and schema dependency. Check ordering, existing data, constraints, RLS, grants, compatibility with the currently live app, and rollback/recovery options. Separate code merge from database migration.
+6. Prepare a release report with scope, commit range, test evidence, preview evidence, database operations, risks, recovery plan, and proposed version/changelog entry.
+7. STOP before merging to `main`, applying production database migrations, changing production configuration, or promoting/deploying production. Obtain explicit owner approval for the specific release and its material database operations.
+8. After explicit approval, execute only the approved steps in a controlled order. Verify production health and critical journeys, then record the exact release commit, deployment, migration outcome, and version.
+9. If a critical check fails or unexpected changes appear, stop; do not force-push, overwrite production, or improvise a destructive rollback. Report the issue and safest recovery options.
+
+A general agreement to use this command or a request to inspect migration readiness is not approval to release. The command may prepare and verify a release candidate autonomously, but production actions remain gated by explicit, release-specific approval. Git merge and Supabase database migration are separate operations; neither implies the other.
+
+### 19.3 `/command-master-audit` — audit
+Inspect the requested or highest-risk project areas across application code, APIs, authentication/authorization, Supabase schema/RLS/functions, performance, accessibility, SEO, and UX. Prioritize findings by severity and evidence. Distinguish confirmed vulnerabilities/defects from hypotheses. Do not make production changes; safe, reversible fixes may be proposed or implemented on the development branch when clearly within scope.
+
+### 19.4 `/command-master-status` — project status
+Report the verified current branch and HEAD, working changes if available, latest preview and production deployment states, release version, active workstream, completed/pending items, known blockers, and next recommended action. Retrieve current state from GitHub/Vercel/Supabase where possible; do not present stale notes as live status.
+
+### 19.5 Command precedence
+- All subcommands inherit this charter and the Master Foundation.
+- A narrower command controls its task scope; it does not override security, data protection, or release approval rules.
+- If multiple commands are invoked, follow the explicit order requested; otherwise resolve the highest-risk prerequisite first.
+- Never infer authorization for an irreversible, financial, destructive, or production action from a command name alone.
+
+## 20. Incremental release and versioning policy
+- Dajjal Family may be released in coherent, independently usable phases; the entire roadmap does not need to be complete before the first public release.
+- Each release candidate must define its scope, acceptance criteria, dependencies, known limitations, and rollback/recovery approach.
+- Use semantic versioning as a release communication convention: patch for compatible fixes, minor for backward-compatible features, major for material breaking changes or major product transitions. The owner may approve a different scheme if needed.
+- After a release, synchronize the development branch with the released `main` baseline before continuing subsequent work. Preserve unmerged work and resolve divergence explicitly; never blindly reset or force-push.
+- Prefer additive and backward-compatible database changes. Use expand-and-contract for changes that span multiple releases: add compatible structures, deploy code that supports old and new forms, backfill/verify, then remove legacy structures only in a separately approved later release.
+- Maintain release notes and migration records. Mark each database migration as staged, applied to preview, applied to production, or rolled back; never imply that a committed migration file has been executed.
+- Production releases remain opt-in and owner-approved, even when the candidate has passed all checks.
