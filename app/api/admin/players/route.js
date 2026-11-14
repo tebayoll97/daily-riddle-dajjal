@@ -108,7 +108,6 @@ export async function GET(request) {
         let accountType = "UNKNOWN";
         let isBanned = false;
         let authEmail = null;
-        let authCreatedAt = null;
         let lastSignInAt = null;
         let authUserExists = false;
 
@@ -122,7 +121,6 @@ export async function GET(request) {
             const user = data.user;
             authUserExists = true;
             authEmail = user.email || null;
-            authCreatedAt = user.created_at || null;
             lastSignInAt = user.last_sign_in_at || null;
             isBanned = Boolean(user.banned_until && new Date(user.banned_until).getTime() > Date.now());
             const providers =
@@ -156,9 +154,9 @@ export async function GET(request) {
           avatarUrl: player.avatar_url,
           createdAt: player.created_at,
           accountType,
+          hasAuthLink: Boolean(player.auth_user_id),
           authUserExists,
           authEmail,
-          authCreatedAt,
           lastSignInAt,
           isBanned,
           totalPoints: stats.totalPoints,
