@@ -84,7 +84,7 @@ export async function GET(request, { params }) {
     return Response.json({
       player: { id: player.id, nickname: player.nickname, server_number: player.server_number, created_at: player.created_at, avatar_url: player.avatar_url || null },
       stats: { summary, games: stats, activity },
-    });
+    }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     console.error("Player profile API error:", error);
     return Response.json(
