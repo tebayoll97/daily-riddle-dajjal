@@ -239,7 +239,7 @@ export default function Header() {
 
           {/* BRAND */}
           <Link
-            href="/"
+            href={withLocalePrefix("/", language)}
             className="min-w-0 flex flex-col"
           >
             <span className={`font-black tracking-wide text-white leading-tight transition-all duration-300 ${isCompact ? "text-xs sm:text-sm" : "text-sm sm:text-base"}`}>
