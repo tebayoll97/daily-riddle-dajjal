@@ -34,6 +34,10 @@ const translations = {
     security: "ACCOUNT SECURITY",
     securityTitle: "Account Security",
     securityDescription: "Protect your account and game progress.",
+    email: "Login email",
+    provider: "Sign-in method",
+    lastSignIn: "Last sign-in",
+    unknown: "Not available",
     dateLocale: "en-US",
   },
   id: {
@@ -59,6 +63,10 @@ const translations = {
     security: "KEAMANAN AKUN",
     securityTitle: "Keamanan Akun",
     securityDescription: "Lindungi akun dan progres permainanmu.",
+    email: "Email login",
+    provider: "Metode masuk",
+    lastSignIn: "Login terakhir",
+    unknown: "Tidak tersedia",
     dateLocale: "id-ID",
   },
 };
@@ -73,6 +81,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [avatarFailed, setAvatarFailed] = useState(false);
+  const [account, setAccount] = useState({ email: "", provider: "", lastSignInAt: null });
 
   useEffect(() => {
     let active = true;
@@ -92,6 +101,13 @@ export default function ProfilePage() {
           router.replace("/login?next=%2Fprofile");
           return;
         }
+
+        const provider = session.user.app_metadata?.provider || session.user.app_metadata?.providers?.[0] || "";
+        if (active) setAccount({
+          email: session.user.email || "",
+          provider: provider ? provider.toUpperCase() : t.unknown,
+          lastSignInAt: session.user.last_sign_in_at || null,
+        });
 
         const { data, error: playerError } = await supabase
           .from("players")
@@ -360,6 +376,17 @@ export default function ProfilePage() {
             <p className="text-sm text-gray-400 mt-1">
               {t.securityDescription}
             </p>
+          </div>
+
+          <div className="rounded-2xl border border-purple-500/20 bg-[#151020] p-4 space-y-3 ui-card">
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-bold tracking-widest text-gray-500">{t.email}</span>
+              <span className="text-sm font-semibold text-white break-all">{account.email || "—"}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 border-t border-purple-500/10 pt-3">
+              <div className="min-w-0"><span className="text-[10px] font-bold tracking-widest text-gray-500">{t.provider}</span><p className="text-xs font-bold text-purple-200 mt-1">{account.provider || t.unknown}</p></div>
+              <div className="min-w-0"><span className="text-[10px] font-bold tracking-widest text-gray-500">{t.lastSignIn}</span><p className="text-xs font-bold text-purple-200 mt-1">{account.lastSignInAt ? new Date(account.lastSignInAt).toLocaleDateString(t.dateLocale) : t.unknown}</p></div>
+            </div>
           </div>
 
           <GoogleAccountLink />
