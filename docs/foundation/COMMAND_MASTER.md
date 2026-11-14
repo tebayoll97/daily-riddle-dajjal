@@ -387,3 +387,12 @@ When requested, implement the account profile experience with display name, uniq
 - The migration file is committed on redesign/dajjalfamily-home with the exact remote migration version. Supabase CLI was unavailable; the supported Supabase MCP migration path was used, and the applied migration history was then mirrored into the repository.
 - Remaining release sequence: deploy the branch's server-side wedding submission routes to production first; only then apply 202611140001_secure_wedding_guest_submissions to remove the public direct INSERT policies. That later policy removal is intentionally not yet applied because production main still uses the browser's direct Guestbook insert path.
 - No merge to main or production application deployment was performed. The Profile identity migration remains deferred. The separate players column-privilege audit and SECURITY DEFINER RPC review remain release blockers.
+
+## 30. Player table privilege hardening — 2026-11-14
+
+- Production Supabase migration 20261114133753_lock_down_players_client_privileges is applied and mirrored in the repository.
+- Before applying it, repository-wide call-site review confirmed that player-row creation is performed by the verified server-side /api/player/ensure route using supabaseAdmin; browser profile editing updates only nickname, server_number, avatar_url, and avatar_path. Profile and account reads use the authenticated user's own row under RLS.
+- The migration revokes all table privileges on public.players from anon and authenticated, then restores authenticated SELECT and column-scoped UPDATE only for nickname, server_number, avatar_url, and avatar_path. Server-side service_role behavior is unchanged.
+- Live privilege verification confirms anon has no SELECT/INSERT; authenticated has SELECT but no INSERT, DELETE, TRUNCATE, or TRIGGER; authenticated can update the four profile columns but cannot update id, created_at, or auth_user_id.
+- This intentionally defers future username/gender/phone/birth_date browser writes until a separate reviewed migration grants only those specific columns after the identity schema is approved. The identity migration remains deferred.
+- No player rows or linked game data were changed. This was a grants-only change; no table data was modified.
