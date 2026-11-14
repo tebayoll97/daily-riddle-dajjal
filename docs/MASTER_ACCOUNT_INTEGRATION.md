@@ -149,3 +149,39 @@ This is an implementation inventory, not a claim that all routes have passed end
 - **Phase 2C — Account-game consistency:** retain MAMAH NGAMUK account requirements for persistence; assess optional no-save guest demo separately.
 - **Phase 2D — Lifecycle and privacy:** notices, account linking/upgrade, deletion/export workflow, and privacy-safe analytics.
 - Each phase requires route/API tests and preview QA. No production database changes are implied by this plan.
+
+## Expanded player profile and login identifiers — implementation plan (November 14, 2026)
+
+The account profile expansion is being developed additively. Existing `players.id`, `auth_user_id`, nickname, avatar, game statistics, wallets, and historical ownership must remain unchanged.
+
+### Profile fields
+
+- Display name / nickname: public player-facing name used by profile and leaderboard; preserve the existing `nickname` column and its global case-insensitive uniqueness.
+- Username: optional during rollout, unique case-insensitively, ASCII letters and digits only, 3–20 characters. It is a login alias, not a player primary key.
+- Gender: optional; supported values are `male` and `female`.
+- Phone number: optional, normalized to E.164 format and globally unique. Treat as private account data; never include it in public profile, leaderboard, or public API payloads.
+- Birth date: optional; private account data and excluded from public profile/leaderboard responses.
+- Darkwar state: optional server number. Keep the existing `server_number` storage field for backward compatibility; update its user-facing label to “State Darkwar” / “State Darkwar (Nomor Server)”.
+- Avatar: retain current upload flow and storage ownership checks.
+
+### Password and sign-in model
+
+- Passwords are managed only by Supabase Auth. Never add password or password-confirmation columns to `players`, logs, analytics, or application tables.
+- Google users may set an Auth password from Account Security; require confirmation in the UI, validate strength, and submit only the password to Supabase Auth over TLS. Confirmation is client-side validation and is never persisted.
+- Login UI accepts email, username, or phone plus password, and retains direct Google OAuth as the alternate method.
+- Email login uses Supabase Auth email/password. Username and phone aliases must be resolved in a trusted server-side login flow; never expose a lookup endpoint that reveals the email behind a username/phone. The server must rate-limit attempts and return generic invalid-credentials errors.
+- Phone/password login is enabled only after phone verification and confirmation that the Supabase Auth phone/password configuration supports the chosen flow. Do not imply SMS OTP is configured unless it is verified.
+- Keep Google OAuth working and preserve the same Auth user and Player ID when a Google user sets a password.
+- Do not silently merge accounts or reassign a username/phone alias from one Auth identity to another.
+
+### Public/private field contract
+
+Public profile and leaderboard: display name, avatar, and optional Darkwar state number when intentionally shown.
+Private owner/admin-only: email, username where required for account management, phone number, birth date, gender, provider metadata, and sign-in timestamps. Do not expose these via public player endpoints.
+
+### Current implementation status
+
+- Primary navigation: Profile link added immediately before Home on the development branch.
+- Draft additive migration created at `supabase/migrations/202611140002_expand_player_profile_identity.sql`; it is NOT applied to Supabase.
+- Existing profile edit UI, login UI, and profile APIs still require implementation and QA before the feature is complete.
+- No production changes, Auth configuration changes, or database mutations have been made.
