@@ -51,7 +51,6 @@ export async function generateMetadata({ params }) {
 
   const requestHeaders = await headers();
   const locale = requestHeaders.get("x-df-locale") === "en" ? "en" : "id";
-  const alternateLocale = locale === "id" ? "en" : "id";
   const canonicalPath = `/${locale}/${section}`;
 
   return {
