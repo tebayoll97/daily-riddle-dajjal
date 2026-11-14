@@ -219,3 +219,15 @@ Report the verified current branch and HEAD, working changes if available, lates
 - Ban/unban and player-profile deletion remain server-side admin actions. Deleting a player profile removes the player profile and dependent game history; it does NOT delete the linked Supabase Auth login. The UI confirmation and success feedback must preserve this distinction.
 - Scope limitation: the current User Management directory is based on rows in `players`; standalone Supabase Auth users without a player profile are not yet included. A complete all-Auth-users directory requires a separately paginated and carefully rate-limited Auth-user discovery design.
 - Verification status: implementation committed to the development branch. Preview build and interactive QA are blocked while Vercel reports the deployment build-rate limit. Do not claim this phase fully QA-complete until a deployment for the exact latest commit is READY and profile/admin journeys are tested. No production release or Supabase schema changes.
+
+
+## Account-Based Platform with Progressive Login — Official Master Foundation v1.1
+
+- Owner-approved policy: public discovery and supported demo/mini-game experiences remain accessible without login; authentication is requested only when a visitor uses account-dependent features.
+- Account-required capabilities include persistent progress, cross-device sync, profile/statistics, achievements, leaderboards/competition, wallet/rewards, and saved/social features that need a stable identity.
+- Administrative access is a separate server-verified permission, never implied by ordinary authentication.
+- Supabase Auth is the canonical identity; `players.id` is the universal gaming Player ID resolved from the verified Auth user. Product and game data remain separately scoped.
+- Preserve Guest identity/progress when explicitly linking a provider; never silently merge distinct Auth users.
+- Privacy/data minimization, purpose transparency, public API field allowlists, and account lifecycle controls are mandatory.
+- Implementation sequence: identity contract → feature access matrix/shared authorization → game/product integration → privacy/analytics/lifecycle → security and regression QA.
+- Execution status: policy and documentation foundation adopted on `redesign/dajjalfamily-home`; application-level progressive access migration is the next development phase. No production, main-branch, or database changes are authorized by this policy adoption alone.
