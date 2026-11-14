@@ -77,3 +77,14 @@
 - Removed the internal Supabase Auth user ID from the admin player-list API response and distinguished missing Auth links from failed Auth lookups.
 - Scope: directory currently lists player profiles and their linked login accounts; standalone Auth users without player profiles remain outside this directory.
 - Status: committed to `redesign/dajjalfamily-home`; preview build and interactive QA remain blocked by Vercel build-rate limiting. No production release or database schema change.
+
+
+## Master Foundation v1.1 — Account-Based Platform with Progressive Login
+
+- Owner-approved the Account-Based Platform with Progressive Login as the official account/access standard.
+- Public discovery, public invitations/content, catalogue browsing, and supported non-persistent demo/mini games do not require login.
+- Request authentication progressively when users access persistent progress, cross-device sync, profile/statistics, achievements, leaderboards, wallet/rewards, or other account-bound capabilities.
+- Administrative permissions remain separate and server-verified.
+- Established Supabase Auth as canonical identity and `players.id` as the universal gaming Player ID, with product/game data boundaries and preservation of existing Guest/account progress.
+- Added privacy, data-minimization, account-lifecycle, and phased rollout requirements.
+- Status: policy documentation committed to the development branch only. Application migration, database changes, production deployment, and release approval remain separate steps.
