@@ -10,6 +10,8 @@ const PUBLIC_PROFILE_FIELDS = [
   "main_photo_url",
   "music_url",
   "gallery_urls",
+  "rsvp_enabled",
+  "guestbook_enabled",
 ].join(",");
 
 export async function GET(request, { params }) {
