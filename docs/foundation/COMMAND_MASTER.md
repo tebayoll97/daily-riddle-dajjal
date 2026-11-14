@@ -231,3 +231,13 @@ Report the verified current branch and HEAD, working changes if available, lates
 - Privacy/data minimization, purpose transparency, public API field allowlists, and account lifecycle controls are mandatory.
 - Implementation sequence: identity contract → feature access matrix/shared authorization → game/product integration → privacy/analytics/lifecycle → security and regression QA.
 - Execution status: policy and documentation foundation adopted on `redesign/dajjalfamily-home`; application-level progressive access migration is the next development phase. No production, main-branch, or database changes are authorized by this policy adoption alone.
+
+
+## Progressive Login — Phase 2 access inventory
+
+- Classified current routes and flows as Public, Account, or Administrative in `docs/MASTER_ACCOUNT_INTEGRATION.md`.
+- Confirmed public Game Library discovery, public mini-game play, public wedding invitations, account-protected profile, and server-verified admin areas.
+- Confirmed MAMAH NGAMUK persistence and leaderboard are account-bound; its save API validates Google identity today.
+- Identified Daily Riddle as the primary progressive-login gap: answer API has a non-persistent guest response branch, but launch flow and daily-riddle API still depend on a resolvable player profile.
+- Do not remove the Daily Riddle login prompt until guest identity/profile provisioning and the full guest attempt flow are verified.
+- Status: access inventory documented on the development branch. Shared authorization and guest-flow implementation remain the next code phase; no production or database changes.
