@@ -126,7 +126,7 @@ This is an implementation inventory, not a claim that all routes have passed end
 |---|---|---|---|
 | Homepage and public content | Public | Public routes | Preserve public discovery. |
 | `/games` game catalogue | Public | Catalogue loads without an account | Keep browsing public; request login only from a feature launch that needs persistent identity. |
-| `/mini-game` and `/mini-game/run-jump` | Public demo/mini game | Runs in browser and stores best score in localStorage | Remains public; local device-only score is not a cross-device account record. |
+| `/games` and `/games/run-jump` | Public demo/mini game | Runs in browser and stores best score in localStorage | Remains public; local device-only score is not a cross-device account record. |
 | Public wedding invitation `/df/...` | Public | Public invitation rendering; RSVP/guestbook are feature-flagged | Keep guest access; protect owner/editor management separately. |
 | `/profile` and `/profile/edit` | Account | Login required | Correct: personal profile and account data require identity. |
 | `/admin/**` | Admin | Admin login and server-side admin checks | Continue validating every privileged API operation, not only page access. |
