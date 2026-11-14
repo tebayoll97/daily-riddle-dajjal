@@ -89,7 +89,7 @@ export default function ProfilePage() {
         const session = sessionData.session;
 
         if (!session) {
-          router.replace("/login");
+          router.replace("/login?next=%2Fprofile");
           return;
         }
 
@@ -112,6 +112,11 @@ export default function ProfilePage() {
         });
 
         const profileResult = await profileResponse.json();
+
+        if (profileResponse.status === 401) {
+          router.replace("/login?next=%2Fprofile");
+          return;
+        }
 
         if (!profileResponse.ok) {
           throw new Error(profileResult.error || t.error);

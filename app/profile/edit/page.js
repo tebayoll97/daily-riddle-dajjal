@@ -184,17 +184,15 @@ export default function EditProfilePage() {
     let uploadedPath = null;
 
     try {
-      const { data: sessionData } =
+      const { data: sessionData, error: sessionError } =
         await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
 
       const user = sessionData?.session?.user;
 
       if (!user) {
-        throw new Error(
-          isID
-            ? "Sesi login berakhir."
-            : "Your session has expired."
-        );
+        router.replace("/login?next=%2Fprofile%2Fedit");
+        return;
       }
 
       let newAvatarUrl = avatarUrl;
